@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SQL с нуля · тренажёр</title><link rel="stylesheet" href="assets/sql-lab.css"></head>
+<body><main>
+<nav><a href="cpp_station9_sql.html#section=sql-first-query" target="_top">← К теории SQL</a><a href="cpp_backend_roadmap.html" target="_top">Курс</a></nav>
+<header><p class="eyebrow">СТАНЦИЯ 9A · ПРАКТИКА В БРАУЗЕРЕ</p><h1>Напиши запрос. Посмотри на данные.</h1>
+<p>Локальная учебная база на SQLite, не PostgreSQL. Запросы не отправляются на сервер. Каждый запуск — на свежей копии исходных таблиц, поэтому можно безопасно ошибаться.</p></header>
+<label for="exercise">Упражнение</label><select id="exercise"></select>
+<nav class="exercise-navigation" aria-label="Переход между упражнениями"><button id="previous" class="quiet" type="button">← Предыдущее</button><span id="exercise-position" class="muted" aria-live="polite"></span><button id="next" class="quiet" type="button">Следующее →</button></nav>
+<section class="assignment"><h2 id="task-title"></h2><p id="task-prompt"></p><a id="theory-link" target="_top">Разобрать тему в учебнике →</a></section>
+<details><summary>Исходные таблицы и схема</summary><div id="seed-tables"></div><pre id="schema"></pre><p>В SQLite done отображается как 0/1. priority может быть NULL. В PostgreSQL boolean — отдельный тип. SQLite также иначе проверяет типы и некоторые кавычки: успешный запрос здесь не доказывает переносимость всего синтаксиса.</p></details>
+<label for="query">Твой SQL <span class="muted">· Ctrl/⌘ + Enter — выполнить</span></label>
+<textarea id="query" spellcheck="false" rows="8" maxlength="16000" aria-describedby="reset-note"></textarea>
+<p id="reset-note" class="muted">Можно написать несколько команд через «;». Изменения живут только в рамках одного запуска. Черновик запроса сохраняется в этом браузере, если доступно локальное хранилище.</p>
+<div class="actions"><button id="run">Выполнить</button><button id="check">Проверить решение</button><button id="stop" hidden>Остановить</button><button id="reset" class="quiet">Очистить запрос</button></div>
+<p id="status" role="status" aria-live="polite">Начни с запроса или открой подсказку.</p>
+<details id="hint"><summary>Подсказка</summary><p id="hint-text"></p></details>
+<details id="answer"><summary>Разобрать решение</summary><pre id="solution"></pre><p id="explanation"></p><p>Сравни не только текст, но и смысл: какие строки выбраны или изменены и почему. Проверка допускает другие запросы с тем же результатом; имена выходных столбцов отдельно не оцениваются.</p></details>
+<section aria-label="Результат запроса"><h2>Результат</h2><div id="results"><p class="muted">Здесь появится таблица результата или объяснение ошибки.</p></div></section>
+<details id="state"><summary>Состояние таблиц после запуска</summary><div id="state-tables"></div></details>
+<footer>До 200 строк на результат; длительный запрос можно остановить, также действует автоматический лимит времени. Изоляцию, WAL и FOR UPDATE изучаем на PostgreSQL, не в этом тренажёре. <a href="vendor/sqljs/LICENSE">sql.js 1.13.0 · MIT</a></footer>
+</main><script src="assets/sql-lab-core.js"></script><script src="generated/sql-lab-worker.data.js"></script><script src="assets/sql-lab.js"></script></body></html>

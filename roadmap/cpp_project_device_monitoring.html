@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Итоговый пример 0–3 · Система мониторинга устройств</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    background: radial-gradient(circle at 15% -8%, #F2F7FC, #E8EEF5);
+    color: #16202B;
+    min-height: 100vh;
+  }
+  a { color: #1B4E85; font-weight: 700; text-decoration: none; border-bottom: 1px solid #C8D8E8; }
+  code { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .page { max-width: 900px; margin: 0 auto; padding: 28px 16px 64px; }
+  .hero { text-align: center; margin-bottom: 22px; }
+  .badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 800; letter-spacing: 0.18em; color: #1B8A6B; background: #E4F4EE; padding: 7px 13px 7px 16px; border-radius: 999px; margin-bottom: 14px; }
+  h1 { font-size: 32px; line-height: 1.15; margin: 0 0 10px; letter-spacing: -0.02em; }
+  .subtitle { max-width: 680px; margin: 0 auto; color: #54657A; font-size: 15px; line-height: 1.6; }
+  .card { background: #fff; border: 1px solid #DCE5EE; border-radius: 16px; padding: 18px; margin-bottom: 16px; box-shadow: 0 12px 32px -26px rgba(20,50,90,0.5); }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .mini { background: #F7FAFD; border: 1px solid #DCE5EE; border-radius: 12px; padding: 13px; }
+  .mini-title { font-size: 12px; font-weight: 800; color: #1B4E85; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .mini-text { font-size: 13px; line-height: 1.55; color: #3A4856; margin: 0; }
+  h2 { font-size: 20px; margin: 0 0 12px; letter-spacing: -0.01em; }
+  h3 { font-size: 16px; margin: 18px 0 8px; color: #1B4E85; }
+  p { font-size: 14px; line-height: 1.65; color: #2B3947; margin: 0 0 10px; }
+  ul { margin: 0 0 4px; padding-left: 20px; }
+  li { font-size: 14px; line-height: 1.6; color: #2B3947; margin-bottom: 5px; }
+  .run { background: #16202B; color: #E8EEF4; border-radius: 12px; padding: 13px 15px; overflow-x: auto; font-size: 13px; line-height: 1.6; margin: 8px 0 0; }
+  pre.code { background: #16202B; color: #E8EEF4; border-radius: 14px; padding: 16px; overflow-x: auto; font-size: 12.5px; line-height: 1.58; margin: 0; white-space: pre; }
+  .note { background: #F7FAFD; border: 1px solid #DCE5EE; border-radius: 12px; padding: 13px 14px; color: #54657A; font-size: 13.5px; line-height: 1.6; }
+  .callout { background: #E7F5EE; border: 1px solid #C7E7D6; border-radius: 12px; padding: 13px 14px; color: #245A3D; font-size: 13.5px; line-height: 1.6; }
+  .back { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 14px; font-size: 13px; }
+  .section-label { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #7E8C9A; margin-bottom: 9px; }
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: 1fr; }
+    h1 { font-size: 27px; }
+    .card { padding: 15px; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+  <a class="back" href="cpp_backend_roadmap.html">← Назад к roadmap</a>
+
+  <section class="hero">
+    <div class="badge">ИТОГОВЫЙ ПРИМЕР 0–3</div>
+    <h1>Система мониторинга устройств</h1>
+    <p class="subtitle">Один цельный учебный проект, который связывает базу ООП, современный C++ и полиморфизм: устройства, общий интерфейс, реестр-владелец, опрос, поиск, сброс и статистика.</p>
+  </section>
+
+  <section class="card">
+    <h2>Техническое задание</h2>
+    <p>Написать консольную программу на C++20, моделирующую систему мониторинга набора устройств. В системе должны быть разные типы устройств, но общий код должен работать с ними единообразно через интерфейс.</p>
+    <ul>
+      <li>Есть показание <code>Reading</code>: числовое значение + единица измерения.</li>
+      <li>Есть абстрактный интерфейс <code>Device</code>: имя, чтение, сброс.</li>
+      <li>Есть минимум три реализации: температурный датчик, датчик напряжения, реле.</li>
+      <li>Есть <code>DeviceRegistry</code>, который владеет устройствами через <code>std::unique_ptr</code>.</li>
+      <li>Реестр умеет добавить устройство, опросить всех, найти и прочитать по имени, сбросить одно устройство или все сразу.</li>
+      <li>Реестр умеет считать статистику <code>min/max/average/count</code> по отфильтрованным показаниям.</li>
+      <li>В финальном коде нет ручных <code>new/delete</code>.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Что покрывает</h2>
+    <div class="grid">
+      <div class="mini">
+        <div class="mini-title">Станция 0</div>
+        <p class="mini-text">Классы, private-поля, конструкторы, const-геттеры, инкапсуляция данных.</p>
+      </div>
+      <div class="mini">
+        <div class="mini-title">Станция 1</div>
+        <p class="mini-text">RAII, <code>unique_ptr</code>, <code>vector</code>, <code>move</code> и явная передача владения.</p>
+      </div>
+      <div class="mini">
+        <div class="mini-title">Станция 2</div>
+        <p class="mini-text">Абстрактный класс, virtual/override, виртуальный деструктор, полиморфный вызов.</p>
+      </div>
+      <div class="mini">
+        <div class="mini-title">Станция 3</div>
+        <p class="mini-text"><code>optional</code>, шаблонный предикат, лямбды и вычисления по единому snapshot.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Как запустить</h2>
+    <p>Сохрани код ниже в <code>main.cpp</code> и запусти команду:</p>
+    <pre class="run"><code>g++ -std=c++20 -Wall -Wextra -pedantic -o main main.cpp && ./main</code></pre>
+    <p class="note" style="margin-top: 12px;">Для всего готового маршрута принят единый baseline C++20; предупреждения компилятора включены намеренно.</p>
+  </section>
+
+  <section class="card">
+    <h2>Полный код</h2>
+    <pre class="code"><code>#include &lt;cstddef&gt;
+#include &lt;cstdlib&gt;
+#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;optional&gt;
+#include &lt;stdexcept&gt;
+#include &lt;string&gt;
+#include &lt;string_view&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+class Reading {
+    std::string unit_;
+    double value_;
+public:
+    Reading(std::string unit, double value)
+        : unit_(std::move(unit)), value_(value) {}
+
+    const std::string&amp; getUnit() const { return unit_; }
+    double getValue() const { return value_; }
+};
+
+struct NamedReading {
+    std::string deviceName;
+    Reading reading;
+};
+
+struct Stats {
+    double min;
+    double max;
+    double average;
+    std::size_t count;
+};
+
+class Device {
+public:
+    virtual ~Device() = default;
+    virtual const std::string&amp; getName() const = 0;
+    virtual Reading read() = 0;
+    virtual void reset() = 0;
+};
+
+class DeviceRegistry {
+    std::vector&lt;std::unique_ptr&lt;Device&gt;&gt; devices_;
+
+    Device* findByName(std::string_view name) const {
+        for (const auto&amp; device : devices_) {
+            if (device-&gt;getName() == name)
+                return device.get();  // невладеющий указатель
+        }
+        return nullptr;
+    }
+
+public:
+    void add(std::unique_ptr&lt;Device&gt; device) {
+        if (!device)
+            throw std::invalid_argument("device must not be null");
+        if (device-&gt;getName().empty())
+            throw std::invalid_argument("device name must not be empty");
+        if (findByName(device-&gt;getName()))
+            throw std::invalid_argument("duplicate device name: " + device-&gt;getName());
+        devices_.push_back(std::move(device));
+    }
+
+    std::size_t size() const { return devices_.size(); }
+
+    std::vector&lt;NamedReading&gt; collectSnapshot() {
+        std::vector&lt;NamedReading&gt; result;
+        result.reserve(devices_.size());
+        for (const auto&amp; device : devices_)
+            result.push_back({device-&gt;getName(), device-&gt;read()});
+        return result;
+    }
+
+    static void printSnapshot(const std::vector&lt;NamedReading&gt;&amp; snapshot) {
+        for (const auto&amp; item : snapshot) {
+            std::cout &lt;&lt; "Device: " &lt;&lt; item.deviceName
+                      &lt;&lt; ", Reading: " &lt;&lt; item.reading.getValue()
+                      &lt;&lt; ' ' &lt;&lt; item.reading.getUnit() &lt;&lt; '\n';
+        }
+    }
+
+    static std::optional&lt;Reading&gt; readByName(
+            const std::vector&lt;NamedReading&gt;&amp; snapshot,
+            std::string_view name) {
+        for (const auto&amp; item : snapshot) {
+            if (item.deviceName == name)
+                return item.reading;
+        }
+        return std::nullopt;
+    }
+
+    template&lt;class Predicate&gt;
+    static std::optional&lt;Stats&gt; statsWhere(
+            const std::vector&lt;NamedReading&gt;&amp; snapshot,
+            Predicate predicate) {
+        std::optional&lt;Stats&gt; stats;
+        double sum = 0.0;
+
+        for (const auto&amp; item : snapshot) {
+            if (!predicate(item.reading))
+                continue;
+
+            const double value = item.reading.getValue();
+            if (!stats) {
+                stats = Stats{value, value, 0.0, 0};
+            } else {
+                if (value &lt; stats-&gt;min) stats-&gt;min = value;
+                if (value &gt; stats-&gt;max) stats-&gt;max = value;
+            }
+            sum += value;
+            ++stats-&gt;count;
+        }
+
+        if (stats)
+            stats-&gt;average = sum / static_cast&lt;double&gt;(stats-&gt;count);
+        return stats;
+    }
+
+    bool resetByName(std::string_view name) {
+        if (Device* device = findByName(name)) {
+            device-&gt;reset();
+            return true;
+        }
+        return false;
+    }
+
+    void resetAll() {
+        for (const auto&amp; device : devices_)
+            device-&gt;reset();
+    }
+};
+
+class TemperatureSensor final : public Device {
+    std::string name_;
+    double initial_;
+    double last_;
+public:
+    TemperatureSensor(std::string name, double initial)
+        : name_(std::move(name)), initial_(initial), last_(initial) {}
+
+    const std::string&amp; getName() const override { return name_; }
+
+    Reading read() override {
+        last_ += static_cast&lt;double&gt;(std::rand()) / RAND_MAX * 1.5;
+        return Reading("°C", last_);
+    }
+
+    void reset() override { last_ = initial_; }
+};
+
+class VoltageSensor final : public Device {
+    std::string name_;
+    double initial_;
+    double last_;
+public:
+    VoltageSensor(std::string name, double initial)
+        : name_(std::move(name)), initial_(initial), last_(initial) {}
+
+    const std::string&amp; getName() const override { return name_; }
+
+    Reading read() override {
+        last_ += static_cast&lt;double&gt;(std::rand()) / RAND_MAX * 3.0;
+        return Reading("V", last_);
+    }
+
+    void reset() override { last_ = initial_; }
+};
+
+class Relay final : public Device {
+    std::string name_;
+    bool isOn_ = false;
+public:
+    explicit Relay(std::string name) : name_(std::move(name)) {}
+
+    const std::string&amp; getName() const override { return name_; }
+    Reading read() override { return Reading("state", isOn_ ? 1.0 : 0.0); }
+    void reset() override { isOn_ = false; }
+};
+
+void printStats(std::string_view label, const std::optional&lt;Stats&gt;&amp; stats) {
+    if (!stats) {
+        std::cout &lt;&lt; label &lt;&lt; ": no readings\n";
+        return;
+    }
+    std::cout &lt;&lt; label &lt;&lt; ": min=" &lt;&lt; stats-&gt;min
+              &lt;&lt; ", max=" &lt;&lt; stats-&gt;max
+              &lt;&lt; ", avg=" &lt;&lt; stats-&gt;average
+              &lt;&lt; ", count=" &lt;&lt; stats-&gt;count &lt;&lt; '\n';
+}
+
+int main() {
+    DeviceRegistry registry;
+    registry.add(std::make_unique&lt;TemperatureSensor&gt;("Temperature 1", 24.0));
+    registry.add(std::make_unique&lt;TemperatureSensor&gt;("Temperature 2", 27.0));
+    registry.add(std::make_unique&lt;Relay&gt;("Relay 1"));
+    registry.add(std::make_unique&lt;VoltageSensor&gt;("Voltage 1", 218.0));
+    registry.add(std::make_unique&lt;VoltageSensor&gt;("Voltage 2", 231.0));
+
+    const auto snapshot = registry.collectSnapshot(); // каждый Device::read() ровно один раз
+    DeviceRegistry::printSnapshot(snapshot);
+
+    printStats("temperature", DeviceRegistry::statsWhere(snapshot,
+        [](const Reading&amp; reading) { return reading.getUnit() == "°C"; }));
+    printStats("voltage", DeviceRegistry::statsWhere(snapshot,
+        [](const Reading&amp; reading) { return reading.getUnit() == "V"; }));
+
+    if (auto relay = DeviceRegistry::readByName(snapshot, "Relay 1"))
+        std::cout &lt;&lt; "Relay 1 in snapshot: " &lt;&lt; relay-&gt;getValue() &lt;&lt; '\n';
+
+    registry.resetAll();
+}</code></pre>
+  </section>
+
+  <section class="card">
+    <h2>Разбор архитектуры</h2>
+
+    <h3>1. Reading: отдельный тип для результата измерения</h3>
+    <p><code>Reading</code> нужен, чтобы не возвращать просто <code>double</code>. Число без единицы измерения теряет смысл: <code>25.0</code> может быть температурой, напряжением или состоянием реле. Поэтому показание хранит и значение, и строку единицы.</p>
+    <p>Поля закрыты в <code>private</code>, наружу данные выдаются через const-геттеры. <code>getUnit()</code> возвращает <code>const std::string&</code>, чтобы не копировать строку и не разрешать внешнему коду менять внутреннее поле.</p>
+
+    <h3>2. Device: общий контракт</h3>
+    <p><code>Device</code> — это абстрактный интерфейс. Он не хранит конкретных данных датчика, а только требует, чтобы каждое устройство умело вернуть имя, снять показание и сброситься.</p>
+    <p><code>= 0</code> делает методы чисто виртуальными, поэтому объект <code>Device</code> создать нельзя. Это правильно: абстрактного “просто устройства” в программе нет, есть конкретные устройства.</p>
+    <p>Виртуальный деструктор обязателен для базового класса с виртуальными методами. Иначе удаление наследника через указатель на базу может не вызвать деструктор наследника.</p>
+
+    <h3>3. Конкретные устройства</h3>
+    <p><code>TemperatureSensor</code>, <code>VoltageSensor</code> и <code>Relay</code> наследуются от <code>Device</code> и реализуют один и тот же интерфейс по-разному.</p>
+    <ul>
+      <li>Температурный датчик возвращает <code>°C</code>.</li>
+      <li>Датчик напряжения возвращает <code>V</code>.</li>
+      <li>Реле возвращает <code>state</code> и значение <code>0</code> или <code>1</code>.</li>
+    </ul>
+    <p>Ключевое слово <code>override</code> просит компилятор проверить, что метод действительно переопределяет виртуальный метод базы. Это защита от тихих ошибок в сигнатуре.</p>
+
+    <h3>4. DeviceRegistry: владелец устройств</h3>
+    <p><code>DeviceRegistry</code> хранит <code>std::vector&lt;std::unique_ptr&lt;Device&gt;&gt;</code>. Это значит: реестр владеет устройствами, а устройства могут быть разных реальных типов.</p>
+    <p><code>unique_ptr</code> нельзя копировать, поэтому метод <code>add()</code> принимает владение и перемещает указатель через <code>std::move</code>. После этого устройство живёт внутри реестра и удалится автоматически при уничтожении реестра.</p>
+    <p class="callout">Главная архитектурная победа: <code>pollAll()</code> не знает, какие именно устройства лежат внутри. Он вызывает <code>device-&gt;read()</code>, а C++ сам выбирает нужную реализацию по реальному типу объекта.</p>
+
+    <h3>5. optional: когда результата может не быть</h3>
+    <p><code>readByName()</code> ищет устройство по имени. Если устройство найдено, возвращается <code>Reading</code>. Если не найдено, возвращается <code>std::nullopt</code>.</p>
+    <p>Это честнее, чем возвращать фиктивное значение. Отсутствие устройства — нормальная ситуация, и <code>std::optional&lt;Reading&gt;</code> явно выражает это в типе результата.</p>
+
+    <h3>6. Шаблонный предикат и snapshot</h3>
+    <p><code>statsWhere()</code> — шаблон: принимает любой вызываемый предикат без обязательной type-erasure через <code>std::function</code>. В <code>main()</code> передаются лямбды для °C и V.</p>
+    <p>Сначала <code>collectSnapshot()</code> вызывает каждое устройство ровно один раз. Печать, поиск и обе статистики используют один и тот же неизменяемый снимок, поэтому сравнивают согласованные показания.</p>
+
+    <h3>7. Почему main стал коротким</h3>
+    <p><code>main()</code> больше не управляет памятью, не хранит сырые указатели и не знает, как опрашивать каждый тип устройства отдельно. Он собирает систему: создаёт реестр, добавляет устройства и запускает сценарии.</p>
+    <p>Это ближе к промышленному стилю: конкретные классы отвечают за своё поведение, реестр отвечает за хранение и оркестрацию, а <code>main()</code> остаётся точкой сборки приложения.</p>
+  </section>
+
+  <section class="card">
+    <h2>Что важно заметить</h2>
+    <ul>
+      <li>Добавление нового устройства требует нового класса, но не требует менять <code>DeviceRegistry::pollAll()</code>.</li>
+      <li>Владение объектами выражено через типы: <code>unique_ptr</code> владеет, сырой указатель из <code>.get()</code> только наблюдает.</li>
+      <li>Полиморфизм работает через указатель или ссылку на базовый класс: здесь это <code>unique_ptr&lt;Device&gt;</code>.</li>
+      <li><code>collectSnapshot()</code> отделяет ввод-вывод от анализа: каждое устройство читается один раз, затем все отчёты строятся по согласованным данным.</li>
+      <li><code>add()</code> отвергает null, пустое имя и дубликаты до помещения устройства в реестр.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

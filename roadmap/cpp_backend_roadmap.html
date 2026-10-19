@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Курс · C++ и backend-разработка</title>
+<link rel="stylesheet" href="assets/home.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    background: #fafaf8;
+    color: #16202B; min-height: 100vh;
+  }
+  button { font-family: inherit; }
+  ::-webkit-scrollbar { height: 8px; width: 8px; }
+  ::-webkit-scrollbar-thumb { background: #b9cbdd; border-radius: 8px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  button:focus { outline: none; }
+  button:focus:not(:focus-visible) { outline: none; }
+  button:focus-visible { outline: 2px solid #2D6FB3; outline-offset: 2px; }
+  .fade-in { animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script id="roadmap-data" type="application/json">
+{
+  "title": "C++ и backend-разработка",
+  "subtitle": "Маршрут от C++ и управления ресурсами к сетевым сервисам, SQL, PostgreSQL и эксплуатации.",
+  "intro": "Курс для всех, кто знаком с основами C или C++: переменными, условиями, циклами, функциями, массивами и базовым использованием указателей. Классы и управление ресурсами изучаются с начала; опыт embedded-разработки, многопоточности, сетей и баз данных не требуется. Для расчётов достаточно школьной арифметики; новые понятия вводятся по мере необходимости. Основной материал и задания можно изучать в браузере. Для самостоятельного запуска примеров понадобится компилятор, а для серверных проектов — среда разработки; работу с терминалом и сборкой разбирает станция 5. Основная версия языка — C++20, возможности C++23 отмечены отдельно.",
+  "stages": [
+    {
+      "id": "oop-basics",
+      "phase": "Подготовка",
+      "title": "База ООП: классы с нуля",
+      "goal": "Понять классы, инкапсуляцию, конструкторы и деструкторы — фундамент для всего C++ кода, который последует дальше.",
+      "why": "Классы, конструкторы и деструкторы используются в следующих станциях. Здесь разбираем их с начала и учимся задавать допустимые состояния объекта, а затем проверяем понимание на задачах.",
+      "skills": [
+        "Класс vs struct, public/private",
+        "Инварианты и проектирование контролируемого API",
+        "Методы, const-методы и this",
+        "Инициализация: {}, explicit, default/delete и список инициализации",
+        "Порядок жизни, деструктор и вводная модель специальных функций",
+        "static-члены, friend и вложенные типы"
+      ],
+      "res": [
+        {
+          "name": "cpp_station0_oop_basics.html",
+          "url": "",
+          "note": "20 разделов · 4 подстанции · 47 вопросов · 8 практических задач"
+        }
+      ],
+      "project": {
+        "title": "Класс BankAccount с нуля",
+        "desc": "Напиши полноценный класс с приватными полями, конструктором, проверками в методах и const-геттерами — без подсказок. Это итоговое задание станции.",
+        "deliver": "Класс компилируется в godbolt.org, все методы работают корректно, поля приватны.",
+        "skills": "инкапсуляция, конструктор, методы, const."
+      },
+      "station": {
+        "file": "cpp_station0_oop_basics.html",
+        "storeKey": "cpp_station0_progress_v1",
+        "totalSections": 20,
+        "label": "Станция 0"
+      },
+      "num": 1
+    },
+    {
+      "id": "modern-cpp",
+      "phase": "Фундамент",
+      "title": "Современный C++: ресурсы и владение",
+      "goal": "Освоить RAII, ссылки, const-correctness, умные указатели и семантику перемещения; научиться явно выражать владение ресурсами.",
+      "why": "Ресурсами нужно управлять и при обычном завершении функции, и при ошибках. Разберём, как связать освобождение с временем жизни владельца, а доступ к объекту отделить от владения им.",
+      "skills": [
+        "RAII как основа управления ресурсами (а не ручной new/delete)",
+        "Lifetime, storage duration, dangling и контракты владения в API",
+        "Умные указатели: unique_ptr/deleter, shared_ptr/control block, weak_ptr",
+        "Ссылки vs указатели; глубокая const-correctness",
+        "Move-семантика, std::move, moved-from состояние и const",
+        "Copy elision, NRVO и эффективный возврат значений",
+        "auto, range-based for, лямбды — современный синтаксис",
+        "Правило пяти / правило нуля при управлении ресурсами"
+      ],
+      "res": [
+        {
+          "name": "roadmap.sh/cpp",
+          "url": "https://roadmap.sh/cpp",
+          "note": "интерактивная карта самого языка — держи открытой"
+        },
+        {
+          "name": "cppreference.com",
+          "url": "https://cppreference.com",
+          "note": "справочник №1, сверяйся по каждому методу"
+        },
+        {
+          "name": "«A Tour of C++» (Stroustrup)",
+          "url": "",
+          "note": "сжатый обзор современного языка от автора"
+        },
+        {
+          "name": "Твой тест cpp_basic_level.html",
+          "url": "",
+          "note": "прогоняй темы, закрывай пробелы"
+        }
+      ],
+      "project": {
+        "title": "CLI-утилита для анализа логов",
+        "desc": "Начни CLI-анализатор логов: чтение файла через RAII, разбор строк и базовые счётчики. После станции 3 добавь map/sort и top-N, после станции 5 — CMake и тестовый запуск.",
+        "deliver": "На этом этапе: чтение файла без ручного new/delete и корректная модель владения. Полная статистика и сборка добавляются по мере прохождения станций 3 и 5.",
+        "skills": "RAII, строки, vector, ссылки и const; map/sort/CMake добавятся позже."
+      },
+      "station": {
+        "file": "cpp_station1_modern_cpp.html",
+        "storeKey": "cpp_station1_progress_v1",
+        "totalSections": 23,
+        "label": "Станция 1"
+      },
+      "num": 2
+    },
+    {
+      "id": "inheritance-poly",
+      "phase": "Фундамент",
+      "title": "Наследование и полиморфизм",
+      "goal": "Закрыть базу ООП: научиться строить иерархии классов и писать полиморфный код через виртуальные функции и интерфейсы.",
+      "why": "Наследование и виртуальные функции — один из способов выразить общий интерфейс для разных реализаций. Разберём, когда они полезны, а когда проще композиция, шаблоны или обычные функции. Наследование не является обязательной основой архитектуры C++.",
+      "skills": [
+        "Дизайн is-a, substitutability и выбор композиции",
+        "public/protected/private наследование и доступ к членам",
+        "Множественное и виртуальное наследование, ромб и порядок lifetime",
+        "Виртуальные функции: override/final, name hiding и default-аргументы",
+        "Полиморфизм через указатели и ссылки на базу",
+        "Абстрактные классы и интерфейсы (чисто виртуальные функции)",
+        "RTTI: dynamic_cast/typeid и безопасный downcast",
+        "Slicing и полиморфное копирование через clone",
+        "Виртуальный деструктор и корректное полиморфное уничтожение",
+        "Типичная реализация virtual через vtable/vptr и граница между ABI и стандартом",
+        "Middle+ задачи на порядок конструирования, исключения и new/delete"
+      ],
+      "res": [
+        {
+          "name": "cpp_station2_inheritance_polymorphism.html",
+          "url": "",
+          "note": "25 разделов · 5 подстанции · 57 вопросов · 8 практических задач"
+        }
+      ],
+      "project": {
+        "title": "Полиморфная иерархия фигур и система уведомлений",
+        "desc": "Спроектируй абстрактный интерфейс (Shape или Notifier) и несколько реализаций, работающих полиморфно через vector<unique_ptr<Base>>. Цель — прочувствовать «один код, много типов».",
+        "deliver": "Код компилируется в godbolt.org, добавление новой реализации не требует менять общий код.",
+        "skills": "наследование, виртуальные функции, абстрактные классы, полиморфизм, unique_ptr."
+      },
+      "station": {
+        "file": "cpp_station2_inheritance_polymorphism.html",
+        "storeKey": "cpp_station2_progress_v1",
+        "totalSections": 25,
+        "label": "Станция 2"
+      },
+      "num": 3
+    },
+    {
+      "id": "stl-templates",
+      "phase": "Фундамент",
+      "title": "STL, шаблоны и алгоритмы вглубь",
+      "goal": "Свободно владеть контейнерами, итераторами, алгоритмами и базовыми шаблонами — это рабочая лошадь повседневного C++.",
+      "why": "Контейнеры и алгоритмы помогают работать с данными без повторной реализации типовых операций. Чтобы применять их корректно, нужно понимать сложность, требования к типам и правила инвалидирования ссылок и итераторов.",
+      "skills": [
+        "Cost model контейнеров: сложность, locality, аллокации и reserve/resize",
+        "Invalidation итераторов/ссылок и корректные erase-паттерны",
+        "map/unordered_map: rehash, try_emplace, transparent lookup и выбор структуры",
+        "Категории итераторов, ranges, projections и ленивые views",
+        "Алгоритмы: sort, find/find_if, transform, accumulate и erase/remove",
+        "Вывод шаблонов, dependent code, SFINAE/concepts и forwarding references",
+        "Лямбды как предикаты и компараторы",
+        "optional/variant и non-owning span/string_view с контролем lifetime"
+      ],
+      "res": [
+        {
+          "name": "cpp_station3_stl_templates.html",
+          "url": "",
+          "note": "39 разделов · 4 подстанции · 83 вопросов · 12 практических задач"
+        },
+        {
+          "name": "cppreference: Containers library",
+          "url": "https://en.cppreference.com/w/cpp/container",
+          "note": "таблица сложностей операций"
+        },
+        {
+          "name": "«Effective STL» (Meyers)",
+          "url": "",
+          "note": "как пользоваться STL правильно"
+        },
+        {
+          "name": "Compiler Explorer (godbolt.org)",
+          "url": "https://godbolt.org",
+          "note": "смотри, во что компилируется твой код"
+        }
+      ],
+      "project": {
+        "title": "In-memory хранилище ключ-значение",
+        "desc": "Маленькая библиотека-«база в памяти»: set(key, value), get(key), del(key), список ключей по префиксу. Данные — в unordered_map. Покрой шаблонами, чтобы значение могло быть разных типов.",
+        "deliver": "Шаблонный класс Store<T>, методы возвращают std::optional. Юнит-тесты на основные операции (пока хоть assert, дальше заменишь на Google Test).",
+        "skills": "unordered_map, optional, шаблоны, проектирование API класса."
+      },
+      "station": {
+        "file": "cpp_station3_stl_templates.html",
+        "storeKey": "cpp_station3_progress_v1",
+        "totalSections": 39,
+        "label": "Станция 3"
+      },
+      "num": 4,
+      "milestone": {
+        "label": "ИТОГОВЫЙ ПРИМЕР 0–3",
+        "title": "Система мониторинга устройств",
+        "desc": "Полный учебный проект после станций 0–3: инкапсуляция, владение, интерфейсы, полиморфный реестр, optional, шаблонный фильтр и единый snapshot показаний.",
+        "page": "cpp_project_device_monitoring.html",
+        "run": "g++ -std=c++20 -Wall -Wextra -pedantic -o main main.cpp && ./main",
+        "covers": [
+          "Станция 0: классы, private-поля, конструкторы, const-геттеры.",
+          "Станция 1: RAII, std::unique_ptr, std::vector, std::move.",
+          "Станция 2: абстрактный Device, virtual/override и виртуальный деструктор.",
+          "Станция 3: std::optional, лямбды, шаблонный предикат и алгоритмы по snapshot."
+        ]
+      }
+    },
+    {
+      "id": "error-handling",
+      "phase": "Фундамент",
+      "title": "Обработка ошибок и исключения",
+      "goal": "Научиться писать надёжный код: исключения, гарантии безопасности, выбор между throw и optional. То, что отличает игрушку от продукта.",
+      "why": "Операции ввода-вывода, разбор данных и выделение памяти могут завершаться ошибками. Разберём способы сообщить об ошибке, гарантии сохранности состояния и освобождение ресурсов при раскрутке стека. Отдельно рассмотрим случаи завершения программы, в которых обычная раскрутка не гарантируется.",
+      "skills": [
+        "try/catch/throw и раскрутка стека",
+        "Иерархия std::exception и свои типы исключений",
+        "RAII + исключения: почему это две половины одного",
+        "Гарантии безопасности: basic / strong / no-throw",
+        "Контракты ошибок: optional, expected, error_code и исключения",
+        "Конструкторы, частично созданные объекты и безопасные деструкторы",
+        "Транзакционный prepare/commit/rollback и внешние эффекты",
+        "conditional noexcept, move_if_noexcept и честные обещания",
+        "Границы request/thread/C ABI и передача exception_ptr",
+        "Defensive-парсинг, retry и идемпотентность"
+      ],
+      "res": [
+        {
+          "name": "cpp_station4_error_handling.html",
+          "url": "",
+          "note": "28 разделов · 5 подстанции · 56 вопросов · 8 практических задач"
+        }
+      ],
+      "project": {
+        "title": "Надёжный парсер системных данных",
+        "desc": "Напиши разбор /proc/meminfo с полной обработкой ошибок: свой тип CollectorError, мягкий пропуск кривых строк, исключение при отсутствии обязательных полей, ловля на границе. Это прямая заготовка для сборщика MemorySource в проекте телеметрии.",
+        "deliver": "Парсер не падает от кривых данных, а честно сообщает об ошибке через исключение; вызывающий ловит на границе и продолжает работу.",
+        "skills": "исключения, свои типы, RAII, выбор стратегии обработки."
+      },
+      "station": {
+        "file": "cpp_station4_error_handling.html",
+        "storeKey": "cpp_station4_progress_v1",
+        "totalSections": 28,
+        "label": "Станция 4"
+      },
+      "num": 5
+    },
+    {
+      "id": "build-tools",
+      "phase": "Инструменты",
+      "title": "Сборка, Git и окружение Linux",
+      "goal": "Уверенно собирать проекты через CMake, работать в Git и чувствовать себя дома в Linux-терминале.",
+      "why": "Для воспроизводимой работы с C++ нужны сборка, зависимости, контроль версий и диагностика. В курсе используем Linux, CMake и Git; это выбранный набор инструментов, а не единственный возможный способ разрабатывать backend.",
+      "skills": [
+        "Translation units, ODR, inline и явное инстанцирование шаблонов",
+        "Internal/external linkage, symbols, name mangling и extern C",
+        "Static/shared библиотеки, dynamic loader, ABI и PImpl",
+        "Target-based CMake: цели, библиотеки, usage requirements и FetchContent",
+        "PUBLIC/PRIVATE/INTERFACE и imported/interface targets",
+        "Git: branch, merge, rebase и разрешение конфликтов",
+        "Linux CLI: навигация, grep/sed/awk, процессы, права и пайпы",
+        "Менеджеры зависимостей: vcpkg/Conan и фиксация версий",
+        "Presets/toolchains, compile_commands, ccache, LTO/PGO",
+        "CTest, gdb/core dumps, sanitizers, perf и strace"
+      ],
+      "res": [
+        {
+          "name": "cpp_station5_build_tools.html",
+          "url": "",
+          "note": "37 разделов · 5 подстанции · 72 вопросов · 10 практических задач"
+        },
+        {
+          "name": "«Modern CMake» (Henry Schreiner)",
+          "url": "https://cliutils.gitlab.io/modern-cmake/",
+          "note": "бесплатный гайд по CMake как надо"
+        },
+        {
+          "name": "Pro Git (бесплатная книга)",
+          "url": "https://git-scm.com/book/ru/v2",
+          "note": "на русском"
+        },
+        {
+          "name": "vcpkg",
+          "url": "https://github.com/microsoft/vcpkg",
+          "note": "проще всего ставить зависимости"
+        }
+      ],
+      "project": {
+        "title": "Переезд прошлых проектов на CMake + GitHub",
+        "desc": "Возьми утилиту логов и KV-хранилище из прошлых этапов, организуй как нормальные CMake-проекты с подключённой внешней библиотекой (например, fmt для форматирования), залей на GitHub с README.",
+        "deliver": "Структура src/ include/ tests/, CMakeLists.txt, .gitignore, README с инструкцией сборки. Зависимость подтянута через vcpkg или FetchContent.",
+        "skills": "CMake-таргеты, внешние зависимости, структура репозитория, Git-воркфлоу."
+      },
+      "station": {
+        "file": "cpp_station5_build_tools.html",
+        "storeKey": "cpp_station5_progress_v1",
+        "totalSections": 38,
+        "label": "Станция 5"
+      },
+      "num": 6
+    },
+    {
+      "id": "concurrency",
+      "phase": "Системное",
+      "title": "Многопоточность и асинхронность",
+      "goal": "Понимать модель памяти C++, писать безопасный многопоточный код — фундамент любого сервера, обрабатывающего много запросов.",
+      "why": "Сервису часто приходится обслуживать несколько операций с перекрывающимся временем выполнения. Начнём с различия конкурентности и параллелизма, затем разберём потоки, синхронизацию и модель памяти. Предыдущий опыт с потоками или RTOS не предполагается.",
+      "skills": [
+        "Потоки: std::thread, std::jthread (C++20), передача аргументов",
+        "Data race, sequenced-before, synchronizes-with и happens-before",
+        "Все виды мьютексов: mutex, recursive, timed, shared_mutex",
+        "RAII-обёртки: lock_guard, unique_lock, scoped_lock, shared_lock",
+        "std::atomic: RMW/CAS, memory_order, ABA и границы lock-free",
+        "Deadlock, livelock, starvation и их профилактика",
+        "condition_variable: ожидание событий без busy waiting",
+        "future/promise, std::async, packaged_task",
+        "Семафоры, latch, barrier (C++20)",
+        "Линеаризуемый API, TOCTOU и lifetime возвращаемых объектов",
+        "Bounded queues, backpressure, stop_token и корректный shutdown",
+        "Паттерны: производитель-потребитель, пул потоков, false sharing",
+        "TSan, stress-тесты и production-наблюдаемость"
+      ],
+      "res": [
+        {
+          "name": "cpp_station6_multithreading.html",
+          "url": "",
+          "note": "54 разделов · 8 подстанции · 173 вопросов · 28 практических задач"
+        },
+        {
+          "name": "«C++ Concurrency in Action» (Williams)",
+          "url": "",
+          "note": "лучшая книга по теме, автор — мейнтейнер std::thread"
+        },
+        {
+          "name": "cppreference: Thread support library",
+          "url": "https://en.cppreference.com/w/cpp/thread",
+          "note": ""
+        }
+      ],
+      "project": {
+        "title": "Многопоточный пул задач (thread pool)",
+        "desc": "Реализуй пул потоков: очередь задач (функций), N рабочих потоков разбирают её. submit(task) возвращает future с результатом. Это фундамент, на котором потом стоит сервер.",
+        "deliver": "Класс ThreadPool, безопасная очередь с mutex + condition_variable, корректное завершение всех потоков в деструкторе (RAII!). Тест: закинь 1000 задач, проверь результаты.",
+        "skills": "thread, mutex, condition_variable, future, потокобезопасные структуры."
+      },
+      "station": {
+        "file": "cpp_station6_multithreading.html",
+        "storeKey": "cpp_station6_progress_v1",
+        "totalSections": 56,
+        "label": "Станция 6"
+      },
+      "num": 7
+    },
+    {
+      "id": "networking",
+      "phase": "Backend-ядро",
+      "title": "Сеть, сокеты и HTTP",
+      "goal": "Пройти весь путь запроса — от DNS, IP и TCP до production-сервиса на Asio/Beast — и уметь защищать сетевую архитектуру на middle+ собеседовании.",
+      "why": "Это фундамент backend: прежде чем проектировать REST и базы, нужно понимать, где заканчивается HTTP request, что гарантирует TCP, почему медленный клиент съедает память, как живёт async Session и на каком участке proxy завершает TLS. Станция разделена на восемь подстанций и ведёт от почти нулевого сетевого опыта до production-minded проекта.",
+      "skills": [
+        "7.1: путь URL → DNS → route → transport → TLS → HTTP → proxy → C++ service",
+        "7.2: OSI/TCP-IP, Ethernet, IPv4/IPv6, CIDR, routing, NAT, DNS, MTU/MSS",
+        "7.3: UDP, TCP handshake/ACK/retransmit, окна, FIN/RST/TIME-WAIT и QUIC",
+        "7.4: POSIX sockets, getaddrinfo, RAII fd, partial I/O, framing и error contracts",
+        "7.5: select/poll/epoll, LT/ET, reactor state machine, fairness и backpressure",
+        "7.6: Boost.Asio executors/strand, lifetime buffers/Session, cancellation и C++20 coroutines",
+        "7.7: HTTP/1.1–3, framing и request smuggling, TLS 1.3, certificates, SNI/ALPN и Beast",
+        "7.8: deadlines/retries, Slowloris, overload, proxy/container networking, diagnostics и graceful shutdown"
+      ],
+      "res": [
+        {
+          "name": "cpp_station7_networking.html",
+          "url": "",
+          "note": "89 разделов · 8 подстанции · 162 вопросов · 29 практических задач"
+        },
+        {
+          "name": "Boost.Asio — latest documentation",
+          "url": "https://www.boost.org/doc/libs/latest/doc/html/boost_asio.html",
+          "note": "официальные contracts async I/O, executors, cancellation и coroutines"
+        },
+        {
+          "name": "Boost.Beast — latest",
+          "url": "https://www.boost.org/library/latest/beast/",
+          "note": "HTTP/1 и WebSocket поверх Asio"
+        },
+        {
+          "name": "RFC 9110: HTTP Semantics",
+          "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+          "note": "первоисточник по HTTP semantics"
+        },
+        {
+          "name": "Beej's Guide to Network Programming",
+          "url": "https://beej.us/guide/bgnet/",
+          "note": "практический вводный гайд по POSIX sockets"
+        }
+      ],
+      "project": {
+        "title": "Telemetry Gateway",
+        "desc": "Итеративно пройди blocking framed echo и учебный epoll reactor, затем собери ограниченный HTTP/1 ingestion service на Asio coroutines и Beast. Fake sink умеет замедляться и падать, чтобы доказать backpressure, timeout и overload policy.",
+        "deliver": "POST /v1/metrics и health endpoints; строгие header/body/connection limits; FIFO writes; absolute deadlines; bounded queue и 503 policy; structured metrics/logs; graceful shutdown; tests на split input, slow client, sink failure и plateau памяти под перегрузкой. Ручной HTTP parser остаётся только упражнением.",
+        "skills": "POSIX sockets, epoll, Asio/Beast, C++20 coroutines, HTTP/TLS boundary, lifetime, backpressure, диагностика и design review."
+      },
+      "station": {
+        "file": "cpp_station7_networking.html",
+        "storeKey": "cpp_station7_progress_v1",
+        "totalSections": 91,
+        "label": "Станция 7"
+      },
+      "num": 8
+    },
+    {
+      "id": "rest-api",
+      "phase": "Backend-ядро",
+      "title": "REST API и C++-сервис",
+      "goal": "Понимать HTTP-договор с нуля и объяснять реализацию, безопасность и поведение API при конфликтах и сетевых отказах.",
+      "why": "Девять подстанций ведут от ресурса и первого запроса к C++-обработчикам, условным изменениям, правам доступа, совместимости и событиям. Разборы и тесты выполняются без компилятора в браузере.",
+      "skills": [
+        "Ресурсы, REST, методы, статусы, JSON, валидация и Problem Details",
+        "cpp-httplib, Crow и Drogon: модель выполнения, handler/service/store и время жизни",
+        "ETag, If-Match, кэширование, потерянные ответы и ключи повторов",
+        "Объектная авторизация, tenant scope, cookie/JWT, CORS, CSRF, SSRF и лимиты",
+        "OpenAPI, совместимость, пагинация и развитие интерфейса",
+        "RPC/gRPC, protobuf, SSE, WebSocket, webhook и восстановление после обрыва",
+        "Логи, метрики, контрактные проверки и защита учебного проекта"
+      ],
+      "res": [
+        {
+          "name": "cpp-httplib",
+          "url": "https://github.com/yhirose/cpp-httplib",
+          "note": "небольшой блокирующий HTTP-сервер; закреплённая версия в примере"
+        },
+        {
+          "name": "Drogon framework",
+          "url": "https://github.com/drogonframework/drogon",
+          "note": "асинхронный фреймворк; модель потоков разбирается отдельно"
+        },
+        {
+          "name": "spdlog",
+          "url": "https://github.com/gabime/spdlog",
+          "note": "журналирование C++; очередь и политика переполнения требуют настройки"
+        }
+      ],
+      "project": {
+        "title": "Task API: договор и локальный C++-пример",
+        "desc": "В учебнике — разборы без набора кода и полный локальный пример POST/GET в памяти. Отдельный проект можно расширить до CRUD, страниц, условных изменений и авторизации по описанному договору. База данных появится в следующей станции.",
+        "deliver": "Сначала объяснить запросы, конфликты, отказы и границы гарантий. При самостоятельной реализации — OpenAPI, тесты HTTP и сервиса, безопасные логи и README с явно указанными ограничениями RAM.",
+        "skills": "HTTP-контракт, C++ lifetime и синхронизация, безопасность, совместимость и наблюдаемость."
+      },
+      "station": {
+        "file": "cpp_station8_rest_api.html",
+        "storeKey": "cpp_station8_progress_v1",
+        "totalSections": 62,
+        "label": "Станция 8"
+      },
+      "num": 9
+    },
+    {
+      "id": "sql",
+      "phase": "Базы данных",
+      "title": "9A · SQL: язык запросов",
+      "goal": "Самостоятельно составлять запросы и объяснять каждую строку результата.",
+      "why": "Сначала научимся работать с данными на небольших таблицах. Затем перейдём к конкуренции, индексам и PostgreSQL в 9B.",
+      "skills": [
+        "SELECT, WHERE, NULL, сортировка и изменения",
+        "JOIN и агрегаты без потерянных и размноженных строк",
+        "Подзапросы, EXISTS, CTE и UNION",
+        "Оконные функции, страницы и UPSERT"
+      ],
+      "res": [
+        {
+          "name": "PostgreSQL: официальный учебник",
+          "url": "https://www.postgresql.org/docs/18/tutorial.html",
+          "note": "Первоисточник: таблицы, SQL, связи и транзакции"
+        }
+      ],
+      "project": {
+        "title": "SQL-отчёт для API",
+        "desc": "Построй отчёт по владельцам задач: счётчик открытых задач и выбранная задача каждого владельца. Не потеряй пользователей без задач.",
+        "deliver": "Запросы, проверенные на исходных и граничных данных в браузерном SQL-тренажёре.",
+        "skills": "JOIN, GROUP BY, CTE, оконные функции и проверка результата."
+      },
+      "station": {
+        "file": "cpp_station9_sql.html",
+        "storeKey": "cpp_station9_sql_progress_v1",
+        "totalSections": 24,
+        "label": "Станция 9A"
+      },
+      "num": 10
+    },
+    {
+      "id": "databases",
+      "phase": "Базы данных",
+      "title": "9B · PostgreSQL и надёжность данных",
+      "goal": "Хранить данные по-настоящему: SQL, PostgreSQL и работа с БД из C++.",
+      "why": "Многим сервисам требуется долговременное хранение данных. Разберём реляционную модель, SQL и подключение PostgreSQL к C++-сервису. При этом не каждый backend использует собственную базу данных.",
+      "skills": [
+        "Реляционная модель, SQL: SELECT/INSERT/UPDATE/DELETE, JOIN, индексы",
+        "PostgreSQL: запуск (через Docker), psql, схемы, миграции",
+        "Подключение из C++: libpqxx (C++-библиотека поверх libpq)",
+        "Connection pool, транзакции, защита от SQL-инъекций (параметризованные запросы)",
+        "Когда SQL, а когда NoSQL/кэш (Redis) — базовое понимание",
+        "Паттерн «репозиторий»: отделение доступа к данным от логики"
+      ],
+      "res": [
+        {
+          "name": "PostgreSQL: официальный учебник",
+          "url": "https://www.postgresql.org/docs/18/tutorial.html",
+          "note": "Первоисточник: таблицы, SQL, связи и транзакции"
+        },
+        {
+          "name": "libpqxx",
+          "url": "https://github.com/jtv/libpqxx",
+          "note": "C++-библиотека для PostgreSQL поверх libpq"
+        },
+        {
+          "name": "«Use The Index, Luke»",
+          "url": "https://use-the-index-luke.com/",
+          "note": "как работают индексы — бесплатно"
+        }
+      ],
+      "project": {
+        "title": "Менеджер задач на PostgreSQL",
+        "desc": "Возьми REST API из этапа 9 и посади на настоящую БД: задачи хранятся в PostgreSQL, доступ через libpqxx, миграции схемы, connection pool. Подними БД и сервис вместе через docker-compose одной командой.",
+        "deliver": "Флагманский проект портфолио: REST API + PostgreSQL + параметризованные запросы + docker-compose. CRUD работает против реальной базы, данные переживают рестарт.",
+        "skills": "SQL, PostgreSQL, libpqxx, транзакции, репозиторий-слой, docker-compose."
+      },
+      "station": {
+        "file": "cpp_station9_databases.html",
+        "storeKey": "cpp_station9_progress_v1",
+        "totalSections": 14,
+        "label": "Станция 9B"
+      },
+      "num": 11
+    },
+    {
+      "id": "production",
+      "phase": "Продакшен",
+      "title": "Тесты, Docker, CI и подготовка к работе",
+      "goal": "Научиться проверять, упаковывать, выпускать и наблюдать сервис: тесты, контейнеры, CI, совместимость и диагностика отказов.",
+      "why": "Работающий код — половина дела. Вторая половина — что его можно собрать одной командой, протестировать автоматически и задеплоить. На собеседовании именно это показывает зрелость.",
+      "skills": [
+        "Юнит- и интеграционные тесты: Google Test или Catch2",
+        "Test-driven development (TDD) — хотя бы попробовать",
+        "Docker: написать Dockerfile (многоступенчатый — сборка отдельно от рантайма)",
+        "CI: GitHub Actions — сборка, тесты, clang-format/clang-tidy на каждый push",
+        "Наблюдаемость: структурное логирование, базовые метрики",
+        "Безопасность: валидация ввода, секреты через переменные окружения"
+      ],
+      "res": [
+        {
+          "name": "Google Test",
+          "url": "https://github.com/google/googletest",
+          "note": "стандарт тестирования в C++"
+        },
+        {
+          "name": "Docker: multi-stage builds",
+          "url": "https://docs.docker.com/build/building/multi-stage/",
+          "note": ""
+        },
+        {
+          "name": "GitHub Actions для C++",
+          "url": "https://docs.github.com/en/actions",
+          "note": ""
+        }
+      ],
+      "project": {
+        "title": "Финализация флагманского проекта",
+        "desc": "Доведи менеджер задач до продакшен-вида: покрытие тестами (Google Test), многоступенчатый Dockerfile, GitHub Actions с прогоном тестов и линтеров на каждый коммит, README с архитектурой и бейджем CI.",
+        "deliver": "Репозиторий, который не стыдно дать ссылкой рекрутеру: зелёный CI-бейдж, тесты, Docker, чистая структура, понятный README. Это твоё главное доказательство навыков.",
+        "skills": "Google Test, Docker, CI/CD, документация, инженерная культура."
+      },
+      "station": {
+        "file": "cpp_station10_production.html",
+        "storeKey": "cpp_station10_progress_v1",
+        "totalSections": 23,
+        "label": "Станция 10"
+      },
+      "num": 12
+    }
+  ],
+  "closing": "Практические задания помогают собрать портфолио и научиться объяснять решения: какие ограничения были у задачи, почему выбран этот подход, как проверялась корректность и что изменится при росте нагрузки. Учебный проект следует представлять как учебный, не подменяя им коммерческий опыт. Прохождение курса не гарантирует определённый грейд: готовность к собеседованию лучше оценивать по самостоятельному решению незнакомых задач и способности обсуждать альтернативы. Маршрут завершается станцией 10: тестирование, доставка изменений и эксплуатация сервиса.",
+  "bonusFiles": [
+    {
+      "label": "Визуальные лаборатории",
+      "file": "visual_labs.html",
+      "desc": "Девять связанных экспериментов: жизнь объекта, владение, vector, сборка, потоки, сеть и API, SQL, транзакции и перегрузка. Входы также есть в оглавлениях нужных подглав."
+    },
+    {
+      "label": "Источники теории",
+      "file": "sources.html",
+      "desc": "Первоисточники по разделам: правила C++, протоколы, документация инструментов и рекомендации по проектированию."
+    },
+    {
+      "label": "Шпаргалка по станциям 0–10",
+      "file": "cpp_cheatsheet.html",
+      "desc": "C++, сборка, многопоточность, сеть и API: ключевые правила, примеры, источники и быстрые переходы к полным главам."
+    },
+    {
+      "label": "Тест по C++ (базовый уровень)",
+      "file": "cpp_basic_level.html",
+      "desc": "256 вопросов по всем темам — можно проходить параллельно с любой станцией для самопроверки."
+    }
+  ]
+}
+</script>
+<script>
+"use strict";
+const { useState, useEffect, useCallback } = React;
+const DATA = JSON.parse(document.getElementById("roadmap-data").textContent);
+const C = {
+    blue: "#2D6FB3", blueDeep: "#1B4E85", ink: "#16202B", line: "#DCE5EE",
+    paper: "#F7FAFD", green: "#2E7D52", greenBg: "#E7F5EE", mute: "#7E8C9A", muteSoft: "#A7B4C1",
+    amber: "#B07A12", amberBg: "#FBF1DC", red: "#C0392B",
+};
+const PHASE_COLORS = {
+    "Подготовка": "#7A5BB0",
+    "Фундамент": "#2D6FB3",
+    "Инструменты": "#7A5BB0",
+    "Системное": "#B0602D",
+    "Backend-ядро": "#1B8A6B",
+    "Продакшен": "#B0344E",
+};
+const STORE_KEY = "cpp_roadmap_progress_v1";
+function loadStore() { try {
+    return JSON.parse(localStorage.getItem(STORE_KEY)) || {};
+}
+catch (e) {
+    return {};
+} }
+function saveStore(o) { try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(o));
+}
+catch (e) { } }
+// Читаем прогресс конкретной станции из её собственного ключа localStorage
+function loadStationProgress(storeKey, totalSections) {
+    try {
+        const raw = localStorage.getItem(storeKey);
+        if (!raw)
+            return null;
+        const data = JSON.parse(raw);
+        const movedSql = new Set(['sql-language','sql-first-query','sql-create-basics','tables','sql-select-basics','sql-filter-basics','sql-null-basics','sql-order-basics','sql-write-basics','queries','sql-join-basics','worked-example','sql-boundaries','sql-trainer','sql-aggregate-basics','aggregation','join-shapes']);
+        const secDone = Object.keys(data).filter(k => k.startsWith("sec:") && data[k] && !(storeKey === 'cpp_station9_progress_v1' && movedSql.has(k.slice(4)))).length;
+        function aggregateModuleQuiz(kind) {
+            const suffix = ":" + kind;
+            const results = Object.entries(data)
+                .filter(([key, value]) => key.startsWith("quiz:") && key.endsWith(suffix)
+                    && value && Number.isFinite(value.score) && Number.isFinite(value.total))
+                .map(([, value]) => value);
+            if (!results.length)
+                return null;
+            return results.reduce((sum, value) => ({
+                score: sum.score + value.score,
+                total: sum.total + value.total,
+            }), { score: 0, total: 0 });
+        }
+        const splitDatabase = storeKey === 'cpp_station9_progress_v1' || storeKey === 'cpp_station9_sql_progress_v1';
+        const auditedCpp = /^cpp_station[0-4]_progress_v1$/.test(storeKey);
+        const quiz = splitDatabase ? data['station-final:database-split:v1:basic'] : auditedCpp ? data["station-final:coverage:v1:basic"] : data["station-final:v3:basic"] || data["station-final:v2:basic"] || data.quiz || aggregateModuleQuiz("basic");
+        const quizAdvanced = splitDatabase ? null : data.quizAdvanced || aggregateModuleQuiz("advanced");
+        return { secDone, totalSections, quiz, quizAdvanced };
+    }
+    catch (e) {
+        return null;
+    }
+}
+const Icon = {
+    check: (p) => React.createElement("svg", Object.assign({ width: "14", height: "14", viewBox: "0 0 24 24", fill: "none" }, p),
+        React.createElement("path", { d: "M20 6L9 17l-5-5", stroke: "currentColor", strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round" })),
+    chevron: (p) => React.createElement("svg", Object.assign({ width: "18", height: "18", viewBox: "0 0 24 24", fill: "none" }, p),
+        React.createElement("path", { d: "M6 9l6 6 6-6", stroke: "currentColor", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" })),
+    rocket: (p) => React.createElement("svg", Object.assign({ width: "15", height: "15", viewBox: "0 0 24 24", fill: "none" }, p),
+        React.createElement("path", { d: "M5 13c-1.5 1-2 4-2 4s3-.5 4-2m6.5-9.5C16 3 20 3 21 3c0 1 0 5-2.5 7.5L12 17l-5-5 6.5-6.5z", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }),
+        React.createElement("circle", { cx: "14.5", cy: "9.5", r: "1.5", fill: "currentColor" })),
+    link: (p) => React.createElement("svg", Object.assign({ width: "13", height: "13", viewBox: "0 0 24 24", fill: "none" }, p),
+        React.createElement("path", { d: "M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" })),
+    open: (p) => React.createElement("svg", Object.assign({ width: "14", height: "14", viewBox: "0 0 24 24", fill: "none" }, p),
+        React.createElement("path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3", stroke: "currentColor", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" })),
+};
+// Плашка прогресса станции
+function StationProgress({ progress, accent }) {
+    if (!progress)
+        return null;
+    const { secDone, totalSections, quiz, quizAdvanced } = progress;
+    const secPct = Math.round(secDone / totalSections * 100);
+    const quizPct = quiz ? Math.round(quiz.score / quiz.total * 100) : null;
+    const advancedPct = quizAdvanced ? Math.round(quizAdvanced.score / quizAdvanced.total * 100) : null;
+    return (React.createElement("div", { style: Object.assign(Object.assign({}, S.stationProgress), { borderColor: accent + "33" }) },
+        React.createElement("div", { style: S.stationProgressRow },
+            React.createElement("div", { style: S.stationProgressCell },
+                React.createElement("div", { style: S.stationProgressLabel }, "\u0422\u0435\u043E\u0440\u0438\u044F"),
+                React.createElement("div", { style: S.stationProgressBar },
+                    React.createElement("div", { style: Object.assign(Object.assign({}, S.stationProgressFill), { width: secPct + "%", background: accent }) })),
+                React.createElement("div", { style: Object.assign(Object.assign({}, S.stationProgressVal), { color: accent }) },
+                    secDone,
+                    "/",
+                    totalSections)),
+            quizPct !== null && (React.createElement("div", { style: S.stationProgressCell },
+                React.createElement("div", { style: S.stationProgressLabel }, "\u0411\u0430\u0437\u043E\u0432\u044B\u0439 \u0442\u0435\u0441\u0442"),
+                React.createElement("div", { style: S.stationProgressBar },
+                    React.createElement("div", { style: Object.assign(Object.assign({}, S.stationProgressFill), { width: quizPct + "%", background: quizPct >= 80 ? C.green : quizPct >= 55 ? C.amber : C.red }) })),
+                React.createElement("div", { style: Object.assign(Object.assign({}, S.stationProgressVal), { color: quizPct >= 80 ? C.green : quizPct >= 55 ? C.amber : C.red }) },
+                    quizPct,
+                    "%"))),
+            advancedPct !== null && (React.createElement("div", { style: S.stationProgressCell },
+                React.createElement("div", { style: S.stationProgressLabel }, "\u0423\u0433\u043B\u0443\u0431\u043B\u0451\u043D\u043D\u044B\u0439"),
+                React.createElement("div", { style: S.stationProgressBar },
+                    React.createElement("div", { style: Object.assign(Object.assign({}, S.stationProgressFill), { width: advancedPct + "%", background: advancedPct >= 80 ? C.green : advancedPct >= 55 ? C.amber : C.red }) })),
+                React.createElement("div", { style: Object.assign(Object.assign({}, S.stationProgressVal), { color: advancedPct >= 80 ? C.green : advancedPct >= 55 ? C.amber : C.red }) },
+                    advancedPct,
+                    "%"))))));
+}
+// Кнопка открытия станции
+function OpenStationBtn({ station, accent }) {
+    if (!station)
+        return (React.createElement("div", { style: S.stationInDev }, "\u0421\u0442\u0430\u043D\u0446\u0438\u044F \u0432 \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u043A\u0435"));
+    return (React.createElement("a", { href: station.file, style: Object.assign(Object.assign({}, S.openBtn), { background: accent, textDecoration: "none", display: "inline-block", textAlign: "center" }) },
+        React.createElement(Icon.open, { style: { marginRight: 8, verticalAlign: "-2px" } }),
+        "\u041E\u0442\u043A\u0440\u044B\u0442\u044C ",
+        station.label));
+}
+function MilestoneCard({ milestone, accent }) {
+    if (!milestone)
+        return null;
+    return (React.createElement("div", { style: Object.assign(Object.assign({}, S.milestoneCard), { borderColor: accent + "55" }) },
+        React.createElement("div", { style: Object.assign(Object.assign({}, S.milestoneBadge), { color: accent, background: accent + "14" }) }, milestone.label),
+        React.createElement("div", { style: S.milestoneTitle }, milestone.title),
+        React.createElement("p", { style: S.milestoneDesc }, milestone.desc),
+        React.createElement("div", { style: S.milestoneRun },
+            React.createElement("span", { style: S.milestoneRunLabel }, "\u0417\u0430\u043F\u0443\u0441\u043A:"),
+            React.createElement("code", { style: S.milestoneRunCode }, milestone.run)),
+        React.createElement("ul", { style: S.milestoneList }, milestone.covers.map((item, i) => (React.createElement("li", { key: i, style: S.milestoneListItem },
+            React.createElement("span", { style: Object.assign(Object.assign({}, S.skillDot), { background: accent }) }),
+            React.createElement("span", null, item))))),
+        React.createElement("button", { style: Object.assign(Object.assign({}, S.milestoneOpenBtn), { background: accent, boxShadow: "0 10px 24px -10px " + accent + "99" }), onClick: (e) => { e.currentTarget.blur(); window.open(milestone.page, "_blank"); } },
+            React.createElement(Icon.open, { style: { marginRight: 8, verticalAlign: "-2px" } }),
+            "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0440\u0430\u0437\u0431\u043E\u0440")));
+}
+function Stage({ stage, index, done, expanded, onToggleDone, onToggleExpand, isLast }) {
+    const [stationProgress, setStationProgress] = useState(null);
+    const accent = "#386789";
+    // читаем прогресс станции при раскрытии
+    useEffect(() => {
+        if (stage.station) {
+            const p = loadStationProgress(stage.station.storeKey, stage.station.totalSections);
+            setStationProgress(p);
+        }
+    }, [expanded, stage.station]);
+    // обновляем прогресс при фокусе вкладки (вернулись со станции)
+    useEffect(() => {
+        if (!stage.station)
+            return;
+        function onFocus() {
+            if (stage.station) {
+                const p = loadStationProgress(stage.station.storeKey, stage.station.totalSections);
+                setStationProgress(p);
+            }
+        }
+        window.addEventListener("focus", onFocus);
+        return () => window.removeEventListener("focus", onFocus);
+    }, [expanded, stage.station]);
+    return (React.createElement("div", { style: S.stageRow },
+        React.createElement("div", { style: S.rail },
+            React.createElement("button", { style: Object.assign(Object.assign({}, S.node), { borderColor: accent, background: done ? accent : "#fff", color: done ? "#fff" : accent }), onClick: onToggleDone, "aria-pressed": done, "aria-label": (done ? "Снять отметку: " : "Отметить пройденным: ") + stage.title, title: done ? "Пройдено" : "Отметить пройденным" }, done ? React.createElement(Icon.check, null) : React.createElement("span", { style: S.nodeNum }, index + 1)),
+            !isLast && React.createElement("div", { style: Object.assign(Object.assign({}, S.railLine), { background: done ? accent : C.line }) })),
+        React.createElement("div", { style: Object.assign(Object.assign({}, S.stageCard), (done ? S.stageCardDone : {})) },
+            React.createElement("button", { style: S.stageHead, "aria-expanded": expanded, onClick: onToggleExpand },
+                React.createElement("div", { style: S.stageHeadLeft },
+                    React.createElement("div", { style: S.stageHeadTop },
+                        React.createElement("span", { style: Object.assign(Object.assign({}, S.phaseTag), { color: accent, background: accent + "1A" }) }, stage.phase),
+                        stage.station && (React.createElement("span", { style: Object.assign(Object.assign({}, S.stationTag), { color: accent, borderColor: accent + "55" }) }, stage.station.label))),
+                    React.createElement("h3", { style: S.stageTitle }, stage.title)),
+                React.createElement("span", { style: Object.assign(Object.assign({}, S.chevronWrap), { transform: expanded ? "rotate(180deg)" : "none" }) },
+                    React.createElement(Icon.chevron, null))),
+            React.createElement("p", { style: S.stageGoal }, stage.goal),
+            !expanded && stage.station && React.createElement("a", { className: "home-station-link", href: stage.station.file }, "Открыть станцию →"),
+            stage.station && stationProgress && !expanded && (React.createElement("div", { style: { padding: "0 16px 14px" } },
+                React.createElement(StationProgress, { progress: stationProgress, accent: accent }))),
+            expanded && (React.createElement("div", { style: S.stageBody, className: "fade-in" },
+                React.createElement("div", { style: Object.assign(Object.assign({}, S.stationBox), { borderColor: accent + "33" }) },
+                    React.createElement("div", { style: S.stationBoxLeft }, stationProgress
+                        ? React.createElement(StationProgress, { progress: stationProgress, accent: accent })
+                        : stage.station
+                            ? React.createElement("div", { style: S.stationNoProgress }, "\u041F\u0440\u043E\u0433\u0440\u0435\u0441\u0441 \u043F\u043E\u044F\u0432\u0438\u0442\u0441\u044F \u043F\u043E\u0441\u043B\u0435 \u043E\u0442\u043A\u0440\u044B\u0442\u0438\u044F \u0441\u0442\u0430\u043D\u0446\u0438\u0438")
+                            : null),
+                    stage.preview ? React.createElement("a", { href: stage.preview, className: "home-primary" }, "Читать начало станции 9 · в работе →") : React.createElement(OpenStationBtn, { station: stage.station, accent: accent })),
+                React.createElement("div", { style: S.whyBox },
+                    React.createElement("span", { style: S.whyLabel }, "\u0417\u0430\u0447\u0435\u043C \u0438 \u0441 \u0447\u0435\u0433\u043E"),
+                    React.createElement("p", { style: S.whyText }, stage.why)),
+                React.createElement("div", { style: S.sectionLabel }, "\u0427\u0442\u043E \u043E\u0441\u0432\u043E\u0438\u0442\u044C"),
+                React.createElement("ul", { style: S.skillList }, stage.skills.map((sk, i) => (React.createElement("li", { key: i, style: S.skillItem },
+                    React.createElement("span", { style: Object.assign(Object.assign({}, S.skillDot), { background: accent }) }),
+                    React.createElement("span", null, sk))))),
+                React.createElement("div", { style: S.sectionLabel }, "\u0420\u0435\u0441\u0443\u0440\u0441\u044B"),
+                React.createElement("div", { style: S.resList }, stage.res.map((r, i) => (React.createElement("div", { key: i, style: S.resItem },
+                    r.url
+                        ? React.createElement("a", { href: r.url, target: "_blank", rel: "noopener noreferrer", style: S.resLink },
+                            React.createElement(Icon.link, { style: { verticalAlign: "-1px", marginRight: 5 } }),
+                            r.name)
+                        : React.createElement("span", { style: S.resName }, r.name),
+                    r.note && React.createElement("span", { style: S.resNote },
+                        " \u2014 ",
+                        r.note))))),
+                React.createElement("div", { style: Object.assign(Object.assign({}, S.projectCard), { borderColor: accent + "55" }) },
+                    React.createElement("div", { style: Object.assign(Object.assign({}, S.projectBadge), { color: accent, background: accent + "14" }) },
+                        React.createElement(Icon.rocket, { style: { verticalAlign: "-2px", marginRight: 6 } }),
+                        "\u041F\u0420\u041E\u0415\u041A\u0422 \u042D\u0422\u0410\u041F\u0410"),
+                    React.createElement("div", { style: S.projectTitle }, stage.project.title),
+                    React.createElement("p", { style: S.projectDesc }, stage.project.desc),
+                    React.createElement("div", { style: S.projectMeta },
+                        React.createElement("div", { style: S.projectMetaRow },
+                            React.createElement("span", { style: S.projectMetaLabel }, "\u0421\u0434\u0435\u043B\u0430\u0442\u044C \u0442\u0430\u043A:"),
+                            " ",
+                            stage.project.deliver),
+                        React.createElement("div", { style: S.projectMetaRow },
+                            React.createElement("span", { style: S.projectMetaLabel }, "\u041D\u0430\u0432\u044B\u043A\u0438:"),
+                            " ",
+                            stage.project.skills))),
+                stage.milestone && React.createElement(MilestoneCard, { milestone: stage.milestone, accent: accent }),
+                React.createElement("button", { style: Object.assign(Object.assign({}, S.doneBtn), (done ? S.doneBtnOn : { background: accent })), "aria-pressed": done, onClick: onToggleDone }, done ? "✓ Этап пройден — снять отметку" : "Отметить этап пройденным"))))));
+}
+function App() {
+    const [lastRead, setLastRead] = useState(null);
+    useEffect(() => {
+        function refreshLastRead() {
+            try {
+                const saved = JSON.parse(localStorage.getItem("cpp_course_last_read_v1"));
+                const valid = saved && DATA.stages.some(s => s.station && s.station.file === saved.file)
+                    && typeof saved.section === "string" && /^[a-z0-9-]+$/.test(saved.section)
+                    && typeof saved.title === "string";
+                setLastRead(valid ? saved : null);
+            } catch (_) { setLastRead(null); }
+        }
+        refreshLastRead();
+        window.addEventListener("focus", refreshLastRead);
+        window.addEventListener("storage", refreshLastRead);
+        return () => { window.removeEventListener("focus", refreshLastRead); window.removeEventListener("storage", refreshLastRead); };
+    }, []);
+    const [store, setStore] = useState(() => loadStore());
+    const [expanded, setExpanded] = useState({});
+    useEffect(() => { saveStore(store); }, [store]);
+    const toggleDone = useCallback((id) => {
+        setStore(prev => (Object.assign(Object.assign({}, prev), { [id]: !prev[id] })));
+    }, []);
+    const toggleExpand = useCallback((i) => {
+        setExpanded(prev => (Object.assign(Object.assign({}, prev), { [i]: !prev[i] })));
+    }, []);
+    function resetAll() {
+        if (window.confirm && !window.confirm("Сбросить отметки о пройденных этапах?"))
+            return;
+        setStore({});
+    }
+    function expandAll() { const a = {}; DATA.stages.forEach((_, i) => a[i] = true); setExpanded(a); }
+    function collapseAll() { setExpanded({}); }
+    const doneCount = DATA.stages.filter(s => store[s.id]).length;
+    const pct = Math.round(doneCount / DATA.stages.length * 100);
+    const h = React.createElement;
+    const ready = DATA.stages.filter(stage => stage.station);
+    const plannedCount = DATA.stages.length - ready.length;
+    function stageCountLabel(count) {
+        const last = count % 10, lastTwo = count % 100;
+        return count + " " + (lastTwo >= 11 && lastTwo <= 14 ? "этапов" : last === 1 ? "этап" : last >= 2 && last <= 4 ? "этапа" : "этапов");
+    }
+    function groupStatus(group) {
+        const stations = group.indices.map(i => DATA.stages[i].station).filter(Boolean);
+        if (!stations.length) return "В плане";
+        const labels = stations.map(station => station.label.replace(/^Станция\s+/, ""));
+        if (labels.length > 1 && labels.every((label, i) => /^\d+$/.test(label) && Number(label) === Number(labels[0]) + i)) {
+            return "Станции " + labels[0] + "–" + labels[labels.length - 1];
+        }
+        return (stations.length === 1 ? "Станция " : "Станции ") + labels.join(", ");
+    }
+    const groups = [
+        { id: "foundation", label: "01 / ОСНОВЫ ЯЗЫКА", title: "Научиться понимать C++", description: "От устройства объекта до управления ресурсами, контейнеров и обработки ошибок.", indices: [0, 1, 2, 3, 4] },
+        { id: "engineering", label: "02 / ИНЖЕНЕРНАЯ ПРАКТИКА", title: "От кода — к работающей программе", description: "Сборка, диагностика, потоки и координация нескольких операций.", indices: [5, 6] },
+        { id: "backend", label: "03 / BACKEND", title: "Построить взаимодействие", description: "Сети, протоколы и API: как запрос проходит через систему и получает ответ.", indices: [7, 8] },
+        { id: "databases-group", label: "04 / БАЗЫ ДАННЫХ", title: "От запросов к надёжному хранению", description: "9A — SQL и практика запросов. Затем 9B — PostgreSQL, конкуренция, индексы и работа из C++.", indices: [9, 10] },
+        { id: "planned", label: "05 / ЭКСПЛУАТАЦИЯ", title: "Эксплуатация сервиса", description: "Тесты, контейнеры, CI, безопасный выпуск и наблюдаемость — станция 10.", indices: [11] }
+    ];
+    const previewTitles = {
+        foundation: "Язык и ресурсы", engineering: "Сборка и конкурентность",
+        backend: "Сети и API", "databases-group": "SQL и PostgreSQL", planned: "Эксплуатация сервиса"
+    };
+    return h("div", { className: "course-home-page" },
+        h("a", { className: "home-skip", href: "#curriculum" }, "Перейти к программе"),
+        h("header", { className: "home-topbar" },
+            h("a", { className: "home-brand", href: "cpp_backend_roadmap.html", "aria-label": "C++ Backend — главная" }, h("span", { className: "home-brand-mark" }, "C++"), h("span", null, "BACKEND", h("small", null, "Открытый учебный маршрут"))),
+            h("nav", { "aria-label": "Навигация по главной" }, h("a", { href: "#curriculum" }, "Программа"), h("a", { href: "#library" }, "Материалы"), h("a", { href: "sources.html" }, "Источники"))),
+        h("main", null,
+            h("section", { className: "home-hero", "aria-labelledby": "course-title" },
+                h("div", { className: "home-hero-copy" },
+                    h("p", { className: "home-eyebrow" }, "C++20 · ТЕОРИЯ · РАЗБОРЫ · ПРАКТИКА"),
+                    h("h1", { id: "course-title" }, "Понять C++.", h("br"), h("span", null, "Построить backend.")),
+                    h("p", { className: "home-description" }, "От классов и владения памятью — к многопоточности, сетям, серверным API, SQL и PostgreSQL. С подробной теорией, разборами задач и практикой. Следующий этап — эксплуатация сервиса."),
+                    h("div", { className: "home-actions" },
+                        h("a", { className: "home-primary", href: lastRead ? lastRead.file + "#section=" + encodeURIComponent(lastRead.section) : "cpp_station0_oop_basics.html" }, lastRead ? "Продолжить обучение →" : "Начать с основ →"),
+                        h("a", { className: "home-secondary", href: "#curriculum" }, "Посмотреть программу ↓")),
+                    lastRead ? h("p", { className: "home-resume" }, "Последний раздел: ", h("strong", null, lastRead.title)) : h("p", { className: "home-resume" }, "Для начала достаточно базовых знаний C или C++.")),
+                h("aside", { className: "home-route-preview", "aria-label": "Логика обучения" },
+                    h("div", { className: "home-preview-top" }, h("span", null, "ОДИН МАРШРУТ"), h("span", null, "01 — " + String(groups.length).padStart(2, "0"))),
+                    h("h2", null, "От объекта", h("br"), " до сервиса"),
+                    h("ol", { className: "home-preview-steps" }, groups.map((group, i) => h("li", { key: group.id, className: group.indices.every(index => !DATA.stages[index].station) ? "is-planned" : "" },
+                        h("a", { href: "#" + group.id }, h("span", { className: "home-step-number" }, String(i + 1).padStart(2, "0")), h("span", null, previewTitles[group.id] || group.title, h("small", null, groupStatus(group))))))),
+                    h("p", { className: "home-preview-foot" }, "Каждый следующий этап опирается на предыдущий."))),
+            h("section", { className: "home-course-facts", "aria-label": "Содержание курса" },
+                h("div", null, h("strong", null, ready.length), h("span", null, "готовых станций")),
+                h("div", null, h("strong", null, ready.reduce((sum, stage) => sum + stage.station.totalSections, 0)), h("span", null, "разделов теории")),
+                h("div", null, h("strong", null, "C++20"), h("span", null, "основная версия языка")),
+                h("div", null, h("strong", null, stageCountLabel(plannedCount)), h("span", null, "в плане"))),
+            h("details", { className: "home-prerequisites" }, h("summary", null, "Подойдёт ли мне курс и что нужно для начала?"), h("p", null, DATA.intro)),
+            h("section", { id: "curriculum", className: "home-curriculum", "aria-labelledby": "curriculum-title" },
+                h("div", { className: "home-section-heading" }, h("div", null, h("p", { className: "home-eyebrow" }, "ПРОГРАММА"), h("h2", { id: "curriculum-title" }, "Шаг за шагом, без пробелов.")), h("p", null, "Раскройте станцию, чтобы увидеть темы, материалы и итоговый проект.")),
+                h("div", { className: "home-route-tools" },
+                    h("span", null, "Ваши отметки: ", h("strong", null, doneCount + " / " + DATA.stages.length), " этапов"),
+                    h("div", null, h("button", { onClick: expandAll }, "Раскрыть всё"), h("button", { onClick: collapseAll }, "Свернуть всё"))),
+                groups.map(group => h("section", { id: group.id, className: "home-course-group" + (group.indices.every(index => !DATA.stages[index].station) ? " home-planned" : ""), key: group.id, "aria-labelledby": group.id + "-title" },
+                    h("div", { className: "home-group-intro" }, h("p", { className: "home-eyebrow" }, group.label), h("h3", { id: group.id + "-title" }, group.title), h("p", null, group.description)),
+                    h("div", { className: "home-group-stages" }, group.indices.map(i => h(Stage, { key: DATA.stages[i].id, stage: DATA.stages[i], index: i, done: !!store[DATA.stages[i].id], expanded: !!expanded[i], onToggleDone: () => toggleDone(DATA.stages[i].id), onToggleExpand: () => toggleExpand(i), isLast: i === group.indices[group.indices.length - 1] }))))),
+                h("div", { className: "home-reset-row" }, h("small", null, "Отметки сохраняются в этом браузере. Они не заменяют проверку знаний."), h("button", { onClick: resetAll }, "Сбросить отметки"))),
+            h("section", { id: "library", className: "home-library", "aria-labelledby": "library-title" },
+                h("div", { className: "home-section-heading" }, h("div", null, h("p", { className: "home-eyebrow" }, "ПОД РУКОЙ"), h("h2", { id: "library-title" }, "Вернуться. Вспомнить. Проверить."))),
+                h("div", { className: "home-library-grid" }, DATA.bonusFiles.map((item, i) => h("a", { href: item.file, className: "home-library-card", key: item.file },
+                    h("span", { className: "home-library-number", "aria-hidden": true }, "0" + (i + 1) + " ↗"), h("h3", null, item.label), h("p", null, item.desc), h("span", { className: "home-library-open" }, "Открыть материал →"))))),
+            h("details", { className: "home-prerequisites home-outcome" }, h("summary", null, "Как оценивать результат обучения"), h("p", null, DATA.closing))),
+        h("footer", { className: "home-footer" }, h("span", null, "C++ / BACKEND"), h("span", null, "Учебник для вдумчивой практики"), h("a", { href: "sources.html" }, "Источники и границы материала")));
+
+}
+const S = {
+    page: { maxWidth: 720, margin: "0 auto", padding: "24px 16px 56px" },
+    hero: { textAlign: "center", padding: "8px 4px 26px" },
+    logo: { display: "inline-block", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, fontWeight: 700, letterSpacing: "0.3em", color: C.blue, background: "#E2EDF8", padding: "7px 14px 7px 18px", borderRadius: 999, marginBottom: 14 },
+    h1: { fontSize: 30, fontWeight: 800, margin: "0 0 10px", letterSpacing: "-0.02em", lineHeight: 1.15 },
+    subtitle: { fontSize: 15, lineHeight: 1.55, color: "#54657A", margin: "0 auto 16px", maxWidth: 540 },
+    introBox: { fontSize: 14, lineHeight: 1.65, color: "#3A4856", textAlign: "left", background: "#fff", border: "1px solid " + C.line, borderRadius: 14, padding: "16px 18px", maxWidth: 600, margin: "0 auto 18px", boxShadow: "0 10px 30px -22px rgba(20,50,90,0.4)" },
+    overallCard: { background: "#fff", border: "1px solid " + C.line, borderRadius: 14, padding: "14px 16px", maxWidth: 440, margin: "0 auto 14px", boxShadow: "0 10px 30px -22px rgba(20,50,90,0.4)" },
+    overallTop: { display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 9 },
+    overallLabel: { fontSize: 13, fontWeight: 700, color: "#54657A" },
+    overallVal: { fontSize: 15, fontWeight: 800, color: C.blueDeep, fontVariantNumeric: "tabular-nums" },
+    overallBar: { height: 7, background: C.line, borderRadius: 999, overflow: "hidden" },
+    overallBarFill: { height: "100%", background: "linear-gradient(90deg,#4A8BCE,#2D6FB3)", borderRadius: 999, transition: "width 0.5s ease" },
+    bonusRow: { display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginBottom: 14 },
+    bonusBtn: { background: "#fff", border: "1px solid " + C.line, color: C.blueDeep, fontSize: 13, fontWeight: 700, padding: "9px 16px", borderRadius: 10, cursor: "pointer", display: "flex", alignItems: "center" },
+    controls: { display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" },
+    ctrlBtn: { background: "transparent", border: "1px solid " + C.line, color: C.mute, fontSize: 12.5, fontWeight: 600, padding: "8px 14px", borderRadius: 999, cursor: "pointer" },
+    stages: { marginTop: 8 },
+    stageRow: { display: "flex", gap: 14, alignItems: "stretch" },
+    rail: { display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, width: 36 },
+    node: { width: 36, height: 36, borderRadius: "50%", border: "2.5px solid", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, fontWeight: 800, transition: "all 0.2s ease", zIndex: 1 },
+    nodeNum: { fontSize: 14, fontFamily: "'JetBrains Mono', monospace" },
+    railLine: { width: 3, flex: 1, marginTop: 2, marginBottom: 2, borderRadius: 2, transition: "background 0.3s ease" },
+    stageCard: { flex: 1, background: "#fff", border: "1px solid " + C.line, borderRadius: 16, marginBottom: 16, boxShadow: "0 12px 32px -24px rgba(20,50,90,0.5)", overflow: "hidden" },
+    stageCardDone: { background: "linear-gradient(180deg,#F5FAF7,#fff)", borderColor: "#CBE6D6" },
+    stageHead: { width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, background: "transparent", border: "none", cursor: "pointer", padding: "15px 16px 9px", textAlign: "left" },
+    stageHeadLeft: { minWidth: 0 },
+    stageHeadTop: { display: "flex", alignItems: "center", gap: 7, marginBottom: 7, flexWrap: "wrap" },
+    phaseTag: { display: "inline-block", fontSize: 10.5, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", padding: "3px 9px", borderRadius: 999 },
+    stationTag: { display: "inline-block", fontSize: 10.5, fontWeight: 800, letterSpacing: "0.04em", padding: "3px 9px", borderRadius: 999, border: "1.5px solid", background: "transparent" },
+    stageTitle: { fontSize: 17.5, fontWeight: 800, margin: 0, lineHeight: 1.25, letterSpacing: "-0.01em" },
+    chevronWrap: { color: C.muteSoft, flexShrink: 0, transition: "transform 0.2s ease", display: "flex" },
+    stageGoal: { fontSize: 14, lineHeight: 1.55, color: "#54657A", margin: "0 16px 12px" },
+    // станция в карточке
+    stationBox: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, border: "1.5px solid", borderRadius: 13, padding: "13px 14px", marginBottom: 16, background: C.paper, flexWrap: "wrap" },
+    stationBoxLeft: { flex: 1, minWidth: 0 },
+    stationNoProgress: { fontSize: 12.5, color: C.mute, fontStyle: "italic", paddingTop: 2 },
+    stationInDev: { fontSize: 12.5, color: C.muteSoft, background: "#EEF2F6", padding: "9px 14px", borderRadius: 9, fontWeight: 600 },
+    openBtn: { display: "flex", alignItems: "center", color: "#fff", border: "none", borderRadius: 10, padding: "10px 16px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" },
+    // прогресс станции
+    stationProgress: { border: "1px solid", borderRadius: 10, padding: "10px 12px" },
+    stationProgressRow: { display: "flex", gap: 12, flexWrap: "wrap" },
+    stationProgressCell: { display: "flex", alignItems: "center", gap: 8, minWidth: 0 },
+    stationProgressLabel: { fontSize: 11.5, fontWeight: 700, color: C.mute, flexShrink: 0 },
+    stationProgressBar: { width: 80, height: 5, background: C.line, borderRadius: 999, overflow: "hidden", flexShrink: 0 },
+    stationProgressFill: { height: "100%", borderRadius: 999, transition: "width 0.4s ease" },
+    stationProgressVal: { fontSize: 12.5, fontWeight: 800, flexShrink: 0 },
+    stageBody: { padding: "0 16px 16px" },
+    whyBox: { background: C.paper, border: "1px solid " + C.line, borderRadius: 11, padding: "12px 14px", marginBottom: 16 },
+    whyLabel: { display: "block", fontSize: 11, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: C.blueDeep, marginBottom: 5 },
+    whyText: { fontSize: 13.5, lineHeight: 1.6, color: "#3A4856", margin: 0 },
+    sectionLabel: { fontSize: 11.5, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: C.mute, margin: "4px 0 9px" },
+    skillList: { listStyle: "none", padding: 0, margin: "0 0 16px", display: "flex", flexDirection: "column", gap: 8 },
+    skillItem: { display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13.5, lineHeight: 1.5, color: "#2B3947" },
+    skillDot: { width: 7, height: 7, borderRadius: "50%", flexShrink: 0, marginTop: 6 },
+    resList: { display: "flex", flexDirection: "column", gap: 7, marginBottom: 16 },
+    resItem: { fontSize: 13, lineHeight: 1.45 },
+    resLink: { fontWeight: 700, textDecoration: "none", borderBottom: "1px solid " + C.line },
+    resName: { fontWeight: 700, color: "#3A4856" },
+    resNote: { color: C.mute },
+    projectCard: { border: "1.5px solid", borderRadius: 13, padding: "14px 15px", marginBottom: 14, background: "#FCFDFE" },
+    projectBadge: { display: "inline-block", fontSize: 10.5, fontWeight: 800, letterSpacing: "0.06em", padding: "4px 10px", borderRadius: 999, marginBottom: 9 },
+    projectTitle: { fontSize: 16, fontWeight: 800, marginBottom: 7, color: C.ink },
+    projectDesc: { fontSize: 13.5, lineHeight: 1.6, color: "#2B3947", margin: "0 0 11px" },
+    projectMeta: { display: "flex", flexDirection: "column", gap: 7 },
+    projectMetaRow: { fontSize: 12.5, lineHeight: 1.55, color: "#54657A" },
+    projectMetaLabel: { fontWeight: 700, color: C.blueDeep },
+    milestoneCard: { border: "1.5px solid", borderRadius: 13, padding: "14px 15px", marginBottom: 14, background: "#FCFDFE" },
+    milestoneBadge: { display: "inline-block", fontSize: 10.5, fontWeight: 800, letterSpacing: "0.06em", padding: "4px 10px", borderRadius: 999, marginBottom: 9 },
+    milestoneTitle: { fontSize: 16, fontWeight: 800, marginBottom: 7, color: C.ink },
+    milestoneDesc: { fontSize: 13.5, lineHeight: 1.6, color: "#2B3947", margin: "0 0 11px" },
+    milestoneRun: { display: "flex", flexDirection: "column", gap: 6, background: C.paper, border: "1px solid " + C.line, borderRadius: 10, padding: "10px 12px", marginBottom: 12 },
+    milestoneRunLabel: { fontSize: 11.5, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: C.blueDeep },
+    milestoneRunCode: { fontFamily: "'JetBrains Mono', monospace", fontSize: 12.5, color: C.ink, background: "transparent", wordBreak: "break-word" },
+    milestoneList: { listStyle: "none", padding: 0, margin: "0 0 14px", display: "flex", flexDirection: "column", gap: 8 },
+    milestoneListItem: { display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13, lineHeight: 1.5, color: "#2B3947" },
+    milestoneOpenBtn: { display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", border: "none", borderRadius: 10, padding: "10px 16px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", width: "100%" },
+    milestoneBlock: { marginTop: 13 },
+    milestoneBlockTitle: { fontSize: 13, fontWeight: 800, color: C.blueDeep, marginBottom: 5 },
+    milestoneBlockWhy: { fontSize: 12.8, lineHeight: 1.55, color: "#54657A", margin: "0 0 7px" },
+    milestoneCode: { background: C.ink, color: "#E8EEF4", padding: "12px 14px", borderRadius: 10, fontSize: 12, lineHeight: 1.58, overflowX: "auto", margin: 0, whiteSpace: "pre" },
+    doneBtn: { width: "100%", color: "#fff", border: "none", borderRadius: 11, padding: "12px", fontSize: 14, fontWeight: 700, cursor: "pointer" },
+    doneBtnOn: { background: C.green },
+    closing: { marginTop: 14, background: "linear-gradient(135deg,#1B4E85,#2D6FB3)", borderRadius: 18, padding: "22px 20px", color: "#fff", boxShadow: "0 18px 44px -24px rgba(20,50,90,0.7)" },
+    closingLabel: { fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", color: "#AFD0EE", marginBottom: 9 },
+    closingText: { fontSize: 14.5, lineHeight: 1.65, margin: 0 },
+    foot: { marginTop: 18, textAlign: "center", fontSize: 12, color: C.muteSoft, lineHeight: 1.55 },
+};
+// Restrained editorial theme; retain data, handlers and progress keys.
+Object.assign(S, {
+    page: { maxWidth: 920, margin: "0 auto", padding: "48px 20px 64px" },
+    hero: { textAlign: "left", padding: "0 0 32px" },
+    logo: { fontSize: 11, letterSpacing: ".16em", fontWeight: 600, color: "#606d77", marginBottom: 18 },
+    h1: { fontSize: "clamp(30px, 5vw, 44px)", lineHeight: 1.15, letterSpacing: "-.035em", fontWeight: 700, margin: "0 0 18px" },
+    subtitle: { fontSize: 17, lineHeight: 1.7, color: "#606d77", maxWidth: 650, margin: "0 0 12px" },
+    introBox: { fontSize: 16, lineHeight: 1.8, color: "#414c56", maxWidth: 740, margin: "0 0 28px" },
+    overallCard: { padding: "18px 0", borderTop: "1px solid #dfe2e2", borderBottom: "1px solid #dfe2e2", margin: "0 0 20px", maxWidth: 740 },
+    overallBarFill: { height: "100%", background: "#386789", borderRadius: 3 },
+    stageCard: { flex: 1, minWidth: 0, background: "transparent", borderBottom: "1px solid #dfe2e2", marginBottom: 12, paddingBottom: 12 },
+    stageCardDone: { background: "#f0f4f1" },
+    stageTitle: { fontSize: 21, fontWeight: 600, margin: 0, lineHeight: 1.4, letterSpacing: "-.015em" },
+    stageGoal: { fontSize: 15, lineHeight: 1.75, color: "#606d77", margin: 0, padding: "0 16px 16px" },
+    whyBox: { borderLeft: "2px solid #a1b6c3", padding: "4px 18px", marginBottom: 24 },
+    whyText: { fontSize: 16, lineHeight: 1.8, margin: "8px 0" },
+    closing: { borderTop: "1px solid #dfe2e2", padding: "28px 0", marginTop: 32 },
+    closingText: { fontSize: 16, lineHeight: 1.8, margin: 0 }
+});
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App, null));
+
+</script>
+</body>
+</html>

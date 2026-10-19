@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(station10_gate LANGUAGES CXX)
+add_executable(gate_check main.cpp)
+target_compile_features(gate_check PRIVATE cxx_std_20)
+set_target_properties(gate_check PROPERTIES CXX_EXTENSIONS OFF)
+enable_testing()
+add_test(NAME gate_contract COMMAND gate_check)
+set_tests_properties(gate_contract PROPERTIES TIMEOUT 5)

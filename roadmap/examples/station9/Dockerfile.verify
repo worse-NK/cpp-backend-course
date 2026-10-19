@@ -1,0 +1,12 @@
+FROM postgres:18
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+    && apt-get update && apt-get install -y --no-install-recommends \
+    g++ cmake pkg-config libpq-dev ca-certificates curl make \
+    && rm -rf /var/lib/apt/lists/*
+RUN curl --fail --location https://github.com/jtv/libpqxx/archive/refs/tags/7.10.1.tar.gz \
+    | tar xz -C /tmp \
+    && cmake -S /tmp/libpqxx-7.10.1 -B /tmp/pqxx-build -DSKIP_BUILD_TEST=ON \
+    && cmake --build /tmp/pqxx-build -j2 \
+    && cmake --install /tmp/pqxx-build
+COPY main.cpp parking.cpp CMakeLists.txt /course/
+RUN cmake -S /course -B /course/build && cmake --build /course/build -j2

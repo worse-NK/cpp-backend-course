@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Пошаговая лаборатория C++: создание объекта, порядок полей, наследование, исключения и new/delete.">
+  <title>Жизнь объекта · Визуальная лаборатория C++</title>
+  <style>
+    :root{color-scheme:light;--paper:#f7f8f6;--card:#fff;--ink:#23322f;--muted:#78837d;--line:#dfe5df;--teal:#246755;--teal-soft:#eaf2ec;--amber:#a16b25;--amber-soft:#faf1df;--red:#ae574d;--red-soft:#faeeea;--code:#202c2a;--mono:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",monospace;--sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6}button,a,input,select{-webkit-tap-highlight-color:transparent}button,select{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.38}a{color:var(--teal);text-underline-offset:3px}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #70a88d;outline-offset:4px}button{color:inherit}svg{display:block}code,kbd{font-family:var(--mono)}.shell{max-width:1400px;margin:auto;padding:0 46px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:82px;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}.brand-icon{display:grid;place-items:center;width:38px;height:38px;border:1px solid #cbd9cf;border-radius:11px;font:600 13px var(--mono);color:var(--teal)}.brand-name{font-weight:650;font-size:13px;letter-spacing:.02em}.brand-sub{display:block;font-size:11px;color:var(--muted);font-weight:400;letter-spacing:0}.top-link{font-size:12px;text-decoration:none;color:#61746a;display:flex;align-items:center;gap:9px}.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:35px;padding:37px 0 27px}.eyebrow{font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:var(--teal);display:flex;align-items:center;gap:9px}.eyebrow::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--teal)}h1{font-size:42px;line-height:1.15;letter-spacing:-.045em;font-weight:600;margin:12px 0}.hero p{max-width:650px;color:#6c7971;font-size:14px;margin:0;line-height:1.8}.hero-aside{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:7px;color:var(--muted);font-size:11px;padding-bottom:3px}.version{font:11px var(--mono);border:1px solid var(--line);border-radius:5px;padding:5px 9px;background:white;color:#5c6e63}.scenarios{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:16px}.scenario{position:relative;display:flex;align-items:flex-start;gap:12px;min-height:73px;padding:15px 17px;text-align:left;border:1px solid var(--line);border-radius:10px;background:#fff;transition:background .18s,border-color .18s}.scenario:hover{border-color:#9caf9f}.scenario[aria-pressed="true"]{background:var(--teal-soft);border-color:#a9c6b0;box-shadow:inset 0 0 0 1px #a9c6b033}.scenario-number{font:11px var(--mono);color:#a0aaa3;padding-top:4px}.scenario[aria-pressed="true"] .scenario-number{color:var(--teal)}.scenario strong{display:block;font-weight:600;font-size:13px}.scenario small{display:block;font-size:11px;color:var(--muted);margin-top:2px}.scenario[aria-pressed="true"]::after{content:"";position:absolute;right:12px;top:13px;width:5px;height:5px;border-radius:50%;background:var(--teal)}.experiment{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:59px;border:1px solid var(--line);border-radius:9px;background:#f0f3ee;padding:12px 17px;margin-bottom:20px}.experiment-copy{font-size:12px;color:#68766c}.experiment-copy strong{font-weight:600;color:#3c5547}.experiment-control{display:flex;align-items:center;gap:12px;flex-shrink:0}.toggle-label{display:flex;gap:9px;align-items:center;font-size:12px;cursor:pointer}.toggle-label input{accent-color:var(--teal);width:15px;height:15px}.select-label{font-size:11px;color:#6d7b70}.select-label select{margin-left:8px;border:1px solid #cdd9cf;border-radius:6px;background:#fff;padding:6px 25px 6px 9px;color:#345840;font-size:12px;max-width:230px}.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:17px;align-items:start}.column{display:grid;gap:17px;min-width:0}.panel{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 19px;border-bottom:1px solid var(--line);min-height:51px}.panel-title{display:flex;gap:9px;align-items:center}.panel-title svg{color:#819084;width:15px;height:15px}.panel-head h2{font-size:12px;font-weight:600;margin:0}.micro-label{font:10px var(--mono);color:#8e9b92}.code-panel{background:var(--code);border-color:var(--code)}.code-panel .panel-head{background:#263330;border-color:#39453f;color:#e5eee6}.code-panel .panel-title svg{color:#94ae9b}.code-panel .micro-label{color:#a2b5a5}.code-body{max-height:375px;min-height:346px;overflow:auto;padding:14px 0;scrollbar-width:thin;scrollbar-color:#53675a transparent}.code-line{display:flex;align-items:baseline;min-height:23px;border-left:2px solid transparent;font:11.5px/23px var(--mono);white-space:pre;color:#dce6dd;padding-right:16px;position:relative}.line-no{display:inline-block;flex-shrink:0;width:43px;text-align:right;padding-right:15px;color:#6b8073;font-size:10px;user-select:none}.code-line.current{background:#3b5246;border-left-color:#b2d6b9}.code-line.current .line-no{color:#c8dfcd}.code-line.related{background:#2b3e33}.tok-key{color:#b3cbb9}.tok-type{color:#e1cda0}.tok-str{color:#b9d195}.tok-comment{color:#839788}.code-foot{border-top:1px solid #3a483e;color:#98ae9d;padding:11px 18px;display:flex;justify-content:space-between;gap:14px;font-size:10px}.text-btn{border:0;background:transparent;font-size:11px;padding:0;line-height:1.6;color:var(--teal);text-decoration:none}.code-foot .text-btn{color:#c5ddc3}.code-foot span{max-width:290px}.output-panel .panel-head{min-height:45px;padding-top:11px;padding-bottom:11px}.output-lines{height:133px;overflow:auto;padding:10px 16px;font:11.5px/24px var(--mono);scrollbar-width:thin}.output-empty{font-family:var(--sans);color:#9aa49b;font-size:11px;padding:6px 3px}.output-line{display:flex;align-items:center;gap:13px;color:#425a48}.output-line button{border:0;background:transparent;padding:0;color:inherit;font:inherit;text-align:left;display:flex;align-items:center;gap:13px;width:100%;border-radius:4px}.output-line button:hover{background:#f0f5ef}.output-no{color:#a4b0a5;font-size:10px;width:14px;text-align:right}.output-line.new{color:var(--teal);font-weight:600}.output-line.new .output-no{color:#79a085}.output-line.new .new-tag{color:#76987c;background:#edf4ea;border-radius:3px;padding:0 5px;line-height:18px;font:9px/18px var(--sans);margin-left:auto}.scene-panel .panel-head{padding:14px 19px}.scene-heading{display:flex;align-items:center;gap:8px}.phase{font-size:10px;border-radius:5px;padding:3px 8px;background:#f2f4f0;color:#7e8b80;white-space:nowrap}.phase.construct{background:var(--teal-soft);color:var(--teal)}.phase.destroy{background:var(--amber-soft);color:var(--amber)}.phase.error{background:var(--red-soft);color:var(--red)}.scene{position:relative;min-height:321px;padding:21px 25px 17px;background:radial-gradient(#d3dcd04d .7px,transparent .7px) 0 0/16px 16px;background-color:#fcfdfa}.scope-line{display:flex;align-items:center;justify-content:space-between;gap:14px;font:10px var(--mono);color:#84917f;margin:0 2px 14px}.scope-line span:last-child{font-family:var(--sans);font-size:10px;color:#8c9989}.object-shell{position:relative;border:1px solid #d0ddcf;border-radius:11px;background:#f5f8f1;padding:17px;transition:border-color .2s,background .2s}.object-shell[data-state="waiting"]{border-style:dashed;background:#f8faf5}.object-shell[data-state="constructing"]{border-color:#91b497;background:#f0f6ec}.object-shell[data-state="ready"]{border-color:#82aa8a;background:#eff6eb}.object-shell[data-state="destroying"]{border-color:#d5b98a;background:#fcf6e9}.object-shell[data-state="failed"]{border-color:#d6aaa0;background:#fcf2eb}.object-shell[data-state="dead"]{border-style:dashed;background:#f3f5f0;border-color:#ccd5c9}.object-heading{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:17px}.object-name{font:500 15px var(--mono);color:#354e36}.object-sub{font-size:10px;color:#8b9784;margin-top:4px}.object-status{display:flex;align-items:center;gap:6px;font-size:11px;color:#64715d}.status-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}.object-shell[data-state="ready"] .object-status,.object-shell[data-state="constructing"] .object-status{color:#527f50}.object-shell[data-state="destroying"] .object-status{color:var(--amber)}.object-shell[data-state="failed"] .object-status{color:var(--red)}.object-parts{display:grid;grid-template-columns:1fr 1fr;gap:10px}.part{padding:13px 14px;min-height:79px;border:1px dashed #d7dfd1;border-radius:7px;background:#fafcf8;color:#9ba696;position:relative;transition:background .18s,border-color .18s}.part-role{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:9px;letter-spacing:.045em;text-transform:uppercase}.part-name{font:12px var(--mono);margin-bottom:6px}.part-status{font-size:11px;display:flex;align-items:center;gap:5px}.part-index{font:9px var(--mono);opacity:.7}.part[data-state="constructing"]{border:1px solid #91b898;color:#386741;background:#e7f1e3;box-shadow:0 0 0 3px #dbead680}.part[data-state="ready"]{border:1px solid #b8ceb0;color:#4a6b44;background:#f5faef}.part[data-state="destroying"]{border:1px solid #d5b578;color:#966828;background:#fcf0d6;box-shadow:0 0 0 3px #f7edd780}.part[data-state="failed"]{border:1px solid #d7b0a2;color:#a55e4e;background:#fbede7}.part[data-state="dead"]{color:#8d9888;border-color:#d1d9ca;background:#f0f3eb}.part[data-state="dead"] .part-name{text-decoration:line-through;text-decoration-color:#9eab97}.part.base-part{grid-column:1/-1;min-height:auto;display:grid;grid-template-columns:1fr auto;align-items:center;padding:10px 14px}.base-part .part-role{margin:0 0 4px}.base-part .part-name{margin:0}.base-part .part-status{grid-column:2;grid-row:1/3}.node-activity{position:absolute;right:11px;bottom:12px;font-size:13px}.scene-caption{margin:13px 2px 0;color:#72806a;font-size:11px;line-height:1.7;min-height:17px}.storage-row{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-top:12px;border:1px solid #dce3d7;border-radius:6px;background:#fffdf8;padding:9px 11px;font-size:10px}.storage-row code{font-size:11px;color:#6c7963}.storage-status{display:flex;align-items:center;gap:6px;color:#79896f}.storage-row[data-storage="allocated"] .storage-status{color:var(--teal)}.storage-row[data-storage="released"] .storage-status{color:var(--muted)}.scene-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px 18px;border-top:1px solid var(--line);font-size:11px;color:#657660;background:#fff}.legend{display:flex;gap:13px;flex-wrap:wrap}.legend span{display:flex;align-items:center;gap:5px;white-space:nowrap}.legend i{width:6px;height:6px;border-radius:2px;display:inline-block}.legend i.waiting{border:1px solid #bfcbb9}.legend i.ready{background:#83aa7c}.legend i.destroying{background:#d8b779}.legend i.failed{background:#c58673}.insight{padding:20px 23px;min-height:192px;background:#fff;position:relative;overflow:hidden}.insight-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.step-eyebrow{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:700}.step-fraction{font:10px var(--mono);color:#9aa699}.insight h3{font-size:18px;letter-spacing:-.025em;font-weight:600;line-height:1.35;margin:0 0 9px;max-width:520px}.insight p{font-size:13px;line-height:1.85;color:#5f715b;margin:0;max-width:570px}.insight code{font-size:11px;color:#3c6048;background:#f0f5ed;border-radius:3px;padding:1px 3px}.rule{display:flex;gap:8px;align-items:flex-start;border-top:1px solid #e9eee4;padding-top:10px;margin-top:13px;font-size:11px;line-height:1.7;color:#6e8066}.rule svg{flex-shrink:0;margin-top:2px;width:12px;height:12px}.insight[data-tone="error"] .step-eyebrow{color:var(--red)}.insight[data-tone="error"] code{background:var(--red-soft);color:var(--red)}.controls{margin-top:21px;border:1px solid var(--line);border-radius:11px;background:white;padding:15px 19px;display:grid;grid-template-columns:auto minmax(160px,1fr) auto;gap:25px;align-items:center}.transport{display:flex;align-items:center;gap:7px}.icon-btn{display:grid;place-items:center;width:33px;height:33px;background:#fff;border:1px solid #dde4d8;border-radius:7px;color:#73856b}.icon-btn svg{width:14px;height:14px}.play{color:var(--teal);background:#f0f5ec;border-color:#d2dfcb}.next{display:flex;align-items:center;gap:12px;padding:9px 15px;color:#fff;background:var(--teal);border:1px solid var(--teal);border-radius:7px;font-size:11px;white-space:nowrap}.next svg{width:13px;height:13px}.next:disabled{opacity:.5}.scrubber-meta{display:flex;align-items:center;justify-content:space-between;font-size:9px;color:#8b9887;margin-bottom:6px}.scrubber-meta strong{color:#6f8366;font-weight:500}.scrubber input{display:block;width:100%;height:4px;accent-color:var(--teal);cursor:pointer;margin:10px 0}.control-help{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:9px 3px 0;font-size:10px;color:#718069}.control-help kbd{font-size:9px;border:1px solid #dce3d7;background:white;border-radius:3px;padding:1px 4px}.timeline-toggle{color:#7a8c70;font-size:10px;text-decoration:underline;text-underline-offset:3px;border:0;background:transparent;padding:0}.timeline{margin:13px 0 0;padding:9px;border:1px solid var(--line);border-radius:9px;background:white;max-height:260px;overflow:auto}.timeline[hidden]{display:none}.timeline button{display:grid;grid-template-columns:24px 1fr auto;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:5px;padding:8px 10px;font-size:11px;color:#84917a}.timeline button:hover{background:#f5f7f2}.timeline button[aria-current="step"]{background:var(--teal-soft);color:var(--teal)}.timeline button span:first-child{font-family:var(--mono);font-size:10px}.timeline button small{font-size:9px}.bottom-notes{display:grid;grid-template-columns:1.3fr 1fr;gap:60px;padding:29px 3px 34px;color:#899581;font-size:10px;line-height:1.9}.bottom-notes strong{color:#64775d;font-size:10px;font-weight:600}.bottom-notes p{margin:4px 0 0}.bottom-notes a{color:#718769}.sources{display:flex;flex-wrap:wrap;gap:4px 13px;margin-top:5px}.footer{padding:16px 0 25px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#9aa692;gap:15px}.footer a{text-decoration:none;color:#819375}.dialog{border:1px solid #d6e0d1;border-radius:14px;padding:0;width:min(800px,calc(100vw - 32px));max-height:87vh;color:var(--ink);background:var(--paper);box-shadow:0 30px 100px #203b3040}.dialog::backdrop{background:#172f2799;backdrop-filter:blur(3px)}.dialog .panel-head{background:#fff;padding:15px 20px}.dialog .panel-head h2{font-size:14px}.dialog-toolbar{display:flex;gap:17px;align-items:center}.full-source{margin:0;overflow:auto;max-height:60vh;padding:20px 24px;background:var(--code);color:#dce6dd;font:12px/1.8 var(--mono);tab-size:4}.dialog-note{font-size:11px;color:#74836b;padding:12px 20px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.noscript{padding:25px;background:var(--amber-soft)}
+    [hidden]{display:none!important}.scenarios:has(.scenario[hidden]){grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))}.top-links{display:flex;gap:20px;align-items:center;flex-wrap:wrap}.code-context{padding:10px 18px;border-bottom:1px solid #39483e;color:#bed3bd;font-size:11px;line-height:1.7;min-height:56px}.code-context code{color:#e0d3a8;font-size:11px}.output-owner{margin-left:auto;color:#6c8069;font:9px var(--sans)}.output-line.new .new-tag{margin-left:0}
+    @media(min-width:1600px){.shell{max-width:1480px}.hero{padding-top:45px}.code-body{max-height:418px;min-height:390px}.scene{min-height:365px}.insight{min-height:192px}.output-lines{height:133px}}
+    @media(max-width:1050px){.shell{padding:0 25px}.hero-aside{display:none}.scenario{padding:13px 12px;gap:9px}.scenario small{font-size:10px}.scenario strong{font-size:12px}.workspace{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}.scene{padding:20px 17px;min-height:321px}.object-shell{padding:14px}.object-parts{gap:7px}.part{padding:11px;min-height:80px}.object-heading{gap:7px}.object-status{font-size:9px}.scene-footer{padding:11px 13px}.legend{gap:9px}.controls{gap:15px}.insight{padding:18px}.insight h3{font-size:17px}.experiment-copy{font-size:11px;max-width:50%}.bottom-notes{gap:30px}}
+    @media(max-width:740px){.shell{padding:0 18px}.topbar{min-height:69px}.hero{padding:26px 0 22px}.hero h1{font-size:35px}.hero p{font-size:13px;max-width:500px}.scenarios{grid-template-columns:1fr 1fr;gap:8px}.scenario{min-height:69px}.experiment{flex-direction:column;align-items:flex-start;gap:10px;padding:12px 14px;margin-bottom:15px}.experiment-copy{max-width:none;font-size:11px}.experiment-control{width:100%;justify-content:flex-start}.workspace{grid-template-columns:1fr;gap:14px}.column{gap:14px}.code-body{min-height:0;max-height:255px}.code-foot{font-size:9px}.output-lines{height:95px}.scene{min-height:290px;padding:19px}.insight{min-height:190px;padding:20px}.controls{position:sticky;bottom:10px;z-index:5;box-shadow:0 6px 30px #29423417;padding:12px;gap:13px;grid-template-columns:auto 1fr}.scrubber{grid-row:1;grid-column:1/-1}.transport{grid-column:1}.next{grid-column:2;justify-self:end}.control-help{font-size:9px}.control-help>span{display:none}.bottom-notes{grid-template-columns:1fr;gap:16px;padding-top:24px}.footer{font-size:9px}.object-name{font-size:15px}.top-link{font-size:10px}.code-line{font-size:11px}.panel-head{padding:12px 16px}.hero .eyebrow{font-size:9px}.dialog-toolbar{gap:10px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <a href="cpp_backend_roadmap.html" class="brand"><span class="brand-icon">C++</span><span class="brand-name">BACKEND<span class="brand-sub">Визуальная лаборатория</span></span></a>
+    <nav class="top-links"><a class="top-link" id="returnToTheory" href="cpp_backend_roadmap.html"><span aria-hidden="true">←</span> К программе курса</a><a class="top-link" href="visual_labs.html">Все лаборатории</a></nav>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="pageTitle">
+      <div><div class="eyebrow">Объектная модель · интерактивный разбор</div><h1 id="pageTitle">Жизнь объекта</h1><p>Проследи, как создаются поля, когда начинается тело конструктора<br class="desktop-break"> и что уничтожается при выходе из блока или исключении.</p></div>
+      <div class="hero-aside"><span class="version">C++20</span><span>Один шаг — одно объяснение</span></div>
+    </section>
+    <nav class="scenarios" aria-label="Выбрать сценарий">
+      <button class="scenario" data-scenario="members" aria-pressed="true"><span class="scenario-number">01</span><span><strong>Два поля</strong><small>Порядок создания и разрушения</small></span></button>
+      <button class="scenario" data-scenario="inheritance" aria-pressed="false"><span class="scenario-number">02</span><span><strong>Добавим базу</strong><small>Из чего состоит полный объект</small></span></button>
+      <button class="scenario" data-scenario="exception" aria-pressed="false"><span class="scenario-number">03</span><span><strong>Конструктор бросает</strong><small>Кто выполнит очистку</small></span></button>
+      <button class="scenario" data-scenario="dynamic" aria-pressed="false"><span class="scenario-number">04</span><span><strong>А если через new?</strong><small>Объект, указатель и память</small></span></button>
+    </nav>
+    <div class="experiment"><div class="experiment-copy" id="experimentCopy"></div><div class="experiment-control" id="experimentControl"></div></div>
+    <noscript><p class="noscript">Для управления разбором включи JavaScript. Эта страница работает локально и не требует подключения к сети.</p></noscript>
+    <div class="workspace">
+      <div class="column">
+        <section class="panel code-panel" aria-labelledby="codeTitle">
+          <div class="panel-head"><div class="panel-title"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m6 5-5 5 5 5m8-10 5 5-5 5M12 3 8 17" stroke="currentColor" stroke-width="1.3"/></svg><h2 id="codeTitle">Код сценария</h2></div><span class="micro-label">main.cpp</span></div>
+          <div class="code-context" id="codeContext">Определение Probe показано в этом же коде. При печати подсветится конкретный std::cout.</div>
+          <div class="code-body" id="codeBody" tabindex="0" aria-label="C++ код, текущая строка подсвечена"><div id="codeLines"></div></div>
+          <div class="code-foot"><span><code>first()</code> и <code>second()</code> — строки вывода, собранные из <code>name</code> и <code>"()"</code>.</span><button class="text-btn" id="openSource">Полная программа ↗</button></div>
+        </section>
+        <section class="panel output-panel" aria-labelledby="outputTitle">
+          <div class="panel-head"><div class="panel-title"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 5 5 5-5 5m7 0h5" stroke="currentColor" stroke-width="1.4"/></svg><h2 id="outputTitle">Вывод программы</h2></div><span class="micro-label" id="outputCount">0 строк</span></div>
+          <div class="output-lines" id="outputLines"></div>
+        </section>
+      </div>
+      <div class="column">
+        <section class="panel scene-panel" aria-labelledby="sceneTitle">
+          <div class="panel-head"><div class="panel-title"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.3"/><path d="M3 8h14m-7 0v9" stroke="currentColor" stroke-width="1.1"/></svg><h2 id="sceneTitle">Состав объекта</h2></div><span class="phase" id="phase"></span></div>
+          <div class="scene">
+            <div class="scope-line"><span id="scopeLabel">main()</span><span id="storageLabel">автоматическая длительность хранения</span></div>
+            <div class="object-shell" id="objectShell" data-state="waiting">
+              <div class="object-heading"><div><div class="object-name" id="objectName">s : Session</div><div class="object-sub" id="objectSub">Полный объект</div></div><div class="object-status"><span class="status-dot"></span><span id="rootStatus">Ожидает создания</span></div></div>
+              <div class="object-parts" id="objectParts"></div>
+            </div>
+            <div id="dynamicStorage"></div>
+            <p class="scene-caption" id="sceneCaption">Схема подобъектов, а не расположение байтов в памяти.</p>
+          </div>
+          <div class="scene-footer"><div class="legend"><span><i class="waiting"></i>Не создан</span><span><i class="ready"></i>Создан</span><span><i class="destroying"></i>Разрушение</span><span><i class="failed"></i>Отказ</span></div><span id="partCount">0 / 2 готовы</span></div>
+        </section>
+        <section class="panel insight" id="insight" aria-labelledby="stepTitle">
+          <div class="insight-top"><span class="step-eyebrow" id="stepEyebrow">Начало</span><span class="step-fraction" id="stepFraction"></span></div>
+          <h3 id="stepTitle"></h3><p id="stepText"></p><div class="rule"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6" stroke="currentColor"/><path d="M8 7v4m0-7v1" stroke="currentColor" stroke-width="1.2"/></svg><span id="stepRule"></span></div>
+        </section>
+      </div>
+    </div>
+    <section class="controls" aria-label="Управление выполнением">
+      <div class="transport"><button class="icon-btn" id="reset" aria-label="Вернуться к началу" title="К началу"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 4v12m10-12-8 6 8 6V4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></button><button class="icon-btn" id="prev" aria-label="Предыдущий шаг" title="Предыдущий шаг (←)"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m12 5-5 5 5 5" stroke="currentColor" stroke-width="1.6"/></svg></button><button class="icon-btn play" id="play" aria-label="Автовоспроизведение" title="Автовоспроизведение (Пробел)"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m7 4 9 6-9 6V4Z" fill="currentColor"/></svg></button></div>
+      <div class="scrubber"><div class="scrubber-meta"><span>Создание</span><strong id="scrubberLabel"></strong><span>Завершение</span></div><input type="range" min="0" max="1" value="0" id="stepRange" aria-label="Шаг выполнения"></div>
+      <button class="next" id="next">Следующий шаг<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.4"/></svg></button>
+    </section>
+    <div class="control-help"><span><kbd>←</kbd> <kbd>→</kbd> шаги · <kbd>Пробел</kbd> воспроизведение · строка в консоли возвращает к событию</span><button class="timeline-toggle" id="timelineToggle" aria-expanded="false" aria-controls="timeline">Показать все события</button></div>
+    <nav class="timeline" id="timeline" aria-label="Все шаги сценария" hidden></nav>
+    <div class="sr-only" role="status" aria-live="polite" id="announcement"></div>
+    <aside class="bottom-notes"><div><strong>Что именно показывает разбор</strong><p>Каждый шаг показывает событие языка или границу между событиями. Возврат назад восстанавливает учебное состояние. Это подготовленные сценарии C++20; произвольный код здесь не исполняется. Выделение памяти и вывод считаем успешными, деструкторы не бросают. Виртуального наследования в примерах нет.</p></div><div><strong>На какие правила опираемся</strong><div class="sources"><a href="https://timsong-cpp.github.io/cppwp/n4861/class.base.init" target="_blank" rel="noopener noreferrer">Порядок инициализации ↗</a><a href="https://timsong-cpp.github.io/cppwp/n4861/class.dtor" target="_blank" rel="noopener noreferrer">Разрушение ↗</a><a href="https://timsong-cpp.github.io/cppwp/n4861/except.ctor" target="_blank" rel="noopener noreferrer">Отказ конструктора ↗</a><a href="https://timsong-cpp.github.io/cppwp/n4861/expr.new" target="_blank" rel="noopener noreferrer">new и очистка ↗</a></div><p>Открытый проект стандарта C++20, N4861.</p></div></aside>
+  </main>
+  <footer class="footer"><span>C++ / Backend · Лаборатория 01</span><a id="footerTheory" href="cpp_station0_oop_basics.html#section=initialization-model">К теории о порядке полей →</a></footer>
+</div>
+<dialog class="dialog" id="sourceDialog" aria-labelledby="sourceTitle"><div class="panel-head"><h2 id="sourceTitle">Полная программа · C++20</h2><div class="dialog-toolbar"><button class="text-btn" id="downloadSource">Скачать .cpp</button><button class="icon-btn" id="closeSource" aria-label="Закрыть полную программу">×</button></div></div><pre class="full-source" id="fullSource"></pre><div class="dialog-note"><code>g++ -std=c++20 main.cpp -o example</code><br>Затем <code>./example</code>. Вывод соответствует выбранному сценарию целиком.</div></dialog>
+<script>
+"use strict";
+(() => {
+  const $ = id => document.getElementById(id);
+  const escape = text => String(text).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const icons = {play:'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6V4Z" fill="currentColor"/></svg>',pause:'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4h3v12H6zm5 0h3v12h-3z" fill="currentColor"/></svg>'};
+  const labels = {waiting:"Не создан",constructing:"Конструктор выполняется",ready:"Создание завершено",destroying:"Деструктор выполняется",dead:"Разрушен",failed:"Создание прервано"};
+  const helper = `#include <iostream>\n#include <stdexcept>\n#include <new>\n#include <cstddef>\n\nstruct Probe {\n    const char* name;\n    explicit Probe(const char* n, bool fail = false) : name(n) {\n        std::cout << name << "()\\n";\n        if (fail) throw std::runtime_error("probe failed");\n    }\n    ~Probe() { std::cout << "~" << name << "()\\n"; }\n};\n\n`;
+  const baseSource = `struct Base {\n    Base() { std::cout << "Base()\\n"; }\n    ~Base() { std::cout << "~Base()\\n"; }\n};\n\n`;
+
+  function makeScenario(kind, reversed = false, failure = "none", allowExceptions = true) {
+    const dynamic = kind === "dynamic", inherited = kind === "inheritance";
+    const failing = failure !== "none";
+    const lines = [], locations = {};
+    const line = (text, key) => { if (key) locations[key] = lines.length; lines.push(text); };
+    const visibleHelper = allowExceptions ? helper : helper.replace(", bool fail = false", "").replace('        if (fail) throw std::runtime_error("probe failed");\n', "");
+    const helperStart = visibleHelper.indexOf("struct Probe");
+    visibleHelper.slice(helperStart).trimEnd().split("\n").forEach(text => {
+      const key = text.includes('std::cout << name') ? "probeCtorPrint"
+        : text.includes('~Probe()') ? "probeDtorPrint"
+        : text.includes('if (fail)') ? "probeThrow" : null;
+      line(text, key);
+    });
+    line("");
+    if (inherited) baseSource.trimEnd().split("\n").forEach((t,i) => line(t, i === 1 ? "base" : i === 2 ? "baseDtor" : null));
+    if (inherited) line("");
+    line("struct Session" + (inherited ? " : Base" : "") + " {", "class");
+    line("    Probe first;", "firstDecl");
+    line("    Probe second;", "secondDecl");
+    line("");
+    line("    Session()", "ctor");
+    const inits = reversed ? ["second", "first"] : ["first", "second"];
+    if (inherited) { line("        : Base(),", "baseInit"); }
+    inits.forEach((name,i) => line((i === 0 && !inherited ? "        : " : "          ") + name + '("' + name + '"' + (name === "second" && failure === "second" ? ", true" : "") + ")" + (i === 0 ? "," : " {"), name));
+    line('        std::cout << "Session()\\n";', "body");
+    if (failure === "body") line('        throw std::runtime_error("body failed");', "throw");
+    line("    }", "ctorEnd");
+    line('    ~Session() { std::cout << "~Session()\\n"; }', "dtor");
+    if (dynamic) {
+      line("");
+      line("    static void* operator new(std::size_t n) {", "allocate");
+      line("        void* p = ::operator new(n);");
+      line('        std::cout << "allocate\\n";', "allocatePrint");
+      line("        return p;");
+      line("    }");
+      line("    static void operator delete(void* p) noexcept {", "deallocate");
+      line('        std::cout << "deallocate\\n";', "deallocatePrint");
+      line("        ::operator delete(p);");
+      line("    }");
+    }
+    line("};"); line(""); line("int main() {", "main");
+    if (dynamic || failing) line("    try {", "try");
+    const indent = dynamic || failing ? "        " : "    ";
+    if (dynamic) { line(indent + "Session* ptr = new Session;", "call"); line(indent + "delete ptr;", "delete"); }
+    else line(indent + "Session s;", "call");
+    if (dynamic || failing) {
+      line("    } catch (const std::exception&) {", "catch");
+      line('        std::cout << "catch\\n";', "caught"); line("    }");
+    }
+    line("}", "end");
+    const source = visibleHelper.slice(0, helperStart) + lines.join("\n") + "\n";
+    const nodes = inherited ? ["base","first","second"] : ["first","second"];
+    let state = {root:"waiting",nodes:Object.fromEntries(nodes.map(n=>[n,"waiting"])),storage:"pending",pointer:"not-started",phase:"Начало",tone:"",output:[]};
+    const events = [];
+    function add(key,title,text,rule,patch = {},output = null) {
+      const nodePatch = patch.nodes || {};
+      state = {...state,...patch,nodes:{...state.nodes,...nodePatch},output:state.output.slice()};
+      let printKey = key, origin = "", owner = "";
+      if (output !== null) {
+        const field = /^(~?)(first|second)\(\)$/.exec(output);
+        if (field) {
+          const destroying = Boolean(field[1]), name = field[2];
+          printKey = destroying ? "probeDtorPrint" : "probeCtorPrint";
+          owner = destroying ? "Probe::~Probe" : "Probe::Probe";
+          origin = destroying
+            ? '<code>Probe::~Probe</code> для поля <code>' + name + '</code>: <code>name = "' + name + '"</code>. В <code>std::cout</code> последовательно поступают <code>"~"</code>, <code>name</code> и <code>"()\\n"</code>.'
+            : '<code>' + name + '("' + name + '")</code> → <code>Probe::Probe</code>. Аргумент <code>n = "' + name + '"</code> сохраняется в <code>name</code>; в <code>std::cout</code> поступают <code>name</code> и <code>"()\\n"</code>.';
+        } else {
+          const prints = {
+            "Session()": ["body", "Session::Session"],
+            "~Session()": ["dtor", "Session::~Session"],
+            "Base()": ["base", "Base::Base"],
+            "~Base()": ["baseDtor", "Base::~Base"],
+            "allocate": ["allocatePrint", "Session::operator new"],
+            "deallocate": ["deallocatePrint", "Session::operator delete"],
+            "catch": ["caught", "main · catch"]
+          };
+          [printKey, owner] = prints[output];
+          origin = 'Строку <code>' + output + '</code> печатает <code>std::cout</code> в <code>' + owner + '</code>.';
+        }
+        state.output.push({text:output,event:events.length,owner});
+      }
+      events.push({key:printKey,triggerKey:key,title,text,rule,origin,state:JSON.parse(JSON.stringify(state)),newOutput:output !== null});
+    }
+    add("main", "Начнём с одной Session", dynamic
+      ? 'В <code>main</code> будет локальный указатель <code>ptr</code>. Сам объект <code>Session</code> создаст выражение <code>new Session</code>. Пока не выделена его память и не начато создание полей.'
+      : 'В <code>main</code> объявим <code>Session s</code>. Внутри неё два самостоятельных подобъекта: <code>first</code> и <code>second</code>.' + (inherited ? ' В этом варианте есть ещё базовый подобъект <code>Base</code>.' : ''),
+      'Пунктир обозначает будущие подобъекты. Схема не утверждает, что они уже созданы.');
+    if (dynamic) add("allocate","Сначала выделяется память",'Выражение <code>new Session</code> вызывает наш <code>operator new</code>. Он получает память через <code>::operator new</code> и печатает <code>allocate</code>. Поля ещё не созданы.','Получить память и завершить создание объекта — разные события.',{storage:"allocated",pointer:"initializing",phase:"Выделение",tone:"construct"},"allocate");
+    add("call","Начинается создание Session",'Запускается конструктор <code>Session</code>, но его тело ещё не выполняется. Сначала нужно создать ' + (inherited ? 'базовый подобъект, затем ' : '') + 'поля в порядке их объявления: <code>first</code>, затем <code>second</code>.',reversed ? 'Мы переставили записи после двоеточия. Объявления полей остались прежними — порядок создания не изменится.' : 'Список инициализации выбирает начальные значения. Очерёдность задаётся устройством класса.',{root:"constructing",storage:dynamic?"allocated":"automatic",phase:"Создание",tone:"construct",pointer:dynamic?"initializing":"not-started"});
+    for (const name of nodes) {
+      const isBase = name === "base", display = isBase ? "Base" : name;
+      add(isBase ? "baseInit" : name,isBase ? "Первой создаётся база" : "Создаётся поле " + name,
+        isBase ? 'До полей <code>Session</code> выполняется <code>Base::Base()</code>. Его тело печатает <code>Base()</code>. Это часть создаваемой <code>Session</code>, а не отдельный соседний объект.' : 'Инициализатор <code>' + name + '("' + name + '")</code> передаёт строку <code>"' + name + '"</code> конструктору <code>Probe</code>. Она сохраняется в поле <code>name</code>. Строка <code>std::cout &lt;&lt; name &lt;&lt; "()\\n"</code> печатает <code>' + name + '()</code>: это текст, а не вызов функции <code>' + name + '()</code>.',
+        isBase ? 'В этом примере обычная прямая база создаётся до полей производного класса.' : 'Сообщение из тела конструктора само по себе ещё не доказывает, что конструктор успешно завершится.',{nodes:{[name]:"constructing"}},display + "()");
+      if (name === "second" && failure === "second") {
+        add("probeThrow","Создание second прервано",'Внутри <code>Probe</code> параметр <code>fail</code> равен <code>true</code>: после печати бросается исключение. Конструктор <code>second</code> не завершён. Тело <code>Session()</code> вообще не началось.','Для незавершённого second его ~Probe() не вызывается. Очистить нужно только уже созданные подобъекты.',{nodes:{second:"failed"},root:"failed",phase:"Исключение",tone:"error"});
+        break;
+      }
+      add(isBase ? "baseInit" : name,isBase ? "Base создана" : name + " успешно создан",'Конструктор <code>' + (isBase ? "Base" : "Probe") + '</code> нормально завершился. ' + (name === "second" ? 'Оба поля готовы: теперь можно перейти к телу <code>Session()</code>.' : 'Этот подобъект придётся разрушить при последующем отказе или обычном завершении.'),'Зелёная отметка означает успешное завершение создания, а не просто вход в конструктор.',{nodes:{[name]:"ready"}});
+    }
+    if (failure !== "second") {
+      add("body","Теперь — тело конструктора Session",'Поля уже созданы. Только теперь выполняется строка в теле <code>Session()</code> и печатается <code>Session()</code>.' + (failure === "body" ? ' Следующая строка ещё может прервать создание.' : 'После этой строки тело закончится нормально.'),'К моменту входа в тело конструктора все показанные базы и поля уже инициализированы.',{},"Session()");
+      if (failure === "body") add("throw","Тело бросает исключение",'Оба поля созданы, но конструктор <code>Session</code> завершился исключением. Полный объект не был успешно создан: <code>~Session()</code> не вызывается. Язык начнёт очистку готовых полей.','Даже печать Session() не гарантирует успешного создания: важно нормальное завершение всего конструктора.',{root:"failed",phase:"Исключение",tone:"error"});
+      else add("ctorEnd","Session полностью создана",dynamic ? 'Конструктор нормально вернулся. Выражение <code>new Session</code> вернуло адрес, и инициализация указателя <code>ptr</code> завершилась. Теперь он указывает на созданную <code>Session</code>.' : 'Конструктор нормально завершился. Объект <code>s</code> готов к использованию; оба его поля остаются созданы.',dynamic ? 'Указатель и объект — разные сущности. Позже delete ptr разрушит объект и освободит его память.' : 'До выхода из области объект остаётся доступен через s.',{root:"ready",pointer:dynamic?"points":"not-started"});
+    }
+    if (!failing) add(dynamic ? "delete" : "end",dynamic ? "delete начинает разрушение" : "Выходим из области видимости",dynamic ? 'Выполняется <code>delete ptr</code>. Сначала вызывается <code>~Session()</code>; память будет освобождена после разрушения объекта.' : 'При выходе из блока автоматически вызывается <code>~Session()</code>. Его тело печатает <code>~Session()</code>. Поля на этом шаге ещё не разрушены.', 'Сначала выполняется тело деструктора полного объекта, затем автоматически разрушаются поля и базы.',{root:"destroying",phase:"Разрушение",tone:"destroy"},"~Session()");
+    const completed = nodes.filter(n => state.nodes[n] === "ready").reverse();
+    for (const name of completed) {
+      const isBase = name === "base", display = isBase ? "Base" : name;
+      add(isBase ? "baseDtor" : (failing ? (failure === "body" ? "throw" : "second") : "dtor"),isBase ? "Последней разрушается база" : "Разрушается поле " + name,
+        (failing ? 'Во время очистки незавершённой <code>Session</code> ' : 'После тела <code>~Session()</code> ') + 'вызывается деструктор ' + (isBase ? 'базового подобъекта <code>Base</code>.' : 'готового поля <code>' + name + '</code>.') + (name === "second" ? ' Оно было создано позже <code>first</code>, поэтому разрушается раньше.' : name === "first" && failure === "second" ? ' Только first успело полностью создаться; second не получит вызова деструктора.' : ''),
+        'Готовые подобъекты разрушаются в порядке, обратном завершению их создания.',{nodes:{[name]:"destroying"},phase:failing?"Очистка":"Разрушение",tone:failing?"error":"destroy"},"~" + display + "()");
+      add(isBase ? "baseDtor" : (failing ? (failure === "body" ? "throw" : "second") : "dtor"), display + " разрушен",'Деструктор этого подобъекта завершился. ' + (completed[completed.length-1] !== name ? 'Очистка продолжается в обратном порядке.' : 'Все успешно созданные подобъекты теперь разрушены.'),'При возврате к предыдущему шагу мы восстанавливаем снимок учебной модели; настоящая программа назад не исполняется.',{nodes:{[name]:"dead"}});
+    }
+    if (!failing) add("dtor","Разрушение Session завершено",'Тело <code>~Session()</code> и все предусмотренные вызовы деструкторов полей' + (inherited ? ' и базы' : '') + ' завершены. ' + (dynamic ? 'Теперь выражение <code>delete</code> должно освободить память.' : 'Для этой Session больше не будет вызовов деструкторов.'),'Завершение разрушения и освобождение динамической памяти показаны отдельными событиями.',{root:"dead",pointer:dynamic?"destroyed":"not-started"});
+    if (dynamic) add("deallocate", failing ? "new освобождает память после отказа" : "Память освобождается",
+      failing ? 'Создание объекта завершилось исключением. Для показанной пары функций выделения и освобождения выражение <code>new</code> само вызывает <code>Session::operator delete</code>. Строка <code>delete ptr</code> в <code>main</code> не выполнялась.' : 'После разрушения вызывается <code>Session::operator delete</code>. Он печатает <code>deallocate</code> и возвращает память через <code>::operator delete</code>. Сам указатель автоматически не обнуляется.',
+      failing ? 'Для этого new подходящая функция освобождения существует. Это не результат вызова ~Session(): он при отказе не вызывался.' : 'После delete оставшийся адрес не даёт права обращаться к уничтоженному объекту.',{storage:"released",pointer:failing?"initialization-failed":"dangling",phase:"Освобождение",tone:"destroy"},"deallocate");
+    if (failing) add("caught","Управление приходит в catch",'Очистка готовых подобъектов' + (dynamic ? ' и освобождение выделенной памяти' : '') + ' уже выполнены. Внешний <code>catch</code> печатает <code>catch</code>. ' + (dynamic ? 'Объявление ptr было прервано исключением и не завершилось.' : 'Объявление s не завершилось: готовой Session в блоке нет.'),'Catch получает управление после предусмотренной языком очистки. Деструктор незавершённой Session не нужен для этой очистки.',{phase:"Обработка",tone:"error"},"catch");
+    add("end","Сценарий завершён",failing ? 'Просмотри вывод: ' + (failure === "second" ? 'нет ни <code>~second()</code>, ни <code>~Session()</code>.' : 'есть деструкторы обоих полей, но нет <code>~Session()</code>.') + (dynamic ? ' При этом <code>deallocate</code> присутствует: память освобождена.' : '') : 'В выводе виден полный порядок: ' + (inherited ? 'база → ' : '') + 'первое поле → второе поле → тело конструктора. При обычном завершении: тело деструктора → второе поле → первое поле' + (inherited ? ' → база.' : '.'),
+      reversed ? 'Перестановка списка инициализации не изменила вывод. Чтобы изменить порядок полей, пришлось бы изменить их объявления.' : dynamic&&!failing ? 'После delete ptr ещё хранил прежний адрес. Выход из блока try завершил время жизни самой переменной ptr. Это не повторное удаление Session.' : 'Измени одно условие сверху и сравни истории. Каждую полную программу можно скачать и проверить компилятором.',{storage:"released",pointer:dynamic&&!failing?"out-of-scope":state.pointer,phase:"Готово",tone:""});
+    return {kind,reversed,failure,dynamic,inherited,lines,locations,source,nodes,events};
+  }
+
+  const courseParams = new URLSearchParams(window.location.search);
+  const courseFrom = courseParams.get("from");
+  const level = courseFrom === "station0" ? "basics" : courseFrom === "station2" ? "inheritance" : courseParams.get("level");
+  const allowedScenarios = level === "basics" ? ["members"] : level === "inheritance" ? ["members", "inheritance"] : ["members", "inheritance", "exception", "dynamic"];
+  const requestedScenario = window.location.hash.slice(1);
+  let kind = allowedScenarios.includes(requestedScenario) ? requestedScenario : "members", reversed = false, failure = "none", model, cursor = 0, timer = null;
+  const defaultFailure = {members:"none",inheritance:"none",exception:"second",dynamic:"none"};
+  function highlight(text) {
+    const re = /("(?:\\.|[^"\\])*"|\/\/.*$|\b(?:struct|static|void|int|try|catch|throw|return|new|delete|explicit|const|bool|true|false|noexcept)\b|\b(?:Session|Probe|Base|std::\w+)\b)/g;
+    let result = "", offset = 0;
+    for (const m of text.matchAll(re)) {
+      result += escape(text.slice(offset,m.index));
+      const cls = m[0].startsWith('"') ? "str" : m[0].startsWith("//") ? "comment" : /^(Session|Probe|Base|std::)/.test(m[0]) ? "type" : "key";
+      result += '<span class="tok-' + cls + '">' + escape(m[0]) + '</span>'; offset = m.index + m[0].length;
+    }
+    return result + escape(text.slice(offset));
+  }
+  function stop() { if (timer !== null) clearInterval(timer); timer = null; $("play").innerHTML = icons.play; $("play").setAttribute("aria-label","Автовоспроизведение"); $("play").title = "Автовоспроизведение (Пробел)"; }
+  function start() {
+    if (timer !== null) {stop();return;}
+    if (cursor === model.events.length-1) cursor = 0;
+    $("play").innerHTML = icons.pause; $("play").setAttribute("aria-label","Пауза"); $("play").title = "Пауза (Пробел)";
+    render(); timer = setInterval(() => { if (cursor < model.events.length-1) {cursor++;render();} if (cursor === model.events.length-1) stop(); }, 2400);
+  }
+  function go(index) { stop(); cursor = Math.max(0,Math.min(index,model.events.length-1)); render(); }
+  function configure() {
+    const focusedControl = document.activeElement ? document.activeElement.id : null;
+    stop(); cursor = 0; model = makeScenario(kind,reversed,failure,allowedScenarios.includes("exception"));
+    document.querySelectorAll("[data-scenario]").forEach(b => { b.hidden = !allowedScenarios.includes(b.dataset.scenario); b.setAttribute("aria-pressed",String(b.dataset.scenario === kind)); });
+    $("experimentCopy").innerHTML = {members:'<strong>Проверь одно правило.</strong> Измени список инициализации и проследи порядок полей.',inheritance:'<strong>Ещё один подобъект.</strong> База создаётся до полей, а разрушается после них.',exception:'<strong>Измени точку отказа.</strong> Посмотри, какие деструкторы действительно вызовутся.',dynamic:'<strong>Раздели объект и память.</strong> Сравни обычный delete и отказ во время new.'}[kind];
+    if (kind === "members") $("experimentControl").innerHTML='<label class="toggle-label"><input type="checkbox" id="reverseInput" '+(reversed?'checked':'')+'>Обратный список инициализации</label>';
+    else if (kind === "exception" || kind === "dynamic") $("experimentControl").innerHTML='<label class="select-label">Исключение<select id="failureInput" aria-label="Точка отказа"><option value="none">Не бросать</option><option value="second">В конструкторе second</option><option value="body">В теле Session()</option></select></label>';
+    else $("experimentControl").innerHTML='<span class="version">Base → first → second</span>';
+    if ($("reverseInput")) $("reverseInput").onchange = e => { const previousStep = cursor; reversed = e.target.checked; configure(); go(previousStep); };
+    if ($("failureInput")) {$("failureInput").value=failure;$("failureInput").onchange=e=>{failure=e.target.value;configure();};}
+    $("codeLines").innerHTML=model.lines.map((text,i)=>'<div class="code-line" data-line="'+i+'"><span class="line-no" aria-hidden="true">'+(i+1)+'</span><span>'+highlight(text)+'</span></div>').join("");
+    $("objectParts").innerHTML=model.nodes.map((name,i)=>'<div class="part '+(name==='base'?'base-part':'')+'" data-node="'+name+'" data-state="waiting"><div class="part-role"><span>'+(name==='base'?'Базовый подобъект':'Поле · Probe')+'</span><span class="part-index">0'+(i+1)+'</span></div><div class="part-name">'+(name==='base'?'Base':name)+'</div><div class="part-status"><span class="status-dot"></span><span data-node-label></span></div></div>').join("");
+    $("scopeLabel").textContent="main()";
+    $("storageLabel").textContent=model.dynamic?"динамическая длительность хранения":"автоматическая длительность хранения";
+    $("objectName").textContent=model.dynamic?"Session · объект в выделенной памяти":"s : Session";
+    $("objectSub").textContent=model.inherited?"База и поля входят в одну Session":"Полный объект и его поля";
+    $("sceneCaption").textContent="Схема подобъектов, а не расположение байтов в памяти.";
+    $("dynamicStorage").innerHTML=model.dynamic?'<div class="storage-row" id="memoryRow"><code>Память Session</code><span class="storage-status"><i class="status-dot"></i><span id="memoryStatus"></span></span></div><div class="storage-row"><code>ptr</code><span id="pointerStatus"></span></div>':"";
+    $("stepRange").max=model.events.length-1;
+    $("timeline").innerHTML=model.events.map((event,i)=>'<button data-event="'+i+'"><span>'+String(i+1).padStart(2,"0")+'</span><span>'+escape(event.title)+'</span><small>'+escape(event.state.phase)+'</small></button>').join("");
+    $("fullSource").textContent=model.source;
+    render();
+    if (["reverseInput", "failureInput"].includes(focusedControl) && $(focusedControl)) $(focusedControl).focus();
+  }
+  function render() {
+    const event=model.events[cursor],s=event.state;
+    $("objectShell").dataset.state=s.root;
+    $("rootStatus").textContent=labels[s.root];
+    document.querySelectorAll("[data-node]").forEach(el=>{const v=s.nodes[el.dataset.node];el.dataset.state=v;el.querySelector("[data-node-label]").textContent=labels[v];});
+    $("partCount").textContent=model.nodes.filter(n=>s.nodes[n]==="ready").length+" / "+model.nodes.length+" готовы";
+    $("phase").textContent=s.phase;$("phase").className="phase "+s.tone;
+    $("insight").dataset.tone=s.tone;
+    $("stepEyebrow").textContent=s.phase+" · шаг "+String(cursor+1).padStart(2,"0");
+    $("stepFraction").textContent=String(cursor+1).padStart(2,"0")+" / "+String(model.events.length).padStart(2,"0");
+    $("stepTitle").textContent=event.title;$("stepText").innerHTML=event.text;$("stepRule").textContent=event.rule;
+    $("codeContext").innerHTML=event.origin || 'В коде есть <code>Probe</code>, <code>Session</code> и <code>main</code>. При появлении новой строки вывода подсветится печатающий её <code>std::cout</code>.';
+    const activeLine=model.locations[event.key];
+    document.querySelectorAll(".code-line").forEach((el,i)=>{el.classList.toggle("current",i===activeLine);el.classList.toggle("related",(event.newOutput&&i===model.locations[event.triggerKey]&&i!==activeLine)||(reversed&&event.key==="call"&&(i===model.locations.firstDecl||i===model.locations.secondDecl)));if(i===activeLine)el.setAttribute("aria-current","step");else el.removeAttribute("aria-current");});
+    const active=$("codeLines").children[activeLine],body=$("codeBody");
+    if(active){const top=active.offsetTop-body.offsetTop;if(top<body.scrollTop+12||top+30>body.scrollTop+body.clientHeight)body.scrollTop=Math.max(0,top-body.clientHeight/2);}
+    $("outputCount").textContent=s.output.length+" строк";
+    $("outputLines").innerHTML=s.output.length?s.output.map((o,i)=>'<div class="output-line '+(o.event===cursor?'new':'')+'"><button data-output-event="'+o.event+'" title="Показать std::cout в '+escape(o.owner)+' · событие '+(o.event+1)+'"><span class="output-no">'+(i+1)+'</span><span>'+escape(o.text)+'</span><span class="output-owner">'+escape(o.owner)+'</span>'+(o.event===cursor?'<span class="new-tag">СЕЙЧАС</span>':'')+'</button></div>').join(""):'<div class="output-empty">Здесь появится вывод. Начни пошаговый разбор →</div>';
+    $("outputLines").scrollTop=$("outputLines").scrollHeight;
+    if(model.dynamic){$("memoryRow").dataset.storage=s.storage;$("memoryStatus").textContent={pending:"Ещё не выделена",allocated:"Выделена",released:"Освобождена"}[s.storage];$("pointerStatus").textContent={"not-started":"Объявление ещё не начато",initializing:"Инициализатор ещё выполняется",points:"Указывает на созданную Session",destroyed:"Объект разрушен; память ещё выделена",dangling:"Хранит прежний адрес; объект уничтожен","out-of-scope":"Время жизни самого ptr завершилось","initialization-failed":"Инициализация не завершилась"}[s.pointer];}
+    $("stepRange").value=cursor;$("stepRange").setAttribute("aria-valuetext",(cursor+1)+" из "+model.events.length+": "+event.title);
+    $("scrubberLabel").textContent="Шаг "+(cursor+1)+" из "+model.events.length;
+    $("prev").disabled=cursor===0;$("reset").disabled=cursor===0;$("next").disabled=cursor===model.events.length-1;
+    document.querySelectorAll("[data-event]").forEach(el=>{if(Number(el.dataset.event)===cursor)el.setAttribute("aria-current","step");else el.removeAttribute("aria-current");});
+    $("announcement").textContent="Шаг "+(cursor+1)+". "+event.title;
+  }
+  document.querySelectorAll("[data-scenario]").forEach(b=>b.onclick=()=>{kind=b.dataset.scenario;reversed=false;failure=defaultFailure[kind];configure();});
+  $("prev").onclick=()=>go(cursor-1);$("next").onclick=()=>go(cursor+1);$("reset").onclick=()=>go(0);$("play").onclick=start;
+  $("stepRange").oninput=e=>go(Number(e.target.value));
+  $("timelineToggle").onclick=()=>{const open=$("timeline").hidden;$("timeline").hidden=!open;$("timelineToggle").setAttribute("aria-expanded",String(open));$("timelineToggle").textContent=open?"Скрыть список событий":"Показать все события";};
+  $("timeline").onclick=e=>{const b=e.target.closest("[data-event]");if(b)go(Number(b.dataset.event));};
+  $("outputLines").onclick=e=>{const b=e.target.closest("[data-output-event]");if(b)go(Number(b.dataset.outputEvent));};
+  $("openSource").onclick=()=>{stop();$("sourceDialog").showModal();};
+  $("closeSource").onclick=()=>$("sourceDialog").close();
+  $("sourceDialog").addEventListener("click",e=>{if(e.target===$("sourceDialog")){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
+  $("downloadSource").onclick=()=>{const url=URL.createObjectURL(new Blob([model.source],{type:"text/plain;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="lifetime_"+kind+"_"+failure+".cpp";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+  document.addEventListener("keydown",e=>{if($("sourceDialog").open||e.altKey||e.ctrlKey||e.metaKey||e.target.closest("input,select,textarea,.code-body,.full-source,.timeline"))return;if(e.key==="ArrowRight"){e.preventDefault();go(cursor+1);}else if(e.key==="ArrowLeft"){e.preventDefault();go(cursor-1);}else if(e.code==="Space"&&!e.target.closest("button,a,summary")){e.preventDefault();start();}});
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)stop();});
+  const courseReturns = {
+    station0: ["cpp_station0_oop_basics.html", "destructor"],
+    station2: ["cpp_station2_inheritance_polymorphism.html", "ctor-order"],
+    station4: ["cpp_station4_error_handling.html", "constructor-transaction"]
+  };
+  if (courseReturns[courseFrom]) {
+    const [file, section] = courseReturns[courseFrom];
+    for (const id of ["returnToTheory", "footerTheory"]) { $(id).href = file + "#section=" + section; $(id).textContent = "← К разделу станции " + courseFrom.replace("station", ""); }
+  }
+  failure = defaultFailure[kind];
+  configure();
+  // Pure scenario builder is shared by the UI and verification of the C++ traces.
+  window.LifetimeDemo=Object.freeze({makeScenario});
+})();
+</script>
+</body>
+</html>

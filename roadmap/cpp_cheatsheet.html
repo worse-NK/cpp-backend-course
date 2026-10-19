@@ -1,0 +1,2047 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Шпаргалка: C++ и backend</title><link rel="stylesheet" href="assets/cheatsheet.css"></head>
+<body id="top"><a class="skip-link" href="#reference">К справочнику</a>
+<div class="reference-layout"><aside id="contents" tabindex="-1">
+<a class="course-link" href="cpp_backend_roadmap.html">← C++ и backend</a>
+<details class="contents-disclosure" open><summary>Оглавление шпаргалки</summary>
+<nav aria-label="Станции шпаргалки"><a href="#station-0"><span>0</span> База ООП</a><a href="#station-1"><span>1</span> Современный C++</a><a href="#station-2"><span>2</span> Наследование и полиморфизм</a><a href="#station-3"><span>3</span> STL, шаблоны, алгоритмы</a><a href="#station-4"><span>4</span> Обработка ошибок</a><a href="#station-5"><span>5</span> Сборка, Git, Linux</a><a href="#station-6"><span>6</span> Многопоточность</a><a href="#station-7"><span>7</span> Сеть, сокеты и HTTP</a><a href="#station-8"><span>8</span> REST API и C++-сервис</a><a href="#station-9"><span>9</span> Базы данных и PostgreSQL</a><a href="#code-review"><span>★</span> Как разбирать код на собеседовании</a><a href="#station-10"><span>10</span> Тесты, доставка и эксплуатация</a><a href="#std-functions"><span>fn</span> Ходовые функции std</a></nav></details>
+<a class="sources-link" href="sources.html">Источники курса ↗</a></aside>
+<main id="reference"><header><p class="eyebrow">СПРАВОЧНИК · СТАНЦИИ 0–10</p>
+<h1>Шпаргалка: C++ и backend</h1><p class="lead">Краткий справочник по станциям 0–10: ключевые правила, типичные ошибки и проверка решений. Примеры — фрагменты, если не указано иное; основа C++20, expected — C++23, сокеты и epoll — Linux/POSIX.</p>
+<p class="scope-note">Для первого знакомства открывай полную главу. Здесь — опорные правила для повторения; подсказки не заменяют разбор предусловий и проверку кода.</p>
+<div class="search-panel" hidden><label for="reference-search">Найти правило или пример</label>
+<div class="search-row"><input id="reference-search" type="search" placeholder="Например: владение, epoll, ETag, noexcept"><button id="clear-search" type="button">Очистить</button></div>
+<p id="search-status" role="status" aria-live="polite"></p>
+<div class="controls"><button id="expand-all" type="button">Раскрыть всё</button><button id="collapse-all" type="button">Свернуть всё</button></div></div></header>
+<details class="reference-group" id="station-0" open>
+<summary><span class="number">0</span><h2>База ООП</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a class="button" href="cpp_station0_oop_basics.html">Читать полную станцию 0 ↗</a><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: База ООП"><a href="#station-0-section-1">Класс: данные + методы</a><a href="#station-0-section-2">struct vs class</a><a href="#station-0-section-3">Конструктор и деструктор</a><a href="#station-0-section-4">Несколько конструкторов</a><a href="#station-0-section-5">Инициализация и lifetime</a><a href="#station-0-section-6">const и this</a><a href="#station-0-section-7">Контракты конструктора</a><a href="#station-0-section-8">Зачем инкапсуляция</a><a href="#station-0-section-9">Интерфейс, static и friend</a><a href="#station-0-section-10">Источники и подробные объяснения</a></nav>
+<section class="reference-section" id="station-0-section-1" tabindex="-1"><h3>Класс: данные + методы</h3><div class="reference-item"><h4>Класс объединяет состояние и операции; доступ проектирует автор</h4><pre><code>class Account {
+    int balance_ = 0;
+public:
+    bool deposit(int amount) {
+        if (amount &lt;= 0 || amount &gt; 1000000 - balance_)
+            return false;
+        balance_ += amount;
+        return true;
+    }
+    int balance() const { return balance_; }
+}; // инвариант: 0 &lt;= balance_ &lt;= 1000000</code></pre></div></section><section class="reference-section" id="station-0-section-2" tabindex="-1"><h3>struct vs class</h3><div class="reference-item"><h4>Отличие — в доступе по умолчанию</h4><p class="rule">У <code>struct</code> члены и базовое наследование по умолчанию public, у <code>class</code> — private. В остальном возможности языка одинаковы.</p></div></section><section class="reference-section" id="station-0-section-3" tabindex="-1"><h3>Конструктор и деструктор</h3><div class="reference-item"><h4>Конструктор = имя класса, задаёт начальное состояние (список инициализации)</h4><pre><code>class Point {
+    int x, y;
+public:
+    Point(int x, int y) : x(x), y(y) {}  // список инициализации
+};</code></pre></div><div class="reference-item"><h4>Деструктор = ~ИмяКласса, вызывается автоматически при уничтожении</h4><pre><code>~Logger() { /* уборка */ }   // сам вызовется в конце области видимости</code></pre></div><div class="reference-item"><h4>Порядок lifetime задаётся структурой объекта и scope</h4><p class="rule">Локальные объекты одного scope уничтожаются в обратном порядке завершённого создания. Поля инициализируются в порядке объявления в классе и уничтожаются в обратном — порядок в initializer list это не меняет. База строится до полей и разрушается после них.</p></div></section><section class="reference-section" id="station-0-section-4" tabindex="-1"><h3>Несколько конструкторов</h3><div class="reference-item"><h4>Конструкторов может быть несколько — с разными параметрами (перегрузка)</h4><pre><code>class Account {
+    int balance;
+public:
+    Account() : balance(0) {}           // по умолчанию
+    Account(int start) : balance(start) {}  // с балансом
+};
+Account a;       // -&gt; balance 0
+Account b(500);  // -&gt; balance 500</code></pre></div><div class="reference-item"><h4>Поля можно инициализировать прямо при объявлении (C++11)</h4><pre><code>class Timer {
+    int ms = 0;        // значение по умолчанию
+    bool running = false;
+};</code></pre></div></section><section class="reference-section" id="station-0-section-5" tabindex="-1"><h3>Инициализация и lifetime</h3><div class="reference-item"><h4>{} помогает получить известное начальное значение и запрещает narrowing</h4><pre><code>int a;       // локальный a имеет indeterminate value: не читать
+int b{};     // 0
+int c{42};   // 42
+// int d{3.14}; // ill-formed: narrowing double -&gt; int</code></pre></div><div class="reference-item"><h4>Storage, объект и lifetime — не одно и то же</h4><p class="rule">Выделенная память ещё не обязательно содержит живой <code>T</code>, а окончание lifetime не всегда сразу освобождает storage. Обычные RAII-контейнеры скрывают эти детали; в placement new, allocator и низкоуровневом коде отслеживай construction/destruction отдельно от allocation/deallocation.</p></div></section><section class="reference-section" id="station-0-section-6" tabindex="-1"><h3>const и this</h3><div class="reference-item"><h4>const-метод нельзя использовать для изменения обычных полей; его можно звать на const-объекте</h4><p class="rule">Это shallow const: <code>mutable</code>-поля, внешнее состояние и объект за указателем всё ещё могут меняться. Логически читающие методы обычно помечай <code>const</code>, но не обещай ими больше, чем задаёт контракт.</p></div><div class="reference-item"><h4>this-&gt; явно выбирает член, если параметр скрывает его имя</h4><pre><code>Account(int balance) : balance(balance) {}
+// В теле: this-&gt;balance = balance;</code></pre></div></section><section class="reference-section" id="station-0-section-7" tabindex="-1"><h3>Контракты конструктора</h3><div class="reference-item"><h4>explicit, = default и = delete выражают намерение</h4><pre><code>class Id {
+public:
+    explicit Id(int value);       // нет неявного int -&gt; Id
+    Id() = delete;                 // пустой Id запрещён
+    Id(const Id&amp;) = default;       // обычное копирование явно разрешено
+};</code></pre></div><div class="reference-item"><h4>Конструктор должен установить инвариант или не создать объект</h4><p class="rule">Если проверка не прошла, конструктор может бросить: уже построенные базы и поля разрушатся автоматически, но деструктор самого недостроенного объекта не вызывается.</p></div></section><section class="reference-section" id="station-0-section-8" tabindex="-1"><h3>Зачем инкапсуляция</h3><div class="reference-item"><h4>private ограничивает прямой доступ, но инвариант сохраняет логика класса</h4><p class="rule">Проверки в методах и конструкторах должны согласовываться. Возврат изменяемой ссылки на поле и friend могут открыть обходной путь; private само по себе не доказывает корректность.</p></div><div class="reference-item"><h4>Публичные методы — «пульт»; приватные поля — «провода»</h4><p class="rule">Внутренности можно переписать, не ломая код, который пользуется классом через публичные методы.</p></div></section><section class="reference-section" id="station-0-section-9" tabindex="-1"><h3>Интерфейс, static и friend</h3><div class="reference-item"><h4>Инвариант важнее набора getter/setter</h4><p class="rule">Инвариант — условие корректного состояния объекта. Конструктор устанавливает его, публичные операции сохраняют. Не добавляй setter, если изменение поля в одиночку нарушит это условие.</p></div><div class="reference-item"><h4>static-член общий для класса; friend даёт доступ, но не членство</h4><p class="rule">У static-метода нет this. Дружественная функция может читать private, но остаётся внешней функцией. Дружба не наследуется и не передаётся через цепочку друзей.</p></div><div class="reference-item"><h4>Равенство значений проектируют по смыслу</h4><p class="rule">operator== обычно сравнивает значимые данные, а не адреса объектов. = default в C++20 сравнивает базы и поля: проверь, соответствует ли это смыслу равенства твоего типа.</p></div></section><section class="reference-section" id="station-0-section-10" tabindex="-1"><h3>Источники и подробные объяснения</h3><div class="reference-item"><h4>Правила языка, протоколы и документация</h4><p class="rule"><a href="https://eel.is/c++draft/class">Объектная модель: проект стандарта</a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса.</p></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: База ООП"><a href="#top">← К началу</a><a href="#station-1">Современный C++ →</a></nav></div></details><details class="reference-group" id="station-1" open>
+<summary><span class="number">1</span><h2>Современный C++</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a class="button" href="cpp_station1_modern_cpp.html">Читать полную станцию 1 ↗</a><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: Современный C++"><a href="#station-1-section-1">RAII — сердце C++</a><a href="#station-1-section-2">Умные указатели (вместо new/delete)</a><a href="#station-1-section-3">Ловушки shared ownership</a><a href="#station-1-section-4">Ссылки и const</a><a href="#station-1-section-5">auto, decltype и forwarding</a><a href="#station-1-section-6">Move-семантика</a><a href="#station-1-section-7">Правило пяти / нуля</a><a href="#station-1-section-8">Синтаксис</a><a href="#station-1-section-9">Возврат значений и заимствование</a><a href="#station-1-section-10">Источники и подробные объяснения</a></nav>
+<section class="reference-section" id="station-1-section-1" tabindex="-1"><h3>RAII — сердце C++</h3><div class="reference-item"><h4>Владение ресурсом выражается объектом, а освобождение — его деструктором</h4><p class="rule">Owned-ресурс освобождается автоматически, в том числе при исключении. RAII-объект может иметь пустое/deferred-состояние или получать ресурс через factory; важно, чтобы каждое состояние сохраняло инвариант и cleanup был привязан к lifetime владельца.</p></div></section><section class="reference-section" id="station-1-section-2" tabindex="-1"><h3>Умные указатели (вместо new/delete)</h3><div class="reference-item"><h4>unique_ptr — единоличное владение, нельзя копировать (только move)</h4><pre><code>auto p = std::make_unique&lt;T&gt;(args);
+auto p2 = std::move(p);   // передать владение; p теперь nullptr</code></pre></div><div class="reference-item"><h4>shared_ptr — разделяемое владение со счётчиком ссылок</h4><pre><code>auto a = std::make_shared&lt;T&gt;();
+auto b = a;               // счётчик 2; удалится, когда счётчик -&gt; 0</code></pre></div><div class="reference-item"><h4>weak_ptr — невладеющий наблюдатель за shared_ptr (не держит объект живым)</h4><pre><code>std::weak_ptr&lt;T&gt; w = sp;   // из shared_ptr, счётчик НЕ растёт
+if (auto s = w.lock()) {   // получить shared_ptr, если объект жив
+    use(*s);
+}</code></pre></div><div class="reference-item"><h4>Правило выбора владения</h4><p class="rule">Если объект можно хранить значением — храни значением. Нужны динамический lifetime или полиморфизм с одним владельцем → unique_ptr. Реально несколько независимых владельцев → shared_ptr. Наблюдение за shared ownership и разрыв циклов → weak_ptr. Ручной owning new/delete в прикладном коде почти не нужен.</p></div></section><section class="reference-section" id="station-1-section-3" tabindex="-1"><h3>Ловушки shared ownership</h3><div class="reference-item"><h4>Потокобезопасный control block не делает потокобезопасным сам T</h4><p class="rule">Разные экземпляры <code>shared_ptr</code> к одному control block можно копировать/уничтожать конкурентно, но одновременный доступ к <code>*p</code> синхронизируй по правилам самого объекта. Один и тот же объект <code>shared_ptr</code> тоже нельзя произвольно читать и изменять без atomic/shared_ptr-синхронизации.</p></div><div class="reference-item"><h4>make_shared обычно объединяет object и control block в одну allocation</h4><p class="rule">Это уменьшает число аллокаций и безопасно связывает создание с ownership. После исчезновения strong owners объект разрушен, но объединённая allocation может жить, пока существуют <code>weak_ptr</code>. Если нужен отдельный lifetime памяти или custom deleter, выбирай другой способ осознанно.</p></div><div class="reference-item"><h4>Цикл shared_ptr не освобождается сам</h4><pre><code>// Parent владеет Child, а обратная связь наблюдает:
+std::shared_ptr&lt;Child&gt; child;
+std::weak_ptr&lt;Parent&gt; parent;</code></pre></div></section><section class="reference-section" id="station-1-section-4" tabindex="-1"><h3>Ссылки и const</h3><div class="reference-item"><h4>Тяжёлые объекты передавай как const T&amp; (без копии, только чтение)</h4><pre><code>void f(const std::string&amp; s);   // не копирует, не меняет</code></pre></div><div class="reference-item"><h4>Ссылка — псевдоним: после связывания её нельзя переназначить</h4><p class="rule">В корректной программе ссылка связывается с объектом/функцией, а не с null. Но ссылка может стать dangling после окончания lifetime объекта; одно наличие <code>T&amp;</code> не гарантирует, что referent всё ещё жив.</p></div></section><section class="reference-section" id="station-1-section-5" tabindex="-1"><h3>auto, decltype и forwarding</h3><div class="reference-item"><h4>auto по значению снимает top-level const и reference</h4><pre><code>const int n = 7;
+auto a = n;        // int
+const auto&amp; r = n; // const int&amp;
+auto&amp;&amp; u = n;      // const int&amp; из-за reference collapsing
+decltype(auto) x = (n); // const int&amp;: скобки важны</code></pre></div><div class="reference-item"><h4>Forwarding reference: T&amp;&amp; с выводимым cv-неквалифицированным параметром шаблона</h4><pre><code>template&lt;class T&gt;
+void relay(T&amp;&amp; value) {
+    consume(std::forward&lt;T&gt;(value));
+}
+// Widget&amp;&amp; вне такого deduction context — обычная rvalue reference.</code></pre></div></section><section class="reference-section" id="station-1-section-6" tabindex="-1"><h3>Move-семантика</h3><div class="reference-item"><h4>Move-операция может передать ресурсы вместо копирования; std::move лишь разрешает её выбрать</h4><pre><code>v.push_back(std::move(s));  // s валиден, но его состояние обычно не специфицировано</code></pre></div><div class="reference-item"><h4>std::move сам ничего не двигает</h4><p class="rule">Это лишь приведение к rvalue, разрешающее вызвать move-конструктор.</p></div></section><section class="reference-section" id="station-1-section-7" tabindex="-1"><h3>Правило пяти / нуля</h3><div class="reference-item"><h4>Правило нуля (предпочтительно): не управляй ресурсами вручную</h4><p class="rule">Используй <code>vector/string/unique_ptr</code> и другие RAII-члены — тогда обычно не нужно писать пять спецфункций. Компилятор сгенерирует, удалит или не объявит конкретную операцию по правилам членов: например, <code>unique_ptr</code> естественно удаляет копирование. Проверяй именно нужные свойства типа.</p></div><div class="reference-item"><h4>Правило пяти: объявление одной спецфункции требует проверить остальные</h4><p class="rule">Для каждой операции реши явно: реализовать, = default или = delete. Уникальный ресурс часто только перемещаем, а копирование запрещено.</p></div></section><section class="reference-section" id="station-1-section-8" tabindex="-1"><h3>Синтаксис</h3><div class="reference-item"><h4>auto, range-for, лямбды</h4><pre><code>for (const auto&amp; x : v) { ... }        // чтение
+for (auto&amp; x : v) { x *= 2; }           // изменение
+auto f = [](int a, int b){ return a+b; };</code></pre></div></section><section class="reference-section" id="station-1-section-9" tabindex="-1"><h3>Возврат значений и заимствование</h3><div class="reference-item"><h4>return T{…} и return local — разные случаи</h4><p class="rule">В C++17+ возврат prvalue того же типа может создавать результат напрямую, без промежуточной копии. NRVO для именованного локального объекта разрешено, но не обязательно. return std::move(local) мешает NRVO; обычно достаточно return local.</p></div><div class="reference-item"><h4>Захват ссылки не продлевает жизнь объекта</h4><p class="rule">Лямбда с [&] или [this] может пережить объект, на который ссылается. Для отложенной задачи проверь владельца каждого захвата. Копирование string_view копирует только представление, а не строку.</p></div><div class="reference-item"><h4>После перемещения действуй по контракту типа</h4><p class="rule">У стандартных библиотечных типов обычно сохраняется корректное, но не определённое заранее состояние. unique_ptr после передачи владения пуст; для string не обещай пустоту. У пользовательского типа гарантии задаёт его автор.</p></div></section><section class="reference-section" id="station-1-section-10" tabindex="-1"><h3>Источники и подробные объяснения</h3><div class="reference-item"><h4>Правила языка, протоколы и документация</h4><p class="rule"><a href="https://eel.is/c++draft/class.copy.elision">Copy elision</a> · <a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-resource">C++ Core Guidelines: управление ресурсами</a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса.</p></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: Современный C++"><a href="#station-0">← База ООП</a><a href="#station-2">Наследование и полиморфизм →</a></nav></div></details><details class="reference-group" id="station-2" open>
+<summary><span class="number">2</span><h2>Наследование и полиморфизм</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a class="button" href="cpp_station2_inheritance_polymorphism.html">Читать полную станцию 2 ↗</a><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: Наследование и полиморфизм"><a href="#station-2-section-1">Наследование</a><a href="#station-2-section-2">Виртуальные функции = полиморфизм</a><a href="#station-2-section-3">Абстрактные классы (интерфейсы)</a><a href="#station-2-section-4">Две частые ловушки</a><a href="#station-2-section-5">Lookup, default arguments и downcast</a><a href="#station-2-section-6">Типичная реализация virtual</a><a href="#station-2-section-7">Порядок вызовов и исключения</a><a href="#station-2-section-8">Выбор полиморфного интерфейса</a><a href="#station-2-section-9">Источники и подробные объяснения</a></nav>
+<section class="reference-section" id="station-2-section-1" tabindex="-1"><h3>Наследование</h3><div class="reference-item"><h4>class Derived : public Base — отношение is-a</h4><pre><code>class Dog : public Animal {
+public:
+    Dog(const std::string&amp; n) : Animal(n) {}  // вызвать конструктор базы
+};</code></pre></div><div class="reference-item"><h4>protected — доступно классу и наследникам, но не снаружи</h4><p class="rule">Третий уровень между private и public.</p></div><div class="reference-item"><h4>Порядок: строятся базовые подобъекты, затем Derived; разрушение идёт обратно</h4><p class="rule">У самого derived-типа сначала строятся virtual bases, затем direct bases слева направо, затем поля в порядке объявления и тело. Деструктор выполняет обратную последовательность для уже построенных подобъектов.</p></div></section><section class="reference-section" id="station-2-section-2" tabindex="-1"><h3>Виртуальные функции = полиморфизм</h3><div class="reference-item"><h4>virtual в базе + override в наследнике → динамический вызов</h4><pre><code>class Animal {
+public:
+    virtual void say();
+    virtual ~Animal() = default;
+};
+class Dog : public Animal { public: void say() override; };
+
+auto p = std::make_unique&lt;Dog&gt;();
+Animal&amp; animal = *p;
+animal.say();   // final overrider: Dog::say()</code></pre></div><div class="reference-item"><h4>Runtime-полиморфизм обычно используют через указатель/ссылку на базу</h4><p class="rule"><code>Animal&amp;</code>, <code>Animal*</code>, <code>unique_ptr&lt;Animal&gt;</code>. Передача производного объекта как <code>Animal</code> по значению создаёт отдельный базовый объект и срезает derived-часть.</p></div></section><section class="reference-section" id="station-2-section-3" tabindex="-1"><h3>Абстрактные классы (интерфейсы)</h3><div class="reference-item"><h4>= 0 делает функцию чисто виртуальной, класс — абстрактным</h4><pre><code>class Shape {
+public:
+    virtual double area() const = 0;   // объект Shape создать нельзя
+    virtual ~Shape() = default;
+};</code></pre></div></section><section class="reference-section" id="station-2-section-4" tabindex="-1"><h3>Две частые ловушки</h3><div class="reference-item"><h4>Virtual-деструктор нужен базе для полиморфного удаления</h4><p class="rule">Если производный объект удаляют через Base*, деструктор базы должен быть virtual; иначе delete имеет UB. Само наличие virtual-метода не доказывает, что такое удаление разрешено дизайном.</p></div><div class="reference-item"><h4>Срезка (slicing): по значению теряется часть наследника</h4><pre><code>Dog d;
+Animal a = d;   // Dog-часть отрезана, полиморфизм сломан
+// храни полиморфно: vector&lt;unique_ptr&lt;Animal&gt;&gt;</code></pre></div></section><section class="reference-section" id="station-2-section-5" tabindex="-1"><h3>Lookup, default arguments и downcast</h3><div class="reference-item"><h4>Имя в Derived скрывает весь overload set Base с тем же именем</h4><pre><code>struct Base { void f(int); void f(double); };
+struct Derived : Base {
+    using Base::f;       // вернуть overloads базы в lookup
+    void f(std::string);
+};</code></pre></div><div class="reference-item"><h4>Virtual body выбирается динамически, default argument — по static type</h4><p class="rule">Не меняй default arguments при override: вызов через <code>Base&amp;</code> возьмёт default из объявления Base, даже если выполнится тело Derived. Лучше передать аргумент явно или использовать non-virtual interface.</p></div><div class="reference-item"><h4>dynamic_cast проверяет полиморфный downcast во время выполнения</h4><p class="rule">Для pointer неудача даёт <code>nullptr</code>, для reference — <code>std::bad_cast</code>. Это инструмент на границе неоднородной иерархии, а не замена хорошему virtual-интерфейсу; база должна быть polymorphic.</p></div></section><section class="reference-section" id="station-2-section-6" tabindex="-1"><h3>Типичная реализация virtual</h3><div class="reference-item"><h4>vptr/vtable — распространённая ABI-модель</h4><p class="rule">Большинство ABI использует vptr/vtable, но стандарт требует только поведение динамического вызова и не предписывает внутреннюю таблицу.</p></div></section><section class="reference-section" id="station-2-section-7" tabindex="-1"><h3>Порядок вызовов и исключения</h3><div class="reference-item"><h4>Строительство: virtual bases → direct bases → fields → тело; разрушение обратно</h4><p class="rule">Инициализаторы баз и полей вычисляются по правилам языка, но сами подобъекты строятся в предписанном порядке, не по строкам initializer list. При исключении разрушаются только полностью построенные подобъекты.</p></div><div class="reference-item"><h4>Virtual-вызов в конструкторе/деструкторе не уходит в ещё не живущую derived-часть</h4><p class="rule">Во время конструктора/деструктора dispatch ограничен текущей строящейся или разрушающейся частью иерархии. Прямой или косвенный вызов pure virtual для строящегося/разрушающегося объекта из ctor/dtor даёт undefined behavior — это не способ вызвать реализацию наследника.</p></div></section><section class="reference-section" id="station-2-section-8" tabindex="-1"><h3>Выбор полиморфного интерфейса</h3><div class="reference-item"><h4>Композиция — содержит; публичное наследование — подставляется вместо</h4><p class="rule">Если нужен только готовый код базы, отношение is-a из этого не следует. Скрывай делегирование в поле; наследование оставь для осмысленной взаимозаменяемости по контракту.</p></div><div class="reference-item"><h4>clone сохраняет динамический тип копии</h4><p class="rule">В интерфейсе можно вернуть <code>unique_ptr&lt;Base&gt;</code>; наследник создаёт копию себя через <code>make_unique&lt;Derived&gt;(*this)</code>. <code>unique_ptr&lt;Derived&gt;</code> не является ковариантным возвращаемым типом для override — сигнатура остаётся <code>unique_ptr&lt;Base&gt;</code>.</p></div></section><section class="reference-section" id="station-2-section-9" tabindex="-1"><h3>Источники и подробные объяснения</h3><div class="reference-item"><h4>Правила языка, протоколы и документация</h4><p class="rule"><a href="https://eel.is/c++draft/class.virtual">Виртуальные функции</a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса.</p></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: Наследование и полиморфизм"><a href="#station-1">← Современный C++</a><a href="#station-3">STL, шаблоны, алгоритмы →</a></nav></div></details><details class="reference-group" id="station-3" open>
+<summary><span class="number">3</span><h2>STL, шаблоны, алгоритмы</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a class="button" href="cpp_station3_stl_templates.html">Читать полную станцию 3 ↗</a><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: STL, шаблоны, алгоритмы"><a href="#station-3-section-1">vector — контейнер по умолчанию</a><a href="#station-3-section-2">map / unordered_map / set</a><a href="#station-3-section-3">Стабильность и контракты контейнеров</a><a href="#station-3-section-4">Итераторы</a><a href="#station-3-section-5">Алгоритмы &lt;algorithm&gt;</a><a href="#station-3-section-6">Шаблоны</a><a href="#station-3-section-7">Современные удобства</a><a href="#station-3-section-8">Ranges, concepts и non-owning view</a><a href="#station-3-section-9">Erase и выбор контейнера</a><a href="#station-3-section-10">Выбор типа результата и поиск</a><a href="#station-3-section-11">Источники и подробные объяснения</a></nav>
+<section class="reference-section" id="station-3-section-1" tabindex="-1"><h3>vector — контейнер по умолчанию</h3><div class="reference-item"><h4>Динамический массив, непрерывная память</h4><pre><code>std::vector&lt;int&gt; v;
+v.push_back(10);          // добавить элемент
+v.size(); v[0]; v.at(0);  // [] без проверки, at() бросает при выходе
+v.reserve(1000);          // capacity &gt;= 1000, size не меняется
+v.resize(1000);           // size = 1000: элементы реально созданы</code></pre></div><div class="reference-item"><h4>Инвалидация зависит от операции и reallocation</h4><p class="rule">При reallocation у vector инвалидируются все ссылки, указатели и итераторы. Без reallocation вставка инвалидирует как минимум old end и позиции от места вставки. <code>erase</code> инвалидирует удалённые и всё после них. Перед сохранением iterator всегда проверь правило конкретной операции.</p></div></section><section class="reference-section" id="station-3-section-2" tabindex="-1"><h3>map / unordered_map / set</h3><div class="reference-item"><h4>map — O(log n) и порядок; unordered_map — O(1) в среднем, O(n) в худшем</h4><pre><code>std::map&lt;std::string,int&gt; m;
+++m[&quot;key&quot;];   // [] создаёт ключ с 0, если его нет</code></pre></div><div class="reference-item"><h4>Ловушка operator[]: создаёт ключ, если его нет</h4><p class="rule">Для проверки наличия — m.contains(key) (C++20) или m.find(key) != m.end().</p></div><div class="reference-item"><h4>set — уникальные значения в порядке comparator</h4><p class="rule">«Уникальность» определяется эквивалентностью comparator: ни <code>comp(a,b)</code>, ни <code>comp(b,a)</code>. Comparator обязан задавать strict weak ordering.</p></div></section><section class="reference-section" id="station-3-section-3" tabindex="-1"><h3>Стабильность и контракты контейнеров</h3><div class="reference-item"><h4>Node-based containers обычно сохраняют ссылки на не удалённые элементы</h4><p class="rule">У <code>map/set/list</code> вставка не инвалидирует references/iterators, а erase инвалидирует удалённое. У <code>unordered_*</code> rehash инвалидирует iterators, но не references/pointers на элементы; erase инвалидирует только удалённое. У <code>deque</code> правила зависят от операции — проверяй отдельно.</p></div><div class="reference-item"><h4>Comparator обязан задавать strict weak ordering</h4><pre><code>// плохо: &lt;= не является строгим порядком
+// std::sort(v.begin(), v.end(), [](auto a, auto b){ return a &lt;= b; });
+
+// обычно:
+std::sort(v.begin(), v.end(), std::less{});</code></pre></div><div class="reference-item"><h4>emplace — интерфейс построения, а не обещание «всегда быстрее»</h4><p class="rule">Он передаёт аргументы конструктору элемента, но копии/move, временные объекты и стоимость проверки зависят от контейнера и вызова. Для <code>map</code>, когда не хочешь строить mapped value при существующем ключе, смотри <code>try_emplace</code>.</p></div></section><section class="reference-section" id="station-3-section-4" tabindex="-1"><h3>Итераторы</h3><div class="reference-item"><h4>Полуоткрытый диапазон [begin, end)</h4><p class="rule">end() указывает ЗА последним элементом — не разыменовывать. Цикл: it != end().</p></div></section><section class="reference-section" id="station-3-section-5" tabindex="-1"><h3>Алгоритмы &lt;algorithm&gt;</h3><div class="reference-item"><h4>sort, find, count_if, transform, max_element</h4><pre><code>std::sort(v.begin(), v.end());               // по возрастанию
+std::sort(v.begin(), v.end(),
+          [](int a,int b){ return a&gt;b; });   // свой компаратор
+std::count_if(v.begin(), v.end(),
+              [](int x){ return x&gt;0; });     // подсчёт по условию
+auto it = std::find(v.begin(), v.end(), 8);  // вернёт итератор или end()</code></pre></div></section><section class="reference-section" id="station-3-section-6" tabindex="-1"><h3>Шаблоны</h3><div class="reference-item"><h4>Функция: template&lt;typename T&gt;</h4><pre><code>template&lt;typename T&gt;
+T myMax(T a, T b) { return a &gt; b ? a : b; }</code></pre></div><div class="reference-item"><h4>Аргументы шаблона можно указать явно; с C++17 иногда работает вывод CTAD</h4><pre><code>template&lt;typename T&gt;
+class Box { T value; public: Box(T v):value(v){} };
+Box&lt;int&gt; b(42);</code></pre></div><div class="reference-item"><h4>Определение шаблона обычно должно быть доступно при инстанцировании</h4><p class="rule">Поэтому template definitions обычно лежат в header. Разнести можно через явные instantiation definitions для заранее выбранного набора типов.</p></div></section><section class="reference-section" id="station-3-section-7" tabindex="-1"><h3>Современные удобства</h3><div class="reference-item"><h4>optional, structured bindings, auto</h4><pre><code>std::optional&lt;int&gt; r = find();
+if (r) use(*r);                 // значение или nullopt
+
+for (const auto&amp; [key, val] : m) { ... }  // распаковка пары</code></pre></div></section><section class="reference-section" id="station-3-section-8" tabindex="-1"><h3>Ranges, concepts и non-owning view</h3><div class="reference-item"><h4>Ranges принимают диапазон целиком и поддерживают projection</h4><pre><code>auto it = std::ranges::find(users, id, &amp;User::id);
+std::ranges::sort(users, std::less{}, &amp;User::name);</code></pre></div><div class="reference-item"><h4>Concept делает требования шаблона частью интерфейса</h4><pre><code>template&lt;class T&gt;
+concept Number = std::integral&lt;T&gt; || std::floating_point&lt;T&gt;;
+
+template&lt;Number T&gt; T twice(T value) { return value + value; }</code></pre></div><div class="reference-item"><h4>string_view/span не владеют памятью</h4><p class="rule">Они дешевы для параметров и срезов, но источник обязан жить дольше view. Не возвращай string_view на временную string и не храни span после уничтожения/reallocation контейнера.</p></div></section><section class="reference-section" id="station-3-section-9" tabindex="-1"><h3>Erase и выбор контейнера</h3><div class="reference-item"><h4>Удаляй из vector безопасным API</h4><pre><code>std::erase_if(values, [](int x) { return x &lt; 0; }); // C++20
+
+for (auto it = m.begin(); it != m.end(); ) {
+    if (expired(*it)) it = m.erase(it);
+    else ++it;
+}</code></pre></div><div class="reference-item"><h4>Big O — не вся стоимость</h4><p class="rule">Учитывай locality, аллокации, размер элемента, стабильность адресов и профиль операций. vector остаётся первым кандидатом; list/unordered_map выбирай по требуемому контракту и измерениям.</p></div></section><section class="reference-section" id="station-3-section-10" tabindex="-1"><h3>Выбор типа результата и поиск</h3><div class="reference-item"><h4>optional, variant и expected отвечают на разные вопросы</h4><p class="rule"><code>optional&lt;T&gt;</code> — значение или отсутствие; <code>variant&lt;A,B&gt;</code> — одно из перечисленных состояний; <code>expected&lt;T,E&gt;</code> (C++23) — успех или ошибка с причиной. Для variant обработай варианты через visit; get неверного активного типа бросает bad_variant_access.</p></div><div class="reference-item"><h4>Бинарный поиск требует подходящего порядка</h4><p class="rule">lower_bound требует разбиения диапазона относительно искомого значения и компаратора; сортировка тем же компаратором обеспечивает это для всех запросов. Для forward-итераторов число сравнений логарифмическое, но перемещений итератора может быть линейно.</p></div></section><section class="reference-section" id="station-3-section-11" tabindex="-1"><h3>Источники и подробные объяснения</h3><div class="reference-item"><h4>Правила языка, протоколы и документация</h4><p class="rule"><a href="https://eel.is/c++draft/containers">Контейнеры</a> · <a href="https://eel.is/c++draft/algorithms">Алгоритмы</a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса.</p></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: STL, шаблоны, алгоритмы"><a href="#station-2">← Наследование и полиморфизм</a><a href="#station-4">Обработка ошибок →</a></nav></div></details><details class="reference-group" id="station-4" open>
+<summary><span class="number">4</span><h2>Обработка ошибок</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a class="button" href="cpp_station4_error_handling.html">Читать полную станцию 4 ↗</a><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: Обработка ошибок"><a href="#station-4-section-1">Базовый механизм</a><a href="#station-4-section-2">Стандартные исключения</a><a href="#station-4-section-3">Свой тип исключения</a><a href="#station-4-section-4">RAII + исключения</a><a href="#station-4-section-5">Гарантии безопасности</a><a href="#station-4-section-6">noexcept</a><a href="#station-4-section-7">Выбор error channel</a><a href="#station-4-section-8">Ошибка на границе сервиса</a><a href="#station-4-section-9">Источники и подробные объяснения</a></nav>
+<section class="reference-section" id="station-4-section-1" tabindex="-1"><h3>Базовый механизм</h3><div class="reference-item"><h4>throw бросает, try/catch ловит; между ними стек разматывается</h4><pre><code>try {
+    risky();
+} catch (const std::out_of_range&amp; e) {   // конкретный — первым
+    handle(e);
+} catch (const std::exception&amp; e) {       // общий — последним
+    std::cerr &lt;&lt; e.what();
+}</code></pre></div><div class="reference-item"><h4>Объекты иерархии исключений обычно ловят по const-ссылке</h4><p class="rule"><code>catch (const std::exception&amp;)</code> — без slicing и с полиморфным <code>what()</code>. Порядок catch: от конкретного к общему. Для повторного выброса используй <code>throw;</code>, а не <code>throw e;</code>.</p></div></section><section class="reference-section" id="station-4-section-2" tabindex="-1"><h3>Стандартные исключения</h3><div class="reference-item"><h4>Иерархия во главе с std::exception</h4><pre><code>std::runtime_error(&quot;...&quot;)     // ошибка времени выполнения
+std::logic_error(&quot;...&quot;)       // ошибка логики (баг)
+std::out_of_range(&quot;...&quot;)      // бросает vector::at()
+std::invalid_argument(&quot;...&quot;)  // бросает std::stoi(&quot;abc&quot;)
+std::bad_alloc                // бросает new при нехватке памяти</code></pre></div></section><section class="reference-section" id="station-4-section-3" tabindex="-1"><h3>Свой тип исключения</h3><div class="reference-item"><h4>Наследуй от std::runtime_error — получишь готовый what()</h4><pre><code>class CollectorError : public std::runtime_error {
+public:
+    explicit CollectorError(const std::string&amp; m)
+        : std::runtime_error(m) {}
+};
+
+throw CollectorError(&quot;cannot open /proc/meminfo&quot;);</code></pre></div></section><section class="reference-section" id="station-4-section-4" tabindex="-1"><h3>RAII + исключения</h3><div class="reference-item"><h4>При раскрутке стека деструкторы вызываются — ресурсы освобождаются сами</h4><pre><code>void f() {
+    std::ifstream file(&quot;x&quot;);   // RAII
+    throw std::runtime_error(&quot;err&quot;);
+}   // деструктор file вызовется -&gt; файл закрыт</code></pre></div><div class="reference-item"><h4>RAII-деструктор не должен выпускать исключение наружу</h4><p class="rule">Язык допускает potentially-throwing destructor, но исключение из него при раскрутке другого исключения приводит к <code>std::terminate</code>. Проверяемую ошибку закрытия сообщай отдельным <code>close()/commit()</code>.</p></div></section><section class="reference-section" id="station-4-section-5" tabindex="-1"><h3>Гарантии безопасности</h3><div class="reference-item"><h4>Четыре уровня, от слабого к сильному</h4><p class="rule"><b>no guarantee</b> — после исключения контракт состояния не обещан (это не автоматически UB); <b>basic</b> — инварианты сохранены и утечек нет, конкретное состояние может быть unspecified; <b>strong</b> — охваченный контрактом наблюдаемый эффект «всё или ничего»; <b>no-throw</b> — исключение не выходит к вызывающему. Внешний I/O и другие необратимые эффекты сильная гарантия сами по себе не откатывает.</p></div><div class="reference-item"><h4>copy-and-swap — идиома для строгой гарантии</h4><pre><code>void update(Config&amp; cfg, const Data&amp; d) {
+    Config tmp = cfg;      // работаем на копии
+    tmp.apply(d);          // если бросит — состояние cfg прежнее
+    using std::swap;
+    swap(cfg, tmp);        // strong для cfg, если swap noexcept
+}
+// Файлы/сеть, изменённые tmp.apply(), автоматически не откатятся.</code></pre></div></section><section class="reference-section" id="station-4-section-6" tabindex="-1"><h3>noexcept</h3><div class="reference-item"><h4>Обещание не бросать; нарушил — terminate</h4><pre><code>void swap(T&amp; o) noexcept;
+T(T&amp;&amp; o) noexcept;              // move-конструктор
+T&amp; operator=(T&amp;&amp; o) noexcept;   // move-присваивание</code></pre></div><div class="reference-item"><h4>Зачем: vector перемещает вместо копирования</h4><p class="rule">Если move <code>noexcept</code>, vector может безопасно перемещать. Иначе для копируемого типа часто выберет копию; move-only тип всё равно придётся перемещать.</p></div></section><section class="reference-section" id="station-4-section-7" tabindex="-1"><h3>Выбор error channel</h3><div class="reference-item"><h4>Тип результата должен различать нужные вызывающему исходы</h4><pre><code>std::optional&lt;Metric&gt; find(Key); // ожидаемое отсутствие, без причины
+std::expected&lt;Config, ParseError&gt; parse(std::string_view); // C++23
+std::error_code removeFile(Path) noexcept; // явный системный status
+
+Config loadRequired(Path); // может throw: операция не может продолжаться</code></pre></div><div class="reference-item"><h4>expected&lt;T,E&gt; — обычная часть контракта, exception — нелокальный выход</h4><p class="rule">Не выбирай по лозунгу или предполагаемой скорости. Учитывай частоту исхода, необходимость причины, composability, ABI и политику проекта. На request/thread/C ABI границе исключение поймай и преобразуй в документированную ошибку.</p></div></section><section class="reference-section" id="station-4-section-8" tabindex="-1"><h3>Ошибка на границе сервиса</h3><div class="reference-item"><h4>Ошибка клиента, временный сбой и баг требуют разных действий</h4><p class="rule">Неверные данные верни как документированную ошибку; временный сбой оцени с учётом бюджета повторов; нарушение инварианта расследуй. catch (...) не означает, что можно безопасно продолжить любую операцию.</p></div><div class="reference-item"><h4>Таймаут не доказывает отсутствие эффекта</h4><p class="rule">Сервер мог выполнить запись, а ответ потеряться. Повтор безопасен только при соответствующем контракте операции или дедупликации. Один deadline (предельный момент завершения) ограничивает суммарное ожидание всех попыток.</p></div></section><section class="reference-section" id="station-4-section-9" tabindex="-1"><h3>Источники и подробные объяснения</h3><div class="reference-item"><h4>Правила языка, протоколы и документация</h4><p class="rule"><a href="https://eel.is/c++draft/except">Обработка исключений</a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса.</p></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: Обработка ошибок"><a href="#station-3">← STL, шаблоны, алгоритмы</a><a href="#station-5">Сборка, Git, Linux →</a></nav></div></details><details class="reference-group" id="station-5" open>
+<summary><span class="number">5</span><h2>Сборка, Git, Linux</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a class="button" href="cpp_station5_build_tools.html">Читать полную станцию 5 ↗</a><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: Сборка, Git, Linux"><a href="#station-5-section-1">Этапы компиляции</a><a href="#station-5-section-2">Заголовки и .cpp</a><a href="#station-5-section-3">CMake: минимум</a><a href="#station-5-section-4">CMake: библиотеки</a><a href="#station-5-section-5">ODR, linkage и ABI</a><a href="#station-5-section-6">CMake usage requirements</a><a href="#station-5-section-7">Структура проекта</a><a href="#station-5-section-8">Git: повседневное</a><a href="#station-5-section-9">Linux: минимум</a><a href="#station-5-section-10">Воспроизводимость и диагностика</a><a href="#station-5-section-11">Источники и подробные объяснения</a></nav>
+<section class="reference-section" id="station-5-section-1" tabindex="-1"><h3>Этапы компиляции</h3><div class="reference-item"><h4>Практический toolchain: препроцессинг → компиляция → ассемблирование → линковка</h4><p class="rule">В типичном native toolchain препроцессор обрабатывает директивы, compiler формирует код (часто через assembly/IR), assembler создаёт object file, linker соединяет objects и библиотеки. Это удобная модель GCC/Clang, а не требование ISO C++ обязательно сохранять отдельный .s на диске; драйвер обычно скрывает промежуточные шаги.</p></div><div class="reference-item"><h4>undefined reference = ошибка линковки</h4><p class="rule">Linker не нашёл подходящий символ. Причина может быть в отсутствующем definition/.cpp/library, несовпавшей сигнатуре или language linkage, порядке/режиме линковки либо visibility — смотри полное имя символа и команду link.</p></div></section><section class="reference-section" id="station-5-section-2" tabindex="-1"><h3>Заголовки и .cpp</h3><div class="reference-item"><h4>Объявление в .hpp, реализация в .cpp</h4><pre><code>// Metric.hpp
+#pragma once
+class Metric {
+    double value_ = 0.0;
+public:
+    double value() const;
+};
+
+// Metric.cpp
+#include &quot;Metric.hpp&quot;
+double Metric::value() const { return value_; }</code></pre></div><div class="reference-item"><h4>Template definition обычно доступно в месте инстанцирования</h4><p class="rule">Обычно оно находится в header. Для закрытого набора типов можно оставить definition в .cpp и выпустить explicit instantiation; <code>extern template</code> подавляет лишние инстанцирования.</p></div></section><section class="reference-section" id="station-5-section-3" tabindex="-1"><h3>CMake: минимум</h3><div class="reference-item"><h4>Описание проекта</h4><pre><code>cmake_minimum_required(VERSION 3.20)
+project(telemetry_agent LANGUAGES CXX)
+
+add_executable(agent main.cpp Metric.cpp)
+target_compile_features(agent PRIVATE cxx_std_20)</code></pre></div><div class="reference-item"><h4>Сборка в два шага</h4><pre><code>cmake -B build          # конфигурация (генерация)
+cmake --build build     # компиляция и линковка
+./build/agent           # запуск</code></pre></div></section><section class="reference-section" id="station-5-section-4" tabindex="-1"><h3>CMake: библиотеки</h3><div class="reference-item"><h4>Своё ядро в библиотеку + тонкий main</h4><pre><code>add_library(telemetry_core src/Metric.cpp src/Registry.cpp)
+target_include_directories(telemetry_core PUBLIC include)
+
+add_executable(agent main.cpp)
+target_link_libraries(agent PRIVATE telemetry_core)</code></pre></div><div class="reference-item"><h4>Внешняя зависимость через FetchContent</h4><pre><code>include(FetchContent)
+FetchContent_Declare(json
+    GIT_REPOSITORY https://github.com/nlohmann/json
+    GIT_TAG v3.11.3)
+FetchContent_MakeAvailable(json)
+target_link_libraries(agent PRIVATE nlohmann_json::nlohmann_json)</code></pre><p class="rule">Версия ниже — зафиксированный пример, не рекомендация последней версии. Для воспроизводимой сборки проекта выбери проверенный release/commit и учитывай обновления безопасности.</p></div></section><section class="reference-section" id="station-5-section-5" tabindex="-1"><h3>ODR, linkage и ABI</h3><div class="reference-item"><h4>Обычное external non-inline definition должно быть одним на программу</h4><p class="rule">Функция с телом в подключаемом header обычно даст multiple definition. <code>inline</code> разрешает эквивалентные definitions в разных translation units; это правило ODR, а не команда оптимизатору. Include guard действует только внутри одной TU.</p></div><div class="reference-item"><h4>Linkage и symbols объясняют ошибки линкера</h4><pre><code>namespace { void helper(); } // internal linkage в этой TU
+extern &quot;C&quot; int api_start(); // C language linkage, но не магическая ABI-совместимость C++ типов
+
+nm -C libcore.a
+readelf -Ws libcore.so
+ldd ./agent</code></pre></div><div class="reference-item"><h4>Shared library требует совместимого ABI и доступности loader-у</h4><p class="rule">ABI включает calling convention, mangling, layout/vtable и runtime. Private-поле публичного класса тоже может изменить layout. PImpl уменьшает ABI-поверхность, но стабильность всё равно нужно проектировать и версионировать.</p></div></section><section class="reference-section" id="station-5-section-6" tabindex="-1"><h3>CMake usage requirements</h3><div class="reference-item"><h4>PRIVATE / PUBLIC / INTERFACE описывают граф требований</h4><p class="rule">PRIVATE нужно самой цели; INTERFACE — её потребителям; PUBLIC — обоим. Если public header использует тип зависимости, её include/compile requirements обычно должны быть транзитивны. Предпочитай namespaced targets вроде <code>Threads::Threads</code>.</p></div><div class="reference-item"><h4>Диагностируй отдельными конфигурациями</h4><pre><code># runtime diagnostics, обычно разные builds
+-fsanitize=address,undefined -fno-omit-frame-pointer
+-fsanitize=thread
+
+cmake --preset dev
+cmake --build build/dev
+ctest --test-dir build/dev --output-on-failure</code></pre></div></section><section class="reference-section" id="station-5-section-7" tabindex="-1"><h3>Структура проекта</h3><div class="reference-item"><h4>Стандартная раскладка</h4><pre><code>project/
+├── CMakeLists.txt
+├── README.md
+├── .gitignore     # build/, *.o, бинарники
+├── include/       # заголовки .hpp
+├── src/           # реализация .cpp
+└── main.cpp</code></pre></div></section><section class="reference-section" id="station-5-section-8" tabindex="-1"><h3>Git: повседневное</h3><div class="reference-item"><h4>Базовый цикл</h4><pre><code>git status                  # что изменилось
+git add -p                  # выбрать фрагменты изменений
+git commit -m &quot;описание&quot;    # зафиксировать
+git log                     # история
+
+git fetch                   # получить состояние сервера
+git push                    # отправить коммиты</code></pre></div><div class="reference-item"><h4>Ветки</h4><pre><code>git checkout -b feature-x   # создать и перейти
+# ... работа, коммиты ...
+git checkout main
+git merge feature-x</code></pre></div></section><section class="reference-section" id="station-5-section-9" tabindex="-1"><h3>Linux: минимум</h3><div class="reference-item"><h4>Навигация и файлы</h4><pre><code>pwd / ls -la / cd dir
+cat file / less file / head -5 file
+grep MemTotal /proc/meminfo
+cp a b / mv a b / rm file / mkdir dir</code></pre></div><div class="reference-item"><h4>Система и права</h4><pre><code>ps aux / top / kill PID
+df -h / free -h
+chmod +x agent      # добавить право на исполнение
+sudo command        # только когда операция действительно требует прав
+# nvme: privilege зависит от команды/device permissions</code></pre></div></section><section class="reference-section" id="station-5-section-10" tabindex="-1"><h3>Воспроизводимость и диагностика</h3><div class="reference-item"><h4>Зафиксируй не только исходники</h4><p class="rule">Запиши версии компилятора, стандартной библиотеки, CMake, зависимости и параметры сборки. Тег зависимости удобен, но для строгой повторяемости нужен проверенный commit/hash; старый пример версии не является рекомендацией использовать её в новом проекте.</p></div><div class="reference-item"><h4>Сначала определи слой сбоя</h4><p class="rule">Ошибка синтаксиса — компилятор; undefined reference — линкер; missing .so — загрузчик; падение процесса — runtime. Для последнего собери символы, backtrace и минимальный сценарий; ASan/UBSan и TSan запускай в подходящих отдельных сборках.</p></div><div class="reference-item"><h4>Git: сначала просмотр, затем выбранные изменения</h4><p class="rule">git diff показывает незаписанные в index правки; git diff --cached — будущий коммит. git add -p выбирает фрагменты. merge сохраняет ветвление, rebase переписывает коммиты: не переписывай общую историю без согласования.</p></div></section><section class="reference-section" id="station-5-section-11" tabindex="-1"><h3>Источники и подробные объяснения</h3><div class="reference-item"><h4>Правила языка, протоколы и документация</h4><p class="rule"><a href="https://cmake.org/cmake/help/latest/command/target_link_libraries.html">CMake: target_link_libraries</a> · <a href="https://git-scm.com/docs">Git: документация</a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса.</p></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: Сборка, Git, Linux"><a href="#station-4">← Обработка ошибок</a><a href="#station-6">Многопоточность →</a></nav></div></details><details class="reference-group" id="station-6" open>
+<summary><span class="number">6</span><h2>Многопоточность</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a class="button" href="cpp_station6_multithreading.html">Читать полную станцию 6 ↗</a><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: Многопоточность"><a href="#station-6-section-1">Запуск потоков</a><a href="#station-6-section-2">Гонка данных</a><a href="#station-6-section-3">Виды мьютексов</a><a href="#station-6-section-4">RAII-обёртки</a><a href="#station-6-section-5">Deadlock</a><a href="#station-6-section-6">std::atomic</a><a href="#station-6-section-7">memory_order</a><a href="#station-6-section-8">Happens-before: быстрый алгоритм проверки</a><a href="#station-6-section-9">condition_variable</a><a href="#station-6-section-10">future / promise / async</a><a href="#station-6-section-11">Примитивы C++20</a><a href="#station-6-section-12">Прочее полезное</a><a href="#station-6-section-13">Потокобезопасный API и shutdown</a><a href="#station-6-section-14">Проверка конкурентного кода</a><a href="#station-6-section-15">Как выбрать инструмент</a><a href="#station-6-section-16">CAS, ожидание и пределы ускорения</a><a href="#station-6-section-17">Источники и подробные объяснения</a></nav>
+<section class="reference-section" id="station-6-section-1" tabindex="-1"><h3>Запуск потоков</h3><div class="reference-item"><h4>std::thread — обязателен join или detach</h4><pre><code>std::thread t(work, arg1);
+t.join();      // дождаться (обычный случай)
+// t.detach(); // отпустить (редко)
+// забыл оба -&gt; std::terminate при уничтожении</code></pre></div><div class="reference-item"><h4>Деструктор joinable jthread запрашивает остановку, затем делает join</h4><pre><code>std::jthread t(work);   // join в деструкторе
+
+// кооперативная остановка:
+std::jthread w([](std::stop_token st){
+    while (!st.stop_requested()) { ... }
+});
+w.request_stop();</code></pre></div><div class="reference-item"><h4>Аргументы материализуются для нового потока; ссылку передают явно</h4><pre><code>std::jthread t(f, std::ref(value)); // f получит T&amp;
+t.join(); // value жив до завершения f
+
+// Альтернатива: захват владеющего значения
+auto owned = value;
+std::jthread safe([owned] { use(owned); });
+// Если owned — view/указатель, данные всё ещё не принадлежат задаче.</code></pre></div></section><section class="reference-section" id="station-6-section-2" tabindex="-1"><h3>Гонка данных</h3><div class="reference-item"><h4>Несинхронизированный ++ обычного общего counter — UB</h4><p class="rule">Внутри три шага (прочитать → прибавить → записать), они переслаиваются. Формально гонка данных — это <b>UB</b>, а не просто неточность.</p></div></section><section class="reference-section" id="station-6-section-3" tabindex="-1"><h3>Виды мьютексов</h3><div class="reference-item"><h4>Четыре типа под разные задачи</h4><p class="rule"><b>mutex</b> — базовый выбор для взаимного исключения. <b>recursive_mutex</b> — повторный захват тем же потоком. <b>timed_mutex</b> — ждать с таймаутом (<code>try_lock_for</code>). <b>shared_mutex</b> (C++17) — много читателей ИЛИ один писатель.</p></div><div class="reference-item"><h4>shared_mutex: читают часто, пишут редко</h4><pre><code>std::shared_mutex m;
+
+// Фрагмент читателя:
+{ std::shared_lock lock(m); /* чтение */ }
+
+// Фрагмент писателя:
+{ std::unique_lock lock(m); /* изменение */ }
+// Это два отдельных критических участка, не upgrade блокировки.</code></pre></div></section><section class="reference-section" id="station-6-section-4" tabindex="-1"><h3>RAII-обёртки</h3><div class="reference-item"><h4>Четыре обёртки — ручные lock/unlock не пиши</h4><pre><code>std::lock_guard&lt;std::mutex&gt; l(m);    // по умолчанию, весь блок
+std::unique_lock&lt;std::mutex&gt; l(m);   // гибкая: unlock/lock, defer
+std::scoped_lock l(m1, m2);          // deadlock-avoiding общий захват
+std::shared_lock l(sharedMutex);     // читатель shared_mutex</code></pre></div><div class="reference-item"><h4>Мьютекс — поле рядом с данными</h4><pre><code>class Registry {
+    std::vector&lt;Metric&gt; data_;
+    mutable std::mutex mutex_;   // mutable для const-методов
+public:
+    std::size_t size() const {
+        std::lock_guard lock(mutex_);   // чтение тоже защищаем
+        return data_.size();
+    }
+};</code></pre></div></section><section class="reference-section" id="station-6-section-5" tabindex="-1"><h3>Deadlock</h3><div class="reference-item"><h4>Причина — разный порядок захвата</h4><p class="rule">A держит m1, ждёт m2; B держит m2, ждёт m1 → висят вечно.</p></div><div class="reference-item"><h4>Четыре способа избежать</h4><p class="rule">(1) единый порядок захвата везде; (2) <code>std::scoped_lock</code> для нескольких; (3) не вызывать чужой/виртуальный код под блокировкой; (4) меньше мьютексов и вложенности.</p></div></section><section class="reference-section" id="station-6-section-6" tabindex="-1"><h3>std::atomic</h3><div class="reference-item"><h4>Операции атомарны; lock-free зависит от типа и реализации</h4><pre><code>std::atomic&lt;int&gt; c{0};
+++c;                    // атомарно; lock-free проверяется отдельно
+c.load(); c.store(5);
+c.fetch_add(3);
+c.exchange(7);          // записать, вернуть старое
+
+int exp = 7;
+c.compare_exchange_strong(exp, 10);   // CAS: основа lock-free</code></pre></div><div class="reference-item"><h4>atomic или mutex</h4><p class="rule">Независимый счётчик или флаг часто выражается atomic RMW. Составной инвариант, check-then-act или несколько полей обычно проще защищать mutex. Atomic load + отдельный store не образуют транзакцию; «atomic быстрее» без benchmark не гарантируется.</p></div></section><section class="reference-section" id="station-6-section-7" tabindex="-1"><h3>memory_order</h3><div class="reference-item"><h4>Memory order задаёт гарантии atomic-операции, а не корректность всей программы</h4><p class="rule"><b>seq_cst</b> — по умолчанию и единый total order для seq_cst atomic-операций; он не чинит data race на обычной памяти. <b>relaxed</b> — атомарность/modification order без публикации соседних данных. Release synchronizes-with acquire, только когда acquire прочитал опубликованное значение (или release sequence). Ослабляй порядок лишь с доказанным happens-before и измеренной причиной.</p></div></section><section class="reference-section" id="station-6-section-8" tabindex="-1"><h3>Happens-before: быстрый алгоритм проверки</h3><div class="reference-item"><h4>Data race: конфликтующие потенциально одновременные доступы, хотя бы один неатомарный, без happens-before</h4><p class="rule">Нарисуй действия двух потоков. Внутри потока есть sequenced-before. Мост дают synchronizes-with: unlock → следующий lock того же mutex; release → acquire, прочитавший публикацию; завершение thread → успешный join. Транзитивная цепочка даёт happens-before. Моста нет — UB, а не просто «старое значение».</p></div><div class="reference-item"><h4>join публикует результат завершившегося worker</h4><pre><code>int result = 0;
+std::thread worker([&amp;] { result = 42; });
+worker.join();
+use(result); // запись worker happens-before чтения после join</code></pre></div></section><section class="reference-section" id="station-6-section-9" tabindex="-1"><h3>condition_variable</h3><div class="reference-item"><h4>Спать до события вместо busy waiting</h4><pre><code>// Общие m, cv, q и closed живут дольше обоих потоков.
+// Consumer (отдельный поток):
+{
+    std::unique_lock lock(m);
+    cv.wait(lock, [&amp;] { return closed || !q.empty(); });
+    // Под lock: извлечь элемент или обработать closed + empty.
+}
+
+// Producer (другой поток):
+{ std::lock_guard lock(m); q.push(x); }
+cv.notify_one(); // уведомление не хранит само состояние
+// Полный протокол очереди также проверяет closed перед push.</code></pre></div><div class="reference-item"><h4>Почему unique_lock и предикат</h4><p class="rule"><code>wait</code> отпускает мьютекс на время сна и берёт обратно — <code>lock_guard</code> так не умеет. Предикат нужен из-за <b>ложных пробуждений</b> (поток может проснуться сам).</p></div></section><section class="reference-section" id="station-6-section-10" tabindex="-1"><h3>future / promise / async</h3><div class="reference-item"><h4>std::async связывает задачу с future, но не задаёт ограниченный пул</h4><pre><code>auto f = std::async(std::launch::async, work, arg);
+int result = f.get();   // ждёт, получает value или повторно бросает exception
+
+// Без явной policy реализация вправе выбрать deferred.
+// Освобождение последней ссылки на async shared state может ждать задачу;
+// временные future способны сериализовать последовательные вызовы.</code></pre></div><div class="reference-item"><h4>promise/future — канал для результата вручную</h4><pre><code>std::promise&lt;int&gt; p;
+std::future&lt;int&gt; f = p.get_future();
+std::thread t([p = std::move(p)]() mutable {
+    p.set_value(42);
+});
+t.join();</code></pre></div><div class="reference-item"><h4>future переносит сохранённое исключение задачи</h4><pre><code>try {
+    auto v = f.get(); // shared state повторно бросит exception здесь
+} catch (const CollectorError&amp; e) { log(e.what()); }
+
+// Непойманное исключение из обычной thread function -&gt; terminate.</code></pre></div><div class="reference-item"><h4>get() — один раз</h4><p class="rule">После <code>future::get()</code> future больше не valid; второй get нарушает предусловие. Для нескольких получателей/чтений используют <code>std::shared_future</code>.</p></div><div class="reference-item"><h4>packaged_task — задача-объект без автозапуска</h4><p class="rule">Оборачивает функцию + future, но не запускает: можно положить в очередь. Основа пулов потоков.</p></div></section><section class="reference-section" id="station-6-section-11" tabindex="-1"><h3>Примитивы C++20</h3><div class="reference-item"><h4>Семафор — счётчик разрешений</h4><pre><code>std::counting_semaphore&lt;4&gt; limit(4);
+limit.acquire();   // взять (ждёт, если нет)
+// ... не более 4 потоков здесь ...
+limit.release();   // вернуть
+
+std::binary_semaphore sig(0);   // сигнализация между потоками</code></pre></div><div class="reference-item"><h4>latch — одноразовый счётчик обратного отсчёта</h4><pre><code>std::latch done(3);
+done.count_down();      // «я закончил» (в каждом потоке)
+done.wait();            // ждём, пока все три отчитаются</code></pre></div><div class="reference-item"><h4>barrier — многоразовый, для повторяющихся фаз</h4><pre><code>std::barrier sync(3, []() noexcept { publishNoThrow(); });
+// в цикле каждого потока:
+sync.arrive_and_wait();   // ждём всех и completion, потом идём дальше</code></pre></div></section><section class="reference-section" id="station-6-section-12" tabindex="-1"><h3>Прочее полезное</h3><div class="reference-item"><h4>call_once — ровно одно успешно завершившееся выполнение</h4><pre><code>std::once_flag flag;
+std::call_once(flag, initConfig);  // после исключения следующая попытка повторит вызов
+
+// проще для простых случаев:
+Config&amp; get() { static Config c = load(); return c; }  // синхронизирована инициализация, не все обращения к c</code></pre></div><div class="reference-item"><h4>thread_local — отдельный объект на поток</h4><p class="rule">Сам <code>thread_local</code>-объект обычно не разделяется, но указатель на него можно передать другому потоку, а его поля могут ссылаться на общее состояние. Поэтому отсутствие синхронизации следует из отсутствия совместного доступа, а не только из ключевого слова.</p></div><div class="reference-item"><h4>false sharing — переменные в одной кэш-линии</h4><p class="rule">Разные потоки меняют соседние объекты → coherence может гонять одну cache line без data race. Универсального размера 64 стандарт не обещает: ориентир — <code>std::hardware_destructive_interference_size</code>, а необходимость padding подтверждай размещением и benchmark.</p></div></section><section class="reference-section" id="station-6-section-13" tabindex="-1"><h3>Потокобезопасный API и shutdown</h3><div class="reference-item"><h4>Два thread-safe метода не образуют атомарную операцию</h4><pre><code>// TOCTOU: между вызовами другой consumer меняет очередь
+if (!q.empty()) q.pop();
+
+// контракт лучше выразить одной линейризуемой операцией
+std::optional&lt;T&gt; try_pop();</code></pre></div><div class="reference-item"><h4>Не возвращай reference/iterator, защита которого кончилась вместе с lock</h4><p class="rule">После unlock другой поток может изменить или удалить объект. Верни snapshot/value либо предоставь одну операцию под lock с документированным запретом re-entry/callback-риском.</p></div><div class="reference-item"><h4>Очереди нужны close и backpressure</h4><p class="rule">Bounded queue ограничивает память и явно выбирает overload policy: block, reject, timeout или drop. Shutdown: запретить новые задачи → разбудить ожидающих/request_stop → drain/cancel по контракту → join workers → разрушить их зависимости. <code>stop_token</code> кооперативен и не прерывает произвольный blocking syscall.</p></div></section><section class="reference-section" id="station-6-section-14" tabindex="-1"><h3>Проверка конкурентного кода</h3><div class="reference-item"><h4>TSan — динамический детектор, не доказательство</h4><pre><code>c++ -std=c++20 -O1 -g -fsanitize=thread \
+    -fno-omit-frame-pointer test.cpp -pthread
+./a.out</code></pre></div><div class="reference-item"><h4>Три слоя уверенности</h4><p class="rule">(1) Инварианты, lifetime и граф happens-before; (2) направленные тесты + barriers/latches + stress + TSan; (3) production metrics: queue depth, lock wait, active workers, timeout/drop и shutdown latency. Нельзя benchmark-ить UB.</p></div></section><section class="reference-section" id="station-6-section-15" tabindex="-1"><h3>Как выбрать инструмент</h3><div class="reference-item"><h4>Быстрый ориентир</h4><p class="rule">Одна/несколько независимых задач с результатом → <b>future/async</b>; постоянный или bounded поток работ → очередь + pool/executor. Общие данные → <b>mutex + RAII lock</b>. Независимый счётчик/флаг → <b>atomic</b>. Много чтений, редкая запись → кандидат <b>shared_mutex</b> после измерения. Ждать изменения состояния → <b>condition_variable</b>. Ограничить одновременный вход → <b>semaphore</b>. Дождаться группы → <b>latch</b>. Повторять синхронные фазы → <b>barrier</b>. Сначала формулируй invariant/lifetime/shutdown, затем выбирай примитив.</p></div></section><section class="reference-section" id="station-6-section-16" tabindex="-1"><h3>CAS, ожидание и пределы ускорения</h3><div class="reference-item"><h4>compare_exchange обновляет expected при неудаче</h4><p class="rule">CAS сравнивает значение с expected; при несовпадении записывает фактическое значение в expected. weak может отказать ложно — обычно нужен цикл. Успех одного CAS не решает lifetime узлов: ABA и освобождение памяти требуют отдельного протокола.</p></div><div class="reference-item"><h4>atomic::wait ждёт изменения значения, а не запоминает события</h4><p class="rule">В C++20 сначала меняют atomic, затем вызывают notify_one/all. Уведомление без изменения значения не гарантирует выход из wait; переход A → B → A может быть не замечен. Для очереди задач нужен счётчик или предикат состояния.</p></div><div class="reference-item"><h4>Больше потоков не означает меньше задержку</h4><p class="rule">Если доля p работы распараллеливается, идеальная оценка ускорения на N исполнителях: 1 / ((1 − p) + p/N). При p = 0,9 и N = 4 это около 3,08. Реальные блокировки, планировщик и обмен данными обычно снижают выигрыш.</p></div></section><section class="reference-section" id="station-6-section-17" tabindex="-1"><h3>Источники и подробные объяснения</h3><div class="reference-item"><h4>Правила языка, протоколы и документация</h4><p class="rule"><a href="https://eel.is/c++draft/intro.races">Модель памяти и гонки</a> · <a href="https://eel.is/c++draft/thread">Потоки и синхронизация</a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса.</p></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: Многопоточность"><a href="#station-5">← Сборка, Git, Linux</a><a href="#station-7">Сеть, сокеты и HTTP →</a></nav></div></details><details class="reference-group" id="station-7" open>
+<summary><span class="number">7</span><h2>Сеть, сокеты и HTTP</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a class="button" href="cpp_station7_networking.html">Читать полную станцию 7 ↗</a><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: Сеть, сокеты и HTTP"><a href="#station-7-section-1">7.1 · Путь запроса: имя, адрес, соединение</a><a href="#station-7-section-2">7.2 · Что добавляют сетевые уровни</a><a href="#station-7-section-3">7.3 · TCP, UDP и QUIC</a><a href="#station-7-section-4">7.4 · POSIX sockets: чтение и запись</a><a href="#station-7-section-5">7.5 · epoll: готовность не равна завершению</a><a href="#station-7-section-6">7.6 · Boost.Asio и время жизни</a><a href="#station-7-section-7">7.7 · HTTP framing и TLS</a><a href="#station-7-section-8">7.8 · Нагрузка, таймауты и диагностика</a><a href="#station-7-section-9">Источники и подробные объяснения</a></nav>
+<section class="reference-section" id="station-7-section-1" tabindex="-1"><h3>7.1 · Путь запроса: имя, адрес, соединение</h3><div class="reference-item"><h4>DNS разрешает имя; маршрутизация доставляет IP-пакеты</h4><p class="rule">DNS-ответ может прийти из кэша; имя может иметь несколько адресов. Порт выбирает транспортную конечную точку, а не URL-путь. HTTP-путь разбирает уже приложение. Проверяй DNS, соединение, TLS и HTTP как отдельные этапы.</p></div><div class="reference-item"><h4>localhost относится к текущему сетевому окружению</h4><p class="rule">127.0.0.1 и ::1 — loopback; внутри контейнера это обычно сам контейнер. Bind на 0.0.0.0 означает все локальные IPv4-интерфейсы, а не адрес, который клиент должен использовать.</p></div></section><section class="reference-section" id="station-7-section-2" tabindex="-1"><h3>7.2 · Что добавляют сетевые уровни</h3><div class="reference-item"><h4>Инкапсуляция добавляет служебные поля, а не новые HTTP-запросы</h4><p class="rule">Для обычного HTTP/1.1 поверх TCP: байты HTTP → TCP-заголовок и часть потока → IP-заголовок → кадр канального уровня. При HTTPS между HTTP и TCP находятся TLS records. Границы HTTP-сообщений, TLS records, TCP-сегментов и кадров не обязаны совпадать.</p></div><div class="reference-item"><h4>MTU ограничивает пакет на канале</h4><p class="rule">TCP делит поток на сегменты; IP и транспортные заголовки занимают часть доступного размера. MTU, MSS и размер буфера recv — не одно и то же. По одному маленькому recv нельзя заключить, что отправитель послал маленькое сообщение.</p></div></section><section class="reference-section" id="station-7-section-3" tabindex="-1"><h3>7.3 · TCP, UDP и QUIC</h3><div class="reference-item"><h4>TCP — упорядоченный поток байтов, не очередь сообщений</h4><p class="rule">Запиши протокол границ: длина, разделитель с экранированием или готовый HTTP-парсер. Успешный send ещё не означает, что сервер обработал команду; для этого нужен ответ уровня приложения.</p></div><div class="reference-item"><h4>UDP сохраняет границы датаграмм, но не обещает доставку</h4><p class="rule">Потери, дубликаты и перестановки учитываются протоколом приложения. QUIC работает поверх UDP, добавляет защищённые соединения и надёжные потоки; потеря данных одного потока не требует упорядочивать с ним доставку других, хотя общая перегрузка влияет на соединение.</p></div></section><section class="reference-section" id="station-7-section-4" tabindex="-1"><h3>7.4 · POSIX sockets: чтение и запись</h3><div class="reference-item"><h4>Частичные операции — нормальный результат</h4><p class="rule">send может принять лишь часть буфера: сохрани смещение. Для TCP recv с ненулевым размером буфера возвращает >0 байты, 0 — EOF, -1 — ошибку. EINTR и EAGAIN/EWOULDBLOCK обрабатываются по режиму операции; EOF не обязательно означает, что ты уже закончил отправку.</p></div><div class="reference-item"><h4>У сокета должен быть владелец</h4><p class="rule">Закрывай descriptor ровно один раз RAII-объектом. Для неблокирующего connect EINPROGRESS — начало ожидания; после готовности проверь SO_ERROR. Учти SIGPIPE при записи в закрытое соединение; способ подавления зависит от платформы.</p></div></section><section class="reference-section" id="station-7-section-5" tabindex="-1"><h3>7.5 · epoll: готовность не равна завершению</h3><div class="reference-item"><h4>Событие разрешает попробовать I/O без блокировки</h4><p class="rule">В режиме edge-triggered используй неблокирующие дескрипторы и обслуживай чтение/запись до EAGAIN; иначе можно не получить нового ребра. Если вводишь квоту ради справедливости, сохрани готовую работу и явно запланируй её продолжение.</p></div><div class="reference-item"><h4>Не подписывайся постоянно на запись без данных</h4><p class="rule">EPOLLOUT часто готов: включай интерес, когда есть неотправленный буфер, и снимай после его опустошения. Не выполняй долгий CPU-код или блокирующий вызов в event loop.</p></div></section><section class="reference-section" id="station-7-section-6" tabindex="-1"><h3>7.6 · Boost.Asio и время жизни</h3><div class="reference-item"><h4>Буфер обязан дожить до completion handler</h4><p class="rule">async_write не делает владельцем переданный buffer. Состояние сессии должно хранить данные до завершения; не запускай пересекающиеся составные записи в один stream. Очередь исходящих сообщений делает порядок явным.</p></div><div class="reference-item"><h4>strand сериализует обработчики, но не привязывает к одному потоку</h4><p class="rule">Все обращения к защищаемому состоянию должны идти через тот же strand или другой согласованный механизм. Таймер, отмена и completion могут конкурировать логически: заверши запрос один раз, а оставшиеся callbacks обработай безопасно.</p></div></section><section class="reference-section" id="station-7-section-7" tabindex="-1"><h3>7.7 · HTTP framing и TLS</h3><div class="reference-item"><h4>Границы HTTP/1.1 разбираются по правилам протокола</h4><p class="rule">Пустая строка заканчивает заголовки, не обязательно тело. Длина зависит от статуса, метода и полей framing; противоречивые длины опасны для proxy и backend. Не пиши production HTTP-парсер из нескольких split.</p></div><div class="reference-item"><h4>TLS шифрует канал, но не заменяет проверку прав</h4><p class="rule">Проверь доверие сертификату и имя сервера; не отключай verification ради исправления ошибки. TLS может завершаться на reverse proxy: отдельно защити следующий участок и доверяй forwarded-заголовкам только от известного proxy.</p></div><div class="reference-item"><h4>HTTP/2 и HTTP/3 меняют транспорт сообщений</h4><p class="rule">HTTP/2 использует потоки внутри одного TCP-соединения; потеря TCP-сегмента может задержать их все. HTTP/3 работает поверх QUIC. Версия протокола сама по себе не исправляет медленный обработчик или неограниченную очередь.</p></div></section><section class="reference-section" id="station-7-section-8" tabindex="-1"><h3>7.8 · Нагрузка, таймауты и диагностика</h3><div class="reference-item"><h4>Backpressure ограничивает накопление работы</h4><p class="rule">Задай пределы на соединения, тело запроса, очередь и исходящий буфер. При превышении явно выбери отказ, ожидание в пределах deadline или сброс по контракту. Иначе медленный клиент способен удерживать память без границы.</p></div><div class="reference-item"><h4>Проверяй и пропускную способность, и хвост задержек</h4><p class="rule">Для устойчивой системы L = λW: среднее число запросов в системе равно средней интенсивности поступления, умноженной на среднее время в ней. 200 запросов/с × 0,05 с = 10 запросов. Это средние, не формула p99 и не гарантия устойчивости при перегрузке.</p></div><div class="reference-item"><h4>Диагностика идёт от внешнего симптома к узкому месту</h4><p class="rule">curl -v помогает увидеть этап HTTP/TLS, ss — сокеты, tcpdump — пакеты при нужных правах. На сервере сопоставь latency, ошибки, CPU, очередь и время зависимостей. Не записывай токены и тела с секретами в диагностический лог.</p></div></section><section class="reference-section" id="station-7-section-9" tabindex="-1"><h3>Источники и подробные объяснения</h3><div class="reference-item"><h4>Правила языка, протоколы и документация</h4><p class="rule"><a href="https://man7.org/linux/man-pages/man2/recv.2.html">Linux: recv</a> · <a href="https://man7.org/linux/man-pages/man7/epoll.7.html">Linux: epoll</a> · <a href="https://www.boost.org/doc/libs/latest/doc/html/boost_asio/overview/core/strands.html">Boost.Asio: strand</a> · <a href="https://httpwg.org/specs/rfc9112.html">HTTP/1.1: RFC 9112</a> · <a href="https://www.rfc-editor.org/rfc/rfc9000.html">QUIC: RFC 9000</a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса.</p></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: Сеть, сокеты и HTTP"><a href="#station-6">← Многопоточность</a><a href="#station-8">REST API и C++-сервис →</a></nav></div></details><details class="reference-group" id="station-8" open>
+<summary><span class="number">8</span><h2>REST API и C++-сервис</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a class="button" href="cpp_station8_rest_api.html">Читать полную станцию 8 ↗</a><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: REST API и C++-сервис"><a href="#station-8-section-1">8.1 · Контракт API</a><a href="#station-8-section-2">8.2 · Методы и статусы</a><a href="#station-8-section-3">8.3 · Валидация и ошибки</a><a href="#station-8-section-4">8.4 · Слои C++-сервиса</a><a href="#station-8-section-5">8.5 · Конкурентные изменения и повторы</a><a href="#station-8-section-6">8.6 · Доверие и авторизация</a><a href="#station-8-section-7">8.7 · Совместимость, списки и кэш</a><a href="#station-8-section-8">8.8 · Асинхронные операции и события</a><a href="#station-8-section-9">8.9 · Что проверить перед демонстрацией API</a><a href="#station-8-section-10">Источники и подробные объяснения</a></nav>
+<section class="reference-section" id="station-8-section-1" tabindex="-1"><h3>8.1 · Контракт API</h3><div class="reference-item"><h4>API обещает поведение, а не только JSON</h4><p class="rule">Зафиксируй методы, пути, типы полей, ошибки, права, лимиты и повторы. HTTP+JSON ещё не означает соблюдение всех ограничений REST. Stateless означает отсутствие необходимости в скрытом контексте прошлых запросов на сервере, а не запрет хранения ресурсов.</p></div></section><section class="reference-section" id="station-8-section-2" tabindex="-1"><h3>8.2 · Методы и статусы</h3><div class="reference-item"><h4>Безопасность и идемпотентность — разные свойства</h4><p class="rule">GET/HEAD не запрашивают изменение состояния; PUT и DELETE идемпотентны по ожидаемому эффекту. Повторный DELETE может дать другой статус. POST и PATCH не идемпотентны автоматически; свойство можно обеспечить контрактом.</p></div><div class="reference-item"><h4>Ответ должен соответствовать факту</h4><p class="rule">201 — ресурс создан; 202 — принят, но ещё не завершён; 204 — без содержимого. 400 — некорректный запрос, 404 — ресурс не найден, 409 — конфликт состояния, 412 — не выполнено условие запроса. 401 требует подходящего WWW-Authenticate; 403 — отказ в доступе.</p></div></section><section class="reference-section" id="station-8-section-3" tabindex="-1"><h3>8.3 · Валидация и ошибки</h3><div class="reference-item"><h4>Проверяй вход слоями</h4><p class="rule">Сначала лимит байтов и Content-Type, затем синтаксис JSON, типы/диапазоны, после этого бизнес-условия. Пропущенное поле, null и пустая строка могут означать разное. Не превращай любое исключение парсинга и бизнес-логики в один и тот же 500.</p></div><div class="reference-item"><h4>Ошибка должна помогать клиенту, но не раскрывать внутренности</h4><p class="rule">Problem Details (RFC 9457) задаёт application/problem+json и поля type, title, status, detail, instance. Это формат, не каталог всех ошибок. Добавляй машинно-читаемые детали валидации по контракту; не выдавай stack trace, пароли и SQL.</p></div></section><section class="reference-section" id="station-8-section-4" tabindex="-1"><h3>8.4 · Слои C++-сервиса</h3><div class="reference-item"><h4>Handler переводит HTTP, сервис выполняет правило, хранилище держит данные</h4><p class="rule">Handler разбирает запрос и формирует ответ. Сервис проверяет бизнес-инвариант. Хранилище обеспечивает согласованный доступ. Не возвращай ссылку на элемент, который другой запрос может удалить после отпускания lock.</p></div><div class="reference-item"><h4>Память процесса — не долговечное хранилище</h4><p class="rule">Mutex защищает данные только внутри согласованного процесса. Перезапуск теряет in-memory задачи, несколько реплик имеют разные копии. Не обещай сохранность и общую дедупликацию без механизма, который действительно это обеспечивает.</p></div></section><section class="reference-section" id="station-8-section-5" tabindex="-1"><h3>8.5 · Конкурентные изменения и повторы</h3><div class="reference-item"><h4>Проверка версии и запись должны быть одной операцией</h4><p class="rule">ETag/If-Match помогают обнаружить изменение после чтения. Но сервер должен атомарно проверить версию и применить запись; отдельные find и update всё ещё допускают lost update. При несовпадении предусловия верни 412.</p></div><div class="reference-item"><h4>Ключ идемпотентности требует серверного протокола</h4><p class="rule">Свяжи ключ с пользователем, операцией и содержимым запроса. Определи срок хранения, ответ на другой payload с тем же ключом и одновременные повторы. Фиксация эффекта и результата дедупликации не должна оставлять окно для двойной операции.</p></div><div class="reference-item"><h4>Повторы ограничены общим бюджетом</h4><p class="rule">Используй backoff с jitter (случайным разбросом задержки), предел попыток и общий deadline. Не повторяй заведомо неверный ввод. Если ответ потерян, сначала учитывай возможность уже выполненного эффекта.</p></div></section><section class="reference-section" id="station-8-section-6" tabindex="-1"><h3>8.6 · Доверие и авторизация</h3><div class="reference-item"><h4>Знать пользователя недостаточно: проверь доступ к объекту</h4><p class="rule">Аутентификация отвечает «кто», авторизация — «что разрешено». Проверяй владельца/tenant каждой записи и операции; случайный ID не является защитой. Проверяй подпись и необходимые claims токена по принятой политике.</p></div><div class="reference-item"><h4>CORS не защищает API от небраузерных клиентов</h4><p class="rule">Это политика браузера о доступе к ответу другого origin. CSRF касается запросов с автоматически прикрепляемыми credentials, например cookie. Нужны соответствующие SameSite/CSRF меры; TLS и CORS их не заменяют.</p></div></section><section class="reference-section" id="station-8-section-7" tabindex="-1"><h3>8.7 · Совместимость, списки и кэш</h3><div class="reference-item"><h4>Новый обязательный параметр может сломать старого клиента</h4><p class="rule">Версионируй поведение осознанно. Зафиксируй схему и примеры в OpenAPI, проверь контрактными тестами. Даже добавление enum-варианта может сломать клиента, который не умеет обрабатывать неизвестное значение.</p></div><div class="reference-item"><h4>Пагинация требует устойчивого порядка</h4><p class="rule">Offset прост, но при изменениях возможны пропуски/повторы. Cursor должен учитывать сортировку и уникальный tie-breaker; сам по себе он не даёт snapshot. Ограничь размер страницы и не доверяй непроверенному содержимому курсора.</p></div><div class="reference-item"><h4>Кэширование — часть контракта ответа</h4><p class="rule">no-cache требует проверки перед повторным использованием, а no-store запрещает хранение. Для условного GET валидатор помогает ответить 304 без содержимого. Учитывай персональные данные и Vary: общий кэш не должен смешать ответы разных пользователей.</p></div></section><section class="reference-section" id="station-8-section-8" tabindex="-1"><h3>8.8 · Асинхронные операции и события</h3><div class="reference-item"><h4>202 — это обещание принять работу, а не выполнить её успешно</h4><p class="rule">Верни способ узнать статус операции: pending/running/succeeded/failed и результат по контракту. Определи срок хранения, отмену и поведение после рестарта. Webhook требует проверки отправителя и защиты от повторной доставки.</p></div><div class="reference-item"><h4>SSE, WebSocket и polling решают разные задачи</h4><p class="rule">Polling проще, но создаёт повторные запросы. SSE подходит для потока событий сервер → клиент, WebSocket — для двустороннего обмена. Во всех вариантах нужны лимиты буфера, восстановление соединения и правила повторов/потери событий.</p></div></section><section class="reference-section" id="station-8-section-9" tabindex="-1"><h3>8.9 · Что проверить перед демонстрацией API</h3><div class="reference-item"><h4>Проверяй не только счастливый путь</h4><p class="rule">Тесты: валидный запрос, неверный тип, отсутствующий ресурс, чужой объект, одновременное обновление, повтор после таймаута, превышение лимита, рестарт. Изолируй состояние тестов; отдельно проверь бизнес-логику и полный HTTP-путь.</p></div><div class="reference-item"><h4>Объясняй границы учебного проекта честно</h4><p class="rule">Назови место хранения, число процессов, механизм синхронизации, лимиты и известные отказы. Метрики latency/error rate, корреляция запросов и health endpoints помогают искать сбои, но не заменяют долговечность и корректный контракт.</p></div></section><section class="reference-section" id="station-8-section-10" tabindex="-1"><h3>Источники и подробные объяснения</h3><div class="reference-item"><h4>Правила языка, протоколы и документация</h4><p class="rule"><a href="https://httpwg.org/specs/rfc9110.html">HTTP semantics: RFC 9110</a> · <a href="https://www.rfc-editor.org/rfc/rfc9457.html">Problem Details: RFC 9457</a> · <a href="https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html">OWASP: REST Security</a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса.</p></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: REST API и C++-сервис"><a href="#station-7">← Сеть, сокеты и HTTP</a><a href="#station-9">Базы данных и PostgreSQL →</a></nav></div></details><details class="reference-group" id="station-9" open>
+<summary><span class="number">9</span><h2>Базы данных и PostgreSQL</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a class="button" href="cpp_station9_databases.html">Читать полную станцию 9 ↗</a><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: Базы данных и PostgreSQL"><a href="#station-9-section-1">Ограничения</a><a href="#station-9-section-2">SQL и NULL</a><a href="#station-9-section-3">Транзакция</a><a href="#station-9-section-4">Конкуренция</a><a href="#station-9-section-5">Изоляция</a><a href="#station-9-section-6">Индексы</a><a href="#station-9-section-7">C++ и пул</a><a href="#station-9-section-8">Восстановление</a><a href="#station-9-section-9">Проектирование</a><a href="#station-9-section-10">Источники</a></nav>
+<section class="reference-section" id="station-9-section-1" tabindex="-1"><h3>Ограничения</h3><div class="reference-item"><h4>Ограничения</h4><p class="rule">PRIMARY KEY определяет строку; FOREIGN KEY проверяет ссылку, но не права пользователя. CHECK не заменяет NOT NULL.</p></div></section><section class="reference-section" id="station-9-section-2" tabindex="-1"><h3>SQL и NULL</h3><div class="reference-item"><h4>SQL и NULL</h4><p class="rule">IS NULL проверяет отсутствие значения; ORDER BY задаёт порядок. LEFT JOIN сохраняет строки без пары; COUNT(expr) не считает NULL.</p></div></section><section class="reference-section" id="station-9-section-3" tabindex="-1"><h3>Транзакция</h3><div class="reference-item"><h4>Транзакция</h4><p class="rule">Успех приложения — после COMMIT. Внешний email не откатывается. Потеря ответа на COMMIT может оставить исход неизвестным.</p></div></section><section class="reference-section" id="station-9-section-4" tabindex="-1"><h3>Конкуренция</h3><div class="reference-item"><h4>Конкуренция</h4><p class="rule">UPDATE ... WHERE version = ожидаемая RETURNING ... предотвращает молчаливое затирание при соблюдении протокола всеми писателями. Ноль строк — отдельный исход.</p></div></section><section class="reference-section" id="station-9-section-5" tabindex="-1"><h3>Изоляция</h3><div class="reference-item"><h4>Изоляция</h4><p class="rule">Read Committed: снимок на команду. Repeatable Read: стабильный снимок, но возможен write skew. Serializable требует обработки отказов и повтора всей транзакции.</p></div></section><section class="reference-section" id="station-9-section-6" tabindex="-1"><h3>Индексы</h3><div class="reference-item"><h4>Индексы</h4><p class="rule">B-tree: равенство, диапазон, порядок. Hash: равенство, не UNIQUE в PostgreSQL. Проверяй реальный план и число строк; EXPLAIN ANALYZE выполняет запрос.</p></div></section><section class="reference-section" id="station-9-section-7" tabindex="-1"><h3>C++ и пул</h3><div class="reference-item"><h4>C++ и пул</h4><p class="rule">Параметры передаются отдельно от SQL. Соединение имеет одного владельца на время транзакции. Дедлайн HTTP сам по себе не очищает соединение.</p></div></section><section class="reference-section" id="station-9-section-8" tabindex="-1"><h3>Восстановление</h3><div class="reference-item"><h4>Восстановление</h4><p class="rule">Схему меняют совместимо: расширение, переход, удаление старого. Копию проверяют восстановлением. Sequence допускает пропуски; кэш может устареть.</p></div></section><section class="reference-section" id="station-9-section-9" tabindex="-1"><h3>Проектирование</h3><div class="reference-item"><h4>Проектирование</h4><p class="rule">N+1 — дополнительные запросы на каждый объект. Денормализация требует источника истины и пересчёта. Retention ограничивает срок хранения. ctid не является устойчивым публичным ID.</p></div></section><section class="reference-section" id="station-9-section-10" tabindex="-1"><h3>Источники</h3><div class="reference-item"><h4>Источники</h4><p class="rule"><a href="https://www.postgresql.org/docs/18/">PostgreSQL 18</a> · <a href="https://libpqxx.readthedocs.io/7.10.1/getting-started.html">libpqxx 7.10.1</a></p></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: Базы данных и PostgreSQL"><a href="#station-8">← REST API и C++-сервис</a><a href="#code-review">Как разбирать код на собеседовании →</a></nav></div></details><details class="reference-group" id="code-review" open>
+<summary><span class="number">★</span><h2>Как разбирать код на собеседовании</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: Как разбирать код на собеседовании"><a href="#code-review-section-1">0. Сначала реши: программа вообще корректна?</a><a href="#code-review-section-2">1. Нарисуй объект как дерево подобъектов</a><a href="#code-review-section-3">2. Раздели storage и lifetime</a><a href="#code-review-section-4">3. Для каждого вызова отдели static type от dynamic type</a><a href="#code-review-section-5">4. Пройди исключительный и обычный пути отдельно</a><a href="#code-review-section-6">Фраза хорошего ответа</a></nav>
+<section class="reference-section" id="code-review-section-1" tabindex="-1"><h3>0. Сначала реши: программа вообще корректна?</h3><div class="reference-item"><h4>Не вычисляй вывод до проверки компиляции и UB</h4><p class="rule">Проверь access control, deleted/ambiguous overload, abstract type, missing virtual destructor при полиморфном delete, dangling reference, use-after-move по контракту типа, unsequenced operations и data race. Если код ill-formed или имеет UB, единственного гарантированного вывода нет.</p></div></section><section class="reference-section" id="code-review-section-2" tabindex="-1"><h3>1. Нарисуй объект как дерево подобъектов</h3><div class="reference-item"><h4>Construction order не определяется initializer list</h4><p class="rule">Сначала virtual bases (самым derived объектом), затем direct bases слева направо, затем non-static fields в порядке объявления, затем тело конструктора. Destruction идёт строго обратно. Для каждого полностью созданного подобъекта сразу запиши соответствующий destructor.</p></div><div class="reference-item"><h4>Delegating constructor выполняет target constructor, затем своё тело</h4><p class="rule">Если target завершился исключением, делегирующее тело не запускается. Function-try-block конструктора видит ошибку, но после выхода из handler исключение автоматически перебрасывается.</p></div></section><section class="reference-section" id="code-review-section-3" tabindex="-1"><h3>2. Раздели storage и lifetime</h3><div class="reference-item"><h4>new-expression: allocate → construct; delete-expression: destroy → deallocate</h4><pre><code>E* p = new E; // если E::E бросил, подходящий operator delete
+              // освобождает storage; p не получает значение
+delete p;       // при успехе: ~E(), затем deallocation</code></pre></div><div class="reference-item"><h4>Если конструктор полного объекта бросил</h4><p class="rule">Деструктор самого полного объекта не вызывается. Уже построенные поля и базы уничтожаются в обратном порядке. Для автоматического объекта ничего больше делать не нужно; при new-expression storage освобождается автоматически подходящей deallocation function.</p></div></section><section class="reference-section" id="code-review-section-4" tabindex="-1"><h3>3. Для каждого вызова отдели static type от dynamic type</h3><div class="reference-item"><h4>Virtual body выбирается по final overrider, но не всё виртуально</h4><p class="rule">Default arguments связываются по static type; non-virtual overload/name lookup — тоже compile-time. В constructor/destructor virtual dispatch не уходит в более-derived часть. Передача по значению может сделать slicing.</p></div></section><section class="reference-section" id="code-review-section-5" tabindex="-1"><h3>4. Пройди исключительный и обычный пути отдельно</h3><div class="reference-item"><h4>Таблица трассировки</h4><pre><code>ШАГ | СОБЫТИЕ                    | ЖИВЫЕ ОБЪЕКТЫ
+1   | B::B                         | B
+2   | member::member               | B, member
+3   | D::D throws                  | B, member
+4   | member::~member, B::~B       | —
+5   | matching catch               | —</code></pre></div><div class="reference-item"><h4>Не смешивай три варианта одной задачи</h4><p class="rule">Автоматический объект + throw, успешный <code>new/delete</code> и <code>new</code> с исключением конструктора имеют разные точки cleanup. Выпиши trace для каждого варианта заново, затем сравни.</p></div></section><section class="reference-section" id="code-review-section-6" tabindex="-1"><h3>Фраза хорошего ответа</h3><div class="reference-item"><h4>Сначала контракт, затем вывод</h4><p class="rule">«Код корректен/некорректен потому что … . При корректном пути порядок задают … . Вот состояние после каждого шага … . При альтернативе с исключением уничтожаются только … . Поэтому гарантированный вывод такой: …». Это сильнее угадывания строк по памяти.</p></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: Как разбирать код на собеседовании"><a href="#station-9">← Базы данных и PostgreSQL</a><a href="#station-10">Тесты, доставка и эксплуатация →</a></nav></div></details><details class="reference-group" id="station-10" open>
+<summary><span class="number">10</span><h2>Тесты, доставка и эксплуатация</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a class="button" href="cpp_station10_production.html">Читать полную станцию 10 ↗</a><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: Тесты, доставка и эксплуатация"><a href="#station-10-section-1">Договор и уровни тестов</a><a href="#station-10-section-2">Запуск проверок</a><a href="#station-10-section-3">Образ и контейнер</a><a href="#station-10-section-4">CI и доверие</a><a href="#station-10-section-5">Выпуск и остановка</a><a href="#station-10-section-6">Наблюдение</a></nav>
+<section class="reference-section" id="station-10-section-1" tabindex="-1"><h3>Договор и уровни тестов</h3><div class="reference-item"><h4>Результат важнее отсутствия падения</h4><p class="rule">Unit проверяет ограниченный договор; integration — реальные границы компонентов; end-to-end — пользовательский путь. Проверяй обычный случай, границы и состояние после отказа. <a href="cpp_station10_production.html#section=test-levels">Разбор уровней →</a></p></div></section><section class="reference-section" id="station-10-section-2" tabindex="-1"><h3>Запуск проверок</h3><div class="reference-item"><h4>Сборка не равна выполнению тестов</h4><pre><code>cmake -S . -B build
+cmake --build build --parallel 2
+ctest --test-dir build --output-on-failure --no-tests=error</code></pre><p class="rule">Покрытие не доказывает корректность ожиданий; sanitizers видят выполненные пути. <a href="cpp_station10_production.html#section=sanitizers-coverage">Ограничения инструментов →</a></p></div></section><section class="reference-section" id="station-10-section-3" tabindex="-1"><h3>Образ и контейнер</h3><div class="reference-item"><h4>Изоляция и хранение</h4><p class="rule">Образ — шаблон; контейнер — процессы и их окружение. Multi-stage отделяет сборочные инструменты от runtime. Volume переживает удаление контейнера, но не заменяет backup. <a href="cpp_station10_production.html#section=docker-network-data">Сеть и данные →</a></p></div></section><section class="reference-section" id="station-10-section-4" tabindex="-1"><h3>CI и доверие</h3><div class="reference-item"><h4>Проверяй тот артефакт, который выпускаешь</h4><p class="rule">Runner исполняет команды, в том числе недоверенные сборочные скрипты. Не выдавай PR production-секреты. Cache ускоряет; artifact фиксирует результат. <a href="cpp_station10_production.html#section=ci-model">Модель CI →</a></p></div></section><section class="reference-section" id="station-10-section-5" tabindex="-1"><h3>Выпуск и остановка</h3><div class="reference-item"><h4>Readiness не равна liveness</h4><p class="rule">При draining запрещают новую работу и ограниченно ждут принятую. Откат бинарника не отменяет несовместимую миграцию. <a href="cpp_station10_production.html#section=release-compatibility">Совместимость →</a></p></div></section><section class="reference-section" id="station-10-section-6" tabindex="-1"><h3>Наблюдение</h3><div class="reference-item"><h4>Считать по одному договору</h4><p class="rule">Доля успеха = сумма good / сумма total. Не усредняй p99 реплик. SLO задаёт цель и окно; запросный бюджет не равен минутам простоя. У алерта нужны действие и владелец. <a href="cpp_station10_production.html#section=metrics-slo">Показатели →</a></p></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: Тесты, доставка и эксплуатация"><a href="#code-review">← Как разбирать код на собеседовании</a><a href="#std-functions">Ходовые функции std →</a></nav></div></details><details class="reference-group" id="std-functions" open>
+<summary><span class="number">fn</span><h2>Ходовые функции std</h2><span class="chevron" aria-hidden="true">⌄</span></summary>
+<div class="group-body"><div class="chapter-link"><a href="#contents">К оглавлению ↑</a></div>
+<nav class="section-toc" aria-label="Темы: Ходовые функции std"><a href="#std-functions-section-1">vector &lt;vector&gt;</a><a href="#std-functions-section-2">string &lt;string&gt;</a><a href="#std-functions-section-3">map / set &lt;map&gt; &lt;set&gt;</a><a href="#std-functions-section-4">Алгоритмы &lt;algorithm&gt; &lt;numeric&gt;</a><a href="#std-functions-section-5">Умные указатели &lt;memory&gt;</a><a href="#std-functions-section-6">Ввод-вывод &lt;iostream&gt;</a><a href="#std-functions-section-7">Файлы &lt;fstream&gt;</a></nav>
+<section class="reference-section" id="std-functions-section-1" tabindex="-1"><h3>vector &lt;vector&gt;</h3><div class="reference-item"><h4>Основные методы</h4><pre><code>v.push_back(x);       // добавить готовый объект
+v.emplace_back(a, b); // построить элемент из аргументов на месте
+v.pop_back();         // удалить последний (не возвращает его)
+v.size(); v.empty();  // размер / пустота
+v.front(); v.back();  // требуют непустой vector
+v.clear();            // size=0; capacity не уменьшается
+v.reserve(n);         // увеличить capacity, size не меняется
+v.resize(n);          // изменить size
+v.insert(it, x);
+v.erase(it);</code></pre></div></section><section class="reference-section" id="std-functions-section-2" tabindex="-1"><h3>string &lt;string&gt;</h3><div class="reference-item"><h4>Основные методы</h4><pre><code>s.size(); s.empty();          // длина / пустота
+s.substr(pos, len);           // новая owning string
+s.find(&quot;ab&quot;);              // позиция или std::string::npos
+s += &quot;more&quot;;
+s.c_str();                    // NUL-terminated до следующей invalidating операции
+std::to_string(42);
+std::stoi(&quot;42&quot;);           // бросает; может принять числовой prefix
+std::getline(std::cin, s);    // после &gt;&gt; учти оставшийся newline
+
+std::string_view view = s;    // без копии и без владения</code></pre></div></section><section class="reference-section" id="std-functions-section-3" tabindex="-1"><h3>map / set &lt;map&gt; &lt;set&gt;</h3><div class="reference-item"><h4>Основные методы</h4><pre><code>m[key] = v;          // вставка/изменение ([] создаёт ключ!)
+++m[key];            // идиома подсчёта
+m.at(key);           // доступ с проверкой (бросает)
+m.find(key);         // итератор или m.end()
+m.contains(key);     // есть ли ключ (C++20)
+m.count(key);        // 0 или 1 для map/set
+m.erase(key);        // удалить по ключу
+s.insert(x);         // вставить в set (дубликаты игнор)</code></pre></div></section><section class="reference-section" id="std-functions-section-4" tabindex="-1"><h3>Алгоритмы &lt;algorithm&gt; &lt;numeric&gt;</h3><div class="reference-item"><h4>Основные</h4><pre><code>std::sort(b, e);
+std::find(b, e, x);              // iterator или e
+std::count_if(b, e, pred);
+std::max_element(b, e);          // перед *it проверь it != e
+std::transform(b, e, out, f);
+std::copy_if(b, e, std::back_inserter(dst), pred);
+std::accumulate(b, e, 0LL);      // тип accumulator задаёт initial value
+std::erase_if(v, pred);          // C++20
+
+std::ranges::sort(v);
+auto it = std::ranges::find(v, x);</code></pre></div><div class="reference-item"><h4>b, e — это begin() и end()</h4><p class="rule">Почти все алгоритмы принимают диапазон итераторов [begin, end). pred — предикат-лямбда, out — итератор назначения (часто std::back_inserter(v)).</p></div></section><section class="reference-section" id="std-functions-section-5" tabindex="-1"><h3>Умные указатели &lt;memory&gt;</h3><div class="reference-item"><h4>Создание и операции</h4><pre><code>std::make_unique&lt;T&gt;(args);   // unique ownership
+std::make_shared&lt;T&gt;(args);   // shared ownership
+p.get();                     // non-owning raw pointer
+p.reset();                   // освободить/заменить owned object
+auto q = std::move(p);       // передать unique ownership
+if (auto sp = w.lock()) { use(*sp); } // временно продлить lifetime
+
+// use_count() — диагностика, не протокол синхронизации/уникальности</code></pre></div></section><section class="reference-section" id="std-functions-section-6" tabindex="-1"><h3>Ввод-вывод &lt;iostream&gt;</h3><div class="reference-item"><h4>Основное</h4><pre><code>std::cout &lt;&lt; x &lt;&lt; &quot;\n&quot;;      // вывод
+std::cin &gt;&gt; x;               // ввод (до пробела)
+std::getline(std::cin, s);   // строка целиком
+std::cerr &lt;&lt; &quot;error\n&quot;;      // поток ошибок</code></pre></div></section><section class="reference-section" id="std-functions-section-7" tabindex="-1"><h3>Файлы &lt;fstream&gt;</h3><div class="reference-item"><h4>Чтение файла построчно (RAII — закроется сам)</h4><pre><code>std::ifstream f(&quot;data.txt&quot;);
+if (!f) return;              // проверка открытия
+std::string line;
+while (std::getline(f, line)) {
+    // обработка line
+}   // файл закроется автоматически</code></pre></div></section>
+<nav class="chapter-pagination" aria-label="Переходы: Ходовые функции std"><a href="#station-10">← Тесты, доставка и эксплуатация</a><a href="cpp_backend_roadmap.html">К курсу →</a></nav></div></details>
+<footer><a href="#top">Наверх ↑</a><a href="cpp_backend_roadmap.html">← Вернуться к курсу</a><p>Редакция от 14 октября 2026. Материал хранится локально; ссылки на первоисточники требуют интернета. UB означает отсутствие гарантий поведения, а не особый вариант вывода.</p></footer>
+</main></div><script id="cheat-data" type="application/json">{
+  "title": "Шпаргалка: C++ и backend",
+  "subtitle": "Краткий справочник по станциям 0–10: ключевые правила, типичные ошибки и проверка решений. Примеры — фрагменты, если не указано иное; основа C++20, expected — C++23, сокеты и epoll — Linux/POSIX.",
+  "stations": [
+    {
+      "num": "0",
+      "title": "База ООП",
+      "color": "#7A5BB0",
+      "sections": [
+        {
+          "h": "Класс: данные + методы",
+          "items": [
+            {
+              "t": "Класс объединяет состояние и операции; доступ проектирует автор",
+              "code": "class Account {\n    int balance_ = 0;\npublic:\n    bool deposit(int amount) {\n        if (amount <= 0 || amount > 1000000 - balance_)\n            return false;\n        balance_ += amount;\n        return true;\n    }\n    int balance() const { return balance_; }\n}; // инвариант: 0 <= balance_ <= 1000000"
+            }
+          ]
+        },
+        {
+          "h": "struct vs class",
+          "items": [
+            {
+              "t": "Отличие — в доступе по умолчанию",
+              "rule": "У <code>struct<\/code> члены и базовое наследование по умолчанию public, у <code>class<\/code> — private. В остальном возможности языка одинаковы."
+            }
+          ]
+        },
+        {
+          "h": "Конструктор и деструктор",
+          "items": [
+            {
+              "t": "Конструктор = имя класса, задаёт начальное состояние (список инициализации)",
+              "code": "class Point {\n    int x, y;\npublic:\n    Point(int x, int y) : x(x), y(y) {}  // список инициализации\n};"
+            },
+            {
+              "t": "Деструктор = ~ИмяКласса, вызывается автоматически при уничтожении",
+              "code": "~Logger() { /* уборка */ }   // сам вызовется в конце области видимости"
+            },
+            {
+              "t": "Порядок lifetime задаётся структурой объекта и scope",
+              "rule": "Локальные объекты одного scope уничтожаются в обратном порядке завершённого создания. Поля инициализируются в порядке объявления в классе и уничтожаются в обратном — порядок в initializer list это не меняет. База строится до полей и разрушается после них."
+            }
+          ]
+        },
+        {
+          "h": "Несколько конструкторов",
+          "items": [
+            {
+              "t": "Конструкторов может быть несколько — с разными параметрами (перегрузка)",
+              "code": "class Account {\n    int balance;\npublic:\n    Account() : balance(0) {}           // по умолчанию\n    Account(int start) : balance(start) {}  // с балансом\n};\nAccount a;       // -> balance 0\nAccount b(500);  // -> balance 500"
+            },
+            {
+              "t": "Поля можно инициализировать прямо при объявлении (C++11)",
+              "code": "class Timer {\n    int ms = 0;        // значение по умолчанию\n    bool running = false;\n};"
+            }
+          ]
+        },
+        {
+          "h": "Инициализация и lifetime",
+          "items": [
+            {
+              "t": "{} помогает получить известное начальное значение и запрещает narrowing",
+              "code": "int a;       // локальный a имеет indeterminate value: не читать\nint b{};     // 0\nint c{42};   // 42\n// int d{3.14}; // ill-formed: narrowing double -> int"
+            },
+            {
+              "t": "Storage, объект и lifetime — не одно и то же",
+              "rule": "Выделенная память ещё не обязательно содержит живой <code>T<\/code>, а окончание lifetime не всегда сразу освобождает storage. Обычные RAII-контейнеры скрывают эти детали; в placement new, allocator и низкоуровневом коде отслеживай construction/destruction отдельно от allocation/deallocation."
+            }
+          ]
+        },
+        {
+          "h": "const и this",
+          "items": [
+            {
+              "t": "const-метод нельзя использовать для изменения обычных полей; его можно звать на const-объекте",
+              "rule": "Это shallow const: <code>mutable<\/code>-поля, внешнее состояние и объект за указателем всё ещё могут меняться. Логически читающие методы обычно помечай <code>const<\/code>, но не обещай ими больше, чем задаёт контракт."
+            },
+            {
+              "t": "this-> явно выбирает член, если параметр скрывает его имя",
+              "code": "Account(int balance) : balance(balance) {}\n// В теле: this->balance = balance;"
+            }
+          ]
+        },
+        {
+          "h": "Контракты конструктора",
+          "items": [
+            {
+              "t": "explicit, = default и = delete выражают намерение",
+              "code": "class Id {\npublic:\n    explicit Id(int value);       // нет неявного int -> Id\n    Id() = delete;                 // пустой Id запрещён\n    Id(const Id&) = default;       // обычное копирование явно разрешено\n};"
+            },
+            {
+              "t": "Конструктор должен установить инвариант или не создать объект",
+              "rule": "Если проверка не прошла, конструктор может бросить: уже построенные базы и поля разрушатся автоматически, но деструктор самого недостроенного объекта не вызывается."
+            }
+          ]
+        },
+        {
+          "h": "Зачем инкапсуляция",
+          "items": [
+            {
+              "t": "private ограничивает прямой доступ, но инвариант сохраняет логика класса",
+              "rule": "Проверки в методах и конструкторах должны согласовываться. Возврат изменяемой ссылки на поле и friend могут открыть обходной путь; private само по себе не доказывает корректность."
+            },
+            {
+              "t": "Публичные методы — «пульт»; приватные поля — «провода»",
+              "rule": "Внутренности можно переписать, не ломая код, который пользуется классом через публичные методы."
+            }
+          ]
+        },
+        {
+          "h": "Интерфейс, static и friend",
+          "items": [
+            {
+              "t": "Инвариант важнее набора getter/setter",
+              "rule": "Инвариант — условие корректного состояния объекта. Конструктор устанавливает его, публичные операции сохраняют. Не добавляй setter, если изменение поля в одиночку нарушит это условие."
+            },
+            {
+              "t": "static-член общий для класса; friend даёт доступ, но не членство",
+              "rule": "У static-метода нет this. Дружественная функция может читать private, но остаётся внешней функцией. Дружба не наследуется и не передаётся через цепочку друзей."
+            },
+            {
+              "t": "Равенство значений проектируют по смыслу",
+              "rule": "operator== обычно сравнивает значимые данные, а не адреса объектов. = default в C++20 сравнивает базы и поля: проверь, соответствует ли это смыслу равенства твоего типа."
+            }
+          ]
+        },
+        {
+          "h": "Источники и подробные объяснения",
+          "items": [
+            {
+              "t": "Правила языка, протоколы и документация",
+              "rule": "<a href=\"https://eel.is/c++draft/class\">Объектная модель: проект стандарта<\/a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "num": "1",
+      "title": "Современный C++",
+      "color": "#2D6FB3",
+      "sections": [
+        {
+          "h": "RAII — сердце C++",
+          "items": [
+            {
+              "t": "Владение ресурсом выражается объектом, а освобождение — его деструктором",
+              "rule": "Owned-ресурс освобождается автоматически, в том числе при исключении. RAII-объект может иметь пустое/deferred-состояние или получать ресурс через factory; важно, чтобы каждое состояние сохраняло инвариант и cleanup был привязан к lifetime владельца."
+            }
+          ]
+        },
+        {
+          "h": "Умные указатели (вместо new/delete)",
+          "items": [
+            {
+              "t": "unique_ptr — единоличное владение, нельзя копировать (только move)",
+              "code": "auto p = std::make_unique<T>(args);\nauto p2 = std::move(p);   // передать владение; p теперь nullptr"
+            },
+            {
+              "t": "shared_ptr — разделяемое владение со счётчиком ссылок",
+              "code": "auto a = std::make_shared<T>();\nauto b = a;               // счётчик 2; удалится, когда счётчик -> 0"
+            },
+            {
+              "t": "weak_ptr — невладеющий наблюдатель за shared_ptr (не держит объект живым)",
+              "code": "std::weak_ptr<T> w = sp;   // из shared_ptr, счётчик НЕ растёт\nif (auto s = w.lock()) {   // получить shared_ptr, если объект жив\n    use(*s);\n}"
+            },
+            {
+              "t": "Правило выбора владения",
+              "rule": "Если объект можно хранить значением — храни значением. Нужны динамический lifetime или полиморфизм с одним владельцем → unique_ptr. Реально несколько независимых владельцев → shared_ptr. Наблюдение за shared ownership и разрыв циклов → weak_ptr. Ручной owning new/delete в прикладном коде почти не нужен."
+            }
+          ]
+        },
+        {
+          "h": "Ловушки shared ownership",
+          "items": [
+            {
+              "t": "Потокобезопасный control block не делает потокобезопасным сам T",
+              "rule": "Разные экземпляры <code>shared_ptr<\/code> к одному control block можно копировать/уничтожать конкурентно, но одновременный доступ к <code>*p<\/code> синхронизируй по правилам самого объекта. Один и тот же объект <code>shared_ptr<\/code> тоже нельзя произвольно читать и изменять без atomic/shared_ptr-синхронизации."
+            },
+            {
+              "t": "make_shared обычно объединяет object и control block в одну allocation",
+              "rule": "Это уменьшает число аллокаций и безопасно связывает создание с ownership. После исчезновения strong owners объект разрушен, но объединённая allocation может жить, пока существуют <code>weak_ptr<\/code>. Если нужен отдельный lifetime памяти или custom deleter, выбирай другой способ осознанно."
+            },
+            {
+              "t": "Цикл shared_ptr не освобождается сам",
+              "code": "// Parent владеет Child, а обратная связь наблюдает:\nstd::shared_ptr<Child> child;\nstd::weak_ptr<Parent> parent;"
+            }
+          ]
+        },
+        {
+          "h": "Ссылки и const",
+          "items": [
+            {
+              "t": "Тяжёлые объекты передавай как const T& (без копии, только чтение)",
+              "code": "void f(const std::string& s);   // не копирует, не меняет"
+            },
+            {
+              "t": "Ссылка — псевдоним: после связывания её нельзя переназначить",
+              "rule": "В корректной программе ссылка связывается с объектом/функцией, а не с null. Но ссылка может стать dangling после окончания lifetime объекта; одно наличие <code>T&amp;<\/code> не гарантирует, что referent всё ещё жив."
+            }
+          ]
+        },
+        {
+          "h": "auto, decltype и forwarding",
+          "items": [
+            {
+              "t": "auto по значению снимает top-level const и reference",
+              "code": "const int n = 7;\nauto a = n;        // int\nconst auto& r = n; // const int&\nauto&& u = n;      // const int& из-за reference collapsing\ndecltype(auto) x = (n); // const int&: скобки важны"
+            },
+            {
+              "t": "Forwarding reference: T&& с выводимым cv-неквалифицированным параметром шаблона",
+              "code": "template<class T>\nvoid relay(T&& value) {\n    consume(std::forward<T>(value));\n}\n// Widget&& вне такого deduction context — обычная rvalue reference."
+            }
+          ]
+        },
+        {
+          "h": "Move-семантика",
+          "items": [
+            {
+              "t": "Move-операция может передать ресурсы вместо копирования; std::move лишь разрешает её выбрать",
+              "code": "v.push_back(std::move(s));  // s валиден, но его состояние обычно не специфицировано"
+            },
+            {
+              "t": "std::move сам ничего не двигает",
+              "rule": "Это лишь приведение к rvalue, разрешающее вызвать move-конструктор."
+            }
+          ]
+        },
+        {
+          "h": "Правило пяти / нуля",
+          "items": [
+            {
+              "t": "Правило нуля (предпочтительно): не управляй ресурсами вручную",
+              "rule": "Используй <code>vector/string/unique_ptr<\/code> и другие RAII-члены — тогда обычно не нужно писать пять спецфункций. Компилятор сгенерирует, удалит или не объявит конкретную операцию по правилам членов: например, <code>unique_ptr<\/code> естественно удаляет копирование. Проверяй именно нужные свойства типа."
+            },
+            {
+              "t": "Правило пяти: объявление одной спецфункции требует проверить остальные",
+              "rule": "Для каждой операции реши явно: реализовать, = default или = delete. Уникальный ресурс часто только перемещаем, а копирование запрещено."
+            }
+          ]
+        },
+        {
+          "h": "Синтаксис",
+          "items": [
+            {
+              "t": "auto, range-for, лямбды",
+              "code": "for (const auto& x : v) { ... }        // чтение\nfor (auto& x : v) { x *= 2; }           // изменение\nauto f = [](int a, int b){ return a+b; };"
+            }
+          ]
+        },
+        {
+          "h": "Возврат значений и заимствование",
+          "items": [
+            {
+              "t": "return T{…} и return local — разные случаи",
+              "rule": "В C++17+ возврат prvalue того же типа может создавать результат напрямую, без промежуточной копии. NRVO для именованного локального объекта разрешено, но не обязательно. return std::move(local) мешает NRVO; обычно достаточно return local."
+            },
+            {
+              "t": "Захват ссылки не продлевает жизнь объекта",
+              "rule": "Лямбда с [&] или [this] может пережить объект, на который ссылается. Для отложенной задачи проверь владельца каждого захвата. Копирование string_view копирует только представление, а не строку."
+            },
+            {
+              "t": "После перемещения действуй по контракту типа",
+              "rule": "У стандартных библиотечных типов обычно сохраняется корректное, но не определённое заранее состояние. unique_ptr после передачи владения пуст; для string не обещай пустоту. У пользовательского типа гарантии задаёт его автор."
+            }
+          ]
+        },
+        {
+          "h": "Источники и подробные объяснения",
+          "items": [
+            {
+              "t": "Правила языка, протоколы и документация",
+              "rule": "<a href=\"https://eel.is/c++draft/class.copy.elision\">Copy elision<\/a> · <a href=\"https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-resource\">C++ Core Guidelines: управление ресурсами<\/a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "num": "2",
+      "title": "Наследование и полиморфизм",
+      "color": "#1B8A6B",
+      "sections": [
+        {
+          "h": "Наследование",
+          "items": [
+            {
+              "t": "class Derived : public Base — отношение is-a",
+              "code": "class Dog : public Animal {\npublic:\n    Dog(const std::string& n) : Animal(n) {}  // вызвать конструктор базы\n};"
+            },
+            {
+              "t": "protected — доступно классу и наследникам, но не снаружи",
+              "rule": "Третий уровень между private и public."
+            },
+            {
+              "t": "Порядок: строятся базовые подобъекты, затем Derived; разрушение идёт обратно",
+              "rule": "У самого derived-типа сначала строятся virtual bases, затем direct bases слева направо, затем поля в порядке объявления и тело. Деструктор выполняет обратную последовательность для уже построенных подобъектов."
+            }
+          ]
+        },
+        {
+          "h": "Виртуальные функции = полиморфизм",
+          "items": [
+            {
+              "t": "virtual в базе + override в наследнике → динамический вызов",
+              "code": "class Animal {\npublic:\n    virtual void say();\n    virtual ~Animal() = default;\n};\nclass Dog : public Animal { public: void say() override; };\n\nauto p = std::make_unique<Dog>();\nAnimal& animal = *p;\nanimal.say();   // final overrider: Dog::say()"
+            },
+            {
+              "t": "Runtime-полиморфизм обычно используют через указатель/ссылку на базу",
+              "rule": "<code>Animal&amp;<\/code>, <code>Animal*<\/code>, <code>unique_ptr&lt;Animal&gt;<\/code>. Передача производного объекта как <code>Animal<\/code> по значению создаёт отдельный базовый объект и срезает derived-часть."
+            }
+          ]
+        },
+        {
+          "h": "Абстрактные классы (интерфейсы)",
+          "items": [
+            {
+              "t": "= 0 делает функцию чисто виртуальной, класс — абстрактным",
+              "code": "class Shape {\npublic:\n    virtual double area() const = 0;   // объект Shape создать нельзя\n    virtual ~Shape() = default;\n};"
+            }
+          ]
+        },
+        {
+          "h": "Две частые ловушки",
+          "items": [
+            {
+              "t": "Virtual-деструктор нужен базе для полиморфного удаления",
+              "rule": "Если производный объект удаляют через Base*, деструктор базы должен быть virtual; иначе delete имеет UB. Само наличие virtual-метода не доказывает, что такое удаление разрешено дизайном."
+            },
+            {
+              "t": "Срезка (slicing): по значению теряется часть наследника",
+              "code": "Dog d;\nAnimal a = d;   // Dog-часть отрезана, полиморфизм сломан\n// храни полиморфно: vector<unique_ptr<Animal>>"
+            }
+          ]
+        },
+        {
+          "h": "Lookup, default arguments и downcast",
+          "items": [
+            {
+              "t": "Имя в Derived скрывает весь overload set Base с тем же именем",
+              "code": "struct Base { void f(int); void f(double); };\nstruct Derived : Base {\n    using Base::f;       // вернуть overloads базы в lookup\n    void f(std::string);\n};"
+            },
+            {
+              "t": "Virtual body выбирается динамически, default argument — по static type",
+              "rule": "Не меняй default arguments при override: вызов через <code>Base&amp;<\/code> возьмёт default из объявления Base, даже если выполнится тело Derived. Лучше передать аргумент явно или использовать non-virtual interface."
+            },
+            {
+              "t": "dynamic_cast проверяет полиморфный downcast во время выполнения",
+              "rule": "Для pointer неудача даёт <code>nullptr<\/code>, для reference — <code>std::bad_cast<\/code>. Это инструмент на границе неоднородной иерархии, а не замена хорошему virtual-интерфейсу; база должна быть polymorphic."
+            }
+          ]
+        },
+        {
+          "h": "Типичная реализация virtual",
+          "items": [
+            {
+              "t": "vptr/vtable — распространённая ABI-модель",
+              "rule": "Большинство ABI использует vptr/vtable, но стандарт требует только поведение динамического вызова и не предписывает внутреннюю таблицу."
+            }
+          ]
+        },
+        {
+          "h": "Порядок вызовов и исключения",
+          "items": [
+            {
+              "t": "Строительство: virtual bases → direct bases → fields → тело; разрушение обратно",
+              "rule": "Инициализаторы баз и полей вычисляются по правилам языка, но сами подобъекты строятся в предписанном порядке, не по строкам initializer list. При исключении разрушаются только полностью построенные подобъекты."
+            },
+            {
+              "t": "Virtual-вызов в конструкторе/деструкторе не уходит в ещё не живущую derived-часть",
+              "rule": "Во время конструктора/деструктора dispatch ограничен текущей строящейся или разрушающейся частью иерархии. Прямой или косвенный вызов pure virtual для строящегося/разрушающегося объекта из ctor/dtor даёт undefined behavior — это не способ вызвать реализацию наследника."
+            }
+          ]
+        },
+        {
+          "h": "Выбор полиморфного интерфейса",
+          "items": [
+            {
+              "t": "Композиция — содержит; публичное наследование — подставляется вместо",
+              "rule": "Если нужен только готовый код базы, отношение is-a из этого не следует. Скрывай делегирование в поле; наследование оставь для осмысленной взаимозаменяемости по контракту."
+            },
+            {
+              "t": "clone сохраняет динамический тип копии",
+              "rule": "В интерфейсе можно вернуть <code>unique_ptr&lt;Base&gt;<\/code>; наследник создаёт копию себя через <code>make_unique&lt;Derived&gt;(*this)<\/code>. <code>unique_ptr&lt;Derived&gt;<\/code> не является ковариантным возвращаемым типом для override — сигнатура остаётся <code>unique_ptr&lt;Base&gt;<\/code>."
+            }
+          ]
+        },
+        {
+          "h": "Источники и подробные объяснения",
+          "items": [
+            {
+              "t": "Правила языка, протоколы и документация",
+              "rule": "<a href=\"https://eel.is/c++draft/class.virtual\">Виртуальные функции<\/a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "num": "3",
+      "title": "STL, шаблоны, алгоритмы",
+      "color": "#B0602D",
+      "sections": [
+        {
+          "h": "vector — контейнер по умолчанию",
+          "items": [
+            {
+              "t": "Динамический массив, непрерывная память",
+              "code": "std::vector<int> v;\nv.push_back(10);          // добавить элемент\nv.size(); v[0]; v.at(0);  // [] без проверки, at() бросает при выходе\nv.reserve(1000);          // capacity >= 1000, size не меняется\nv.resize(1000);           // size = 1000: элементы реально созданы"
+            },
+            {
+              "t": "Инвалидация зависит от операции и reallocation",
+              "rule": "При reallocation у vector инвалидируются все ссылки, указатели и итераторы. Без reallocation вставка инвалидирует как минимум old end и позиции от места вставки. <code>erase<\/code> инвалидирует удалённые и всё после них. Перед сохранением iterator всегда проверь правило конкретной операции."
+            }
+          ]
+        },
+        {
+          "h": "map / unordered_map / set",
+          "items": [
+            {
+              "t": "map — O(log n) и порядок; unordered_map — O(1) в среднем, O(n) в худшем",
+              "code": "std::map<std::string,int> m;\n++m[\"key\"];   // [] создаёт ключ с 0, если его нет"
+            },
+            {
+              "t": "Ловушка operator[]: создаёт ключ, если его нет",
+              "rule": "Для проверки наличия — m.contains(key) (C++20) или m.find(key) != m.end()."
+            },
+            {
+              "t": "set — уникальные значения в порядке comparator",
+              "rule": "«Уникальность» определяется эквивалентностью comparator: ни <code>comp(a,b)<\/code>, ни <code>comp(b,a)<\/code>. Comparator обязан задавать strict weak ordering."
+            }
+          ]
+        },
+        {
+          "h": "Стабильность и контракты контейнеров",
+          "items": [
+            {
+              "t": "Node-based containers обычно сохраняют ссылки на не удалённые элементы",
+              "rule": "У <code>map/set/list<\/code> вставка не инвалидирует references/iterators, а erase инвалидирует удалённое. У <code>unordered_*<\/code> rehash инвалидирует iterators, но не references/pointers на элементы; erase инвалидирует только удалённое. У <code>deque<\/code> правила зависят от операции — проверяй отдельно."
+            },
+            {
+              "t": "Comparator обязан задавать strict weak ordering",
+              "code": "// плохо: <= не является строгим порядком\n// std::sort(v.begin(), v.end(), [](auto a, auto b){ return a <= b; });\n\n// обычно:\nstd::sort(v.begin(), v.end(), std::less{});"
+            },
+            {
+              "t": "emplace — интерфейс построения, а не обещание «всегда быстрее»",
+              "rule": "Он передаёт аргументы конструктору элемента, но копии/move, временные объекты и стоимость проверки зависят от контейнера и вызова. Для <code>map<\/code>, когда не хочешь строить mapped value при существующем ключе, смотри <code>try_emplace<\/code>."
+            }
+          ]
+        },
+        {
+          "h": "Итераторы",
+          "items": [
+            {
+              "t": "Полуоткрытый диапазон [begin, end)",
+              "rule": "end() указывает ЗА последним элементом — не разыменовывать. Цикл: it != end()."
+            }
+          ]
+        },
+        {
+          "h": "Алгоритмы <algorithm>",
+          "items": [
+            {
+              "t": "sort, find, count_if, transform, max_element",
+              "code": "std::sort(v.begin(), v.end());               // по возрастанию\nstd::sort(v.begin(), v.end(),\n          [](int a,int b){ return a>b; });   // свой компаратор\nstd::count_if(v.begin(), v.end(),\n              [](int x){ return x>0; });     // подсчёт по условию\nauto it = std::find(v.begin(), v.end(), 8);  // вернёт итератор или end()"
+            }
+          ]
+        },
+        {
+          "h": "Шаблоны",
+          "items": [
+            {
+              "t": "Функция: template<typename T>",
+              "code": "template<typename T>\nT myMax(T a, T b) { return a > b ? a : b; }"
+            },
+            {
+              "t": "Аргументы шаблона можно указать явно; с C++17 иногда работает вывод CTAD",
+              "code": "template<typename T>\nclass Box { T value; public: Box(T v):value(v){} };\nBox<int> b(42);"
+            },
+            {
+              "t": "Определение шаблона обычно должно быть доступно при инстанцировании",
+              "rule": "Поэтому template definitions обычно лежат в header. Разнести можно через явные instantiation definitions для заранее выбранного набора типов."
+            }
+          ]
+        },
+        {
+          "h": "Современные удобства",
+          "items": [
+            {
+              "t": "optional, structured bindings, auto",
+              "code": "std::optional<int> r = find();\nif (r) use(*r);                 // значение или nullopt\n\nfor (const auto& [key, val] : m) { ... }  // распаковка пары"
+            }
+          ]
+        },
+        {
+          "h": "Ranges, concepts и non-owning view",
+          "items": [
+            {
+              "t": "Ranges принимают диапазон целиком и поддерживают projection",
+              "code": "auto it = std::ranges::find(users, id, &User::id);\nstd::ranges::sort(users, std::less{}, &User::name);"
+            },
+            {
+              "t": "Concept делает требования шаблона частью интерфейса",
+              "code": "template<class T>\nconcept Number = std::integral<T> || std::floating_point<T>;\n\ntemplate<Number T> T twice(T value) { return value + value; }"
+            },
+            {
+              "t": "string_view/span не владеют памятью",
+              "rule": "Они дешевы для параметров и срезов, но источник обязан жить дольше view. Не возвращай string_view на временную string и не храни span после уничтожения/reallocation контейнера."
+            }
+          ]
+        },
+        {
+          "h": "Erase и выбор контейнера",
+          "items": [
+            {
+              "t": "Удаляй из vector безопасным API",
+              "code": "std::erase_if(values, [](int x) { return x < 0; }); // C++20\n\nfor (auto it = m.begin(); it != m.end(); ) {\n    if (expired(*it)) it = m.erase(it);\n    else ++it;\n}"
+            },
+            {
+              "t": "Big O — не вся стоимость",
+              "rule": "Учитывай locality, аллокации, размер элемента, стабильность адресов и профиль операций. vector остаётся первым кандидатом; list/unordered_map выбирай по требуемому контракту и измерениям."
+            }
+          ]
+        },
+        {
+          "h": "Выбор типа результата и поиск",
+          "items": [
+            {
+              "t": "optional, variant и expected отвечают на разные вопросы",
+              "rule": "<code>optional&lt;T&gt;<\/code> — значение или отсутствие; <code>variant&lt;A,B&gt;<\/code> — одно из перечисленных состояний; <code>expected&lt;T,E&gt;<\/code> (C++23) — успех или ошибка с причиной. Для variant обработай варианты через visit; get неверного активного типа бросает bad_variant_access."
+            },
+            {
+              "t": "Бинарный поиск требует подходящего порядка",
+              "rule": "lower_bound требует разбиения диапазона относительно искомого значения и компаратора; сортировка тем же компаратором обеспечивает это для всех запросов. Для forward-итераторов число сравнений логарифмическое, но перемещений итератора может быть линейно."
+            }
+          ]
+        },
+        {
+          "h": "Источники и подробные объяснения",
+          "items": [
+            {
+              "t": "Правила языка, протоколы и документация",
+              "rule": "<a href=\"https://eel.is/c++draft/containers\">Контейнеры<\/a> · <a href=\"https://eel.is/c++draft/algorithms\">Алгоритмы<\/a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "num": "4",
+      "title": "Обработка ошибок",
+      "color": "#B0344E",
+      "sections": [
+        {
+          "h": "Базовый механизм",
+          "items": [
+            {
+              "t": "throw бросает, try/catch ловит; между ними стек разматывается",
+              "code": "try {\n    risky();\n} catch (const std::out_of_range& e) {   // конкретный — первым\n    handle(e);\n} catch (const std::exception& e) {       // общий — последним\n    std::cerr << e.what();\n}"
+            },
+            {
+              "t": "Объекты иерархии исключений обычно ловят по const-ссылке",
+              "rule": "<code>catch (const std::exception&amp;)<\/code> — без slicing и с полиморфным <code>what()<\/code>. Порядок catch: от конкретного к общему. Для повторного выброса используй <code>throw;<\/code>, а не <code>throw e;<\/code>."
+            }
+          ]
+        },
+        {
+          "h": "Стандартные исключения",
+          "items": [
+            {
+              "t": "Иерархия во главе с std::exception",
+              "code": "std::runtime_error(\"...\")     // ошибка времени выполнения\nstd::logic_error(\"...\")       // ошибка логики (баг)\nstd::out_of_range(\"...\")      // бросает vector::at()\nstd::invalid_argument(\"...\")  // бросает std::stoi(\"abc\")\nstd::bad_alloc                // бросает new при нехватке памяти"
+            }
+          ]
+        },
+        {
+          "h": "Свой тип исключения",
+          "items": [
+            {
+              "t": "Наследуй от std::runtime_error — получишь готовый what()",
+              "code": "class CollectorError : public std::runtime_error {\npublic:\n    explicit CollectorError(const std::string& m)\n        : std::runtime_error(m) {}\n};\n\nthrow CollectorError(\"cannot open /proc/meminfo\");"
+            }
+          ]
+        },
+        {
+          "h": "RAII + исключения",
+          "items": [
+            {
+              "t": "При раскрутке стека деструкторы вызываются — ресурсы освобождаются сами",
+              "code": "void f() {\n    std::ifstream file(\"x\");   // RAII\n    throw std::runtime_error(\"err\");\n}   // деструктор file вызовется -> файл закрыт"
+            },
+            {
+              "t": "RAII-деструктор не должен выпускать исключение наружу",
+              "rule": "Язык допускает potentially-throwing destructor, но исключение из него при раскрутке другого исключения приводит к <code>std::terminate<\/code>. Проверяемую ошибку закрытия сообщай отдельным <code>close()/commit()<\/code>."
+            }
+          ]
+        },
+        {
+          "h": "Гарантии безопасности",
+          "items": [
+            {
+              "t": "Четыре уровня, от слабого к сильному",
+              "rule": "<b>no guarantee<\/b> — после исключения контракт состояния не обещан (это не автоматически UB); <b>basic<\/b> — инварианты сохранены и утечек нет, конкретное состояние может быть unspecified; <b>strong<\/b> — охваченный контрактом наблюдаемый эффект «всё или ничего»; <b>no-throw<\/b> — исключение не выходит к вызывающему. Внешний I/O и другие необратимые эффекты сильная гарантия сами по себе не откатывает."
+            },
+            {
+              "t": "copy-and-swap — идиома для строгой гарантии",
+              "code": "void update(Config& cfg, const Data& d) {\n    Config tmp = cfg;      // работаем на копии\n    tmp.apply(d);          // если бросит — состояние cfg прежнее\n    using std::swap;\n    swap(cfg, tmp);        // strong для cfg, если swap noexcept\n}\n// Файлы/сеть, изменённые tmp.apply(), автоматически не откатятся."
+            }
+          ]
+        },
+        {
+          "h": "noexcept",
+          "items": [
+            {
+              "t": "Обещание не бросать; нарушил — terminate",
+              "code": "void swap(T& o) noexcept;\nT(T&& o) noexcept;              // move-конструктор\nT& operator=(T&& o) noexcept;   // move-присваивание"
+            },
+            {
+              "t": "Зачем: vector перемещает вместо копирования",
+              "rule": "Если move <code>noexcept<\/code>, vector может безопасно перемещать. Иначе для копируемого типа часто выберет копию; move-only тип всё равно придётся перемещать."
+            }
+          ]
+        },
+        {
+          "h": "Выбор error channel",
+          "items": [
+            {
+              "t": "Тип результата должен различать нужные вызывающему исходы",
+              "code": "std::optional<Metric> find(Key); // ожидаемое отсутствие, без причины\nstd::expected<Config, ParseError> parse(std::string_view); // C++23\nstd::error_code removeFile(Path) noexcept; // явный системный status\n\nConfig loadRequired(Path); // может throw: операция не может продолжаться"
+            },
+            {
+              "t": "expected<T,E> — обычная часть контракта, exception — нелокальный выход",
+              "rule": "Не выбирай по лозунгу или предполагаемой скорости. Учитывай частоту исхода, необходимость причины, composability, ABI и политику проекта. На request/thread/C ABI границе исключение поймай и преобразуй в документированную ошибку."
+            }
+          ]
+        },
+        {
+          "h": "Ошибка на границе сервиса",
+          "items": [
+            {
+              "t": "Ошибка клиента, временный сбой и баг требуют разных действий",
+              "rule": "Неверные данные верни как документированную ошибку; временный сбой оцени с учётом бюджета повторов; нарушение инварианта расследуй. catch (...) не означает, что можно безопасно продолжить любую операцию."
+            },
+            {
+              "t": "Таймаут не доказывает отсутствие эффекта",
+              "rule": "Сервер мог выполнить запись, а ответ потеряться. Повтор безопасен только при соответствующем контракте операции или дедупликации. Один deadline (предельный момент завершения) ограничивает суммарное ожидание всех попыток."
+            }
+          ]
+        },
+        {
+          "h": "Источники и подробные объяснения",
+          "items": [
+            {
+              "t": "Правила языка, протоколы и документация",
+              "rule": "<a href=\"https://eel.is/c++draft/except\">Обработка исключений<\/a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "num": "5",
+      "title": "Сборка, Git, Linux",
+      "color": "#7A5BB0",
+      "sections": [
+        {
+          "h": "Этапы компиляции",
+          "items": [
+            {
+              "t": "Практический toolchain: препроцессинг → компиляция → ассемблирование → линковка",
+              "rule": "В типичном native toolchain препроцессор обрабатывает директивы, compiler формирует код (часто через assembly/IR), assembler создаёт object file, linker соединяет objects и библиотеки. Это удобная модель GCC/Clang, а не требование ISO C++ обязательно сохранять отдельный .s на диске; драйвер обычно скрывает промежуточные шаги."
+            },
+            {
+              "t": "undefined reference = ошибка линковки",
+              "rule": "Linker не нашёл подходящий символ. Причина может быть в отсутствующем definition/.cpp/library, несовпавшей сигнатуре или language linkage, порядке/режиме линковки либо visibility — смотри полное имя символа и команду link."
+            }
+          ]
+        },
+        {
+          "h": "Заголовки и .cpp",
+          "items": [
+            {
+              "t": "Объявление в .hpp, реализация в .cpp",
+              "code": "// Metric.hpp\n#pragma once\nclass Metric {\n    double value_ = 0.0;\npublic:\n    double value() const;\n};\n\n// Metric.cpp\n#include \"Metric.hpp\"\ndouble Metric::value() const { return value_; }"
+            },
+            {
+              "t": "Template definition обычно доступно в месте инстанцирования",
+              "rule": "Обычно оно находится в header. Для закрытого набора типов можно оставить definition в .cpp и выпустить explicit instantiation; <code>extern template<\/code> подавляет лишние инстанцирования."
+            }
+          ]
+        },
+        {
+          "h": "CMake: минимум",
+          "items": [
+            {
+              "t": "Описание проекта",
+              "code": "cmake_minimum_required(VERSION 3.20)\nproject(telemetry_agent LANGUAGES CXX)\n\nadd_executable(agent main.cpp Metric.cpp)\ntarget_compile_features(agent PRIVATE cxx_std_20)"
+            },
+            {
+              "t": "Сборка в два шага",
+              "code": "cmake -B build          # конфигурация (генерация)\ncmake --build build     # компиляция и линковка\n./build/agent           # запуск"
+            }
+          ]
+        },
+        {
+          "h": "CMake: библиотеки",
+          "items": [
+            {
+              "t": "Своё ядро в библиотеку + тонкий main",
+              "code": "add_library(telemetry_core src/Metric.cpp src/Registry.cpp)\ntarget_include_directories(telemetry_core PUBLIC include)\n\nadd_executable(agent main.cpp)\ntarget_link_libraries(agent PRIVATE telemetry_core)"
+            },
+            {
+              "t": "Внешняя зависимость через FetchContent",
+              "code": "include(FetchContent)\nFetchContent_Declare(json\n    GIT_REPOSITORY https://github.com/nlohmann/json\n    GIT_TAG v3.11.3)\nFetchContent_MakeAvailable(json)\ntarget_link_libraries(agent PRIVATE nlohmann_json::nlohmann_json)",
+              "rule": "Версия ниже — зафиксированный пример, не рекомендация последней версии. Для воспроизводимой сборки проекта выбери проверенный release/commit и учитывай обновления безопасности."
+            }
+          ]
+        },
+        {
+          "h": "ODR, linkage и ABI",
+          "items": [
+            {
+              "t": "Обычное external non-inline definition должно быть одним на программу",
+              "rule": "Функция с телом в подключаемом header обычно даст multiple definition. <code>inline<\/code> разрешает эквивалентные definitions в разных translation units; это правило ODR, а не команда оптимизатору. Include guard действует только внутри одной TU."
+            },
+            {
+              "t": "Linkage и symbols объясняют ошибки линкера",
+              "code": "namespace { void helper(); } // internal linkage в этой TU\nextern \"C\" int api_start(); // C language linkage, но не магическая ABI-совместимость C++ типов\n\nnm -C libcore.a\nreadelf -Ws libcore.so\nldd ./agent"
+            },
+            {
+              "t": "Shared library требует совместимого ABI и доступности loader-у",
+              "rule": "ABI включает calling convention, mangling, layout/vtable и runtime. Private-поле публичного класса тоже может изменить layout. PImpl уменьшает ABI-поверхность, но стабильность всё равно нужно проектировать и версионировать."
+            }
+          ]
+        },
+        {
+          "h": "CMake usage requirements",
+          "items": [
+            {
+              "t": "PRIVATE / PUBLIC / INTERFACE описывают граф требований",
+              "rule": "PRIVATE нужно самой цели; INTERFACE — её потребителям; PUBLIC — обоим. Если public header использует тип зависимости, её include/compile requirements обычно должны быть транзитивны. Предпочитай namespaced targets вроде <code>Threads::Threads<\/code>."
+            },
+            {
+              "t": "Диагностируй отдельными конфигурациями",
+              "code": "# runtime diagnostics, обычно разные builds\n-fsanitize=address,undefined -fno-omit-frame-pointer\n-fsanitize=thread\n\ncmake --preset dev\ncmake --build build/dev\nctest --test-dir build/dev --output-on-failure"
+            }
+          ]
+        },
+        {
+          "h": "Структура проекта",
+          "items": [
+            {
+              "t": "Стандартная раскладка",
+              "code": "project/\n├── CMakeLists.txt\n├── README.md\n├── .gitignore     # build/, *.o, бинарники\n├── include/       # заголовки .hpp\n├── src/           # реализация .cpp\n└── main.cpp"
+            }
+          ]
+        },
+        {
+          "h": "Git: повседневное",
+          "items": [
+            {
+              "t": "Базовый цикл",
+              "code": "git status                  # что изменилось\ngit add -p                  # выбрать фрагменты изменений\ngit commit -m \"описание\"    # зафиксировать\ngit log                     # история\n\ngit fetch                   # получить состояние сервера\ngit push                    # отправить коммиты"
+            },
+            {
+              "t": "Ветки",
+              "code": "git checkout -b feature-x   # создать и перейти\n# ... работа, коммиты ...\ngit checkout main\ngit merge feature-x"
+            }
+          ]
+        },
+        {
+          "h": "Linux: минимум",
+          "items": [
+            {
+              "t": "Навигация и файлы",
+              "code": "pwd / ls -la / cd dir\ncat file / less file / head -5 file\ngrep MemTotal /proc/meminfo\ncp a b / mv a b / rm file / mkdir dir"
+            },
+            {
+              "t": "Система и права",
+              "code": "ps aux / top / kill PID\ndf -h / free -h\nchmod +x agent      # добавить право на исполнение\nsudo command        # только когда операция действительно требует прав\n# nvme: privilege зависит от команды/device permissions"
+            }
+          ]
+        },
+        {
+          "h": "Воспроизводимость и диагностика",
+          "items": [
+            {
+              "t": "Зафиксируй не только исходники",
+              "rule": "Запиши версии компилятора, стандартной библиотеки, CMake, зависимости и параметры сборки. Тег зависимости удобен, но для строгой повторяемости нужен проверенный commit/hash; старый пример версии не является рекомендацией использовать её в новом проекте."
+            },
+            {
+              "t": "Сначала определи слой сбоя",
+              "rule": "Ошибка синтаксиса — компилятор; undefined reference — линкер; missing .so — загрузчик; падение процесса — runtime. Для последнего собери символы, backtrace и минимальный сценарий; ASan/UBSan и TSan запускай в подходящих отдельных сборках."
+            },
+            {
+              "t": "Git: сначала просмотр, затем выбранные изменения",
+              "rule": "git diff показывает незаписанные в index правки; git diff --cached — будущий коммит. git add -p выбирает фрагменты. merge сохраняет ветвление, rebase переписывает коммиты: не переписывай общую историю без согласования."
+            }
+          ]
+        },
+        {
+          "h": "Источники и подробные объяснения",
+          "items": [
+            {
+              "t": "Правила языка, протоколы и документация",
+              "rule": "<a href=\"https://cmake.org/cmake/help/latest/command/target_link_libraries.html\">CMake: target_link_libraries<\/a> · <a href=\"https://git-scm.com/docs\">Git: документация<\/a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "num": "6",
+      "title": "Многопоточность",
+      "color": "#1B6B8A",
+      "sections": [
+        {
+          "h": "Запуск потоков",
+          "items": [
+            {
+              "t": "std::thread — обязателен join или detach",
+              "code": "std::thread t(work, arg1);\nt.join();      // дождаться (обычный случай)\n// t.detach(); // отпустить (редко)\n// забыл оба -> std::terminate при уничтожении"
+            },
+            {
+              "t": "Деструктор joinable jthread запрашивает остановку, затем делает join",
+              "code": "std::jthread t(work);   // join в деструкторе\n\n// кооперативная остановка:\nstd::jthread w([](std::stop_token st){\n    while (!st.stop_requested()) { ... }\n});\nw.request_stop();"
+            },
+            {
+              "t": "Аргументы материализуются для нового потока; ссылку передают явно",
+              "code": "std::jthread t(f, std::ref(value)); // f получит T&\nt.join(); // value жив до завершения f\n\n// Альтернатива: захват владеющего значения\nauto owned = value;\nstd::jthread safe([owned] { use(owned); });\n// Если owned — view/указатель, данные всё ещё не принадлежат задаче."
+            }
+          ]
+        },
+        {
+          "h": "Гонка данных",
+          "items": [
+            {
+              "t": "Несинхронизированный ++ обычного общего counter — UB",
+              "rule": "Внутри три шага (прочитать → прибавить → записать), они переслаиваются. Формально гонка данных — это <b>UB<\/b>, а не просто неточность."
+            }
+          ]
+        },
+        {
+          "h": "Виды мьютексов",
+          "items": [
+            {
+              "t": "Четыре типа под разные задачи",
+              "rule": "<b>mutex<\/b> — базовый выбор для взаимного исключения. <b>recursive_mutex<\/b> — повторный захват тем же потоком. <b>timed_mutex<\/b> — ждать с таймаутом (<code>try_lock_for<\/code>). <b>shared_mutex<\/b> (C++17) — много читателей ИЛИ один писатель."
+            },
+            {
+              "t": "shared_mutex: читают часто, пишут редко",
+              "code": "std::shared_mutex m;\n\n// Фрагмент читателя:\n{ std::shared_lock lock(m); /* чтение */ }\n\n// Фрагмент писателя:\n{ std::unique_lock lock(m); /* изменение */ }\n// Это два отдельных критических участка, не upgrade блокировки."
+            }
+          ]
+        },
+        {
+          "h": "RAII-обёртки",
+          "items": [
+            {
+              "t": "Четыре обёртки — ручные lock/unlock не пиши",
+              "code": "std::lock_guard<std::mutex> l(m);    // по умолчанию, весь блок\nstd::unique_lock<std::mutex> l(m);   // гибкая: unlock/lock, defer\nstd::scoped_lock l(m1, m2);          // deadlock-avoiding общий захват\nstd::shared_lock l(sharedMutex);     // читатель shared_mutex"
+            },
+            {
+              "t": "Мьютекс — поле рядом с данными",
+              "code": "class Registry {\n    std::vector<Metric> data_;\n    mutable std::mutex mutex_;   // mutable для const-методов\npublic:\n    std::size_t size() const {\n        std::lock_guard lock(mutex_);   // чтение тоже защищаем\n        return data_.size();\n    }\n};"
+            }
+          ]
+        },
+        {
+          "h": "Deadlock",
+          "items": [
+            {
+              "t": "Причина — разный порядок захвата",
+              "rule": "A держит m1, ждёт m2; B держит m2, ждёт m1 → висят вечно."
+            },
+            {
+              "t": "Четыре способа избежать",
+              "rule": "(1) единый порядок захвата везде; (2) <code>std::scoped_lock<\/code> для нескольких; (3) не вызывать чужой/виртуальный код под блокировкой; (4) меньше мьютексов и вложенности."
+            }
+          ]
+        },
+        {
+          "h": "std::atomic",
+          "items": [
+            {
+              "t": "Операции атомарны; lock-free зависит от типа и реализации",
+              "code": "std::atomic<int> c{0};\n++c;                    // атомарно; lock-free проверяется отдельно\nc.load(); c.store(5);\nc.fetch_add(3);\nc.exchange(7);          // записать, вернуть старое\n\nint exp = 7;\nc.compare_exchange_strong(exp, 10);   // CAS: основа lock-free"
+            },
+            {
+              "t": "atomic или mutex",
+              "rule": "Независимый счётчик или флаг часто выражается atomic RMW. Составной инвариант, check-then-act или несколько полей обычно проще защищать mutex. Atomic load + отдельный store не образуют транзакцию; «atomic быстрее» без benchmark не гарантируется."
+            }
+          ]
+        },
+        {
+          "h": "memory_order",
+          "items": [
+            {
+              "t": "Memory order задаёт гарантии atomic-операции, а не корректность всей программы",
+              "rule": "<b>seq_cst<\/b> — по умолчанию и единый total order для seq_cst atomic-операций; он не чинит data race на обычной памяти. <b>relaxed<\/b> — атомарность/modification order без публикации соседних данных. Release synchronizes-with acquire, только когда acquire прочитал опубликованное значение (или release sequence). Ослабляй порядок лишь с доказанным happens-before и измеренной причиной."
+            }
+          ]
+        },
+        {
+          "h": "Happens-before: быстрый алгоритм проверки",
+          "items": [
+            {
+              "t": "Data race: конфликтующие потенциально одновременные доступы, хотя бы один неатомарный, без happens-before",
+              "rule": "Нарисуй действия двух потоков. Внутри потока есть sequenced-before. Мост дают synchronizes-with: unlock → следующий lock того же mutex; release → acquire, прочитавший публикацию; завершение thread → успешный join. Транзитивная цепочка даёт happens-before. Моста нет — UB, а не просто «старое значение»."
+            },
+            {
+              "t": "join публикует результат завершившегося worker",
+              "code": "int result = 0;\nstd::thread worker([&] { result = 42; });\nworker.join();\nuse(result); // запись worker happens-before чтения после join"
+            }
+          ]
+        },
+        {
+          "h": "condition_variable",
+          "items": [
+            {
+              "t": "Спать до события вместо busy waiting",
+              "code": "// Общие m, cv, q и closed живут дольше обоих потоков.\n// Consumer (отдельный поток):\n{\n    std::unique_lock lock(m);\n    cv.wait(lock, [&] { return closed || !q.empty(); });\n    // Под lock: извлечь элемент или обработать closed + empty.\n}\n\n// Producer (другой поток):\n{ std::lock_guard lock(m); q.push(x); }\ncv.notify_one(); // уведомление не хранит само состояние\n// Полный протокол очереди также проверяет closed перед push."
+            },
+            {
+              "t": "Почему unique_lock и предикат",
+              "rule": "<code>wait<\/code> отпускает мьютекс на время сна и берёт обратно — <code>lock_guard<\/code> так не умеет. Предикат нужен из-за <b>ложных пробуждений<\/b> (поток может проснуться сам)."
+            }
+          ]
+        },
+        {
+          "h": "future / promise / async",
+          "items": [
+            {
+              "t": "std::async связывает задачу с future, но не задаёт ограниченный пул",
+              "code": "auto f = std::async(std::launch::async, work, arg);\nint result = f.get();   // ждёт, получает value или повторно бросает exception\n\n// Без явной policy реализация вправе выбрать deferred.\n// Освобождение последней ссылки на async shared state может ждать задачу;\n// временные future способны сериализовать последовательные вызовы."
+            },
+            {
+              "t": "promise/future — канал для результата вручную",
+              "code": "std::promise<int> p;\nstd::future<int> f = p.get_future();\nstd::thread t([p = std::move(p)]() mutable {\n    p.set_value(42);\n});\nt.join();"
+            },
+            {
+              "t": "future переносит сохранённое исключение задачи",
+              "code": "try {\n    auto v = f.get(); // shared state повторно бросит exception здесь\n} catch (const CollectorError& e) { log(e.what()); }\n\n// Непойманное исключение из обычной thread function -> terminate."
+            },
+            {
+              "t": "get() — один раз",
+              "rule": "После <code>future::get()<\/code> future больше не valid; второй get нарушает предусловие. Для нескольких получателей/чтений используют <code>std::shared_future<\/code>."
+            },
+            {
+              "t": "packaged_task — задача-объект без автозапуска",
+              "rule": "Оборачивает функцию + future, но не запускает: можно положить в очередь. Основа пулов потоков."
+            }
+          ]
+        },
+        {
+          "h": "Примитивы C++20",
+          "items": [
+            {
+              "t": "Семафор — счётчик разрешений",
+              "code": "std::counting_semaphore<4> limit(4);\nlimit.acquire();   // взять (ждёт, если нет)\n// ... не более 4 потоков здесь ...\nlimit.release();   // вернуть\n\nstd::binary_semaphore sig(0);   // сигнализация между потоками"
+            },
+            {
+              "t": "latch — одноразовый счётчик обратного отсчёта",
+              "code": "std::latch done(3);\ndone.count_down();      // «я закончил» (в каждом потоке)\ndone.wait();            // ждём, пока все три отчитаются"
+            },
+            {
+              "t": "barrier — многоразовый, для повторяющихся фаз",
+              "code": "std::barrier sync(3, []() noexcept { publishNoThrow(); });\n// в цикле каждого потока:\nsync.arrive_and_wait();   // ждём всех и completion, потом идём дальше"
+            }
+          ]
+        },
+        {
+          "h": "Прочее полезное",
+          "items": [
+            {
+              "t": "call_once — ровно одно успешно завершившееся выполнение",
+              "code": "std::once_flag flag;\nstd::call_once(flag, initConfig);  // после исключения следующая попытка повторит вызов\n\n// проще для простых случаев:\nConfig& get() { static Config c = load(); return c; }  // синхронизирована инициализация, не все обращения к c"
+            },
+            {
+              "t": "thread_local — отдельный объект на поток",
+              "rule": "Сам <code>thread_local<\/code>-объект обычно не разделяется, но указатель на него можно передать другому потоку, а его поля могут ссылаться на общее состояние. Поэтому отсутствие синхронизации следует из отсутствия совместного доступа, а не только из ключевого слова."
+            },
+            {
+              "t": "false sharing — переменные в одной кэш-линии",
+              "rule": "Разные потоки меняют соседние объекты → coherence может гонять одну cache line без data race. Универсального размера 64 стандарт не обещает: ориентир — <code>std::hardware_destructive_interference_size<\/code>, а необходимость padding подтверждай размещением и benchmark."
+            }
+          ]
+        },
+        {
+          "h": "Потокобезопасный API и shutdown",
+          "items": [
+            {
+              "t": "Два thread-safe метода не образуют атомарную операцию",
+              "code": "// TOCTOU: между вызовами другой consumer меняет очередь\nif (!q.empty()) q.pop();\n\n// контракт лучше выразить одной линейризуемой операцией\nstd::optional<T> try_pop();"
+            },
+            {
+              "t": "Не возвращай reference/iterator, защита которого кончилась вместе с lock",
+              "rule": "После unlock другой поток может изменить или удалить объект. Верни snapshot/value либо предоставь одну операцию под lock с документированным запретом re-entry/callback-риском."
+            },
+            {
+              "t": "Очереди нужны close и backpressure",
+              "rule": "Bounded queue ограничивает память и явно выбирает overload policy: block, reject, timeout или drop. Shutdown: запретить новые задачи → разбудить ожидающих/request_stop → drain/cancel по контракту → join workers → разрушить их зависимости. <code>stop_token<\/code> кооперативен и не прерывает произвольный blocking syscall."
+            }
+          ]
+        },
+        {
+          "h": "Проверка конкурентного кода",
+          "items": [
+            {
+              "t": "TSan — динамический детектор, не доказательство",
+              "code": "c++ -std=c++20 -O1 -g -fsanitize=thread \\\n    -fno-omit-frame-pointer test.cpp -pthread\n./a.out"
+            },
+            {
+              "t": "Три слоя уверенности",
+              "rule": "(1) Инварианты, lifetime и граф happens-before; (2) направленные тесты + barriers/latches + stress + TSan; (3) production metrics: queue depth, lock wait, active workers, timeout/drop и shutdown latency. Нельзя benchmark-ить UB."
+            }
+          ]
+        },
+        {
+          "h": "Как выбрать инструмент",
+          "items": [
+            {
+              "t": "Быстрый ориентир",
+              "rule": "Одна/несколько независимых задач с результатом → <b>future/async<\/b>; постоянный или bounded поток работ → очередь + pool/executor. Общие данные → <b>mutex + RAII lock<\/b>. Независимый счётчик/флаг → <b>atomic<\/b>. Много чтений, редкая запись → кандидат <b>shared_mutex<\/b> после измерения. Ждать изменения состояния → <b>condition_variable<\/b>. Ограничить одновременный вход → <b>semaphore<\/b>. Дождаться группы → <b>latch<\/b>. Повторять синхронные фазы → <b>barrier<\/b>. Сначала формулируй invariant/lifetime/shutdown, затем выбирай примитив."
+            }
+          ]
+        },
+        {
+          "h": "CAS, ожидание и пределы ускорения",
+          "items": [
+            {
+              "t": "compare_exchange обновляет expected при неудаче",
+              "rule": "CAS сравнивает значение с expected; при несовпадении записывает фактическое значение в expected. weak может отказать ложно — обычно нужен цикл. Успех одного CAS не решает lifetime узлов: ABA и освобождение памяти требуют отдельного протокола."
+            },
+            {
+              "t": "atomic::wait ждёт изменения значения, а не запоминает события",
+              "rule": "В C++20 сначала меняют atomic, затем вызывают notify_one/all. Уведомление без изменения значения не гарантирует выход из wait; переход A → B → A может быть не замечен. Для очереди задач нужен счётчик или предикат состояния."
+            },
+            {
+              "t": "Больше потоков не означает меньше задержку",
+              "rule": "Если доля p работы распараллеливается, идеальная оценка ускорения на N исполнителях: 1 / ((1 − p) + p/N). При p = 0,9 и N = 4 это около 3,08. Реальные блокировки, планировщик и обмен данными обычно снижают выигрыш."
+            }
+          ]
+        },
+        {
+          "h": "Источники и подробные объяснения",
+          "items": [
+            {
+              "t": "Правила языка, протоколы и документация",
+              "rule": "<a href=\"https://eel.is/c++draft/intro.races\">Модель памяти и гонки<\/a> · <a href=\"https://eel.is/c++draft/thread\">Потоки и синхронизация<\/a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "num": "7",
+      "title": "Сеть, сокеты и HTTP",
+      "color": "#326A82",
+      "sections": [
+        {
+          "h": "7.1 · Путь запроса: имя, адрес, соединение",
+          "items": [
+            {
+              "t": "DNS разрешает имя; маршрутизация доставляет IP-пакеты",
+              "rule": "DNS-ответ может прийти из кэша; имя может иметь несколько адресов. Порт выбирает транспортную конечную точку, а не URL-путь. HTTP-путь разбирает уже приложение. Проверяй DNS, соединение, TLS и HTTP как отдельные этапы."
+            },
+            {
+              "t": "localhost относится к текущему сетевому окружению",
+              "rule": "127.0.0.1 и ::1 — loopback; внутри контейнера это обычно сам контейнер. Bind на 0.0.0.0 означает все локальные IPv4-интерфейсы, а не адрес, который клиент должен использовать."
+            }
+          ]
+        },
+        {
+          "h": "7.2 · Что добавляют сетевые уровни",
+          "items": [
+            {
+              "t": "Инкапсуляция добавляет служебные поля, а не новые HTTP-запросы",
+              "rule": "Для обычного HTTP/1.1 поверх TCP: байты HTTP → TCP-заголовок и часть потока → IP-заголовок → кадр канального уровня. При HTTPS между HTTP и TCP находятся TLS records. Границы HTTP-сообщений, TLS records, TCP-сегментов и кадров не обязаны совпадать."
+            },
+            {
+              "t": "MTU ограничивает пакет на канале",
+              "rule": "TCP делит поток на сегменты; IP и транспортные заголовки занимают часть доступного размера. MTU, MSS и размер буфера recv — не одно и то же. По одному маленькому recv нельзя заключить, что отправитель послал маленькое сообщение."
+            }
+          ]
+        },
+        {
+          "h": "7.3 · TCP, UDP и QUIC",
+          "items": [
+            {
+              "t": "TCP — упорядоченный поток байтов, не очередь сообщений",
+              "rule": "Запиши протокол границ: длина, разделитель с экранированием или готовый HTTP-парсер. Успешный send ещё не означает, что сервер обработал команду; для этого нужен ответ уровня приложения."
+            },
+            {
+              "t": "UDP сохраняет границы датаграмм, но не обещает доставку",
+              "rule": "Потери, дубликаты и перестановки учитываются протоколом приложения. QUIC работает поверх UDP, добавляет защищённые соединения и надёжные потоки; потеря данных одного потока не требует упорядочивать с ним доставку других, хотя общая перегрузка влияет на соединение."
+            }
+          ]
+        },
+        {
+          "h": "7.4 · POSIX sockets: чтение и запись",
+          "items": [
+            {
+              "t": "Частичные операции — нормальный результат",
+              "rule": "send может принять лишь часть буфера: сохрани смещение. Для TCP recv с ненулевым размером буфера возвращает >0 байты, 0 — EOF, -1 — ошибку. EINTR и EAGAIN/EWOULDBLOCK обрабатываются по режиму операции; EOF не обязательно означает, что ты уже закончил отправку."
+            },
+            {
+              "t": "У сокета должен быть владелец",
+              "rule": "Закрывай descriptor ровно один раз RAII-объектом. Для неблокирующего connect EINPROGRESS — начало ожидания; после готовности проверь SO_ERROR. Учти SIGPIPE при записи в закрытое соединение; способ подавления зависит от платформы."
+            }
+          ]
+        },
+        {
+          "h": "7.5 · epoll: готовность не равна завершению",
+          "items": [
+            {
+              "t": "Событие разрешает попробовать I/O без блокировки",
+              "rule": "В режиме edge-triggered используй неблокирующие дескрипторы и обслуживай чтение/запись до EAGAIN; иначе можно не получить нового ребра. Если вводишь квоту ради справедливости, сохрани готовую работу и явно запланируй её продолжение."
+            },
+            {
+              "t": "Не подписывайся постоянно на запись без данных",
+              "rule": "EPOLLOUT часто готов: включай интерес, когда есть неотправленный буфер, и снимай после его опустошения. Не выполняй долгий CPU-код или блокирующий вызов в event loop."
+            }
+          ]
+        },
+        {
+          "h": "7.6 · Boost.Asio и время жизни",
+          "items": [
+            {
+              "t": "Буфер обязан дожить до completion handler",
+              "rule": "async_write не делает владельцем переданный buffer. Состояние сессии должно хранить данные до завершения; не запускай пересекающиеся составные записи в один stream. Очередь исходящих сообщений делает порядок явным."
+            },
+            {
+              "t": "strand сериализует обработчики, но не привязывает к одному потоку",
+              "rule": "Все обращения к защищаемому состоянию должны идти через тот же strand или другой согласованный механизм. Таймер, отмена и completion могут конкурировать логически: заверши запрос один раз, а оставшиеся callbacks обработай безопасно."
+            }
+          ]
+        },
+        {
+          "h": "7.7 · HTTP framing и TLS",
+          "items": [
+            {
+              "t": "Границы HTTP/1.1 разбираются по правилам протокола",
+              "rule": "Пустая строка заканчивает заголовки, не обязательно тело. Длина зависит от статуса, метода и полей framing; противоречивые длины опасны для proxy и backend. Не пиши production HTTP-парсер из нескольких split."
+            },
+            {
+              "t": "TLS шифрует канал, но не заменяет проверку прав",
+              "rule": "Проверь доверие сертификату и имя сервера; не отключай verification ради исправления ошибки. TLS может завершаться на reverse proxy: отдельно защити следующий участок и доверяй forwarded-заголовкам только от известного proxy."
+            },
+            {
+              "t": "HTTP/2 и HTTP/3 меняют транспорт сообщений",
+              "rule": "HTTP/2 использует потоки внутри одного TCP-соединения; потеря TCP-сегмента может задержать их все. HTTP/3 работает поверх QUIC. Версия протокола сама по себе не исправляет медленный обработчик или неограниченную очередь."
+            }
+          ]
+        },
+        {
+          "h": "7.8 · Нагрузка, таймауты и диагностика",
+          "items": [
+            {
+              "t": "Backpressure ограничивает накопление работы",
+              "rule": "Задай пределы на соединения, тело запроса, очередь и исходящий буфер. При превышении явно выбери отказ, ожидание в пределах deadline или сброс по контракту. Иначе медленный клиент способен удерживать память без границы."
+            },
+            {
+              "t": "Проверяй и пропускную способность, и хвост задержек",
+              "rule": "Для устойчивой системы L = λW: среднее число запросов в системе равно средней интенсивности поступления, умноженной на среднее время в ней. 200 запросов/с × 0,05 с = 10 запросов. Это средние, не формула p99 и не гарантия устойчивости при перегрузке."
+            },
+            {
+              "t": "Диагностика идёт от внешнего симптома к узкому месту",
+              "rule": "curl -v помогает увидеть этап HTTP/TLS, ss — сокеты, tcpdump — пакеты при нужных правах. На сервере сопоставь latency, ошибки, CPU, очередь и время зависимостей. Не записывай токены и тела с секретами в диагностический лог."
+            }
+          ]
+        },
+        {
+          "h": "Источники и подробные объяснения",
+          "items": [
+            {
+              "t": "Правила языка, протоколы и документация",
+              "rule": "<a href=\"https://man7.org/linux/man-pages/man2/recv.2.html\">Linux: recv<\/a> · <a href=\"https://man7.org/linux/man-pages/man7/epoll.7.html\">Linux: epoll<\/a> · <a href=\"https://www.boost.org/doc/libs/latest/doc/html/boost_asio/overview/core/strands.html\">Boost.Asio: strand<\/a> · <a href=\"https://httpwg.org/specs/rfc9112.html\">HTTP/1.1: RFC 9112<\/a> · <a href=\"https://www.rfc-editor.org/rfc/rfc9000.html\">QUIC: RFC 9000<\/a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "num": "8",
+      "title": "REST API и C++-сервис",
+      "color": "#326A82",
+      "sections": [
+        {
+          "h": "8.1 · Контракт API",
+          "items": [
+            {
+              "t": "API обещает поведение, а не только JSON",
+              "rule": "Зафиксируй методы, пути, типы полей, ошибки, права, лимиты и повторы. HTTP+JSON ещё не означает соблюдение всех ограничений REST. Stateless означает отсутствие необходимости в скрытом контексте прошлых запросов на сервере, а не запрет хранения ресурсов."
+            }
+          ]
+        },
+        {
+          "h": "8.2 · Методы и статусы",
+          "items": [
+            {
+              "t": "Безопасность и идемпотентность — разные свойства",
+              "rule": "GET/HEAD не запрашивают изменение состояния; PUT и DELETE идемпотентны по ожидаемому эффекту. Повторный DELETE может дать другой статус. POST и PATCH не идемпотентны автоматически; свойство можно обеспечить контрактом."
+            },
+            {
+              "t": "Ответ должен соответствовать факту",
+              "rule": "201 — ресурс создан; 202 — принят, но ещё не завершён; 204 — без содержимого. 400 — некорректный запрос, 404 — ресурс не найден, 409 — конфликт состояния, 412 — не выполнено условие запроса. 401 требует подходящего WWW-Authenticate; 403 — отказ в доступе."
+            }
+          ]
+        },
+        {
+          "h": "8.3 · Валидация и ошибки",
+          "items": [
+            {
+              "t": "Проверяй вход слоями",
+              "rule": "Сначала лимит байтов и Content-Type, затем синтаксис JSON, типы/диапазоны, после этого бизнес-условия. Пропущенное поле, null и пустая строка могут означать разное. Не превращай любое исключение парсинга и бизнес-логики в один и тот же 500."
+            },
+            {
+              "t": "Ошибка должна помогать клиенту, но не раскрывать внутренности",
+              "rule": "Problem Details (RFC 9457) задаёт application/problem+json и поля type, title, status, detail, instance. Это формат, не каталог всех ошибок. Добавляй машинно-читаемые детали валидации по контракту; не выдавай stack trace, пароли и SQL."
+            }
+          ]
+        },
+        {
+          "h": "8.4 · Слои C++-сервиса",
+          "items": [
+            {
+              "t": "Handler переводит HTTP, сервис выполняет правило, хранилище держит данные",
+              "rule": "Handler разбирает запрос и формирует ответ. Сервис проверяет бизнес-инвариант. Хранилище обеспечивает согласованный доступ. Не возвращай ссылку на элемент, который другой запрос может удалить после отпускания lock."
+            },
+            {
+              "t": "Память процесса — не долговечное хранилище",
+              "rule": "Mutex защищает данные только внутри согласованного процесса. Перезапуск теряет in-memory задачи, несколько реплик имеют разные копии. Не обещай сохранность и общую дедупликацию без механизма, который действительно это обеспечивает."
+            }
+          ]
+        },
+        {
+          "h": "8.5 · Конкурентные изменения и повторы",
+          "items": [
+            {
+              "t": "Проверка версии и запись должны быть одной операцией",
+              "rule": "ETag/If-Match помогают обнаружить изменение после чтения. Но сервер должен атомарно проверить версию и применить запись; отдельные find и update всё ещё допускают lost update. При несовпадении предусловия верни 412."
+            },
+            {
+              "t": "Ключ идемпотентности требует серверного протокола",
+              "rule": "Свяжи ключ с пользователем, операцией и содержимым запроса. Определи срок хранения, ответ на другой payload с тем же ключом и одновременные повторы. Фиксация эффекта и результата дедупликации не должна оставлять окно для двойной операции."
+            },
+            {
+              "t": "Повторы ограничены общим бюджетом",
+              "rule": "Используй backoff с jitter (случайным разбросом задержки), предел попыток и общий deadline. Не повторяй заведомо неверный ввод. Если ответ потерян, сначала учитывай возможность уже выполненного эффекта."
+            }
+          ]
+        },
+        {
+          "h": "8.6 · Доверие и авторизация",
+          "items": [
+            {
+              "t": "Знать пользователя недостаточно: проверь доступ к объекту",
+              "rule": "Аутентификация отвечает «кто», авторизация — «что разрешено». Проверяй владельца/tenant каждой записи и операции; случайный ID не является защитой. Проверяй подпись и необходимые claims токена по принятой политике."
+            },
+            {
+              "t": "CORS не защищает API от небраузерных клиентов",
+              "rule": "Это политика браузера о доступе к ответу другого origin. CSRF касается запросов с автоматически прикрепляемыми credentials, например cookie. Нужны соответствующие SameSite/CSRF меры; TLS и CORS их не заменяют."
+            }
+          ]
+        },
+        {
+          "h": "8.7 · Совместимость, списки и кэш",
+          "items": [
+            {
+              "t": "Новый обязательный параметр может сломать старого клиента",
+              "rule": "Версионируй поведение осознанно. Зафиксируй схему и примеры в OpenAPI, проверь контрактными тестами. Даже добавление enum-варианта может сломать клиента, который не умеет обрабатывать неизвестное значение."
+            },
+            {
+              "t": "Пагинация требует устойчивого порядка",
+              "rule": "Offset прост, но при изменениях возможны пропуски/повторы. Cursor должен учитывать сортировку и уникальный tie-breaker; сам по себе он не даёт snapshot. Ограничь размер страницы и не доверяй непроверенному содержимому курсора."
+            },
+            {
+              "t": "Кэширование — часть контракта ответа",
+              "rule": "no-cache требует проверки перед повторным использованием, а no-store запрещает хранение. Для условного GET валидатор помогает ответить 304 без содержимого. Учитывай персональные данные и Vary: общий кэш не должен смешать ответы разных пользователей."
+            }
+          ]
+        },
+        {
+          "h": "8.8 · Асинхронные операции и события",
+          "items": [
+            {
+              "t": "202 — это обещание принять работу, а не выполнить её успешно",
+              "rule": "Верни способ узнать статус операции: pending/running/succeeded/failed и результат по контракту. Определи срок хранения, отмену и поведение после рестарта. Webhook требует проверки отправителя и защиты от повторной доставки."
+            },
+            {
+              "t": "SSE, WebSocket и polling решают разные задачи",
+              "rule": "Polling проще, но создаёт повторные запросы. SSE подходит для потока событий сервер → клиент, WebSocket — для двустороннего обмена. Во всех вариантах нужны лимиты буфера, восстановление соединения и правила повторов/потери событий."
+            }
+          ]
+        },
+        {
+          "h": "8.9 · Что проверить перед демонстрацией API",
+          "items": [
+            {
+              "t": "Проверяй не только счастливый путь",
+              "rule": "Тесты: валидный запрос, неверный тип, отсутствующий ресурс, чужой объект, одновременное обновление, повтор после таймаута, превышение лимита, рестарт. Изолируй состояние тестов; отдельно проверь бизнес-логику и полный HTTP-путь."
+            },
+            {
+              "t": "Объясняй границы учебного проекта честно",
+              "rule": "Назови место хранения, число процессов, механизм синхронизации, лимиты и известные отказы. Метрики latency/error rate, корреляция запросов и health endpoints помогают искать сбои, но не заменяют долговечность и корректный контракт."
+            }
+          ]
+        },
+        {
+          "h": "Источники и подробные объяснения",
+          "items": [
+            {
+              "t": "Правила языка, протоколы и документация",
+              "rule": "<a href=\"https://httpwg.org/specs/rfc9110.html\">HTTP semantics: RFC 9110<\/a> · <a href=\"https://www.rfc-editor.org/rfc/rfc9457.html\">Problem Details: RFC 9457<\/a> · <a href=\"https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html\">OWASP: REST Security<\/a>. Проект стандарта C++ отражает текущую редакцию; учитывай версию языка. Пояснения и дополнительные ссылки — в соответствующей станции курса."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "num": "9",
+      "title": "Базы данных и PostgreSQL",
+      "color": "#386789",
+      "sections": [
+        {
+          "h": "Ограничения",
+          "items": [
+            {
+              "t": "Ограничения",
+              "rule": "PRIMARY KEY определяет строку; FOREIGN KEY проверяет ссылку, но не права пользователя. CHECK не заменяет NOT NULL."
+            }
+          ]
+        },
+        {
+          "h": "SQL и NULL",
+          "items": [
+            {
+              "t": "SQL и NULL",
+              "rule": "IS NULL проверяет отсутствие значения; ORDER BY задаёт порядок. LEFT JOIN сохраняет строки без пары; COUNT(expr) не считает NULL."
+            }
+          ]
+        },
+        {
+          "h": "Транзакция",
+          "items": [
+            {
+              "t": "Транзакция",
+              "rule": "Успех приложения — после COMMIT. Внешний email не откатывается. Потеря ответа на COMMIT может оставить исход неизвестным."
+            }
+          ]
+        },
+        {
+          "h": "Конкуренция",
+          "items": [
+            {
+              "t": "Конкуренция",
+              "rule": "UPDATE ... WHERE version = ожидаемая RETURNING ... предотвращает молчаливое затирание при соблюдении протокола всеми писателями. Ноль строк — отдельный исход."
+            }
+          ]
+        },
+        {
+          "h": "Изоляция",
+          "items": [
+            {
+              "t": "Изоляция",
+              "rule": "Read Committed: снимок на команду. Repeatable Read: стабильный снимок, но возможен write skew. Serializable требует обработки отказов и повтора всей транзакции."
+            }
+          ]
+        },
+        {
+          "h": "Индексы",
+          "items": [
+            {
+              "t": "Индексы",
+              "rule": "B-tree: равенство, диапазон, порядок. Hash: равенство, не UNIQUE в PostgreSQL. Проверяй реальный план и число строк; EXPLAIN ANALYZE выполняет запрос."
+            }
+          ]
+        },
+        {
+          "h": "C++ и пул",
+          "items": [
+            {
+              "t": "C++ и пул",
+              "rule": "Параметры передаются отдельно от SQL. Соединение имеет одного владельца на время транзакции. Дедлайн HTTP сам по себе не очищает соединение."
+            }
+          ]
+        },
+        {
+          "h": "Восстановление",
+          "items": [
+            {
+              "t": "Восстановление",
+              "rule": "Схему меняют совместимо: расширение, переход, удаление старого. Копию проверяют восстановлением. Sequence допускает пропуски; кэш может устареть."
+            }
+          ]
+        },
+        {
+          "h": "Проектирование",
+          "items": [
+            {
+              "t": "Проектирование",
+              "rule": "N+1 — дополнительные запросы на каждый объект. Денормализация требует источника истины и пересчёта. Retention ограничивает срок хранения. ctid не является устойчивым публичным ID."
+            }
+          ]
+        },
+        {
+          "h": "Источники",
+          "items": [
+            {
+              "t": "Источники",
+              "rule": "<a href=\"https://www.postgresql.org/docs/18/\">PostgreSQL 18<\/a> · <a href=\"https://libpqxx.readthedocs.io/7.10.1/getting-started.html\">libpqxx 7.10.1<\/a>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "num": "★",
+      "title": "Как разбирать код на собеседовании",
+      "color": "#8A5A1B",
+      "sections": [
+        {
+          "h": "0. Сначала реши: программа вообще корректна?",
+          "items": [
+            {
+              "t": "Не вычисляй вывод до проверки компиляции и UB",
+              "rule": "Проверь access control, deleted/ambiguous overload, abstract type, missing virtual destructor при полиморфном delete, dangling reference, use-after-move по контракту типа, unsequenced operations и data race. Если код ill-formed или имеет UB, единственного гарантированного вывода нет."
+            }
+          ]
+        },
+        {
+          "h": "1. Нарисуй объект как дерево подобъектов",
+          "items": [
+            {
+              "t": "Construction order не определяется initializer list",
+              "rule": "Сначала virtual bases (самым derived объектом), затем direct bases слева направо, затем non-static fields в порядке объявления, затем тело конструктора. Destruction идёт строго обратно. Для каждого полностью созданного подобъекта сразу запиши соответствующий destructor."
+            },
+            {
+              "t": "Delegating constructor выполняет target constructor, затем своё тело",
+              "rule": "Если target завершился исключением, делегирующее тело не запускается. Function-try-block конструктора видит ошибку, но после выхода из handler исключение автоматически перебрасывается."
+            }
+          ]
+        },
+        {
+          "h": "2. Раздели storage и lifetime",
+          "items": [
+            {
+              "t": "new-expression: allocate → construct; delete-expression: destroy → deallocate",
+              "code": "E* p = new E; // если E::E бросил, подходящий operator delete\n              // освобождает storage; p не получает значение\ndelete p;       // при успехе: ~E(), затем deallocation"
+            },
+            {
+              "t": "Если конструктор полного объекта бросил",
+              "rule": "Деструктор самого полного объекта не вызывается. Уже построенные поля и базы уничтожаются в обратном порядке. Для автоматического объекта ничего больше делать не нужно; при new-expression storage освобождается автоматически подходящей deallocation function."
+            }
+          ]
+        },
+        {
+          "h": "3. Для каждого вызова отдели static type от dynamic type",
+          "items": [
+            {
+              "t": "Virtual body выбирается по final overrider, но не всё виртуально",
+              "rule": "Default arguments связываются по static type; non-virtual overload/name lookup — тоже compile-time. В constructor/destructor virtual dispatch не уходит в более-derived часть. Передача по значению может сделать slicing."
+            }
+          ]
+        },
+        {
+          "h": "4. Пройди исключительный и обычный пути отдельно",
+          "items": [
+            {
+              "t": "Таблица трассировки",
+              "code": "ШАГ | СОБЫТИЕ                    | ЖИВЫЕ ОБЪЕКТЫ\n1   | B::B                         | B\n2   | member::member               | B, member\n3   | D::D throws                  | B, member\n4   | member::~member, B::~B       | —\n5   | matching catch               | —"
+            },
+            {
+              "t": "Не смешивай три варианта одной задачи",
+              "rule": "Автоматический объект + throw, успешный <code>new/delete<\/code> и <code>new<\/code> с исключением конструктора имеют разные точки cleanup. Выпиши trace для каждого варианта заново, затем сравни."
+            }
+          ]
+        },
+        {
+          "h": "Фраза хорошего ответа",
+          "items": [
+            {
+              "t": "Сначала контракт, затем вывод",
+              "rule": "«Код корректен/некорректен потому что … . При корректном пути порядок задают … . Вот состояние после каждого шага … . При альтернативе с исключением уничтожаются только … . Поэтому гарантированный вывод такой: …». Это сильнее угадывания строк по памяти."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "num": "10",
+      "title": "Тесты, доставка и эксплуатация",
+      "color": "#286879",
+      "sections": [
+        {
+          "h": "Договор и уровни тестов",
+          "items": [
+            {
+              "t": "Результат важнее отсутствия падения",
+              "rule": "Unit проверяет ограниченный договор; integration — реальные границы компонентов; end-to-end — пользовательский путь. Проверяй обычный случай, границы и состояние после отказа. <a href=\"cpp_station10_production.html#section=test-levels\">Разбор уровней →<\/a>"
+            }
+          ]
+        },
+        {
+          "h": "Запуск проверок",
+          "items": [
+            {
+              "t": "Сборка не равна выполнению тестов",
+              "code": "cmake -S . -B build\ncmake --build build --parallel 2\nctest --test-dir build --output-on-failure --no-tests=error",
+              "rule": "Покрытие не доказывает корректность ожиданий; sanitizers видят выполненные пути. <a href=\"cpp_station10_production.html#section=sanitizers-coverage\">Ограничения инструментов →<\/a>"
+            }
+          ]
+        },
+        {
+          "h": "Образ и контейнер",
+          "items": [
+            {
+              "t": "Изоляция и хранение",
+              "rule": "Образ — шаблон; контейнер — процессы и их окружение. Multi-stage отделяет сборочные инструменты от runtime. Volume переживает удаление контейнера, но не заменяет backup. <a href=\"cpp_station10_production.html#section=docker-network-data\">Сеть и данные →<\/a>"
+            }
+          ]
+        },
+        {
+          "h": "CI и доверие",
+          "items": [
+            {
+              "t": "Проверяй тот артефакт, который выпускаешь",
+              "rule": "Runner исполняет команды, в том числе недоверенные сборочные скрипты. Не выдавай PR production-секреты. Cache ускоряет; artifact фиксирует результат. <a href=\"cpp_station10_production.html#section=ci-model\">Модель CI →<\/a>"
+            }
+          ]
+        },
+        {
+          "h": "Выпуск и остановка",
+          "items": [
+            {
+              "t": "Readiness не равна liveness",
+              "rule": "При draining запрещают новую работу и ограниченно ждут принятую. Откат бинарника не отменяет несовместимую миграцию. <a href=\"cpp_station10_production.html#section=release-compatibility\">Совместимость →<\/a>"
+            }
+          ]
+        },
+        {
+          "h": "Наблюдение",
+          "items": [
+            {
+              "t": "Считать по одному договору",
+              "rule": "Доля успеха = сумма good / сумма total. Не усредняй p99 реплик. SLO задаёт цель и окно; запросный бюджет не равен минутам простоя. У алерта нужны действие и владелец. <a href=\"cpp_station10_production.html#section=metrics-slo\">Показатели →<\/a>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "num": "fn",
+      "title": "Ходовые функции std",
+      "color": "#B0344E",
+      "sections": [
+        {
+          "h": "vector <vector>",
+          "items": [
+            {
+              "t": "Основные методы",
+              "code": "v.push_back(x);       // добавить готовый объект\nv.emplace_back(a, b); // построить элемент из аргументов на месте\nv.pop_back();         // удалить последний (не возвращает его)\nv.size(); v.empty();  // размер / пустота\nv.front(); v.back();  // требуют непустой vector\nv.clear();            // size=0; capacity не уменьшается\nv.reserve(n);         // увеличить capacity, size не меняется\nv.resize(n);          // изменить size\nv.insert(it, x);\nv.erase(it);"
+            }
+          ]
+        },
+        {
+          "h": "string <string>",
+          "items": [
+            {
+              "t": "Основные методы",
+              "code": "s.size(); s.empty();          // длина / пустота\ns.substr(pos, len);           // новая owning string\ns.find(\"ab\");              // позиция или std::string::npos\ns += \"more\";\ns.c_str();                    // NUL-terminated до следующей invalidating операции\nstd::to_string(42);\nstd::stoi(\"42\");           // бросает; может принять числовой prefix\nstd::getline(std::cin, s);    // после >> учти оставшийся newline\n\nstd::string_view view = s;    // без копии и без владения"
+            }
+          ]
+        },
+        {
+          "h": "map / set <map> <set>",
+          "items": [
+            {
+              "t": "Основные методы",
+              "code": "m[key] = v;          // вставка/изменение ([] создаёт ключ!)\n++m[key];            // идиома подсчёта\nm.at(key);           // доступ с проверкой (бросает)\nm.find(key);         // итератор или m.end()\nm.contains(key);     // есть ли ключ (C++20)\nm.count(key);        // 0 или 1 для map/set\nm.erase(key);        // удалить по ключу\ns.insert(x);         // вставить в set (дубликаты игнор)"
+            }
+          ]
+        },
+        {
+          "h": "Алгоритмы <algorithm> <numeric>",
+          "items": [
+            {
+              "t": "Основные",
+              "code": "std::sort(b, e);\nstd::find(b, e, x);              // iterator или e\nstd::count_if(b, e, pred);\nstd::max_element(b, e);          // перед *it проверь it != e\nstd::transform(b, e, out, f);\nstd::copy_if(b, e, std::back_inserter(dst), pred);\nstd::accumulate(b, e, 0LL);      // тип accumulator задаёт initial value\nstd::erase_if(v, pred);          // C++20\n\nstd::ranges::sort(v);\nauto it = std::ranges::find(v, x);"
+            },
+            {
+              "t": "b, e — это begin() и end()",
+              "rule": "Почти все алгоритмы принимают диапазон итераторов [begin, end). pred — предикат-лямбда, out — итератор назначения (часто std::back_inserter(v))."
+            }
+          ]
+        },
+        {
+          "h": "Умные указатели <memory>",
+          "items": [
+            {
+              "t": "Создание и операции",
+              "code": "std::make_unique<T>(args);   // unique ownership\nstd::make_shared<T>(args);   // shared ownership\np.get();                     // non-owning raw pointer\np.reset();                   // освободить/заменить owned object\nauto q = std::move(p);       // передать unique ownership\nif (auto sp = w.lock()) { use(*sp); } // временно продлить lifetime\n\n// use_count() — диагностика, не протокол синхронизации/уникальности"
+            }
+          ]
+        },
+        {
+          "h": "Ввод-вывод <iostream>",
+          "items": [
+            {
+              "t": "Основное",
+              "code": "std::cout << x << \"\\n\";      // вывод\nstd::cin >> x;               // ввод (до пробела)\nstd::getline(std::cin, s);   // строка целиком\nstd::cerr << \"error\\n\";      // поток ошибок"
+            }
+          ]
+        },
+        {
+          "h": "Файлы <fstream>",
+          "items": [
+            {
+              "t": "Чтение файла построчно (RAII — закроется сам)",
+              "code": "std::ifstream f(\"data.txt\");\nif (!f) return;              // проверка открытия\nstd::string line;\nwhile (std::getline(f, line)) {\n    // обработка line\n}   // файл закроется автоматически"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}</script><script src="assets/cheatsheet.js" defer></script></body></html>
