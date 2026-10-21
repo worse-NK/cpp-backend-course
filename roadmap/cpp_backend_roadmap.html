@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Курс · C++ и backend-разработка</title>
-<link rel="stylesheet" href="assets/home.css" />
+<link rel="stylesheet" href="assets/home.css?v=20261022-facts" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -983,11 +983,6 @@ function App() {
     const pct = Math.round(doneCount / DATA.stages.length * 100);
     const h = React.createElement;
     const ready = DATA.stages.filter(stage => stage.station);
-    const plannedCount = DATA.stages.length - ready.length;
-    function stageCountLabel(count) {
-        const last = count % 10, lastTwo = count % 100;
-        return count + " " + (lastTwo >= 11 && lastTwo <= 14 ? "этапов" : last === 1 ? "этап" : last >= 2 && last <= 4 ? "этапа" : "этапов");
-    }
     function groupStatus(group) {
         const stations = group.indices.map(i => DATA.stages[i].station).filter(Boolean);
         if (!stations.length) return "В плане";
@@ -1032,8 +1027,7 @@ function App() {
             h("section", { className: "home-course-facts", "aria-label": "Содержание курса" },
                 h("div", null, h("strong", null, ready.length), h("span", null, "готовых станций")),
                 h("div", null, h("strong", null, ready.reduce((sum, stage) => sum + stage.station.totalSections, 0)), h("span", null, "разделов теории")),
-                h("div", null, h("strong", null, "C++20"), h("span", null, "основная версия языка")),
-                h("div", null, h("strong", null, stageCountLabel(plannedCount)), h("span", null, "в плане"))),
+                h("div", null, h("strong", null, "C++20"), h("span", null, "основная версия языка"))),
             h("details", { className: "home-prerequisites" }, h("summary", null, "Подойдёт ли мне курс и что нужно для начала?"), h("p", null, DATA.intro)),
             h("section", { id: "curriculum", className: "home-curriculum", "aria-labelledby": "curriculum-title" },
                 h("div", { className: "home-section-heading" }, h("div", null, h("p", { className: "home-eyebrow" }, "ПРОГРАММА"), h("h2", { id: "curriculum-title" }, "Шаг за шагом, без пробелов.")), h("p", null, "Раскройте станцию, чтобы увидеть темы, материалы и итоговый проект.")),

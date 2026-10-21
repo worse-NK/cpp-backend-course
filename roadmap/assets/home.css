@@ -36,7 +36,7 @@
 .home-preview-steps small { display:block; font-size:11px; color:#64776d; margin-top:3px; }
 .home-preview-steps .is-planned .home-step-number { border-style:dashed; background:transparent; }
 .home-preview-foot { border-top:1px solid #d0ddd5; padding-top:15px; font-size:11px; line-height:1.7; color:#64776d; margin:0; }
-.home-course-facts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); padding:24px 0; border-top:1px solid var(--home-line); border-bottom:1px solid var(--home-line); gap:24px; }
+.home-course-facts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); padding:24px 0; border-top:1px solid var(--home-line); border-bottom:1px solid var(--home-line); gap:24px; }
 .home-course-facts div { border-right:1px solid var(--home-line); }
 .home-course-facts div:last-child { border:0; }
 .home-course-facts strong { display:block; font-size:25px; font-weight:500; letter-spacing:-.04em; }
@@ -89,8 +89,7 @@
   .home-hero { grid-template-columns:1fr; padding:38px 0 30px; }
   .home-route-preview h2 br { display:none; }
   .home-route-preview h2 { font-size:25px; }
-  .home-course-facts { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .home-course-facts div:nth-child(2) { border:0; }
+  .home-course-facts { gap:16px; }
   .home-section-heading { display:block; }
   .home-section-heading > p { max-width:none; margin-top:14px; }
   .home-section-heading h2 { font-size:26px; }
