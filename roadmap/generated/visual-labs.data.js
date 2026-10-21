@@ -329,6 +329,55 @@ window.COURSE_LABS = [
       }
     ],
     "boundary": "Дискретная модель: такт — одна секунда, каждая задача занимает исполнителя на один такт. Это не замер реального сервиса и не модель p99."
+  },
+  {
+    "id": "packetpath",
+    "title": "Пакет на разных участках пути",
+    "summary": "Маршрутизация, SNAT, forward-drop и IPv6 Packet Too Big: как меняются заголовки и что подтверждает каждое наблюдение.",
+    "file": "visual_labs.html",
+    "scenarios": [
+      "routed",
+      "snat",
+      "filtered",
+      "pmtu6"
+    ],
+    "entries": [
+      {
+        "station": "station7-netlab",
+        "section": "netlab-packet-walk",
+        "scenario": "routed",
+        "title": "Лаборатория: пакет от LAN до server",
+        "description": "Проследи next hop, канальные заголовки и TTL. Сравни обычную маршрутизацию, SNAT и отказ фильтра.",
+        "file": "cpp_station7_linux_networks.html"
+      },
+      {
+        "station": "station7-netlab",
+        "section": "netlab-ipv6-pmtu",
+        "scenario": "pmtu6",
+        "title": "Лаборатория: IPv6-пакет не помещается в MTU",
+        "description": "Сопоставь размер IP-пакета и MTU выхода, Packet Too Big и следующий уменьшенный пакет.",
+        "file": "cpp_station7_linux_networks.html"
+      }
+    ],
+    "sources": [
+      {
+        "title": "RFC 1812: IPv4 forwarding",
+        "url": "https://www.rfc-editor.org/rfc/rfc1812"
+      },
+      {
+        "title": "nftables: NAT",
+        "url": "https://wiki.nftables.org/wiki-nftables/index.php/Performing_Network_Address_Translation_(NAT)"
+      },
+      {
+        "title": "RFC 8201: IPv6 Path MTU Discovery",
+        "url": "https://www.rfc-editor.org/rfc/rfc8201"
+      },
+      {
+        "title": "Linux 6.1: IPv6 MTU check before forward",
+        "url": "https://github.com/torvalds/linux/blob/v6.1/net/ipv6/ip6_output.c#L570-L597"
+      }
+    ],
+    "boundary": "Подготовленные учебные трассы, не работающий сетевой стек и не захват Linux. MAC — символические метки; IPv4 TTL=64 выбран для примера. SNAT сохраняет порт при отсутствии конфликта. ICMPv6 PTB доходит до источника; его обработка показана отдельно от фрагментации. Модель не доказывает работу реального стенда или приложение в Интернете."
   }
 ];
 window.courseLabHref = function(id, scenario, station, section) {

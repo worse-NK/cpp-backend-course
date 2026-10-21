@@ -234,5 +234,108 @@
     return t;
   }
 
-  global.CourseLabModels={ownership,vector,build,concurrency,concurrencyInitial,concurrencyStep,network,sql,transactions,overload,copy};
+  function packetpath(mode="routed") {
+    if (!["routed","snat","filtered","pmtu6"].includes(mode)) throw new RangeError("Unknown prepared packetpath scenario");
+    const v6=mode==="pmtu6",nat=mode==="snat";
+    const addresses=v6?{client:"2001:db8:7:1::10",lan:"2001:db8:7:1::1",wan:"2001:db8:7:2::1",server:"2001:db8:7:2::10"}:{client:"192.0.2.10",lan:"192.0.2.1",wan:"198.51.100.1",server:"198.51.100.10"};
+    const mac={client:"02:00:00:00:01:10",lan:"02:00:00:00:01:01",wan:"02:00:00:00:02:01",server:"02:00:00:00:02:10"};
+    const code=[
+      "ГОТОВАЯ МОДЕЛЬ · не вывод Linux, без сетевых операций",
+      "client: выбрать маршрут; UDP 40000 → 9000",
+      "LAN: кадр MAC-C → MAC-BR; IP назначения — server",
+      "router: выбрать wan0; для IPv6 проверить MTU до forward",
+      "forward: разрешить или отбросить по сценарию",
+      "postrouting: возможный SNAT; подготовка выхода",
+      "WAN: кадр MAC-RWAN → MAC-S; TTL/Hop Limit уменьшен",
+      "server: получить запрос; создать отдельный ответ",
+      "ответ: server → router; обратное NAT для SNAT",
+      "LAN: кадр MAC-BR → MAC-C; получение клиентом",
+      "IPv6: отбросить крупный UDP; отдельный PTB MTU=1400",
+      "client: PMTU=1400; новый payload=1352, не фрагмент"
+    ].join("\n");
+    const s={prepared:true,mode,family:v6?"IPv6":"IPv4",boundary:"Простой путь Linux 6.1: без GSO, туннелей и дополнительных политик. Это не измерение и не исполнение ядра.",addresses,mac,focus:"client",link:null,direction:"request",stage:"Подготовка",status:"ready",verdict:"Ожидание",before:null,after:null,pmtu:v6?1500:null,lanMtu:1500,wanMtu:v6?1400:1500,route:"Ещё не выбран",hook:"—",nat:null,events:[],counters:{lanRequests:0,wanRequests:0,serverRequests:0,repliesToClient:0,ptbToClient:0}};
+    const t=trace("packetpath",code,"Модель обычного пути Linux 6.1 · без сетевых операций",s);
+    t.prepared=true;
+    function datagram(src,dst,sport,dport,payloadBytes) {
+      return {family:v6?6:4,kind:"UDP",src,dst,sport,dport,hopLimit:64,ipHeaderBytes:v6?40:20,payloadBytes,payloadText:v6?null:sport===40000?"course7:ping":"course7:pong",ipBytes:(v6?40:20)+8+payloadBytes,ethSrc:null,ethDst:null,ethSrcName:null,ethDstName:null,icmpType:null,icmpCode:null,reportedMtu:null,quote:null};
+    }
+    function framed(packet,from,to,fromName,toName) {
+      return {...copy(packet),ethSrc:mac[from],ethDst:mac[to],ethSrcName:fromName,ethDstName:toName};
+    }
+    function routed(packet) {
+      return {...copy(packet),hopLimit:packet.hopLimit-1,ethSrc:null,ethDst:null,ethSrcName:null,ethDstName:null};
+    }
+    function emit(line,title,text,rule,before,after,change={}) {
+      Object.assign(s,change,{before:copy(before),after:copy(after)});
+      s.events.push({number:s.events.length+1,node:s.focus,title});
+      t.add(line,title,text,rule,s,s.stage+" · "+s.verdict);
+    }
+    let request=datagram(addresses.client,addresses.server,40000,9000,v6?1400:12);
+    emit(1,"Клиент выбирает конечный адрес и next hop","Клиент создаёт UDP-датаграмму с портами 40000 → 9000. Сервер находится в другой подсети; следующий переход — LAN-интерфейс router, но IP назначения остаётся адресом server.","Адреса, MAC, порты и соседи заданы моделью. "+(v6?"Размеры IPv6 рассматриваются отдельно.":"Готовая схема приложения: course7:ping → course7:pong, по 12 ASCII-байт без перевода строки; приложение здесь не исполняется.")+" Контрольные суммы не вычисляются: это не PCAP и не вывод Linux.",null,request,{stage:"Client · маршрут",route:"default via "+addresses.lan+" dev eth0",verdict:"Выбран router"});
+    const lanFrame=framed(request,"client","lan","MAC-C","MAC-BR");
+    s.counters.lanRequests++;
+    emit(2,"Первый кадр: клиент → LAN-маршрутизатор","Появился Ethernet-заголовок MAC-C → MAC-BR. Удалённый сервер не является Ethernet-соседом клиента: его MAC на первом линке не нужен.","Ethernet-адрес следующего соседа и IP конечного получателя — разные поля.",request,lanFrame,{stage:"LAN · отправка",link:"lan",verdict:"Кадр передан в LAN"});
+    emit(3,"Router видит входящий LAN-кадр","Кадр принят на LAN-интерфейсе router. Его IP-получатель — server, а не локальный процесс router. На входе TTL/Hop Limit ещё равен 64.","Факт ingress не доказывает egress: впереди решение маршрута, фильтр и ограничение MTU.",lanFrame,lanFrame,{focus:"router",stage:"Router · ingress",link:null,hook:"prerouting",route:addresses.server+" → wan0",verdict:"Нужна IP-пересылка"});
+    if(v6) {
+      request={...copy(lanFrame),ethSrc:null,ethDst:null,ethSrcName:null,ethDstName:null};
+      emit(3,"Маршрут выбран; IPv6 MTU проверяется до forward","Выбран непосредственно подключённый WAN, но его MTU ещё нужно проверить. В обычном пути Linux эта проверка предшествует forward и уменьшению Hop Limit: у большого пакета пока 64.","Это порядок подготовленного обычного Linux IPv6-пути без GSO, туннелей и специальных политик. Старый Ethernet-заголовок относится к LAN, новый ещё не сформирован.",lanFrame,request,{stage:"Router · маршрут",route:addresses.server+" dev wan0",hook:"до forward · проверка IPv6 MTU",verdict:"Сначала проверка MTU"});
+    } else {
+      request=routed(lanFrame);
+      emit(3,"IP-пересылка отделена от нового кадра","Выбран непосредственно подключённый WAN. Router уменьшает TTL с 64 до 63. Старый Ethernet-заголовок принадлежал LAN; новый WAN-заголовок ещё не сформирован.","При обычной маршрутизации без NAT адреса и UDP-порты конечных узлов сохраняются. Удаление L2 из текущего представления не означает исчезновение IP-пакета.",lanFrame,request,{stage:"Router · маршрут",route:addresses.server+" dev wan0",hook:"forward",verdict:"Проверка forward"});
+    }
+    if(mode==="filtered") {
+      emit(4,"Forward drop: вход был, выхода нет","Подготовленное правило forward отбрасывает запрос. Ни WAN-кадр, ни получение на server после этого не происходят. Таблица оставляет последние известные поля; они не становятся доказательством отправки.","Drop в этой точке прекращает данный путь. Видимый LAN ingress не равен доставке серверу, а изменение правила input не описывает этот транзит.",request,request,{stage:"Router · forward",status:"dropped",link:null,hook:"forward",verdict:"DROP · WAN egress = 0"});
+      emit(4,"Граница вывода: приложение пока не проверено","Мы локализовали отбрасывание в forward этой модели. Нельзя утверждать, что сервер получил запрос или что его UDP-служба неисправна: до сервера пакет не дошёл.","Это готовая причинная последовательность, не результат диагностики рабочей машины. Счётчики относятся только к показанному модельному запросу.",request,request,{stage:"Результат · фильтр",focus:"router",verdict:"Запрос не доставлен"});
+      return t;
+    }
+    if(!v6)emit(4,"Forward разрешает продолжить обработку","В этом сценарии подготовленное правило forward разрешает запрос. IP-поля не изменились от самого accept; пакет ещё должен пройти следующие стадии и поместиться в выходной линк.","Accept на текущей стадии не является подтверждением получения приложением.",request,request,{stage:"Router · forward",hook:"forward",verdict:"ACCEPT · не финальная доставка"});
+    if(v6) {
+      emit(10,"1448 байт не помещаются в WAN MTU 1400","IPv6 40 + UDP 8 + payload 1400 = 1448 байт. На LAN MTU 1500 пакет прошёл, но WAN MTU 1400 меньше его полной IP-длины. Linux отбрасывает его до forward; Hop Limit остаётся 64. IPv6-фрагментов router не создаёт.","В IPv6 фрагментировать может источник, не пересылающий router. Исходный большой UDP-пакет не достигает forward и WAN egress этой модели.",request,request,{stage:"Router · MTU",hook:"до forward · IPv6 MTU",status:"too-big",verdict:"DROP 1448 > 1400 · нужен PTB"});
+      let ptb={family:6,kind:"ICMPv6 PTB",src:addresses.lan,dst:addresses.client,sport:null,dport:null,hopLimit:64,ipHeaderBytes:40,payloadBytes:null,ipBytes:1280,ethSrc:null,ethDst:null,ethSrcName:null,ethDstName:null,icmpType:2,icmpCode:0,reportedMtu:1400,quote:{src:request.src,dst:request.dst,sport:request.sport,dport:request.dport,ipBytes:request.ipBytes,quotedBytes:1232}};
+      const ptbFrame=framed(ptb,"lan","client","MAC-BR","MAC-C");
+      emit(10,"Отдельный ICMPv6 Packet Too Big идёт источнику","Router создаёт новый ICMPv6-пакет type 2, code 0, MTU 1400. Назначение — client, а не server. Внутри процитирован вызвавший ошибку UDP-пакет; это не перенос его данных серверу.","Длина PTB: IPv6 40 + ICMPv6 8 + цитата 1232 = 1280. Внешних UDP-портов нет. Источник PTB здесь заранее выбран как адрес br-lan router; это не универсальное правило выбора адреса любого маршрутизатора. Обратная политика разрешает PTB.",request,ptbFrame,{stage:"LAN · ICMPv6 PTB",direction:"control",focus:"router",link:"lan",hook:"локальный output → postrouting",route:addresses.client+" dev br-lan",status:"feedback",verdict:"PTB · сообщить MTU 1400"});
+      s.counters.ptbToClient++;
+      emit(11,"Клиент получает PTB и уменьшает оценку PMTU","Клиент сопоставляет цитату со своим обменом и меняет PMTU с 1500 на 1400. Исходный UDP-пакет 1448 байт всё ещё не доставлен; нужен новый подходящий пакет.","В этой модели PTB доходит до источника. Его потеря дала бы другой сценарий — потенциальную PMTU black hole, а не автоматическую фрагментацию router.",ptbFrame,ptbFrame,{stage:"Client · PMTU",focus:"client",link:null,hook:"input",pmtu:1400,verdict:"Оценка PMTU = 1400"});
+      const smaller=datagram(addresses.client,addresses.server,40000,9000,1352);
+      const smallerFrame=framed(smaller,"client","lan","MAC-C","MAC-BR");
+      s.counters.lanRequests++;
+      emit(11,"Источник формирует новый UDP-пакет длиной 1400","Без extension headers остаётся 1400 − 40 − 8 = 1352 байта UDP payload. Это новая датаграмма с Hop Limit 64; router не отрезал 48 байт от прежнего пакета.","Поведение приложения здесь подготовлено: отправитель согласованно выбирает меньшую полезную нагрузку. UDP сам не обещает надёжную повторную передачу.",lanFrame,smallerFrame,{stage:"LAN · новый пакет",focus:"client",direction:"request",link:"lan",hook:"output",status:"ready",route:"default via "+addresses.lan+" dev eth0",verdict:"Новый размер = 1400"});
+      const smallerRouted=routed(smallerFrame);
+      emit(3,"Меньший пакет проходит MTU и forward: Hop Limit 64 → 63","Router получает новый пакет и выбирает тот же маршрут. Теперь 1400 ≤ 1400: проверка MTU успешна, Hop Limit уменьшается до 63 и подготовленный forward разрешает передачу. Изменение Hop Limit не добавляет байты.","Маршрут и соседи считаются работоспособными; сравнивается влияние размера. Только этот подходящий пакет достигает forward в IPv6-сценарии.",smallerFrame,smallerRouted,{stage:"Router · повторный маршрут",focus:"router",link:null,hook:"forward",route:addresses.server+" dev wan0",verdict:"ACCEPT · 1400 ≤ 1400"});
+      const smallerWan=framed(smallerRouted,"wan","server","MAC-RWAN","MAC-S");
+      s.counters.wanRequests++;
+      emit(6,"Теперь есть WAN egress без фрагментации","Сформирован кадр MAC-RWAN → MAC-S. IPv6-адреса и UDP-порты остались клиент—сервер, Hop Limit равен 63, полная IP-длина — 1400.","Первый большой UDP-пакет не выходил в WAN; счётчик WAN-запросов увеличивается только сейчас.",smallerRouted,smallerWan,{stage:"WAN · подходящий пакет",link:"wan",hook:"postrouting / egress",status:"ready",verdict:"Передан один пакет 1400"});
+      s.counters.serverRequests++;
+      emit(7,"Сервер получает новую датаграмму","Сервер получил пакет с payload 1352, а не прежние 1400 байт данных. В модели проверена доставка новой датаграммы; успех произвольного приложения и обратной большой передачи отсюда не следует.","Размер полного IP-пакета, UDP payload и размер прикладного объекта — разные величины.",smallerWan,smallerWan,{stage:"Результат · новый UDP доставлен",focus:"server",link:null,hook:"input",status:"delivered",verdict:"Доставлен новый payload 1352"});
+      return t;
+    }
+    if(nat) {
+      const translated={...copy(request),src:addresses.wan};
+      const mapping={original:addresses.client+":40000 → "+addresses.server+":9000",translated:addresses.wan+":40000 → "+addresses.server+":9000",reply:addresses.server+":9000 → "+addresses.wan+":40000",restored:addresses.server+":9000 → "+addresses.client+":40000"};
+      emit(5,"SNAT меняет источник перед WAN","В postrouting источник 192.0.2.10 становится 198.51.100.1. Порт 40000 сохраняется по явному условию модели; в общем случае NAT может изменить и порт. Назначение server:9000 осталось прежним.","Stateful NAT запоминает сопоставление для обратного направления. Контрольные суммы, зависящие от изменённых полей, потребуют обновления; численно они здесь не вычисляются.",request,translated,{stage:"Router · SNAT",hook:"postrouting / srcnat",nat:mapping,verdict:"Источник преобразован"});
+      request=translated;
+    }
+    const wanFrame=framed(request,"wan","server","MAC-RWAN","MAC-S");
+    s.counters.wanRequests++;
+    emit(6,"Новый WAN-кадр несёт пересылаемый IP-пакет","Ethernet-поля теперь MAC-RWAN → MAC-S. TTL равен 63; UDP destination — 9000. "+(nat?"Сервер увидит источник 198.51.100.1:40000 после SNAT.":"IP-источник остался 192.0.2.10:40000: для двух маршрутизируемых сетей NAT не обязателен."),"Новый Ethernet-заголовок не означает новый прикладной запрос. Длина IPv4-пакета без options: 20 + 8 + 12 = 40 байт. Текст course7:ping задан готовой схемой, не получен из запуска.",request,wanFrame,{stage:"WAN · egress",link:"wan",hook:"postrouting / egress",verdict:"WAN-запрос передан"});
+    s.counters.serverRequests++;
+    emit(7,"Сервер получает подготовленный course7:ping","По заданной схеме server принимает 12-байтный course7:ping и формирует 12-байтный course7:pong. Только здесь модель фиксирует получение сервером; раньше были промежуточные сетевые события.","Это заранее известный сценарий проверки приложения, а не исполнение C++-сервера. Ответ идёт наблюдаемому источнику; получение UDP не удостоверяет пользователя.",wanFrame,wanFrame,{stage:"Server · input",focus:"server",link:null,hook:"input",verdict:"Получен payload 12"});
+    const reply=datagram(addresses.server,nat?addresses.wan:addresses.client,9000,40000,12);
+    const replyFrame=framed(reply,"server","wan","MAC-S","MAC-RWAN");
+    emit(8,"Ответ — новый пакет с новым исходным TTL","UDP-порты поменяли роли: 9000 → 40000. Сервер создаёт новый IPv4-пакет с TTL 64 и доставляет его WAN-соседу router. "+(nat?"Назначение ответа — адрес SNAT 198.51.100.1.":"Назначение ответа — исходный адрес клиента 192.0.2.10."),"TTL ответа не продолжает отсчёт TTL запроса. У server заранее задан обратный маршрут через WAN-адрес router.",wanFrame,replyFrame,{stage:"WAN · ответ",focus:"server",direction:"reply",link:"wan",hook:"output → postrouting",route:"default via "+addresses.wan+" dev eth0",verdict:"Ответ передан router"});
+    let restored=replyFrame;
+    if(nat) {
+      restored={...copy(replyFrame),dst:addresses.client};
+      emit(8,"Обратное преобразование восстанавливает клиента","Router распознаёт ответ по сохранённому NAT-сопоставлению. В prerouting назначение 198.51.100.1:40000 восстанавливается как 192.0.2.10:40000, до выбора дальнейшего маршрута.","Это обратная часть уже существующего SNAT-сопоставления, а не новое произвольное правило DNAT и не ответ локальному приложению router.",replyFrame,restored,{stage:"Router · reverse NAT",focus:"router",link:null,hook:"prerouting / reverse NAT",route:"После восстановления → br-lan",verdict:"Назначение восстановлено"});
+    }
+    const replyRouted=routed(restored);
+    emit(8,"Маршрут ответа возвращает его в LAN","Router выбирает br-lan и уменьшает TTL ответа с 64 до 63. Подготовленная обратная политика разрешает ответ. IP-источник ответа остаётся адресом server.","Рабочий прямой путь не заменяет обратный маршрут. В этой модели оба направления заданы явно.",restored,replyRouted,{stage:"Router · маршрут ответа",focus:"router",link:null,hook:"forward",route:addresses.client+" dev br-lan",verdict:"Ответ разрешён в LAN"});
+    const lanReply=framed(replyRouted,"lan","client","MAC-BR","MAC-C");
+    emit(9,"Последний кадр: MAC-BR → MAC-C","Router формирует LAN-кадр для клиента. На нём IPv4 server → client, UDP 9000 → 40000, TTL 63. Канальные адреса поменялись снова, конечный server не превратился в LAN-соседа клиента.","NAT меняет выбранные поля IP/транспорта, маршрутизация — путь и TTL, а Ethernet-доставка — заголовок каждого линка.",replyRouted,lanReply,{stage:"LAN · ответ",focus:"router",link:"lan",hook:"postrouting / egress",verdict:"Ответ передан client"});
+    s.counters.repliesToClient++;
+    emit(9,"Клиент получает подготовленный course7:pong","Клиент получил 12-байтный course7:pong от server:9000 на свой порт 40000. "+(nat?"Сохранённое сопоставление скрыло от клиента подмену его источника на WAN.":"Обмен завершился без NAT благодаря маршрутам в обе стороны."),"Это итог фиксированной схемы ping/pong с работающими соседями и подготовленным ответом, не исполнение приложения и не утверждение о текущем состоянии Linux.",lanReply,lanReply,{stage:"Результат · ответ pong",focus:"client",link:null,hook:"input",status:"delivered",verdict:"Ответ получен"});
+    return t;
+  }
+
+  global.CourseLabModels={ownership,vector,build,concurrency,concurrencyInitial,concurrencyStep,network,sql,transactions,overload,packetpath,copy};
 })(globalThis);

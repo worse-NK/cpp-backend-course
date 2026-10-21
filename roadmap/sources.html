@@ -26,8 +26,10 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <a href="#station3">СТАНЦИЯ 03</a>
 <a href="#station4">СТАНЦИЯ 04</a>
 <a href="#station5">СТАНЦИЯ 05</a>
+<a href="#station5-linux">СТАНЦИЯ 05Б</a>
 <a href="#station6">СТАНЦИЯ 06</a>
 <a href="#station7">СТАНЦИЯ 07</a>
+<a href="#station7-netlab">СТАНЦИЯ 07Б</a>
 <a href="#station8">СТАНЦИЯ 08</a>
 <a href="#station9-sql">СТАНЦИЯ 9A · SQL</a>
 <a href="#station9">СТАНЦИЯ 9B · POSTGRESQL</a>
@@ -978,10 +980,12 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://man7.org/linux/man-pages/man2/wait.2.html" target="_blank" rel="noopener noreferrer">Linux wait</a> <span class="muted">— man7.org</span></li>
 </ul>
 </details>
-<details><summary>Стековый кадр: где локальный объект оказывается в машинном коде · источников: 2</summary><p><a href="cpp_station5_build_tools.html#section=stack-frame-object">Открыть раздел теории</a></p>
+<details><summary>Стековый кадр: где локальный объект оказывается в машинном коде · источников: 4</summary><p><a href="cpp_station5_build_tools.html#section=stack-frame-object">Открыть раздел теории</a></p>
 <ul>
 <li><a href="https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html" target="_blank" rel="noopener noreferrer">GCC: оптимизации и frame pointer</a> <span class="muted">— gcc.gnu.org</span></li>
 <li><a href="https://timsong-cpp.github.io/cppwp/n4861/intro.abstract" target="_blank" rel="noopener noreferrer">C++20: наблюдаемое поведение</a> <span class="muted">— timsong-cpp.github.io</span></li>
+<li><a href="https://timsong-cpp.github.io/cppwp/n4861/except.handle#9" target="_blank" rel="noopener noreferrer">отсутствие обработчика</a> <span class="muted">— timsong-cpp.github.io</span></li>
+<li><a href="https://timsong-cpp.github.io/cppwp/n4861/except.terminate#2" target="_blank" rel="noopener noreferrer">границы раскрутки перед terminate</a> <span class="muted">— timsong-cpp.github.io</span></li>
 </ul>
 </details>
 <details><summary>Сигналы: уведомить процесс, а не вызвать обычный метод · источников: 3</summary><p><a href="cpp_station5_build_tools.html#section=signals-and-shutdown">Открыть раздел теории</a></p>
@@ -1042,6 +1046,207 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 </details>
 <details><summary>Итоги: от кода к собранному проекту · источников: 0</summary><p><a href="cpp_station5_build_tools.html#section=summary">Открыть раздел теории</a></p>
 <p class="muted">В этом разделе пока нет прямой внешней ссылки. У вводных маршрутов и итогов источники могут находиться в соответствующих тематических разделах.</p>
+</details>
+<h2 id="station5-linux">Linux: процессы, память и системное I/O</h2>
+<details><summary>Как пройти Linux: от программы до управляемого процесса · источников: 0</summary><p><a href="cpp_station5_linux_systems.html#section=learning-route">Открыть раздел теории</a></p>
+<p class="muted">В этом разделе пока нет прямой внешней ссылки. У вводных маршрутов и итогов источники могут находиться в соответствующих тематических разделах.</p>
+</details>
+<details><summary>Что запускается на самом деле: программа, процесс и ядро · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-process-kernel-model">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man7/pthreads.7.html" target="_blank" rel="noopener noreferrer">Linux man-pages: процесс и потоки</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/getpid.2.html" target="_blank" rel="noopener noreferrer">getpid(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/pid_namespaces.7.html" target="_blank" rel="noopener noreferrer">пространства PID</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Как приложение просит ядро о работе: системный вызов · источников: 4</summary><p><a href="cpp_station5_linux_systems.html#section=linux-syscall-contract">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/syscalls.2.html" target="_blank" rel="noopener noreferrer">syscalls(2): вызовы и библиотечные обёртки</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/read.2.html" target="_blank" rel="noopener noreferrer">read(2): аргументы и результат</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man3/termios.3.html" target="_blank" rel="noopener noreferrer">termios(3): особые режимы чтения терминала</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/vdso.7.html" target="_blank" rel="noopener noreferrer">vdso(7): отдельные операции без перехода в ядро</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Ошибка, короткий результат и прерывание — три разных ситуации · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-error-and-interruption">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man3/errno.3.html" target="_blank" rel="noopener noreferrer">errno(3)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/write.2.html" target="_blank" rel="noopener noreferrer">write(2): частичная запись</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/close.2.html" target="_blank" rel="noopener noreferrer">close(2): ошибки, EINTR и различие Linux/POSIX</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Как наблюдать процесс, а не гадать по исходному коду · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-inspection-basics">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man1/ps.1.html" target="_blank" rel="noopener noreferrer">ps(1)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man5/proc_pid_status.5.html" target="_blank" rel="noopener noreferrer">proc_pid_status(5)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man1/strace.1.html" target="_blank" rel="noopener noreferrer">strace(1)</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Жизнь процесса: выполняться, ждать, остановиться и завершиться · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-process-state">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man5/proc_pid_stat.5.html" target="_blank" rel="noopener noreferrer">состояния и поля процесса в Linux</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/sched.7.html" target="_blank" rel="noopener noreferrer">sched(7): планирование CPU</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/waitpid.2.html" target="_blank" rel="noopener noreferrer">wait(2): ожидание и zombie</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Контекст запуска: аргументы, окружение, каталог и права · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-launch-environment">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man7/environ.7.html" target="_blank" rel="noopener noreferrer">environ(7): окружение и PATH</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/execve.2.html" target="_blank" rel="noopener noreferrer">execve(2): аргументы и наследуемые атрибуты</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/credentials.7.html" target="_blank" rel="noopener noreferrer">credentials(7): учётные данные процесса</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Создать, заменить программу, дождаться: fork, exec и wait · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-fork-exec-wait">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/fork.2.html" target="_blank" rel="noopener noreferrer">fork(2): память, результаты и ограничения ребёнка</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/execve.2.html" target="_blank" rel="noopener noreferrer">execve(2): замена программы</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man3/posix_spawn.3.html" target="_blank" rel="noopener noreferrer">posix_spawn(3): управляемый запуск</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Кто отвечает за процесс после запуска: надзор и завершение · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-process-supervision">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/_exit.2.html" target="_blank" rel="noopener noreferrer">_exit(2): завершение и код</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/waitpid.2.html" target="_blank" rel="noopener noreferrer">wait(2): получение результата</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html" target="_blank" rel="noopener noreferrer">systemd.service: готовность и политика перезапуска</a> <span class="muted">— www.freedesktop.org</span></li>
+</ul>
+</details>
+<details><summary>Файловый дескриптор: номер, открытие и сам объект — не одно и то же · источников: 5</summary><p><a href="cpp_station5_linux_systems.html#section=linux-fd-open-description">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/open.2.html" target="_blank" rel="noopener noreferrer">open(2): дескриптор и описание открытия</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/dup.2.html" target="_blank" rel="noopener noreferrer">dup(2): общая позиция и отдельный FD_CLOEXEC</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/fcntl.2.html" target="_blank" rel="noopener noreferrer">fcntl(2): группы флагов</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/pread.2.html" target="_blank" rel="noopener noreferrer">pread(2): позиционное чтение</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/getrlimit.2.html" target="_blank" rel="noopener noreferrer">getrlimit(2): лимиты</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>read и write: результат — это количество сделанного, а не обещание сделать всё · источников: 6</summary><p><a href="cpp_station5_linux_systems.html#section=linux-io-results">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/read.2.html" target="_blank" rel="noopener noreferrer">read(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/write.2.html" target="_blank" rel="noopener noreferrer">write(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man3/errno.3.html" target="_blank" rel="noopener noreferrer">errno(3)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/pipe.7.html" target="_blank" rel="noopener noreferrer">pipe(7): EAGAIN и SIGPIPE</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/signal.7.html" target="_blank" rel="noopener noreferrer">signal(7): прерывание и возобновление операций</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/open.2.html" target="_blank" rel="noopener noreferrer">open(2): ограничения O_NONBLOCK</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>dup, pipe и наследование: как вывод одной программы становится вводом другой · источников: 5</summary><p><a href="cpp_station5_linux_systems.html#section=linux-dup-pipe-inheritance">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/pipe.2.html" target="_blank" rel="noopener noreferrer">pipe(2), pipe2 и CLOEXEC</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/pipe.7.html" target="_blank" rel="noopener noreferrer">pipe(7): поток, EOF, вместимость, PIPE_BUF</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/dup.2.html" target="_blank" rel="noopener noreferrer">dup(2): перенаправление</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/fork.2.html" target="_blank" rel="noopener noreferrer">fork(2): наследование</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/execve.2.html" target="_blank" rel="noopener noreferrer">execve(2): сохранение FD</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Владение дескриптором: кто закрывает, что проверяет и почему нельзя повторять close вслепую · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-fd-ownership">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/close.2.html" target="_blank" rel="noopener noreferrer">close(2): повтор после ошибки, многопоточность и отложенные ошибки</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/open.2.html" target="_blank" rel="noopener noreferrer">open(2): O_CLOEXEC</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r1-manage-resources-automatically-using-resource-handles-and-raii-resource-acquisition-is-initialization" target="_blank" rel="noopener noreferrer">C++ Core Guidelines R.1: RAII</a> <span class="muted">— isocpp.github.io</span></li>
+</ul>
+</details>
+<details><summary>Путь, inode и ссылки: почему имя файла не равно самому файлу · источников: 7</summary><p><a href="cpp_station5_linux_systems.html#section=linux-paths-inodes">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man7/inode.7.html" target="_blank" rel="noopener noreferrer">inode(7)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/link.2.html" target="_blank" rel="noopener noreferrer">link(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/symlink.7.html" target="_blank" rel="noopener noreferrer">symlink(7)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/unlink.2.html" target="_blank" rel="noopener noreferrer">unlink(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/path_resolution.7.html" target="_blank" rel="noopener noreferrer">path_resolution(7)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/stat.2.html" target="_blank" rel="noopener noreferrer">stat(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/openat2.2.html" target="_blank" rel="noopener noreferrer">openat2(2)</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Права и личность процесса: почему существующий файл иногда нельзя открыть · источников: 5</summary><p><a href="cpp_station5_linux_systems.html#section=linux-permissions-identity">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man7/credentials.7.html" target="_blank" rel="noopener noreferrer">credentials(7): идентификаторы процесса</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/path_resolution.7.html" target="_blank" rel="noopener noreferrer">path_resolution(7): проход пути и проверки</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/inode.7.html" target="_blank" rel="noopener noreferrer">inode(7): mode и sticky bit</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/umask.2.html" target="_blank" rel="noopener noreferrer">umask(2): формула и default ACL</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/capabilities.7.html" target="_blank" rel="noopener noreferrer">capabilities(7): разделение полномочий</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>От буфера до накопителя: что действительно обещают write, fsync и rename · источников: 4</summary><p><a href="cpp_station5_linux_systems.html#section=linux-file-durability">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.kernel.org/doc/html/latest/admin-guide/mm/concepts.html#page-cache" target="_blank" rel="noopener noreferrer">документация ядра: page cache</a> <span class="muted">— www.kernel.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/write.2.html" target="_blank" rel="noopener noreferrer">write(2): пределы успешной записи</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/fsync.2.html" target="_blank" rel="noopener noreferrer">fsync(2): данные, метаданные и каталог</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/rename.2.html" target="_blank" rel="noopener noreferrer">rename(2): замена имени и EXDEV</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Наблюдение без гадания: где открыт файл, почему занято место и что проверять первым · источников: 7</summary><p><a href="cpp_station5_linux_systems.html#section=linux-storage-observation">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man5/proc_pid_fd.5.html" target="_blank" rel="noopener noreferrer">proc_pid_fd(5)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man5/proc_pid_fdinfo.5.html" target="_blank" rel="noopener noreferrer">proc_pid_fdinfo(5)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/statfs.2.html" target="_blank" rel="noopener noreferrer">statfs(2): учёт файловой системы</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man1/df.1.html" target="_blank" rel="noopener noreferrer">руководство GNU Coreutils: df</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man1/du.1.html" target="_blank" rel="noopener noreferrer">руководство GNU Coreutils: du</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/lseek.2.html" target="_blank" rel="noopener noreferrer">lseek(2): разреженные участки</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://strace.io/" target="_blank" rel="noopener noreferrer">официальный проект strace</a> <span class="muted">— strace.io</span></li>
+</ul>
+</details>
+<details><summary>Виртуальная память: адрес не является номером ячейки RAM · источников: 2</summary><p><a href="cpp_station5_linux_systems.html#section=linux-address-space">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://docs.kernel.org/admin-guide/mm/concepts.html" target="_blank" rel="noopener noreferrer">Linux kernel: виртуальная память и страницы</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man5/proc_pid_maps.5.html" target="_blank" rel="noopener noreferrer">proc_pid_maps(5): отображения и права</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Page fault, RSS и copy-on-write: что именно выросло · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-page-fault-metrics">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/fork.2.html" target="_blank" rel="noopener noreferrer">fork(2): copy-on-write</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man5/proc_pid_smaps.5.html" target="_blank" rel="noopener noreferrer">smaps: RSS, PSS и частные страницы</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/getrusage.2.html" target="_blank" rel="noopener noreferrer">getrusage(2): minor/major faults</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>mmap: отображение файла и разделяемая память · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-mmap-sharing">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/mmap.2.html" target="_blank" rel="noopener noreferrer">mmap(2): флаги, MAP_FAILED и SIGBUS</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/msync.2.html" target="_blank" rel="noopener noreferrer">msync(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man3/pthread_mutexattr_setpshared.3.html" target="_blank" rel="noopener noreferrer">POSIX mutex: межпроцессный атрибут</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Память под давлением: почему free не равно отсутствию проблемы · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-memory-pressure">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://docs.kernel.org/admin-guide/mm/concepts.html" target="_blank" rel="noopener noreferrer">Linux: reclaim, page cache и OOM</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://docs.kernel.org/admin-guide/mm/overcommit-accounting.html" target="_blank" rel="noopener noreferrer">overcommit</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://docs.kernel.org/admin-guide/cgroup-v2.html" target="_blank" rel="noopener noreferrer">cgroup v2: memory accounting и events</a> <span class="muted">— docs.kernel.org</span></li>
+</ul>
+</details>
+<details><summary>Сигнал: событие, действие и маска · источников: 2</summary><p><a href="cpp_station5_linux_systems.html#section=linux-signal-model">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man7/signal.7.html" target="_blank" rel="noopener noreferrer">signal(7): действия, маски и доставка</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/pidfd_open.2.html" target="_blank" rel="noopener noreferrer">pidfd_open(2): ссылка на процесс</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Как принять просьбу остановиться без опасного обработчика · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-safe-signal-delivery">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man7/signal-safety.7.html" target="_blank" rel="noopener noreferrer">signal-safety(7)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/sigwaitinfo.2.html" target="_blank" rel="noopener noreferrer">sigwaitinfo(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/signalfd.2.html" target="_blank" rel="noopener noreferrer">signalfd(2)</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Лимиты и изоляция: почему root и свободная RAM не решают всё · источников: 4</summary><p><a href="cpp_station5_linux_systems.html#section=linux-limits-isolation">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/getrlimit.2.html" target="_blank" rel="noopener noreferrer">getrlimit(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://docs.kernel.org/admin-guide/cgroup-v2.html" target="_blank" rel="noopener noreferrer">Linux: cgroup v2</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/namespaces.7.html" target="_blank" rel="noopener noreferrer">namespaces(7)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/capabilities.7.html" target="_blank" rel="noopener noreferrer">capabilities(7)</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Процесс как служба: запуск, журналы и доказательство причины · источников: 4</summary><p><a href="cpp_station5_linux_systems.html#section=linux-service-observation">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man7/signal.7.html" target="_blank" rel="noopener noreferrer">signal(7)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html" target="_blank" rel="noopener noreferrer">systemd.service</a> <span class="muted">— www.freedesktop.org</span></li>
+<li><a href="https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html" target="_blank" rel="noopener noreferrer">systemd.exec</a> <span class="muted">— www.freedesktop.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man1/strace.1.html" target="_blank" rel="noopener noreferrer">strace(1)</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Разбираем задачу целиком: запустить программу и не потерять её вывод · источников: 6</summary><p><a href="cpp_station5_linux_systems.html#section=linux-process-final-workbook">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man3/posix_spawn.3.html" target="_blank" rel="noopener noreferrer">posix_spawn(3)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/pipe.2.html" target="_blank" rel="noopener noreferrer">pipe(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/pipe.7.html" target="_blank" rel="noopener noreferrer">pipe(7)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/read.2.html" target="_blank" rel="noopener noreferrer">read(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/wait.2.html" target="_blank" rel="noopener noreferrer">wait(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/close.2.html" target="_blank" rel="noopener noreferrer">close(2)</a> <span class="muted">— man7.org</span></li>
+</ul>
 </details>
 <h2 id="station6">Многопоточность</h2>
 <details><summary>Как проходить эту станцию: пять уровней сложности · источников: 0</summary><p><a href="cpp_station6_multithreading.html#section=learning-route">Открыть раздел теории</a></p>
@@ -1152,9 +1357,10 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://man7.org/linux/man-pages/man2/futex.2.html" target="_blank" rel="noopener noreferrer">Linux futex: compare-and-block</a> <span class="muted">— man7.org</span></li>
 </ul>
 </details>
-<details><summary>Гарантии прогресса: что обещает lock-free и как измерять скорость · источников: 6</summary><p><a href="cpp_station6_multithreading.html#section=progress-guarantees-performance">Открыть раздел теории</a></p>
+<details><summary>Гарантии прогресса: что обещает lock-free и как измерять скорость · источников: 7</summary><p><a href="cpp_station6_multithreading.html#section=progress-guarantees-performance">Открыть раздел теории</a></p>
 <ul>
 <li><a href="https://timsong-cpp.github.io/cppwp/n4861/atomics.lockfree" target="_blank" rel="noopener noreferrer">C++20: гарантии lock-free атомарных операций</a> <span class="muted">— timsong-cpp.github.io</span></li>
+<li><a href="https://gcc.gnu.org/onlinedocs/libstdc++/manual/status.html#status.iso.2017" target="_blank" rel="noopener noreferrer">Поддержка интерфейса в GNU libstdc++</a> <span class="muted">— gcc.gnu.org</span></li>
 <li><a href="https://man7.org/linux/man-pages/man7/numa.7.html" target="_blank" rel="noopener noreferrer">Linux numa(7): неодинаковая стоимость доступа к памяти</a> <span class="muted">— man7.org</span></li>
 <li><a href="https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html" target="_blank" rel="noopener noreferrer">Linux sched_setaffinity(2): допустимые CPU потока</a> <span class="muted">— man7.org</span></li>
 <li><a href="https://eel.is/c++draft/atomics.order" target="_blank" rel="noopener noreferrer">[atomics.order]</a> <span class="muted">— eel.is</span></li>
@@ -1238,8 +1444,10 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html" target="_blank" rel="noopener noreferrer">ThreadPoolExecutor: зависимые задачи и политики очереди; пример другого исполнителя, не контракт C++</a> <span class="muted">— docs.oracle.com</span></li>
 </ul>
 </details>
-<details><summary>Практические паттерны и подводные камни · источников: 0</summary><p><a href="cpp_station6_multithreading.html#section=patterns">Открыть раздел теории</a></p>
-<p class="muted">В этом разделе пока нет прямой внешней ссылки. У вводных маршрутов и итогов источники могут находиться в соответствующих тематических разделах.</p>
+<details><summary>Практические паттерны и подводные камни · источников: 1</summary><p><a href="cpp_station6_multithreading.html#section=patterns">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://gcc.gnu.org/onlinedocs/libstdc++/manual/status.html#status.iso.2017" target="_blank" rel="noopener noreferrer">Поддержка интерфейса в GNU libstdc++</a> <span class="muted">— gcc.gnu.org</span></li>
+</ul>
 </details>
 <details><summary>Размер pool и перегрузка: от очереди к tail latency · источников: 5</summary><p><a href="cpp_station6_multithreading.html#section=pool-sizing-overload">Открыть раздел теории</a></p>
 <ul>
@@ -1377,10 +1585,24 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://www.rfc-editor.org/rfc/rfc4861.html" target="_blank" rel="noopener noreferrer">RFC 4861: обнаружение соседей IPv6</a> <span class="muted">— www.rfc-editor.org</span></li>
 </ul>
 </details>
+<details><summary>Частный и публичный IP: почему адреса могут повторяться · источников: 2</summary><p><a href="cpp_station7_networking.html#section=private-public-addresses">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc1918.html#section-3" target="_blank" rel="noopener noreferrer">RFC 1918: диапазоны, повторное использование и границы частных сетей</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml" target="_blank" rel="noopener noreferrer">IANA: специальные назначения IPv4</a> <span class="muted">— www.iana.org</span></li>
+</ul>
+</details>
 <details><summary>IP, префиксы CIDR и выбор маршрута · источников: 2</summary><p><a href="cpp_station7_networking.html#section=ip-addressing-routing">Открыть раздел теории</a></p>
 <ul>
 <li><a href="https://www.rfc-editor.org/rfc/rfc4632.html" target="_blank" rel="noopener noreferrer">RFC 4632: префиксы и наиболее специфичные маршруты</a> <span class="muted">— www.rfc-editor.org</span></li>
 <li><a href="https://man7.org/linux/man-pages/man7/ip.7.html" target="_blank" rel="noopener noreferrer">Linux ip(7): INADDR_ANY, loopback и bind</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>От подключения кабеля до адреса: DHCP, шлюз и DNS · источников: 4</summary><p><a href="cpp_station7_networking.html#section=dhcp-network-config">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc2131.html#section-3.1" target="_blank" rel="noopener noreferrer">RFC 2131: DHCPv4 и аренда</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc2132.html" target="_blank" rel="noopener noreferrer">RFC 2132: параметры подсети, роутера и DNS</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-route.8.html" target="_blank" rel="noopener noreferrer">ip-route(8)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc4861.html#section-6" target="_blank" rel="noopener noreferrer">RFC 4861: объявления IPv6-маршрутизатора</a> <span class="muted">— www.rfc-editor.org</span></li>
 </ul>
 </details>
 <details><summary>NAT: преобразование адресов и состояние обмена · источников: 1</summary><p><a href="cpp_station7_networking.html#section=nat-ports">Открыть раздел теории</a></p>
@@ -1434,6 +1656,47 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://www.rfc-editor.org/rfc/rfc8767.html" target="_blank" rel="noopener noreferrer">8767</a> <span class="muted">— www.rfc-editor.org</span></li>
 <li><a href="https://www.rfc-editor.org/rfc/rfc4861.html" target="_blank" rel="noopener noreferrer">4861</a> <span class="muted">— www.rfc-editor.org</span></li>
 <li><a href="https://www.rfc-editor.org/rfc/rfc4632.html" target="_blank" rel="noopener noreferrer">4632</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>Почему из дома можно выйти, а домой нельзя войти: NAT и CGNAT · источников: 4</summary><p><a href="cpp_station7_networking.html#section=inbound-access-cgnat">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://datatracker.ietf.org/doc/html/rfc3022#section-2.2" target="_blank" rel="noopener noreferrer">RFC 3022: NAPT и статические входящие отображения</a> <span class="muted">— datatracker.ietf.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc6598.html" target="_blank" rel="noopener noreferrer">RFC 6598: операторский диапазон</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc2136.html" target="_blank" rel="noopener noreferrer">RFC 2136: динамические обновления DNS</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc6092.html" target="_blank" rel="noopener noreferrer">RFC 6092: фильтрация на домашних IPv6-шлюзах</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>VPN: почему рабочий адрес открывается из дома · источников: 4</summary><p><a href="cpp_station7_networking.html#section=vpn-network-context">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireguard.com/" target="_blank" rel="noopener noreferrer">WireGuard: модель защищённого сетевого интерфейса</a> <span class="muted">— www.wireguard.com</span></li>
+<li><a href="https://www.wireguard.com/quickstart/" target="_blank" rel="noopener noreferrer">WireGuard: настройка участников и NAT keepalive</a> <span class="muted">— www.wireguard.com</span></li>
+<li><a href="https://tailscale.com/docs/reference/connection-types" target="_blank" rel="noopener noreferrer">Tailscale: прямые и ретранслируемые соединения</a> <span class="muted">— tailscale.com</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-route.8.html" target="_blank" rel="noopener noreferrer">Linux: маршруты и контексты поиска</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>SSH домой: маршрут, сервер и две проверки личности · источников: 4</summary><p><a href="cpp_station7_networking.html#section=ssh-home-access">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man.openbsd.org/ssh" target="_blank" rel="noopener noreferrer">ssh(1): команда, ключи и проверка сервера</a> <span class="muted">— man.openbsd.org</span></li>
+<li><a href="https://man.openbsd.org/sshd_config" target="_blank" rel="noopener noreferrer">sshd_config(5): методы входа и ограничения</a> <span class="muted">— man.openbsd.org</span></li>
+<li><a href="https://man.openbsd.org/sshd" target="_blank" rel="noopener noreferrer">sshd(8): конфигурация, authorized_keys и проверка -t</a> <span class="muted">— man.openbsd.org</span></li>
+<li><a href="https://tailscale.com/docs/features/tailscale-ssh" target="_blank" rel="noopener noreferrer">Tailscale SSH: отдельная функция управления входом</a> <span class="muted">— tailscale.com</span></li>
+</ul>
+</details>
+<details><summary>Не открывается SSH: что доказывают ping, маршрут и ошибка входа · источников: 5</summary><p><a href="cpp_station7_networking.html#section=network-diagnostics-basics">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man8/ping.8.html" target="_blank" rel="noopener noreferrer">ping(8)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/traceroute.8.html" target="_blank" rel="noopener noreferrer">traceroute(8)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ss.8.html" target="_blank" rel="noopener noreferrer">ss(8)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man.openbsd.org/ssh_config#ConnectTimeout" target="_blank" rel="noopener noreferrer">OpenSSH: ConnectTimeout</a> <span class="muted">— man.openbsd.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc4890.html" target="_blank" rel="noopener noreferrer">RFC 4890: осмысленная фильтрация ICMPv6</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>Разбор: офисный IP и два способа подключиться домой · источников: 4</summary><p><a href="cpp_station7_networking.html#section=network-access-workbook">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc1918.html" target="_blank" rel="noopener noreferrer">RFC 1918</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc6598.html" target="_blank" rel="noopener noreferrer">RFC 6598</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-route.8.html" target="_blank" rel="noopener noreferrer">ip-route(8)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man.openbsd.org/ssh" target="_blank" rel="noopener noreferrer">ssh(1)</a> <span class="muted">— man.openbsd.org</span></li>
 </ul>
 </details>
 <details><summary>UDP: datagram без обещаний · источников: 1</summary><p><a href="cpp_station7_networking.html#section=udp-semantics">Открыть раздел теории</a></p>
@@ -1759,8 +2022,11 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <details><summary>Глубже: capacity model, очереди и управляемый отказ · источников: 0</summary><p><a href="cpp_station7_networking.html#section=production-capacity-and-overload">Открыть раздел теории</a></p>
 <p class="muted">В этом разделе пока нет прямой внешней ссылки. У вводных маршрутов и итогов источники могут находиться в соответствующих тематических разделах.</p>
 </details>
-<details><summary>Глубже: proxy, контейнеры и реальные connection boundaries · источников: 0</summary><p><a href="cpp_station7_networking.html#section=production-proxy-container-topology">Открыть раздел теории</a></p>
-<p class="muted">В этом разделе пока нет прямой внешней ссылки. У вводных маршрутов и итогов источники могут находиться в соответствующих тематических разделах.</p>
+<details><summary>Глубже: proxy, контейнеры и реальные connection boundaries · источников: 2</summary><p><a href="cpp_station7_networking.html#section=production-proxy-container-topology">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7239.html#section-8.1" target="_blank" rel="noopener noreferrer">RFC 7239</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.haproxy.org/download/3.0/doc/proxy-protocol.txt" target="_blank" rel="noopener noreferrer">спецификация PROXY protocol, раздел Security considerations</a> <span class="muted">— www.haproxy.org</span></li>
+</ul>
 </details>
 <details><summary>Глубже: от симптома к доказательству и сильному проекту · источников: 4</summary><p><a href="cpp_station7_networking.html#section=production-incident-and-project-evidence">Открыть раздел теории</a></p>
 <ul>
@@ -1778,6 +2044,199 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.7" target="_blank" rel="noopener noreferrer">RFC 9293: TCP предоставляет поток байтов</a> <span class="muted">— www.rfc-editor.org</span></li>
 <li><a href="https://man7.org/linux/man-pages/man2/recv.2.html" target="_blank" rel="noopener noreferrer">Linux recv: короткое чтение и нулевой результат</a> <span class="muted">— man7.org</span></li>
 <li><a href="https://timsong-cpp.github.io/cppwp/n4861/string.require" target="_blank" rel="noopener noreferrer">C++20: string после перемещения и операции</a> <span class="muted">— timsong-cpp.github.io</span></li>
+</ul>
+</details>
+<h2 id="station7-netlab">Linux-сеть: от топологии до диагностики</h2>
+<details><summary>Как пройти лабораторную главу: сначала прогноз, потом пакет · источников: 0</summary><p><a href="cpp_station7_linux_networks.html#section=learning-route">Открыть раздел теории</a></p>
+<p class="muted">В этом разделе пока нет прямой внешней ссылки. У вводных маршрутов и итогов источники могут находиться в соответствующих тематических разделах.</p>
+</details>
+<details><summary>Граница опыта: виртуальная машина и сеть внутри неё · источников: 3</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-isolation-boundary">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man7/network_namespaces.7.html" target="_blank" rel="noopener noreferrer">network_namespaces(7): что разделяется</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-netns.8.html" target="_blank" rel="noopener noreferrer">ip-netns(8): запуск и жизненный цикл</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man4/veth.4.html" target="_blank" rel="noopener noreferrer">veth(4): виртуальные пары</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>План стенда: два клиента, маршрутизатор и сервер · источников: 4</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-topology-plan">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc5737" target="_blank" rel="noopener noreferrer">RFC 5737: IPv4-адреса для примеров</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc3849" target="_blank" rel="noopener noreferrer">RFC 3849: IPv6-префикс для документации</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://docs.kernel.org/networking/bridge.html" target="_blank" rel="noopener noreferrer">Linux bridge</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man4/veth.4.html" target="_blank" rel="noopener noreferrer">veth(4)</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Поднимаем стенд и читаем его состояние · источников: 4</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-build-observe">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-netns.8.html" target="_blank" rel="noopener noreferrer">ip-netns(8): exec и именованные пространства</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-address.8.html" target="_blank" rel="noopener noreferrer">ip-address(8)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-route.8.html" target="_blank" rel="noopener noreferrer">ip-route(8): route get</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://docs.kernel.org/networking/ip-sysctl.html" target="_blank" rel="noopener noreferrer">Linux: forwarding, RA и DAD</a> <span class="muted">— docs.kernel.org</span></li>
+</ul>
+</details>
+<details><summary>Время жизни стенда: процессы, владение и безопасная очистка · источников: 2</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-lifecycle-cleanup">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-netns.8.html" target="_blank" rel="noopener noreferrer">ip-netns(8): удаление имени и активные процессы</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/network_namespaces.7.html" target="_blank" rel="noopener noreferrer">network_namespaces(7): освобождение namespace и устройств</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Сосед по LAN: от маршрута к ARP · источников: 3</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-ethernet-neighbors">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc826" target="_blank" rel="noopener noreferrer">RFC 826: ARP</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-neighbour.8.html" target="_blank" rel="noopener noreferrer">ip-neighbour(8): состояния соседей</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-route.8.html" target="_blank" rel="noopener noreferrer">ip-route(8): выбор пути</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Bridge: учим MAC, а не маршруты IP · источников: 2</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-bridge-learning">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://docs.kernel.org/networking/bridge.html" target="_blank" rel="noopener noreferrer">Linux bridge: обучение, FDB и netfilter</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/bridge.8.html" target="_blank" rel="noopener noreferrer">bridge(8): link и fdb</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Удалённая сеть: IP назначения и ближайший MAC · источников: 3</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-route-next-hop">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-route.8.html" target="_blank" rel="noopener noreferrer">ip-route(8): префиксы, get и таблицы</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc1812" target="_blank" rel="noopener noreferrer">RFC 1812: IPv4-маршрутизаторы</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc791" target="_blank" rel="noopener noreferrer">RFC 791: заголовок IPv4 и TTL</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>Прослеживаем пакет: что меняется, а что остаётся · источников: 8</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-packet-walk">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc1812" target="_blank" rel="noopener noreferrer">RFC 1812: IPv4 forwarding</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Performing_Network_Address_Translation_(NAT)" target="_blank" rel="noopener noreferrer">nftables: NAT</a> <span class="muted">— wiki.nftables.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8201" target="_blank" rel="noopener noreferrer">RFC 8201: IPv6 Path MTU Discovery</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://github.com/torvalds/linux/blob/v6.1/net/ipv6/ip6_output.c#L570-L597" target="_blank" rel="noopener noreferrer">Linux 6.1: IPv6 MTU check before forward</a> <span class="muted">— github.com</span></li>
+<li><a href="https://www.tcpdump.org/manpages/tcpdump.1.html" target="_blank" rel="noopener noreferrer">tcpdump: интерфейс, формат и фильтры</a> <span class="muted">— www.tcpdump.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/packet.7.html" target="_blank" rel="noopener noreferrer">packet(7): канальный уровень</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-route.8.html" target="_blank" rel="noopener noreferrer">ip-route(8)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://docs.kernel.org/networking/bridge.html" target="_blank" rel="noopener noreferrer">Linux bridge и hooks</a> <span class="muted">— docs.kernel.org</span></li>
+</ul>
+</details>
+<details><summary>Кому адресован пакет: локальная доставка и пересылка — разные пути · источников: 3</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-hooks-local-forward">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Netfilter_hooks" target="_blank" rel="noopener noreferrer">nftables: Netfilter hooks и порядок обработки</a> <span class="muted">— wiki.nftables.org</span></li>
+<li><a href="https://docs.kernel.org/networking/bridge.html#netfilter" target="_blank" rel="noopener noreferrer">Linux: мостовой путь и границы br_netfilter</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-route.8.html" target="_blank" rel="noopener noreferrer">ip-route(8): route get</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Правило nftables: что сравниваем, где и каким решением заканчиваем · источников: 2</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-nft-rules">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Configuring_chains" target="_blank" rel="noopener noreferrer">nftables: базовые цепочки, типы, policy и приоритет</a> <span class="muted">— wiki.nftables.org</span></li>
+<li><a href="https://netfilter.org/projects/nftables/manpage.html" target="_blank" rel="noopener noreferrer">nft(8): verdict, транзакции и режим --check</a> <span class="muted">— netfilter.org</span></li>
+</ul>
+</details>
+<details><summary>Conntrack: состояние обмена не равно состоянию приложения · источников: 3</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-conntrack-states">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Matching_connection_tracking_stateful_metainformation" target="_blank" rel="noopener noreferrer">nftables: поля conntrack и ct state</a> <span class="muted">— wiki.nftables.org</span></li>
+<li><a href="https://netfilter.org/projects/conntrack-tools/conntrack-manpage.html" target="_blank" rel="noopener noreferrer">conntrack(8): выборка original/reply и наблюдение событий</a> <span class="muted">— netfilter.org</span></li>
+<li><a href="https://github.com/torvalds/linux/blob/master/net/netfilter/nf_conntrack_core.c" target="_blank" rel="noopener noreferrer">Linux nf_conntrack_core.c: классификация направления и IPS_SEEN_REPLY</a> <span class="muted">— github.com</span></li>
+</ul>
+</details>
+<details><summary>Проверяем firewall: счётчик, трасса и ответ приложения доказывают разное · источников: 3</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-firewall-evidence">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Ruleset_debug/tracing" target="_blank" rel="noopener noreferrer">nftables: nftrace, выбор узкой пробы и monitor trace</a> <span class="muted">— wiki.nftables.org</span></li>
+<li><a href="https://www.tcpdump.org/manpages/tcpdump.1.html" target="_blank" rel="noopener noreferrer">tcpdump(1): выбор интерфейса, фильтры и ограничение захвата</a> <span class="muted">— www.tcpdump.org</span></li>
+<li><a href="https://netfilter.org/projects/nftables/manpage.html" target="_blank" rel="noopener noreferrer">nft(8): counter и verdict</a> <span class="muted">— netfilter.org</span></li>
+</ul>
+</details>
+<details><summary>IPv6-адрес: запись, префикс и область действия · источников: 7</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-ipv6-addresses">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc4291.html#section-2" target="_blank" rel="noopener noreferrer">RFC 4291: адреса и области</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc5952.html#section-4" target="_blank" rel="noopener noreferrer">RFC 5952: единообразное сокращение</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc4007.html#section-11" target="_blank" rel="noopener noreferrer">RFC 4007: зоны и %zone_id</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc3849.html#section-2" target="_blank" rel="noopener noreferrer">RFC 3849: 2001:db8::/32</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc6164.html" target="_blank" rel="noopener noreferrer">RFC 6164: специальный случай /127</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc4193.html#section-3" target="_blank" rel="noopener noreferrer">RFC 4193: ULA</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/ipv6.7.html" target="_blank" rel="noopener noreferrer">Linux ipv6(7): sin6_scope_id</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Маршрут IPv6 и NDP: кого искать на текущем линке · источников: 4</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-ndp-route">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc4861.html#section-3" target="_blank" rel="noopener noreferrer">RFC 4861: роли ND-сообщений и определение next hop</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc4291.html#section-2.7.1" target="_blank" rel="noopener noreferrer">RFC 4291: solicited-node и специальные multicast-группы</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc5942.html#section-4" target="_blank" rel="noopener noreferrer">RFC 5942: адрес интерфейса не равен автоматически известному on-link префиксу</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-neighbour.8.html" target="_blank" rel="noopener noreferrer">ip-neighbour(8): состояния таблицы соседей</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>RA, SLAAC и DAD: адрес, on-link и шлюз не выдаются одним фактом · источников: 6</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-ra-slaac">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc4861.html#section-4.2" target="_blank" rel="noopener noreferrer">RFC 4861: RA, Router Lifetime и PIO</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc4862.html#section-5" target="_blank" rel="noopener noreferrer">RFC 4862: SLAAC, DAD, lifetimes и §5.5.2 о default router</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc5942.html" target="_blank" rel="noopener noreferrer">RFC 5942: независимость адреса и on-link сведений</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8415.html" target="_blank" rel="noopener noreferrer">RFC 8415: историческая спецификация DHCPv6</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9915.html" target="_blank" rel="noopener noreferrer">RFC 9915</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://docs.kernel.org/networking/ip-sysctl.html" target="_blank" rel="noopener noreferrer">Linux IP Sysctl: accept_ra и forwarding</a> <span class="muted">— docs.kernel.org</span></li>
+</ul>
+</details>
+<details><summary>PMTU, ICMPv6 и dual stack: маленький пакет ещё ничего не гарантирует · источников: 8</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-ipv6-pmtu">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc1812" target="_blank" rel="noopener noreferrer">RFC 1812: IPv4 forwarding</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Performing_Network_Address_Translation_(NAT)" target="_blank" rel="noopener noreferrer">nftables: NAT</a> <span class="muted">— wiki.nftables.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8201" target="_blank" rel="noopener noreferrer">RFC 8201: IPv6 Path MTU Discovery</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://github.com/torvalds/linux/blob/v6.1/net/ipv6/ip6_output.c#L570-L597" target="_blank" rel="noopener noreferrer">Linux 6.1: IPv6 MTU check before forward</a> <span class="muted">— github.com</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8200.html#section-5" target="_blank" rel="noopener noreferrer">RFC 8200: размер пакета и фрагментация только источником</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8201.html#section-3" target="_blank" rel="noopener noreferrer">RFC 8201: PMTUD и black-hole соединения</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://datatracker.ietf.org/doc/html/rfc4890#section-4" target="_blank" rel="noopener noreferrer">RFC 4890: роль и фильтрация ICMPv6</a> <span class="muted">— datatracker.ietf.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8305.html" target="_blank" rel="noopener noreferrer">RFC 8305: Happy Eyeballs v2</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>Сначала маршрутизация без NAT: адреса сохраняются, путь меняется · источников: 3</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-routing-without-nat">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc1812.html#section-5.2" target="_blank" rel="noopener noreferrer">RFC 1812 §5.2: обычная IPv4-пересылка</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc5737.html" target="_blank" rel="noopener noreferrer">RFC 5737: блоки IPv4 для документации</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-route.8.html" target="_blank" rel="noopener noreferrer">ip-route(8): выбор локального маршрута</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>SNAT: какой источник видит сервер и как находится ответ · источников: 3</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-snat-reply">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Performing_Network_Address_Translation_(NAT)" target="_blank" rel="noopener noreferrer">nftables: stateful SNAT, binding первого пакета и masquerade</a> <span class="muted">— wiki.nftables.org</span></li>
+<li><a href="https://netfilter.org/projects/conntrack-tools/conntrack-manpage.html" target="_blank" rel="noopener noreferrer">conntrack(8): поля и выборка обменов</a> <span class="muted">— netfilter.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc3022.html" target="_blank" rel="noopener noreferrer">RFC 3022: традиционный NAT/NAPT и обратная трансляция</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>DNAT: фильтр пересылки видит уже изменённое назначение · источников: 4</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-dnat-filter">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Netfilter_hooks" target="_blank" rel="noopener noreferrer">nftables: conntrack, dstnat и filter в порядке hooks</a> <span class="muted">— wiki.nftables.org</span></li>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Performing_Network_Address_Translation_(NAT)" target="_blank" rel="noopener noreferrer">nftables: DNAT и обратное stateful-преобразование</a> <span class="muted">— wiki.nftables.org</span></li>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Matching_connection_tracking_stateful_metainformation" target="_blank" rel="noopener noreferrer">nftables: original/reply и статус dnat</a> <span class="muted">— wiki.nftables.org</span></li>
+<li><a href="https://netfilter.org/projects/conntrack-tools/conntrack-manpage.html" target="_blank" rel="noopener noreferrer">conntrack(8): обычная и unconfirmed-таблицы</a> <span class="muted">— netfilter.org</span></li>
+</ul>
+</details>
+<details><summary>Сопоставляем границы захвата: не называй разные пакеты одним адресом · источников: 4</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-capture-boundaries">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.tcpdump.org/manpages/tcpdump.1.html" target="_blank" rel="noopener noreferrer">tcpdump(1): смысл и ограничения захвата</a> <span class="muted">— www.tcpdump.org</span></li>
+<li><a href="https://netfilter.org/projects/conntrack-tools/conntrack-manpage.html" target="_blank" rel="noopener noreferrer">conntrack(8): чтение и отбор состояния</a> <span class="muted">— netfilter.org</span></li>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Performing_Network_Address_Translation_(NAT)" target="_blank" rel="noopener noreferrer">nftables: сохранённое NAT-соответствие и первый пакет</a> <span class="muted">— wiki.nftables.org</span></li>
+<li><a href="https://docs.kernel.org/networking/segmentation-offloads.html" target="_blank" rel="noopener noreferrer">Linux: границы интерпретации при segmentation offload</a> <span class="muted">— docs.kernel.org</span></li>
+</ul>
+</details>
+<details><summary>Лестница диагностики: от симптома к проверяемой гипотезе · источников: 3</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-diagnostic-ladder">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man8/ss.8.html" target="_blank" rel="noopener noreferrer">ss(8): сокеты</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://www.tcpdump.org/manpages/tcpdump.1.html" target="_blank" rel="noopener noreferrer">tcpdump: точки наблюдения</a> <span class="muted">— www.tcpdump.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man7/udp.7.html" target="_blank" rel="noopener noreferrer">udp(7): ошибки и connect</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>План эксперимента: меняем одно условие · источников: 3</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-capture-experiment">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.tcpdump.org/manpages/tcpdump.1.html" target="_blank" rel="noopener noreferrer">tcpdump: запись и чтение</a> <span class="muted">— www.tcpdump.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8200" target="_blank" rel="noopener noreferrer">RFC 8200: IPv6-заголовок</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8201" target="_blank" rel="noopener noreferrer">RFC 8201: Path MTU Discovery</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>Разбираем отказы: разные причины похожего тайм-аута · источников: 3</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-failure-recovery">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man7/udp.7.html" target="_blank" rel="noopener noreferrer">udp(7)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8201" target="_blank" rel="noopener noreferrer">RFC 8201: PMTUD</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ip-netns.8.html" target="_blank" rel="noopener noreferrer">ip-netns(8)</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>Разбираем задачу целиком: UDP-запрос, ответ и доказательство пути · источников: 5</summary><p><a href="cpp_station7_linux_networks.html#section=netlab-udp-final-workbook">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man7/udp.7.html" target="_blank" rel="noopener noreferrer">udp(7)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/recvmsg.2.html" target="_blank" rel="noopener noreferrer">recvmsg(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/poll.2.html" target="_blank" rel="noopener noreferrer">poll(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man3/getnameinfo.3.html" target="_blank" rel="noopener noreferrer">getnameinfo(3)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Performing_Network_Address_Translation_(NAT)" target="_blank" rel="noopener noreferrer">nftables: NAT</a> <span class="muted">— wiki.nftables.org</span></li>
 </ul>
 </details>
 <h2 id="station8">REST API и C++-сервис</h2>

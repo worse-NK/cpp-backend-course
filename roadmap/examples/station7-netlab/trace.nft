@@ -1,0 +1,24 @@
+# Учебная VM, только network namespace nl7-router собственного стенда 7Б.
+# Linux >= 5.10 с nftables/inet NAT. Не применять в основной сети машины.
+# Один полный файл за опыт; inet course7 должна отсутствовать перед загрузкой.
+# -c проверка и загрузка: sudo ip netns exec nl7-router nft [-c] -f ./trace.nft
+# Этот файл НЕ закрывает input/output router и НЕ является production firewall.
+# Удаление только своей таблицы: sudo ip netns exec nl7-router nft delete table inet course7
+# Существующие conntrack bindings от удаления таблицы не исчезают.
+table inet course7 {
+    comment "cpp-course-netlab7: trace; isolated teaching topology only"
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+        ct state invalid counter drop
+        meta l4proto { icmp, ipv6-icmp } counter accept
+        ct state established,related counter accept
+        iifname "br-lan" oifname "wan0" ip saddr 192.0.2.10 ip daddr 198.51.100.10 udp dport 9000 ct state new counter accept
+        iifname "br-lan" oifname "wan0" ip6 saddr 2001:db8:7:1::10 ip6 daddr 2001:db8:7:2::10 udp dport 9000 ct state new counter accept
+        counter drop
+    }
+
+    chain trace_request {
+        type filter hook prerouting priority raw; policy accept;
+        iifname "br-lan" ip saddr 192.0.2.10 ip daddr 198.51.100.10 udp dport 9000 meta nftrace set 1
+    }
+}

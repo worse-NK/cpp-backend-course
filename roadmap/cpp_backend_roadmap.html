@@ -55,7 +55,7 @@
         {
           "name": "cpp_station0_oop_basics.html",
           "url": "",
-          "note": "20 разделов · 4 подстанции · 47 вопросов · 8 практических задач"
+          "note": "20 разделов · 4 подглав · 48 вопросов · 8 заданий"
         }
       ],
       "project": {
@@ -147,7 +147,7 @@
         {
           "name": "cpp_station2_inheritance_polymorphism.html",
           "url": "",
-          "note": "25 разделов · 5 подстанции · 57 вопросов · 8 практических задач"
+          "note": "25 разделов · 5 подглав · 60 вопросов · 8 заданий"
         }
       ],
       "project": {
@@ -184,7 +184,7 @@
         {
           "name": "cpp_station3_stl_templates.html",
           "url": "",
-          "note": "39 разделов · 4 подстанции · 83 вопросов · 12 практических задач"
+          "note": "39 разделов · 4 подглав · 85 вопросов · 12 заданий"
         },
         {
           "name": "cppreference: Containers library",
@@ -251,7 +251,7 @@
         {
           "name": "cpp_station4_error_handling.html",
           "url": "",
-          "note": "28 разделов · 5 подстанции · 56 вопросов · 8 практических задач"
+          "note": "28 разделов · 5 подглав · 61 вопросов · 8 заданий"
         }
       ],
       "project": {
@@ -290,7 +290,7 @@
         {
           "name": "cpp_station5_build_tools.html",
           "url": "",
-          "note": "37 разделов · 5 подстанции · 72 вопросов · 10 практических задач"
+          "note": "38 разделов · 5 подглав · 73 вопросов · 11 заданий"
         },
         {
           "name": "«Modern CMake» (Henry Schreiner)",
@@ -323,6 +323,55 @@
       "num": 6
     },
     {
+      "id": "linux-systems",
+      "phase": "Системное",
+      "title": "Linux: процессы, память и системное I/O",
+      "goal": "Понимать, как C++-программа запускается, обращается к ядру, владеет ресурсами и корректно завершает работу. Основа перед потоками и сетями.",
+      "why": "В Linux-процессе работают и backend-сервер, и сетевая утилита. Без модели дескрипторов, ожидания и памяти трудно объяснить зависание, утечку ресурсов или отказ запуска. Это общая user-space база, не курс разработки модулей ядра.",
+      "skills": [
+        "Программа, процесс, поток и граница приложения с ядром",
+        "Контракт системного вызова: errno, EINTR и частичный результат",
+        "argv/env/cwd, fork, exec, posix_spawn, ожидание и zombie",
+        "FD и open file description: общий курсор, dup и CLOEXEC",
+        "Pipe: поток байтов, EOF, закрытие концов и взаимное ожидание",
+        "Пути, inode, ссылки, права каталогов и umask",
+        "Запись, page cache, fsync и атомарная замена имени",
+        "Виртуальная память, страницы, COW, RSS/PSS и mmap",
+        "Сигналы, безопасный приём и согласованное завершение",
+        "Лимиты, cgroups, namespaces и контекст службы"
+      ],
+      "res": [
+        {
+          "name": "cpp_station5_linux_systems.html",
+          "url": "",
+          "note": "26 разделов · 6 подглав · 50 вопросов · 6 заданий"
+        },
+        {
+          "name": "Linux man-pages",
+          "url": "https://man7.org/linux/man-pages/",
+          "note": "Первичные контракты Linux-интерфейсов; ссылки даны и в каждом разделе."
+        },
+        {
+          "name": "Документация ядра Linux: память",
+          "url": "https://docs.kernel.org/admin-guide/mm/concepts.html",
+          "note": "Модель виртуальной памяти и страничного кэша."
+        }
+      ],
+      "project": {
+        "title": "Запуск дочерней программы и захват её stdout",
+        "desc": "Проследи полный C++20-пример, который запускает известного ребёнка, читает его вывод порциями, получает EOF и проверяет статус. Затем разбери пустой вывод, ненулевой exit и отказ запуска.",
+        "deliver": "Объяснены владельцы всех дескрипторов, порядок чтения и ожидания, границы ошибки запуска и ошибки ребёнка. Запуск возможен отдельно в Linux, не внутри страницы.",
+        "skills": "RAII для FD, posix_spawn, pipe2, read/write, errno и waitpid."
+      },
+      "station": {
+        "file": "cpp_station5_linux_systems.html",
+        "storeKey": "cpp_station5_linux_progress_v1",
+        "totalSections": 26,
+        "label": "Станция 5Б"
+      },
+      "num": 7
+    },
+    {
       "id": "concurrency",
       "phase": "Системное",
       "title": "Многопоточность и асинхронность",
@@ -347,7 +396,7 @@
         {
           "name": "cpp_station6_multithreading.html",
           "url": "",
-          "note": "54 разделов · 8 подстанции · 173 вопросов · 28 практических задач"
+          "note": "56 разделов · 8 подглав · 177 вопросов · 29 заданий"
         },
         {
           "name": "«C++ Concurrency in Action» (Williams)",
@@ -372,17 +421,18 @@
         "totalSections": 56,
         "label": "Станция 6"
       },
-      "num": 7
+      "num": 8
     },
     {
       "id": "networking",
       "phase": "Backend-ядро",
       "title": "Сеть, сокеты и HTTP",
       "goal": "Пройти весь путь запроса — от DNS, IP и TCP до production-сервиса на Asio/Beast — и уметь защищать сетевую архитектуру на middle+ собеседовании.",
-      "why": "Это фундамент backend: прежде чем проектировать REST и базы, нужно понимать, где заканчивается HTTP request, что гарантирует TCP, почему медленный клиент съедает память, как живёт async Session и на каком участке proxy завершает TLS. Станция разделена на восемь подстанций и ведёт от почти нулевого сетевого опыта до production-minded проекта.",
+      "why": "Начинаем с устройства локальной сети: адресов, маршрутов, DHCP и DNS. Затем разбираем NAT/CGNAT, VPN и SSH домой и переходим к TCP, сокетам и серверу на C++. Девять подглав ведут от сетевой базы до учебного backend-проекта с ограничением нагрузки и диагностикой. Это также фундамент для дальнейшего изучения сетевой разработки, но не полный курс эксплуатации сетей.",
       "skills": [
         "7.1: путь URL → DNS → route → transport → TLS → HTTP → proxy → C++ service",
         "7.2: OSI/TCP-IP, Ethernet, IPv4/IPv6, CIDR, routing, NAT, DNS, MTU/MSS",
+        "7.2Б: домашняя и корпоративная сеть, публичный IPv4, CGNAT, VPN, SSH, ping и диагностика",
         "7.3: UDP, TCP handshake/ACK/retransmit, окна, FIN/RST/TIME-WAIT и QUIC",
         "7.4: POSIX sockets, getaddrinfo, RAII fd, partial I/O, framing и error contracts",
         "7.5: select/poll/epoll, LT/ET, reactor state machine, fairness и backpressure",
@@ -394,7 +444,7 @@
         {
           "name": "cpp_station7_networking.html",
           "url": "",
-          "note": "89 разделов · 8 подстанции · 162 вопросов · 29 практических задач"
+          "note": "98 разделов · 9 подглав · 193 вопросов · 33 заданий"
         },
         {
           "name": "Boost.Asio — latest documentation",
@@ -426,10 +476,58 @@
       "station": {
         "file": "cpp_station7_networking.html",
         "storeKey": "cpp_station7_progress_v1",
-        "totalSections": 91,
+        "totalSections": 98,
         "label": "Станция 7"
       },
-      "num": 8
+      "num": 9
+    },
+    {
+      "id": "linux-network-lab",
+      "phase": "Системное",
+      "title": "Linux-сеть: лаборатория и диагностика",
+      "goal": "Проверять путь пакета на понятной изолированной топологии: от маршрута и соседства до фильтра, NAT и ответа C++-приложения.",
+      "why": "Практическое продолжение общих сетей для Linux и сетевой разработки. Раздел можно читать по моделям без запуска; root-настройки допустимы только внутри одноразовой VM со снимком. Для первого API можно перейти из 7 в 8 и вернуться сюда позже.",
+      "skills": [
+        "Network namespaces, veth и bridge: изоляция и безопасная очистка",
+        "ARP/NDP, FDB, next hop и обратный маршрут",
+        "Что меняется в Ethernet/IP/UDP на двух участках",
+        "Linux hooks: input/output/forward и nftables base chains",
+        "Conntrack new/established/related и пределы выводов",
+        "IPv6 scopes, RA/SLAAC, DAD, MTU и ICMPv6 PTB",
+        "SNAT, DNAT, original/reply tuples и старое состояние",
+        "Tcpdump, счётчики и trace как проверка гипотезы",
+        "Один UDP ping/pong на C++20 с ограничением ожидания"
+      ],
+      "res": [
+        {
+          "name": "cpp_station7_linux_networks.html",
+          "url": "",
+          "note": "25 разделов · 6 подглав · 50 вопросов · 6 открытых практик"
+        },
+        {
+          "name": "Linux namespaces: официальный контракт",
+          "url": "https://man7.org/linux/man-pages/man7/network_namespaces.7.html",
+          "note": "Что изолировано и почему network namespace не заменяет VM."
+        },
+        {
+          "name": "nftables: официальный wiki",
+          "url": "https://wiki.nftables.org/",
+          "note": "Hooks, правила и NAT; прямые ссылки даны в теории."
+        }
+      ],
+      "project": {
+        "title": "Доказать путь одного UDP-запроса",
+        "desc": "Построй карту из четырёх узлов, предскажи заголовки запроса и ответа. Сравни baseline, фильтр, SNAT и DNAT, отдельно разбери IPv6 PMTU. Настройки — только в VM; без неё используй подготовленные свидетельства.",
+        "deliver": "Отчёт: условия, гипотеза, наблюдения, границы вывода и проверка восстановления. Предоставлен полный C++-probe и консервативный скрипт создания/очистки.",
+        "skills": "Маршруты, соседство, фильтрация, состояние NAT, IPv6 и причинная диагностика."
+      },
+      "station": {
+        "file": "cpp_station7_linux_networks.html",
+        "storeKey": "cpp_station7_netlab_progress_v1",
+        "totalSections": 25,
+        "label": "Станция 7Б"
+      },
+      "num": 10
     },
     {
       "id": "rest-api",
@@ -475,7 +573,7 @@
         "totalSections": 62,
         "label": "Станция 8"
       },
-      "num": 9
+      "num": 11
     },
     {
       "id": "sql",
@@ -508,7 +606,7 @@
         "totalSections": 24,
         "label": "Станция 9A"
       },
-      "num": 10
+      "num": 12
     },
     {
       "id": "databases",
@@ -553,7 +651,7 @@
         "totalSections": 14,
         "label": "Станция 9B"
       },
-      "num": 11
+      "num": 13
     },
     {
       "id": "production",
@@ -598,7 +696,7 @@
         "totalSections": 23,
         "label": "Станция 10"
       },
-      "num": 12
+      "num": 14
     }
   ],
   "closing": "Практические задания помогают собрать портфолио и научиться объяснять решения: какие ограничения были у задачи, почему выбран этот подход, как проверялась корректность и что изменится при росте нагрузки. Учебный проект следует представлять как учебный, не подменяя им коммерческий опыт. Прохождение курса не гарантирует определённый грейд: готовность к собеседованию лучше оценивать по самостоятельному решению незнакомых задач и способности обсуждать альтернативы. Маршрут завершается станцией 10: тестирование, доставка изменений и эксплуатация сервиса.",
@@ -606,7 +704,7 @@
     {
       "label": "Глоссарий терминов",
       "file": "glossary.html",
-      "desc": "100 понятий простыми словами: краткие определения, подробные пояснения, переходы к главам и первоисточники."
+      "desc": "138 понятий простыми словами: краткие определения, подробные пояснения, переходы к главам и первоисточники."
     },
     {
       "label": "Визуальные лаборатории",
@@ -683,7 +781,9 @@ function loadStationProgress(storeKey, totalSections) {
         }
         const splitDatabase = storeKey === 'cpp_station9_progress_v1' || storeKey === 'cpp_station9_sql_progress_v1';
         const auditedCpp = /^cpp_station[0-4]_progress_v1$/.test(storeKey);
-        const quiz = splitDatabase ? data['station-final:database-split:v1:basic'] : auditedCpp ? data["station-final:coverage:v1:basic"] : data["station-final:v3:basic"] || data["station-final:v2:basic"] || data.quiz || aggregateModuleQuiz("basic");
+        const networkFoundation = storeKey === 'cpp_station7_progress_v1';
+        const networkLab = storeKey === 'cpp_station7_netlab_progress_v1';
+        const quiz = splitDatabase ? data['station-final:database-split:v1:basic'] : auditedCpp ? data["station-final:coverage:v1:basic"] : networkLab ? data['station-final:netlab-20261021:v1:basic'] : networkFoundation ? data['station-final:network-foundation-20261021:v1:basic'] : data["station-final:v3:basic"] || data["station-final:v2:basic"] || data.quiz || aggregateModuleQuiz("basic");
         const quizAdvanced = splitDatabase ? null : data.quizAdvanced || aggregateModuleQuiz("advanced");
         return { secDone, totalSections, quiz, quizAdvanced };
     }
@@ -899,13 +999,13 @@ function App() {
     }
     const groups = [
         { id: "foundation", label: "01 / ОСНОВЫ ЯЗЫКА", title: "Научиться понимать C++", description: "От устройства объекта до управления ресурсами, контейнеров и обработки ошибок.", indices: [0, 1, 2, 3, 4] },
-        { id: "engineering", label: "02 / ИНЖЕНЕРНАЯ ПРАКТИКА", title: "От кода — к работающей программе", description: "Сборка, диагностика, потоки и координация нескольких операций.", indices: [5, 6] },
-        { id: "backend", label: "03 / BACKEND", title: "Построить взаимодействие", description: "Сети, протоколы и API: как запрос проходит через систему и получает ответ.", indices: [7, 8] },
-        { id: "databases-group", label: "04 / БАЗЫ ДАННЫХ", title: "От запросов к надёжному хранению", description: "9A — SQL и практика запросов. Затем 9B — PostgreSQL, конкуренция, индексы и работа из C++.", indices: [9, 10] },
-        { id: "planned", label: "05 / ЭКСПЛУАТАЦИЯ", title: "Эксплуатация сервиса", description: "Тесты, контейнеры, CI, безопасный выпуск и наблюдаемость — станция 10.", indices: [11] }
+        { id: "engineering", label: "02 / ИНЖЕНЕРНАЯ ПРАКТИКА", title: "От кода — к работающей программе", description: "Сборка, процессы и ресурсы Linux, затем потоки и координация нескольких операций.", indices: [5, 6, 7] },
+        { id: "backend", label: "03 / BACKEND", title: "Построить взаимодействие", description: "Сети, изолированная Linux-лаборатория и API: от пути пакета до ответа сервиса.", indices: [8, 9, 10] },
+        { id: "databases-group", label: "04 / БАЗЫ ДАННЫХ", title: "От запросов к надёжному хранению", description: "9A — SQL и практика запросов. Затем 9B — PostgreSQL, конкуренция, индексы и работа из C++.", indices: [11, 12] },
+        { id: "planned", label: "05 / ЭКСПЛУАТАЦИЯ", title: "Эксплуатация сервиса", description: "Тесты, контейнеры, CI, безопасный выпуск и наблюдаемость — станция 10.", indices: [13] }
     ];
     const previewTitles = {
-        foundation: "Язык и ресурсы", engineering: "Сборка и конкурентность",
+        foundation: "Язык и ресурсы", engineering: "Сборка, Linux и потоки",
         backend: "Сети и API", "databases-group": "SQL и PostgreSQL", planned: "Эксплуатация сервиса"
     };
     return h("div", { className: "course-home-page" },
@@ -918,7 +1018,7 @@ function App() {
                 h("div", { className: "home-hero-copy" },
                     h("p", { className: "home-eyebrow" }, "C++20 · ТЕОРИЯ · РАЗБОРЫ · ПРАКТИКА"),
                     h("h1", { id: "course-title" }, "Понять C++.", h("br"), h("span", null, "Построить backend.")),
-                    h("p", { className: "home-description" }, "От классов и владения памятью — к многопоточности, сетям, серверным API, SQL и PostgreSQL. С подробной теорией, разборами задач и практикой. Следующий этап — эксплуатация сервиса."),
+                    h("p", { className: "home-description" }, "От классов и владения памятью — к Linux, многопоточности, сетям, серверным API, SQL и PostgreSQL. С подробной теорией, разборами задач, практикой и основами эксплуатации сервиса."),
                     h("div", { className: "home-actions" },
                         h("a", { className: "home-primary", href: lastRead ? lastRead.file + "#section=" + encodeURIComponent(lastRead.section) : "cpp_station0_oop_basics.html" }, lastRead ? "Продолжить обучение →" : "Начать с основ →"),
                         h("a", { className: "home-secondary", href: "#curriculum" }, "Посмотреть программу ↓")),

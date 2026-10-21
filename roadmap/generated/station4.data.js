@@ -2776,7 +2776,7 @@ window.STATION_DATA = {
         "Я отличил перехват от хорошего контракта.",
         "Я выбрал результат без неоднозначного служебного значения."
       ],
-      "code": "#include <iostream>\n#include <vector>\n#include <stdexcept>\n\nint safeGet(const std::vector<int>& v, std::size_t index) {\n    try {\n        return v.at(index);\n    } catch (const std::out_of_range&) {\n        return -1;\n    }\n}\n\nint main() {\n    std::vector<int> v = {10, 20, 30};\n    std::cout << safeGet(v, 1) << \"\\n\";\n    std::cout << safeGet(v, 99) << \"\\n\";\n}",
+      "code": "#include <iostream>\n#include <vector>\n#include <stdexcept>\n\nint safeGet(const std::vector<int>& v, std::size_t index) {\n    try {\n        return v.at(index);\n    } catch (const std::out_of_range&) {\n        return -1;\n    }\n}\n\nint main() {\n    std::vector<int> v = {-1};\n    std::cout << safeGet(v, 0) << \"\\n\";\n    std::cout << safeGet(v, 99) << \"\\n\";\n}",
       "theoryRefs": [
         "channel-decision"
       ],

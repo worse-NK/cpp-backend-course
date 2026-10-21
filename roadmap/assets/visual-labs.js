@@ -5,8 +5,9 @@
   if(!catalog||!M){root.textContent="Не загружены локальные файлы лабораторий. Открой страницу из каталога roadmap целиком.";return;}
   const esc=value=>String(value??"—").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const modeNames={unique:"Передать unique_ptr",shared:"shared_ptr и weak_ptr",cycle:"Сильный цикл","weak-cycle":"Слабая обратная связь",growth:"Буфер заполнен",reserved:"Есть запас",erase:"Удалить элемент",header:"Изменён заголовок",source:"Изменён .cpp",readme:"Изменён README",separate:"Раздельные load/store",mutex:"Один mutex на всю операцию",rmw:"Один fetch_add",fragmented:"Порции 1 + 2 + 1 + 3",combined:"Все байты сразу",oversize:"Недопустимая длина",retry:"Повтор без ключа",dedup:"Повтор с ключом",version:"Устаревший If-Match",left:"LEFT JOIN · условие в ON",where:"Условие перенесли в WHERE","count-star":"Заменили COUNT на COUNT(*)",inner:"INNER JOIN",commit:"A фиксирует место",rollback:"A откатывается",rc:"Снимки Read Committed",rr:"Снимок Repeatable Read",bounded:"Приём с ограничением",drain:"Закрыть приём на 7-м такте"};
+  Object.assign(modeNames,{routed:"Маршрут без NAT",snat:"SNAT и обратный ответ",filtered:"Drop в forward",pmtu6:"IPv6 · MTU и PTB"});
   let lab=null,mode="",context=null,model=null,cursor=0,timer=null,parameters={rate:8,workers:4,queue:8};
-  function stationName(id){return id==="station9-sql"?"9A":id==="station9"?"9B":id.replace("station","");}
+  function stationName(id){return id==="station7-netlab"?"7Б":id==="station9-sql"?"9A":id==="station9"?"9B":id.replace("station","");}
   function entryHref(item,e){return window.courseLabHref(item.id,e.scenario,e.station,e.section);}
   function catalogPage(){
     stop();lab=null;model=null;document.title="Визуальные лаборатории · C++ / Backend";$("catalogLink").hidden=true;$("returnLink").href="cpp_backend_roadmap.html";$("returnLink").textContent="← К программе курса";
@@ -91,6 +92,30 @@
   function edge(d,label,x,y,kind="strong"){return '<path d="'+d+'" class="edge '+kind+'" marker-end="url(#labArrow)"/>'+(label?'<text class="edge-label" x="'+x+'" y="'+y+'">'+esc(label)+'</text>':"");}
   function table(title,headers,rows){return '<div class="lab-table-wrap"><table class="lab-table"><caption>'+esc(title)+'</caption><thead><tr>'+headers.map(h=>'<th scope="col">'+esc(h)+'</th>').join("")+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(v=>'<td'+(v===null?' class="null"':'')+'>'+esc(v===null?"NULL":v)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>';}
   const scenes={
+    packetpath(s){
+      const bad=s.status==="dropped"||s.status==="too-big";
+      const actor=(id,title,details)=>'<section class="packet-node '+(s.focus===id?'active':'')+'" data-packet-node="'+id+'"'+(s.focus===id?' aria-current="step"':'')+'><h3>'+esc(title)+'</h3>'+details.map(([name,value])=>'<p><span>'+esc(name)+'</span><code>'+esc(value)+'</code></p>').join("")+'</section>';
+      const link=(id,title,mtu)=>'<div class="packet-link '+(s.link===id?'active ':'')+(id==="wan"&&bad?'blocked':'')+'"><span>'+esc(title)+'</span><strong aria-hidden="true">'+(id==="wan"&&bad?'×':s.link===id?(s.direction==="request"?'→':'←'):'—')+'</strong><small>MTU '+mtu+'</small></div>';
+      let body='<div class="packet-prepared"><span>Подготовленная модель</span>'+esc(s.boundary)+' Не выполняет команды или сетевые запросы.</div>';
+      body+='<div class="packet-topology-scroll"><div class="packet-topology" role="group" aria-label="Client через LAN соединён с router, router через WAN соединён с server. Текущий узел: '+esc(s.focus)+'">'+actor("client","nl7-client",[["eth0",s.addresses.client]])+link("lan","LAN",s.lanMtu)+actor("router","nl7-router",[["br-lan",s.addresses.lan],["wan0",s.addresses.wan]])+link("wan","WAN",s.wanMtu)+actor("server","nl7-server",[["eth0",s.addresses.server]])+'</div></div>';
+      body+='<div class="packet-verdict '+(bad?'bad':'')+'" data-packet-status="'+esc(s.status)+'"><span>'+esc(s.stage)+'</span><strong>'+esc(s.verdict)+'</strong></div>';
+      const fields=p=>{
+        if(!p)return Array(12).fill("не сформирован");
+        const mac=(value,name)=>value?(name+" · "+value):"— · только IP-представление";
+        return [p.kind,mac(p.ethSrc,p.ethSrcName),mac(p.ethDst,p.ethDstName),p.src,p.dst,String(p.hopLimit),p.ipBytes+" байт",p.kind==="UDP"?"UDP (17)":"ICMPv6 (58)",p.sport===null?"— · нет UDP-портов":p.sport+" → "+p.dport,p.payloadBytes===null?"— · цитата, не UDP payload":p.payloadBytes+" байт"+(p.payloadText?" · "+p.payloadText:""),p.icmpType===null?"—":p.icmpType+" / "+p.icmpCode,p.reportedMtu===null?"—":p.reportedMtu+" байт"];
+      };
+      const before=fields(s.before),after=fields(s.after),labels=["Пакет","L2 · источник","L2 · назначение","L3 · источник","L3 · назначение",s.family==="IPv6"?"L3 · Hop Limit":"L3 · TTL","L3 · полная длина","IP Protocol / Next Header","L4 · UDP src → dst","Данные UDP","ICMPv6 type / code","PTB · объявленная MTU"];
+      const rows=labels.map((label,i)=>{
+        const changed=before[i]!==after[i];
+        return '<tr'+(changed?' class="packet-field-changed"':'')+'><th scope="row">'+esc(label)+(changed?'<small>изменено</small>':'')+'</th><td>'+esc(before[i])+'</td><td>'+esc(after[i])+'</td></tr>';
+      }).join("");
+      body+='<div class="lab-table-wrap packet-fields"><table class="lab-table"><caption>До и после текущего события · поля, не байтовый дамп</caption><thead><tr><th scope="col">Поле</th><th scope="col">До шага</th><th scope="col">После шага</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+      body+='<dl class="packet-facts"><div><dt>Маршрут текущего направления</dt><dd>'+esc(s.route)+'</dd></div><div><dt>Точка обработки</dt><dd>'+esc(s.hook)+'</dd></div>'+(s.pmtu===null?'':'<div><dt>Оценка PMTU у client</dt><dd>'+s.pmtu+' байт</dd></div>')+'</dl>';
+      if(s.nat)body+='<div class="packet-nat">'+table("Заданное NAT-сопоставление · порт сохранён по условию",["Направление","Адреса и порты"],[["Исходный запрос",s.nat.original],["После SNAT",s.nat.translated],["Ответ на WAN",s.nat.reply],["После reverse NAT",s.nat.restored]])+'</div>';
+      if(s.after&&s.after.quote){const q=s.after.quote;body+='<p class="packet-quote"><strong>Внутри PTB — цитата:</strong> ['+esc(q.src)+']:'+q.sport+' → ['+esc(q.dst)+']:'+q.dport+'; исходная полная длина '+q.ipBytes+' байт. Записано '+q.quotedBytes+' байт цитаты.</p>';}
+      body+='<div class="packet-counters" aria-label="Счётчики только этой модели"><span>Запросы LAN <strong>'+s.counters.lanRequests+'</strong></span><span>Запросы WAN <strong>'+s.counters.wanRequests+'</strong></span><span>Получено server <strong>'+s.counters.serverRequests+'</strong></span><span>Ответы client <strong>'+s.counters.repliesToClient+'</strong></span><span>PTB у client <strong>'+s.counters.ptbToClient+'</strong></span></div>';
+      return body+'<p class="lab-scene-caption">MAC-C, MAC-BR, MAC-RWAN и MAC-S — фиксированные учебные имена с адресами в таблице. Порядок событий не является измерением времени. Изменённые поля отмечены текстом; «—» означает отсутствие этого поля или текущего L2-заголовка.</p>';
+    },
     ownership(s){
       if(s.cycle){let body=node(180,55,240,88,"A : Node",s.aliveA?"сильных: "+s.countA:s.created?"объект уничтожен":"Ещё не создан",s.aliveA?"ready":"dead")+node(590,55,240,88,"B : Node",s.aliveB?"сильных: "+s.countB:s.created?"объект уничтожен":"Ещё не создан",s.aliveB?"ready":"dead");
         body+='<text class="scene-title" x="180" y="33">'+(s.externalA?"Есть внешняя a":"Внешней a нет")+'</text><text class="scene-title" x="590" y="33">'+(s.externalB?"Есть внешняя b":"Внешней b нет")+'</text>';

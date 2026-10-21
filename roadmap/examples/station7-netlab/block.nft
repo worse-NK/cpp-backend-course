@@ -1,0 +1,17 @@
+# Учебная VM, только network namespace nl7-router собственного стенда 7Б.
+# Linux >= 5.10 с nftables/inet NAT. Не применять в основной сети машины.
+# Один полный файл за опыт; inet course7 должна отсутствовать перед загрузкой.
+# -c проверка и загрузка: sudo ip netns exec nl7-router nft [-c] -f ./block.nft
+# Этот файл НЕ закрывает input/output router и НЕ является production firewall.
+# Удаление только своей таблицы: sudo ip netns exec nl7-router nft delete table inet course7
+# Существующие conntrack bindings от удаления таблицы не исчезают.
+table inet course7 {
+    comment "cpp-course-netlab7: block; isolated teaching topology only"
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+        ct state invalid counter drop
+        meta l4proto { icmp, ipv6-icmp } counter accept
+        ct state established,related counter accept
+        counter drop
+    }
+}

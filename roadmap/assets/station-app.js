@@ -87,7 +87,7 @@
   }
 
   // Stable, balanced station-wide selection. Source banks remain untouched.
-  function finalQuestions(bank, modules, limit, preferCoverage) {
+  function finalQuestions(bank, modules, limit, preferCoverage, priorityRefs) {
     // Editorial exclusions from the final exam only: these remain in chapter
     // checkpoints and source banks, but repeat a skill already tested here.
     var repeatedStems = [
@@ -110,6 +110,7 @@
     var buckets = modules.map(function (module) {
       var basic = bank.basic.filter(function (q) { return q.substation === module.id && eligible(q); });
       var advanced = bank.advanced.filter(function (q) { return q.substation === module.id && eligible(q); });
+      basic = prioritizeQuestions(basic, priorityRefs);
       var mixed = [];
       for (var i = 0; i < Math.max(basic.length, advanced.length); i++) {
         if (basic[i]) mixed.push(basic[i]);
@@ -132,6 +133,18 @@
       });
     }
     return selected;
+  }
+
+  // Selection belongs to the assessment, not to physical bank order. Keep
+  // historical question positions stable for readers and source checks.
+  function prioritizeQuestions(questions, refs) {
+    if (!refs || !refs.length) return questions;
+    function priority(q) { return refs.some(function (ref) { return (q.theoryRefs || []).indexOf(ref) >= 0; }); }
+    return questions.filter(priority).concat(questions.filter(function (q) { return !priority(q); }));
+  }
+
+  function chapterQuestions(bank, id, refs) {
+    return prioritizeQuestions((bank.basic || []).filter(function (q) { return q.substation === id; }), refs).slice(0, 3);
   }
 
   // Keep the original task data (including hints and solutions) intact.
@@ -166,11 +179,13 @@
       8: [["Full Stack Open · Phonebook backend, упражнения 3.1–3.6", "https://fullstackopen.com/en/part3/node_js_and_express/#exercises-3-1-3-6", "Оригинальный практикум использует JavaScript, Node.js и Express. Для нашего курса это адаптация требований на C++: реализуй HTTP API телефонной книги на серверной библиотеке станции 8, а не переписывай команды npm. Понадобятся JSON, маршрутизация, валидация и локальные запросы через curl или HTTP-клиент. Критерий нашей адаптации: чтение списка и записи, создание и удаление, понятные ошибки и проверка дубликатов. Случайные ID из вводного примера не переноси как гарантию уникальности — выбери явный договор. Автоматическая проверка курса для C++-версии не обещается."]]
     };
     var entries = catalog[meta.number] || [];
+    if (meta.id === "station5-linux") entries = [["Linux man-pages · программы из pipe(2)", "https://man7.org/linux/man-pages/man2/pipe.2.html", "После итогового разбора воспроизведи пример канала из раздела EXAMPLES в отдельном учебном каталоге Linux. Затем измени передачу одного байта на поток из нескольких порций и объясни, какие закрытия нужны для EOF. Это адаптация практики по контракту API, не онлайн-проверка. Не запускай упражнения от root и не направляй сигналы чужим процессам."]];
+    if (meta.id === "station7-netlab") entries = [["iproute2 · network namespaces", "https://man7.org/linux/man-pages/man8/ip-netns.8.html", "Сопоставь официальный пример с четырьмя узлами учебного стенда. Настройки разрешены только внутри одноразовой VM; для разбора без запуска составь карту интерфейсов, маршрутов и времени жизни namespace. Не переноси физические интерфейсы и не повторяй из внешних примеров массовую очистку или kill."]];
     if (meta.id === "station9-sql") entries = [["PostgreSQL · официальный практикум SQL", "https://www.postgresql.org/docs/18/tutorial-sql.html", "Для локальной практики PostgreSQL пройди таблицы, запросы и агрегаты. Встроенные задания этой станции можно решать в SQL-тренажёре; транзакционная лабораторная относится к следующей станции 9B."]];
     return h("section", { className: "practice-links" }, h("h2", null, "Практика"),
       h("p", { className: "section-lead" }, "Здесь нужно самостоятельно построить решение, а не выбрать готовый ответ."),
       entries.length ? h("div", null,
-        h("p", { className: "notes" }, "Внешняя практика: LeetCode, открытые курсы и лабораторные. У каждой задачи указаны границы и способ работы. Материалы преимущественно на английском; часть требует локального компилятора, а платформы могут попросить вход. Проверено по источникам 11 октября 2026."),
+        h("p", { className: "notes" }, "Внешняя практика: LeetCode, открытые курсы и лабораторные. У каждой задачи указаны границы и способ работы. Материалы преимущественно на английском; часть требует локального компилятора, а платформы могут попросить вход."),
         entries.map(function (entry) { return h("article", { className: "finale-item", key: entry[1] },
           h("h3", null, h("a", { href: entry[1].indexOf("https://") === 0 ? entry[1] : "https://leetcode.com/problems/" + entry[1] + "/", target: "_blank", rel: "noopener noreferrer" }, entry[0] + " ↗")), h("p", null, entry[2])); }))
         : h("p", { className: "notes" }, "Для этой станции подходящая подборка LeetCode пока не добавлена: алгоритмическая задача не заменяет проверку владения, исключений, сборки или серверного протокола. Учебный проект станции описан на главной странице курса."),
@@ -418,7 +433,7 @@
       h("article", { className: "card fade-in", key: section.id, "data-terms-scope": section.id },
         h("nav", { className: "reading-breadcrumbs", "aria-label": "Положение в курсе" },
           h("a", { href: "cpp_backend_roadmap.html" }, "Курс"), h("span", { "aria-hidden": true }, "/"),
-          h("span", null, "Станция " + (meta.number === 9 ? (meta.id === "station9-sql" ? "9A" : "9B") : meta.number)), h("span", { "aria-hidden": true }, "/"),
+          h("span", null, "Станция " + (meta.id === "station5-linux" ? "5Б" : meta.id === "station7-netlab" ? "7Б" : meta.number === 9 ? (meta.id === "station9-sql" ? "9A" : "9B") : meta.number)), h("span", { "aria-hidden": true }, "/"),
           h("span", { "aria-current": "location" }, "Теория")),
         h("div", { className: "kicker" }, routeIndex >= 0 ? "ПЕРВОЕ ЧТЕНИЕ · ШАГ " + (routeIndex + 1) + " / " + props.readingOrder.length : "РАЗДЕЛ " + (active + 1) + " / " + sections.length),
         h("h2", { className: "section-title" }, section.title),
@@ -759,13 +774,16 @@
     if (routeMode && data.readingOrder && !selectedWorkbook) activeTheory.sort(function (a, b) { return data.readingOrder.indexOf(a.id) - data.readingOrder.indexOf(b.id); });
     var activeTasks = tasks.filter(isPracticeTask);
     var analysisTasks = tasks.filter(function (task) { return !isPracticeTask(task); });
-    var activeQuizzes = { basic: finalQuestions(quizzes, substations, 25, meta.number <= 4), interview: quizzes.interview || [] };
-    var checkpointQuestions = (quizzes.basic || []).filter(function (item) { return item.substation === activeSubstationId; }).slice(0, 3);
+    var priorityRefs = meta.number === 7 ? ["private-public-addresses", "dhcp-network-config"] : [];
+    var activeQuizzes = { basic: finalQuestions(quizzes, substations, 25, meta.number <= 4, priorityRefs), interview: quizzes.interview || [] };
+    var checkpointQuestions = chapterQuestions(quizzes, activeSubstationId, priorityRefs);
     var workedSections = theory.filter(function (section) { return /(?:-final-workbook|clock-worked-example)$/.test(section.id); });
     var doneSections = theory.filter(function (item) { return store["sec:" + item.id]; }).length;
     var doneActiveSections = activeTheory.filter(function (item) { return store["sec:" + item.id]; }).length;
 
     function quizStoreKey(kind) {
+      if (meta.id === "station7-netlab") return "station-final:netlab-20261021:v1:" + kind;
+      if (meta.number === 7 && (kind === "basic" || kind === "interview")) return "station-final:network-foundation-20261021:v1:" + kind;
       if (kind === "interview" && [3,6,9].indexOf(meta.number) >= 0) return "station-final:audit-20261015:v1:" + kind;
       if (meta.number === 9) return "station-final:database-split:v1:" + kind;
       if (kind === "interview" && [1,5,6,7,10].indexOf(meta.number) >= 0) return "station-final:interview-gaps:v1:" + kind;
@@ -843,7 +861,7 @@
         checkpointQuestions.length ? h(Quiz, { key: "checkpoint:" + activeSubstationId, backLabel: "← Вернуться к подглаве", kind: "basic", questions: checkpointQuestions,
           onBack: function () { var last = activeTheory[activeTheory.length - 1]; if (last) navigateSection(last.id); }, onSave: function (score, total) { var change = {}; change["checkpoint:v2:" + activeSubstationId] = { score: score, total: total }; updateStore(change); } }) : h("p", null, "Для этой темы короткая проверка ещё готовится."), h("div", { className: "section-actions" }, h("button", { className: "secondary", onClick: continueChapter }, "Далее по учебнику →"))) : null,
       tab === "final" ? h("section", { className: "station-finale" },
-        h("p", { className: "kicker" }, "ЗАВЕРШЕНИЕ СТАНЦИИ " + (meta.number === 9 ? (meta.id === "station9-sql" ? "9A" : "9B") : meta.number)),
+        h("p", { className: "kicker" }, "ЗАВЕРШЕНИЕ СТАНЦИИ " + (meta.id === "station5-linux" ? "5Б" : meta.id === "station7-netlab" ? "7Б" : meta.number === 9 ? (meta.id === "station9-sql" ? "9A" : "9B") : meta.number)),
         h("h2", null, "Собираем знания вместе"),
         h("p", { className: "section-lead" }, "Сначала проследи решение целой задачи, затем проверь знания всей станции и переходи к самостоятельной работе."),
         h("div", { className: "finale-grid" },
