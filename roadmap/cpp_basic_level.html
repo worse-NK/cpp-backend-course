@@ -4,6 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>C++ · Базовый уровень</title>
+<link rel="stylesheet" href="assets/terms.css?v=20261021" />
+<script src="generated/terms.data.js?v=20261021" defer></script>
+<script src="assets/terms-core.js?v=20261021" defer></script>
+<script src="assets/terms.js?v=20261021" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -4182,9 +4186,9 @@ function Quiz({ topic, onSaveResult }) {
                 React.createElement("span", { style: Object.assign(Object.assign(Object.assign({}, S.optMark), (locked && i === cur.answer ? S.optMarkCorrect : {})), (locked && i === selected && i !== cur.answer ? S.optMarkWrong : {})) }, locked && i === cur.answer ? React.createElement(Icon.check, null) : locked && i === selected ? "✕" : String.fromCharCode(65 + i)),
                 React.createElement("span", { style: S.optText }, opt)));
         })),
-        locked && (React.createElement("div", { style: S.explain, className: "fade-in" },
+        locked && (React.createElement("div", { style: S.explain, className: "fade-in", "data-terms-scope": "answer-explanation" },
             React.createElement("div", { style: Object.assign(Object.assign({}, S.explainLabel), { color: selected === cur.answer ? C.green : C.rustDeep }) }, selected === cur.answer ? "Верно" : "Разбор"),
-            React.createElement("p", { style: S.explainText }, cur.why),
+            React.createElement("p", { style: S.explainText, "data-terms-prose": true }, cur.why),
             React.createElement("button", { style: S.btnPrimary, onClick: (e) => { e.currentTarget.blur(); next(); } },
                 idx + 1 >= qs.length ? "Результат теста" : "Дальше",
                 " ",

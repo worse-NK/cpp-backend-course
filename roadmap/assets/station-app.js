@@ -378,7 +378,8 @@
       })),
       h("nav", { className: "contents-ending", "aria-label": "Завершение станции" },
         h("button", { "aria-current": props.view === "final" ? "page" : undefined, onClick: function () { props.onPage("final"); } }, "Завершение станции")),
-      h("a", { href: "visual_labs.html", className: "contents-all-labs" }, "Все визуальные лаборатории →"));
+      h("a", { href: "visual_labs.html", className: "contents-all-labs" }, "Все визуальные лаборатории →"),
+      h("a", { href: "glossary.html", className: "contents-all-labs", target: "_blank", rel: "noopener" }, "Глоссарий терминов ↗"));
   }
 
   function Theory(props) {
@@ -414,7 +415,7 @@
         h("span", { className: "section-dot" + (done ? " done" : "") }, done ? "✓" : ""),
         (index + 1) + ". " + item.title);
       })),
-      h("article", { className: "card fade-in", key: section.id },
+      h("article", { className: "card fade-in", key: section.id, "data-terms-scope": section.id },
         h("nav", { className: "reading-breadcrumbs", "aria-label": "Положение в курсе" },
           h("a", { href: "cpp_backend_roadmap.html" }, "Курс"), h("span", { "aria-hidden": true }, "/"),
           h("span", null, "Станция " + (meta.number === 9 ? (meta.id === "station9-sql" ? "9A" : "9B") : meta.number)), h("span", { "aria-hidden": true }, "/"),

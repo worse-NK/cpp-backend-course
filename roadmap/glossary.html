@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Понятные определения терминов курса C++ и backend: кратко, подробнее, с примерами и ссылками на главы и первоисточники.">
+<title>Глоссарий · C++ и backend</title><link rel="stylesheet" href="assets/glossary.css"></head>
+<body id="top"><a class="glossary-skip" href="#terms">К определениям</a>
+<header class="glossary-top"><a class="glossary-brand" href="cpp_backend_roadmap.html">C++ <span>/ BACKEND</span></a><nav aria-label="Материалы курса"><a href="cpp_backend_roadmap.html">Курс</a><a href="cpp_cheatsheet.html">Шпаргалка</a><a href="sources.html">Источники</a></nav></header>
+<div class="glossary-layout"><aside class="glossary-controls" aria-label="Поиск и темы">
+<p class="glossary-eyebrow">СЛОВАРЬ КУРСА</p><h1>Понять термин.<br>Вернуться к смыслу.</h1>
+<p class="glossary-intro">Короткое определение помогает не потерять нить чтения. Здесь — объяснение подробнее: как понятие работает, с чем его не путать и где разобрать в учебнике.</p>
+<div class="glossary-search" hidden><label for="term-search">Найти термин</label><div><input id="term-search" type="search" placeholder="Инвариант, RAII, DNS…" autocomplete="off"><button id="term-search-clear" type="button" aria-label="Очистить поиск">×</button></div>
+<nav class="glossary-groups" aria-label="Темы глоссария"><button type="button" data-group="" aria-pressed="true">Все понятия<span>100</span></button><button type="button" data-group="C++" aria-pressed="false">C++<span>35</span></button><button type="button" data-group="Инструменты" aria-pressed="false">Инструменты<span>5</span></button><button type="button" data-group="Многопоточность" aria-pressed="false">Многопоточность<span>12</span></button><button type="button" data-group="Сети" aria-pressed="false">Сети<span>14</span></button><button type="button" data-group="API" aria-pressed="false">API<span>15</span></button><button type="button" data-group="Данные" aria-pressed="false">Данные<span>13</span></button><button type="button" data-group="Эксплуатация" aria-pressed="false">Эксплуатация<span>6</span></button></nav></div>
+<p id="term-count" role="status" aria-live="polite">100 понятий · станции 0–10</p>
+<p class="glossary-note">В главах термины с пунктиром открываются по нажатию. Подробное объяснение — в отдельной вкладке: позиция чтения и попытка теста сохраняются на прежней странице.</p></aside>
+<main id="terms"><p class="glossary-empty" id="term-empty" hidden>Совпадений нет. Попробуй короткую часть слова, русское название или английское сокращение.</p><article class="glossary-entry" id="term-aba" tabindex="-1" data-group="Многопоточность" data-aliases="ABA">
+<p class="entry-group">Многопоточность</p>
+<h2><a href="#term-aba" title="Ссылка на этот термин">ABA<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Значение менялось A → B → A, и сравнение только с A не заметило промежуточного изменения.</p>
+<div class="entry-detail"><p>Операция сравнения видит текущее значение, но не всю его историю. Для указателя одинаковый адрес может даже обозначать уже другой объект после освобождения и повторного использования памяти.</p><p>Поэтому успешный CAS не доказывает, что узел всё ещё тот же и жив. Для сложных структур отдельно продумывают версии, владение и безопасное освобождение памяти. Самой настройки memory_order недостаточно для решения всех этих задач.</p></div>
+<a class="entry-lesson" href="cpp_station6_multithreading.html#section=atomic-protocols">Разобрать в учебнике: RMW и CAS: составная операция, повтор попытки и ABA →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/atomics.types.operations" target="_blank" rel="noopener noreferrer">C++20: compare_exchange, expected и weak/strong ↗</a></p></details>
+</article><article class="glossary-entry" id="term-abi" tabindex="-1" data-group="Инструменты" data-aliases="ABI">
+<p class="entry-group">Инструменты</p>
+<h2><a href="#term-abi" title="Ссылка на этот термин">ABI<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Двоичные соглашения, по которым взаимодействуют уже скомпилированные части программы.</p>
+<div class="entry-detail"><p>Соглашения включают передачу аргументов, представление имён, устройство объектов и другие детали конкретной платформы и инструментов. Компилятор и библиотека должны одинаково понимать эти правила, чтобы соединённые части работали вместе.</p><p>Совместимость исходного интерфейса и двоичная совместимость — не одно и то же. После изменения расположения полей старый клиент может требовать пересборки, даже если имена публичных методов сохранились. Стандарт C++ не задаёт единственный ABI для всех систем.</p></div>
+<a class="entry-lesson" href="cpp_station5_build_tools.html#section=abi-evolution">Разобрать в учебнике: ABI как контракт между уже собранными частями →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://refspecs.linuxfoundation.org/elf/elf.pdf" target="_blank" rel="noopener noreferrer">System V ELF specification ↗</a> · <a href="https://refspecs.linuxfoundation.org/elf/gabi4+/ch5.dynamic.html" target="_blank" rel="noopener noreferrer">ELF dynamic linking ↗</a> · <a href="https://eel.is/c++draft/dcl.link" target="_blank" rel="noopener noreferrer">extern C / language linkage ↗</a></p></details>
+</article><article class="glossary-entry" id="term-aliasing" tabindex="-1" data-group="C++" data-aliases="Aliasing shared_ptr aliasing">
+<p class="entry-group">C++</p>
+<h2><a href="#term-aliasing" title="Ссылка на этот термин">Aliasing shared_ptr<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">shared_ptr может хранить один указатель, но удерживать время жизни другого объекта.</p>
+<div class="entry-detail"><p>У shared_ptr надо различать хранимый указатель, возвращаемый get(), и группу владения. Специальный конструктор позволяет разделить существующее владение и сохранить другой адрес, например адрес поля внутри удерживаемого объекта.</p><p>Поэтому ненулевой адрес и наличие сильного владения — разные свойства. Aliasing не создаёт новую независимую обязанность удалить поле. Без понимания группы владения нельзя оценивать корректность только по значению get().</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=smart-ptr-deep">Разобрать в учебнике: Что хранит владелец: удалитель, управляющий блок и слабая ссылка →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.shared" target="_blank" rel="noopener noreferrer">C++20: shared_ptr ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.enab" target="_blank" rel="noopener noreferrer">C++20: enable_shared_from_this ↗</a></p></details>
+</article><article class="glossary-entry" id="term-api" tabindex="-1" data-group="C++" data-aliases="API">
+<p class="entry-group">C++</p>
+<h2><a href="#term-api" title="Ссылка на этот термин">API<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Программный интерфейс: доступные операции и правила их вызова.</p>
+<div class="entry-detail"><p>Интерфейс библиотеки может состоять из функций и типов, а сетевой API — из адресов, методов и форматов сообщений. Вызывающий должен знать, что передать, что получить и какие исходы обработать.</p><p>Реализация и API — разные уровни. Внутреннее устройство можно изменить, сохранив договор с пользователем. Совпадение имени операции само по себе не гарантирует совместимость, если изменились её смысл или требования.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=from-c">Разобрать в учебнике: Управление ресурсами в C++ →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rr-raii" target="_blank" rel="noopener noreferrer">Core Guidelines R.1: RAII ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/except.ctor" target="_blank" rel="noopener noreferrer">C++20 draft: разрушение при обработке исключения ↗</a></p></details>
+</article><article class="glossary-entry" id="term-btree" tabindex="-1" data-group="Данные" data-aliases="B-tree B-tree-индекс">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-btree" title="Ссылка на этот термин">B-tree<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Сбалансированное дерево поиска с упорядоченными ключами и многоэлементными узлами.</p>
+<div class="entry-detail"><p>В PostgreSQL такой индекс подходит для многих проверок равенства, диапазонов и получения упорядоченных данных. Составной индекс хранит порядок по нескольким ключам, поэтому порядок полей имеет значение для запроса.</p><p>Индекс увеличивает стоимость хранения и изменений. Его полезность зависит от реального запроса и распределения данных, а не от факта существования. Решение проверяют планом выполнения и измерениями.</p></div>
+<a class="entry-lesson" href="cpp_station9_databases.html#section=indexes">Разобрать в учебнике: Индекс — дополнительный путь к строкам →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/indexes-multicolumn.html" target="_blank" rel="noopener noreferrer">составные индексы ↗</a> · <a href="https://www.postgresql.org/docs/18/using-explain.html" target="_blank" rel="noopener noreferrer">чтение EXPLAIN ↗</a></p></details>
+</article><article class="glossary-entry" id="term-backlog" tabindex="-1" data-group="Сети" data-aliases="Backlog backlog">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-backlog" title="Ссылка на этот термин">Backlog<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Параметр ограничения очереди соединений, ожидающих принятия сервером.</p>
+<div class="entry-detail"><p>listen подготавливает сокет к приёму соединений, а accept извлекает готовое соединение для работы приложения. Пока приложение его не приняло, оно может ждать в соответствующей очереди ОС.</p><p>Backlog не задаёт максимальное число всех пользователей или всех уже обслуживаемых соединений. Детали очередей и пределы зависят от ОС; для Linux важно различать очередь установления и очередь готовых соединений.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=listen-queues-keepalive">Разобрать в учебнике: Listen queues и keepalive →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://man7.org/linux/man-pages/man2/listen.2.html" target="_blank" rel="noopener noreferrer">Linux listen(2): значение backlog ↗</a></p></details>
+</article><article class="glossary-entry" id="term-backpressure" tabindex="-1" data-group="Многопоточность" data-aliases="Backpressure backpressure обратное давление">
+<p class="entry-group">Многопоточность</p>
+<h2><a href="#term-backpressure" title="Ссылка на этот термин">Backpressure<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Сигнал перегрузки ограничивает поступление новой работы вместо бесконечного накопления.</p>
+<div class="entry-detail"><p>Если запросы поступают быстрее обработки, очередь растёт и расходует память и время клиентов. Система может замедлить производителя, отказать в приёме или применить явно разрешённое отбрасывание.</p><p>Предел очереди не увеличивает производительность обработчиков. Он задаёт управляемую границу накопления. Политика должна учитывать, какие работы уже приняты и что клиент вправе сделать после отказа.</p></div>
+<a class="entry-lesson" href="cpp_station6_multithreading.html#section=shutdown-backpressure">Разобрать в учебнике: Завершение, отмена и backpressure →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://sre.google/sre-book/handling-overload/" target="_blank" rel="noopener noreferrer">Google SRE: обработка перегрузки ↗</a></p></details>
+</article><article class="glossary-entry" id="term-ci" tabindex="-1" data-group="Эксплуатация" data-aliases="CI">
+<p class="entry-group">Эксплуатация</p>
+<h2><a href="#term-ci" title="Ссылка на этот термин">CI<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Непрерывная интеграция: регулярное объединение изменений с автоматическими проверками.</p>
+<div class="entry-detail"><p>Проверка получает конкретную версию исходников, собирает проект и запускает согласованные проверки. Успех должен относиться к определённым входам и результату, а не к неопределённой «последней версии».</p><p>Зелёная сборка не означает, что тесты вообще запускались или что выпуск уже развёрнут. Состав проверок, отсутствие найденных тестов и границы доверия к входящему коду нужно контролировать явно.</p></div>
+<a class="entry-lesson" href="cpp_station10_production.html#section=ci-model">Разобрать в учебнике: CI: кто запускает проверки и почему зелёного значка мало →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions" target="_blank" rel="noopener noreferrer">GitHub Actions: workflow, job и runner ↗</a></p></details>
+</article><article class="glossary-entry" id="term-cmake" tabindex="-1" data-group="Инструменты" data-aliases="CMake">
+<p class="entry-group">Инструменты</p>
+<h2><a href="#term-cmake" title="Ссылка на этот термин">CMake<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Инструмент, который по описанию проекта подготавливает правила его сборки.</p>
+<div class="entry-detail"><p>В CMakeLists.txt описывают цели, исходники и требования к зависимостям. На этапе конфигурирования CMake проверяет окружение и готовит файлы выбранной системы сборки, например Ninja.</p><p>Компилятор, система сборки и CMake выполняют разные роли. Наличие CMake не означает, что библиотеки уже установлены, а успешное конфигурирование ещё не означает, что исходники скомпилированы и тесты выполнены.</p></div>
+<a class="entry-lesson" href="cpp_station5_build_tools.html#section=cmake-basics">Разобрать в учебнике: Первый CMakeLists.txt →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://cmake.org/cmake/help/v3.28/manual/cmake-buildsystem.7.html" target="_blank" rel="noopener noreferrer">CMake 3.28: buildsystem ↗</a></p></details>
+</article><article class="glossary-entry" id="term-concept" tabindex="-1" data-group="C++" data-aliases="Concept concepts concept">
+<p class="entry-group">C++</p>
+<h2><a href="#term-concept" title="Ссылка на этот термин">Concept<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Проверяемые при компиляции требования к типам и выражениям шаблонного кода.</p>
+<div class="entry-detail"><p>Шаблон может требовать, чтобы значение сравнивалось, вызывалось или поддерживало определённую операцию. Concept позволяет назвать такой набор требований и использовать его для ограничения подходящих вариантов шаблона.</p><p>Наличие синтаксически подходящей операции не доказывает все её смысловые свойства. Например, корректное упорядочивание нельзя гарантировать только фактом существования operator&lt;. Часть договора по-прежнему обязан соблюдать автор типа.</p></div>
+<a class="entry-lesson" href="cpp_station3_stl_templates.html#section=templates-class">Разобрать в учебнике: Шаблон класса: общий код, разные типы и требования →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/temp.class" target="_blank" rel="noopener noreferrer">C++20: шаблоны классов ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/temp.inst" target="_blank" rel="noopener noreferrer">Неявная инстанциация ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/dcl.type.class.deduct" target="_blank" rel="noopener noreferrer">Вывод аргументов класса ↗</a></p></details>
+</article><article class="glossary-entry" id="term-control-block" tabindex="-1" data-group="C++" data-aliases="Control block control block управляющий блок управляющего блока">
+<p class="entry-group">C++</p>
+<h2><a href="#term-control-block" title="Ссылка на этот термин">Control block<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Служебные данные группы shared_ptr: счётчики владения и правила освобождения.</p>
+<div class="entry-detail"><p>Отдельные shared_ptr могут ссылаться на одну общую группу владения. Управляющий блок отслеживает сильных владельцев и слабых наблюдателей и знает, как освободить управляемый ресурс. Сам shared_ptr — участник группы, а не копия объекта.</p><p>Потокобезопасное обслуживание счётчиков не делает безопасными одновременные изменения самого объекта. При make_shared память объекта и блока часто выделяется вместе; weak_ptr может удерживать эту память после разрушения самого объекта.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=smart-ptr-deep">Разобрать в учебнике: Что хранит владелец: удалитель, управляющий блок и слабая ссылка →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.shared" target="_blank" rel="noopener noreferrer">C++20: shared_ptr ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.enab" target="_blank" rel="noopener noreferrer">C++20: enable_shared_from_this ↗</a></p></details>
+</article><article class="glossary-entry" id="term-copy-elision" tabindex="-1" data-group="C++" data-aliases="Copy elision copy elision">
+<p class="entry-group">C++</p>
+<h2><a href="#term-copy-elision" title="Ссылка на этот термин">Copy elision<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Предусмотренные языком случаи, когда промежуточное копирование или перемещение объекта не требуется.</p>
+<div class="entry-detail"><p>При чтении программы нужно различать разрешённое устранение копии и прямое создание результата по правилам C++17+. Во втором случае промежуточный объект вообще не возникает: это не просто надежда на удачный оптимизатор.</p><p>NRVO для именованного локального объекта остаётся отдельным разрешением, а не общей гарантией. Поэтому вопрос «сколько вызовов конструктора» требует знать форму выражения и версию языка.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=copy-elision">Разобрать в учебнике: Возврат по значению: прямое создание, NRVO и запасной путь →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/class.copy.elision" target="_blank" rel="noopener noreferrer">C++20: copy elision и правила return ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/dcl.init" target="_blank" rel="noopener noreferrer">C++20: инициализация ↗</a></p></details>
+</article><article class="glossary-entry" id="term-cors" tabindex="-1" data-group="API" data-aliases="CORS CORS-проверка">
+<p class="entry-group">API</p>
+<h2><a href="#term-cors" title="Ссылка на этот термин">CORS<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Правила браузера о доступе скрипта к ответам другого источника.</p>
+<div class="entry-detail"><p>Источник определяется схемой, хостом и портом. Для некоторых запросов браузер заранее уточняет разрешения через preflight; сервер отвечает подходящими заголовками по своей политике.</p><p>Это не система прав для любых HTTP-клиентов. Небраузерный клиент не обязан соблюдать CORS, а часть запросов может отправляться без предварительной проверки. Проверку личности, прав и защиту команд организуют отдельно.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=method-semantics">Разобрать в учебнике: Метод описывает намерение, а не расположение параметров →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2" target="_blank" rel="noopener noreferrer">HTTP: безопасные и идемпотентные методы ↗</a></p></details>
+</article><article class="glossary-entry" id="term-csrf" tabindex="-1" data-group="API" data-aliases="CSRF">
+<p class="entry-group">API</p>
+<h2><a href="#term-csrf" title="Ссылка на этот термин">CSRF<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Подделка запроса, отправленного браузером с полномочиями жертвы без её осознанного согласия.</p>
+<div class="entry-detail"><p>Браузер может автоматически прикладывать cookie к подходящему запросу. Злоумышленник пытается воспользоваться этим для команды, которую пользователь выполнять не собирался. Возможность прочитать ответ и возможность отправить опасный запрос — разные вопросы.</p><p>Поэтому CORS нельзя считать полной защитой от CSRF. Для команд применяют соответствующие проверки и политику cookie, учитывая архитектуру аутентификации и конкретный сценарий запроса.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=session-token">Разобрать в учебнике: Сессия, bearer и JWT: где хранится доверие →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1" target="_blank" rel="noopener noreferrer">JWT: registered claims ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc6750.html" target="_blank" rel="noopener noreferrer">Bearer token usage ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc8725.html" target="_blank" rel="noopener noreferrer">JWT best current practices ↗</a></p></details>
+</article><article class="glossary-entry" id="term-cte" tabindex="-1" data-group="Данные" data-aliases="CTE">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-cte" title="Ссылка на этот термин">CTE<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Именованный результат запроса внутри одной SQL-команды, объявляемый через WITH.</p>
+<div class="entry-detail"><p>CTE помогает разделить сложную команду на понятные части: сначала назвать промежуточный результат, затем использовать его в основном запросе. Область такого имени не равна постоянно созданной таблице.</p><p>Само наличие WITH не означает обязательного сохранения промежуточных строк в отдельном материальном хранилище. Возможности оптимизации и материализации нужно рассматривать по правилам конкретной СУБД.</p></div>
+<a class="entry-lesson" href="cpp_station9_sql.html#section=sql-cte-union">Разобрать в учебнике: CTE: дать промежуточному результату имя →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/queries-with.html" target="_blank" rel="noopener noreferrer">Документация PostgreSQL 18 ↗</a> · <a href="https://www.postgresql.org/docs/18/queries-union.html" target="_blank" rel="noopener noreferrer">Источник: UNION и UNION ALL ↗</a></p></details>
+</article><article class="glossary-entry" id="term-deadlock" tabindex="-1" data-group="Многопоточность" data-aliases="Deadlock deadlock взаимная блокировка взаимной блокировки">
+<p class="entry-group">Многопоточность</p>
+<h2><a href="#term-deadlock" title="Ссылка на этот термин">Deadlock<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Участники ждут ресурсы друг друга так, что никто из них не может продолжить.</p>
+<div class="entry-detail"><p>Типичный пример: A держит первый замок и ждёт второй, а B держит второй и ждёт первый. Каждый ждёт события, которое должен выполнить другой ожидающий участник.</p><p>Единый порядок захвата замков помогает устранить такие циклы. scoped_lock решает задачу совместного захвата переданного набора мьютексов, но не делает автоматически безопасными все остальные замки и внешние вызовы программы.</p></div>
+<a class="entry-lesson" href="cpp_station6_multithreading.html#section=deadlock">Разобрать в учебнике: Deadlock и другие беды блокировок →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/thread.lock.algorithm" target="_blank" rel="noopener noreferrer">C++20: алгоритмы захвата замков ↗</a></p></details>
+</article><article class="glossary-entry" id="term-digest" tabindex="-1" data-group="Эксплуатация" data-aliases="Digest digest">
+<p class="entry-group">Эксплуатация</p>
+<h2><a href="#term-digest" title="Ссылка на этот термин">Digest<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Криптографический идентификатор конкретного содержимого, например контейнерного образа.</p>
+<div class="entry-detail"><p>Тег образа может со временем указывать на другое содержимое. Digest позволяет зафиксировать выбранное содержимое точнее и связать с ним результаты проверки.</p><p>Фиксация идентификатора не означает отсутствие уязвимостей и не отменяет проверку происхождения. Зависимости нужно обновлять осознанно с повторными проверками, а не оставлять навсегда только ради воспроизводимости.</p></div>
+<a class="entry-lesson" href="cpp_station10_production.html#section=docker-build">Разобрать в учебнике: Dockerfile и multi-stage: сборка не должна ехать в runtime →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://docs.docker.com/build/building/multi-stage/" target="_blank" rel="noopener noreferrer">Docker: multi-stage ↗</a> · <a href="https://docs.docker.com/build/building/secrets/" target="_blank" rel="noopener noreferrer">Docker: секреты сборки ↗</a></p></details>
+</article><article class="glossary-entry" id="term-dns" tabindex="-1" data-group="Сети" data-aliases="DNS">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-dns" title="Ссылка на этот термин">DNS<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Система доменных имён: позволяет получать сведения по имени, например адрес сервера.</p>
+<div class="entry-detail"><p>Клиент обращается к резолверу (компоненту, получающему сведения DNS), получает DNS-записи и выбирает адрес для соединения. Запись может уже находиться в кэше, поэтому каждый запрос приложения не обязан заново проходить всю иерархию DNS.</p><p>DNS не видит путь ресурса внутри HTTP-запроса и не выбирает функцию обработчика. Полученный адрес ещё не доказывает подлинность сервера: её проверяют другими механизмами, например проверкой имени в TLS.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=dns-resolution">Разобрать в учебнике: DNS: имя не равно адресу →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc1034.html" target="_blank" rel="noopener noreferrer">RFC 1034: роли DNS и делегирование ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc2308.html" target="_blank" rel="noopener noreferrer">RFC 2308: отрицательные ответы и кэширование ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc7766.html" target="_blank" rel="noopener noreferrer">RFC 7766: DNS поверх TCP ↗</a></p></details>
+</article><article class="glossary-entry" id="term-draining" tabindex="-1" data-group="Эксплуатация" data-aliases="Draining draining drain">
+<p class="entry-group">Эксплуатация</p>
+<h2><a href="#term-draining" title="Ссылка на этот термин">Draining<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Режим завершения уже принятых работ без приёма новых.</p>
+<div class="entry-detail"><p>При мягкой остановке сначала прекращают новый приём, затем дают текущим операциям ограниченное время закончиться. После предела времени применяют заранее выбранную политику отмены и выхода.</p><p>Балансировщик может не сразу узнать о неготовности экземпляра, поэтому сам сервер тоже должен соблюдать запрет нового приёма. Такой режим уменьшает потери, но не гарантирует клиенту определённый исход каждого запроса.</p></div>
+<a class="entry-lesson" href="cpp_station10_production.html#section=health-drain">Разобрать в учебнике: Готовность, живость и мягкая остановка →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes" target="_blank" rel="noopener noreferrer">Kubernetes: различие probes ↗</a> · <a href="https://man7.org/linux/man-pages/man7/signal-safety.7.html" target="_blank" rel="noopener noreferrer">Linux: signal-safety ↗</a></p></details>
+</article><article class="glossary-entry" id="term-fcs" tabindex="-1" data-group="Сети" data-aliases="FCS">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-fcs" title="Ссылка на этот термин">FCS<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Контрольная сумма кадра для обнаружения ошибок передачи на канальном участке.</p>
+<div class="entry-detail"><p>У Ethernet контрольная сумма находится в конце кадра. Она позволяет обнаруживать определённые повреждения при передаче; её обычно обрабатывает сетевой адаптер.</p><p>Это не шифрование и не доказательство, что сообщение пришло от доверенного пользователя. При захвате трафика на компьютере FCS может не показываться: наблюдаемое представление пакета зависит от места и способа захвата.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=wire-header-anatomy">Разобрать в учебнике: Глубже: как читать заголовки Ethernet, IPv4 и TCP →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.kernel.org/doc/html/latest/networking/segmentation-offloads.html" target="_blank" rel="noopener noreferrer">Linux: TSO, GSO и GRO ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.1" target="_blank" rel="noopener noreferrer">RFC 9293 §3.1: заголовок TCP и псевдозаголовок ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc2474.html" target="_blank" rel="noopener noreferrer">RFC 2474: DSCP ↗</a></p></details>
+</article><article class="glossary-entry" id="term-fence" tabindex="-1" data-group="Многопоточность" data-aliases="Fence барьер памяти барьера памяти">
+<p class="entry-group">Многопоточность</p>
+<h2><a href="#term-fence" title="Ссылка на этот термин">Fence<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Операция задания связей порядка между обращениями к памяти.</p>
+<div class="entry-detail"><p>Барьер памяти используют как часть протокола синхронизации вместе с подходящими атомарными действиями. Он может участвовать в публикации данных, но сам не передаёт значение другому потоку и не сообщает, какую запись тот прочитал.</p><p>Это не команда «обновить все кэши» и не точка, где все потоки обязаны собраться. Многоразовый barrier для совместных этапов — другой механизм с другой задачей.</p></div>
+<a class="entry-lesson" href="cpp_station6_multithreading.html#section=atomic-wait-ref-fences">Разобрать в учебнике: Ожидание атомика, atomic_ref и барьеры памяти →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/atomics.wait" target="_blank" rel="noopener noreferrer">C++20: ожидание значения и ненаблюдаемый переход A→B→A ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/atomics.ref.generic" target="_blank" rel="noopener noreferrer">C++20: lifetime, выравнивание и исключительный доступ через atomic_ref ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/atomics.fences" target="_blank" rel="noopener noreferrer">C++20: условия синхронизации через fences ↗</a></p></details>
+</article><article class="glossary-entry" id="term-happens-before" tabindex="-1" data-group="Многопоточность" data-aliases="happens-before">
+<p class="entry-group">Многопоточность</p>
+<h2><a href="#term-happens-before" title="Ссылка на этот термин">happens-before<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Гарантированная языком связь порядка между действиями, а не просто их расположение по часам.</p>
+<div class="entry-detail"><p>Внутри потока часть действий упорядочена правилами вычисления. Между потоками определённые операции синхронизации могут связать публикацию данных с их последующим чтением. Из этих связей строят рассуждение о корректной передаче состояния.</p><p>То, что один поток по наблюдению «успел раньше», не создаёт такую связь. Нельзя доказывать отсутствие гонки только задержками или удачным запуском теста. Для конфликтующих обычных доступов нужно обосновать порядок по правилам языка.</p></div>
+<a class="entry-lesson" href="cpp_station6_multithreading.html#section=happens-before">Разобрать в учебнике: Happens-before: как формально доказать отсутствие гонки →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/stmt.return" target="_blank" rel="noopener noreferrer">C++20: результат return формируется до разрушения локальных объектов ↗</a></p></details>
+</article><article class="glossary-entry" id="term-http" tabindex="-1" data-group="Сети" data-aliases="HTTP HTTP/1.1 HTTP/2 HTTP/3">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-http" title="Ссылка на этот термин">HTTP<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Прикладной протокол с правилами запросов, ответов, методов, полей и содержимого сообщений.</p>
+<div class="entry-detail"><p>HTTP задаёт смысл обмена между клиентом и сервером. Версии отличаются устройством передачи сообщений, но сохраняют общие понятия методов, статусов и представлений ресурсов.</p><p>Установленное TCP- или QUIC-соединение ещё не означает выполненную HTTP-операцию. Успех транспорта, корректный HTTP-ответ и успешное изменение по правилам приложения — разные уровни результата.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=http-semantics-versions">Разобрать в учебнике: HTTP semantics и wire versions →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc9110.html" target="_blank" rel="noopener noreferrer">RFC 9110 ↗</a></p></details>
+</article><article class="glossary-entry" id="term-ip-address" tabindex="-1" data-group="Сети" data-aliases="IP-адрес IP-адреса IP-адресов">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-ip-address" title="Ссылка на этот термин">IP-адрес<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Адрес, используемый для доставки данных через IP-сеть.</p>
+<div class="entry-detail"><p>Сетевые узлы используют адрес назначения и таблицы маршрутов, чтобы выбрать дальнейший путь пакета. Транспортный порт решает другую задачу: помогает направить данные соответствующей конечной точке транспортного обмена.</p><p>Адрес не обязательно навсегда соответствует одному пользователю или процессу. На него влияют несколько интерфейсов, смена сети, общие внешние адреса и правила преобразования. Это важно для диагностики и ограничений доступа.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=request-mental-model">Разобрать в учебнике: Клиент, сервер и endpoint →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc791.html" target="_blank" rel="noopener noreferrer">RFC 791: Internet Protocol ↗</a></p></details>
+</article><article class="glossary-entry" id="term-json" tabindex="-1" data-group="API" data-aliases="JSON">
+<p class="entry-group">API</p>
+<h2><a href="#term-json" title="Ссылка на этот термин">JSON<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Текстовый формат структурированных данных: объектов с полями, массивов и отдельных значений.</p>
+<div class="entry-detail"><p>JSON задаёт представление, а не смысл API. Даже синтаксически правильный документ может иметь неизвестное поле, неверный тип или недопустимое значение по правилам приложения.</p><p>Не надо строить JSON простым склеиванием пользовательских строк: сериализатор (библиотека перевода значений программы в JSON) обрабатывает экранирование. Проверку формата отделяют от проверки допустимости данных и от последующего безопасного отображения в браузере.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=json-domain">Разобрать в учебнике: Корректный JSON ещё не является корректной задачей →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc8259.html" target="_blank" rel="noopener noreferrer">JSON: синтаксис и совместимость ↗</a> · <a href="https://json.nlohmann.me/api/basic_json/parse/" target="_blank" rel="noopener noreferrer">nlohmann/json: parse ↗</a> · <a href="https://json.nlohmann.me/api/basic_json/parser_callback_t/" target="_blank" rel="noopener noreferrer">nlohmann/json: parser callbacks ↗</a></p></details>
+</article><article class="glossary-entry" id="term-jwt" tabindex="-1" data-group="API" data-aliases="JWT">
+<p class="entry-group">API</p>
+<h2><a href="#term-jwt" title="Ссылка на этот термин">JWT<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Формат передачи утверждений: например, сведений о пользователе и сроке действия.</p>
+<div class="entry-detail"><p>Часто используемый подписанный JWT позволяет проверить целостность и происхождение утверждений при соблюдении политики ключей и алгоритмов. Подпись не скрывает содержимое: кодированные части обычно можно прочитать.</p><p>Сам формат не отменяет проверку срока, получателя, издателя и других необходимых условий. Нельзя принимать алгоритм или ключ лишь потому, что так потребовал недоверенный токен. Вопрос отзыва и актуальности прав решают отдельно.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=session-token">Разобрать в учебнике: Сессия, bearer и JWT: где хранится доверие →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1" target="_blank" rel="noopener noreferrer">JWT: registered claims ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc6750.html" target="_blank" rel="noopener noreferrer">Bearer token usage ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc8725.html" target="_blank" rel="noopener noreferrer">JWT best current practices ↗</a></p></details>
+</article><article class="glossary-entry" id="term-lock-free" tabindex="-1" data-group="Многопоточность" data-aliases="Lock-free lock-free">
+<p class="entry-group">Многопоточность</p>
+<h2><a href="#term-lock-free" title="Ссылка на этот термин">Lock-free<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Гарантия общего продвижения операций, но не ограниченного ожидания каждого отдельного потока.</p>
+<div class="entry-detail"><p>При продолжающемся выполнении какие-то конкурирующие операции завершаются: остановка одного участника не должна превращаться в обязательное ожидание его замка остальными. Отдельный участник при этом может постоянно проигрывать.</p><p>Это свойство алгоритма или атомарной операции, а не синоним «я не написал mutex». Выделение памяти, логирование и другие вызовы внутри алгоритма тоже имеют значение. Lock-free не означает автоматически быстрее, wait-free или заданное число миллисекунд.</p></div>
+<a class="entry-lesson" href="cpp_station6_multithreading.html#section=progress-guarantees-performance">Разобрать в учебнике: Гарантии прогресса: что обещает lock-free и как измерять скорость →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/atomics.lockfree" target="_blank" rel="noopener noreferrer">C++20: гарантии lock-free атомарных операций ↗</a> · <a href="https://man7.org/linux/man-pages/man7/numa.7.html" target="_blank" rel="noopener noreferrer">Linux numa(7): неодинаковая стоимость доступа к памяти ↗</a> · <a href="https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html" target="_blank" rel="noopener noreferrer">Linux sched_setaffinity(2): допустимые CPU потока ↗</a></p></details>
+</article><article class="glossary-entry" id="term-mac" tabindex="-1" data-group="Сети" data-aliases="MAC-адрес MAC-адреса MAC получателя MAC отправителя">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-mac" title="Ссылка на этот термин">MAC-адрес<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Адрес участника канального обмена, например интерфейса Ethernet.</p>
+<div class="entry-detail"><p>На локальном участке Ethernet-кадр адресуется ближайшему получателю. Если IP-пакет идёт через маршрутизатор, на следующем участке его канальное обрамление будет другим.</p><p>MAC-адрес и IP-адрес относятся к разным задачам доставки. MAC в криптографическом контексте может означать код проверки подлинности сообщения — это другое значение сокращения, не адрес сетевого интерфейса.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=ethernet-neighbor">Разобрать в учебнике: Ethernet, MAC и сосед →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc826.html" target="_blank" rel="noopener noreferrer">RFC 826: разрешение адреса IPv4 в Ethernet-адрес ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc4861.html" target="_blank" rel="noopener noreferrer">RFC 4861: обнаружение соседей IPv6 ↗</a></p></details>
+</article><article class="glossary-entry" id="term-mss" tabindex="-1" data-group="Сети" data-aliases="MSS">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-mss" title="Ссылка на этот термин">MSS<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Предельный размер полезных данных TCP-сегмента, который сообщает принимающая сторона.</p>
+<div class="entry-detail"><p>Полезные данные TCP не включают заголовки TCP и IP. Поэтому при обычных условиях предел сегмента связан с доступным размером IP-пакета, но не совпадает с ним.</p><p>MSS не является обещанием, что все сегменты будут одинакового размера, и не задаёт границы HTTP-запроса или JSON-документа. Формат прикладных сообщений нужно рассматривать отдельно.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=mtu-mss-path">Разобрать в учебнике: MTU, MSS и Path MTU →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.7" target="_blank" rel="noopener noreferrer">RFC 9293 §3.7: MSS и PMTUD ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc6691.html#section-2" target="_blank" rel="noopener noreferrer">RFC 6691 §2: отдельный учёт опций при формировании сегмента ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc8201.html" target="_blank" rel="noopener noreferrer">RFC 8201: Path MTU для IPv6 ↗</a></p></details>
+</article><article class="glossary-entry" id="term-mtu" tabindex="-1" data-group="Сети" data-aliases="MTU">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-mtu" title="Ссылка на этот термин">MTU<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Предельный размер передаваемого блока для выбранного сетевого интерфейса или участка.</p>
+<div class="entry-detail"><p>При обсуждении IP важно уточнять, какой размер измеряется: например, предел IP-пакета на Ethernet не включает весь Ethernet-кадр. Path MTU — минимальный предел среди участков выбранного пути.</p><p>Это верхняя граница размера, а не размер, который обязано иметь каждое сообщение. Большой прикладной объект может быть разделён на несколько транспортных и сетевых порций.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=mtu-mss-path">Разобрать в учебнике: MTU, MSS и Path MTU →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.7" target="_blank" rel="noopener noreferrer">RFC 9293 §3.7: MSS и PMTUD ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc6691.html#section-2" target="_blank" rel="noopener noreferrer">RFC 6691 §2: отдельный учёт опций при формировании сегмента ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc8201.html" target="_blank" rel="noopener noreferrer">RFC 8201: Path MTU для IPv6 ↗</a></p></details>
+</article><article class="glossary-entry" id="term-mvcc" tabindex="-1" data-group="Данные" data-aliases="MVCC">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-mvcc" title="Ссылка на этот термин">MVCC<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Управление одновременным доступом через несколько версий строк.</p>
+<div class="entry-detail"><p>Разные чтения могут видеть подходящие им версии данных по правилам изоляции. Это позволяет многим чтениям не ждать каждую текущую запись, но не означает, что блокировки в базе исчезли.</p><p>Нужно отдельно понимать момент получения снимка, видимость собственных изменений и конфликты записей. Уровень Read Committed и более строгие уровни имеют разные договоры; название MVCC не выбирает их за приложение.</p></div>
+<a class="entry-lesson" href="cpp_station9_databases.html#section=isolation">Разобрать в учебнике: Чтение прошлого состояния — не обязательно ошибка →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/mvcc-intro.html" target="_blank" rel="noopener noreferrer">MVCC ↗</a> · <a href="https://www.postgresql.org/docs/18/transaction-iso.html" target="_blank" rel="noopener noreferrer">уровни изоляции PostgreSQL ↗</a> · <a href="https://www.postgresql.org/docs/18/explicit-locking.html" target="_blank" rel="noopener noreferrer">блокировки и deadlock ↗</a></p></details>
+</article><article class="glossary-entry" id="term-nat" tabindex="-1" data-group="Сети" data-aliases="NAT">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-nat" title="Ссылка на этот термин">NAT<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Преобразование сетевых адресов, а в распространённых вариантах также транспортных портов.</p>
+<div class="entry-detail"><p>На границе сетей устройство может заменить внутренний адрес внешним и хранить соответствие для обратного трафика. Так несколько внутренних соединений могут разделять один внешний адрес с разными портами.</p><p>NAT не означает, что любое внешнее соединение автоматически попадёт к нужному приложению. Для входящего доступа нужны соответствующие правила. Преобразование адресов также не заменяет проверку прав пользователя.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=nat-ports">Разобрать в учебнике: NAT: преобразование адресов и состояние обмена →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc3022.html" target="_blank" rel="noopener noreferrer">RFC 3022: Traditional NAT и NAPT ↗</a></p></details>
+</article><article class="glossary-entry" id="term-noexcept" tabindex="-1" data-group="C++" data-aliases="noexcept">
+<p class="entry-group">C++</p>
+<h2><a href="#term-noexcept" title="Ссылка на этот термин">noexcept<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Обещание функции не выпускать исключение наружу; нарушение вызывает std::terminate.</p>
+<div class="entry-detail"><p>Спецификация noexcept относится к выходу исключения из функции, а не запрещает ей вызывать любые потенциально бросающие операции. Внутри можно поймать исключение и обработать его. Если оно всё же пересечёт такую границу, обычный поиск внешнего catch не продолжится.</p><p>Обещание особенно важно для деструкторов и перемещающих операций. Его нельзя добавлять только ради скорости: сначала проверяют поведение всех используемых полей и операций. Условный noexcept позволяет выразить зависимость от свойств типа.</p></div>
+<a class="entry-lesson" href="cpp_station4_error_handling.html#section=noexcept-deep">Разобрать в учебнике: Два смысла noexcept и осторожный выбор перемещения →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/except.spec" target="_blank" rel="noopener noreferrer">C++20: спецификации исключений ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/expr.unary.noexcept" target="_blank" rel="noopener noreferrer">C++20: оператор noexcept ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/forward" target="_blank" rel="noopener noreferrer">C++20: move_if_noexcept ↗</a></p></details>
+</article><article class="glossary-entry" id="term-nrvo" tabindex="-1" data-group="C++" data-aliases="NRVO">
+<p class="entry-group">C++</p>
+<h2><a href="#term-nrvo" title="Ссылка на этот термин">NRVO<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Разрешённое устранение копирования подходящего именованного локального результата функции.</p>
+<div class="entry-detail"><p>Компилятор может создать локальный объект сразу в месте результата вызывающей стороны. Это позволяет не вызывать отдельный копирующий или перемещающий конструктор для возврата local.</p><p>NRVO не обязательно выполняется. Требования к доступности подходящих операций при отсутствии этого разрешения сохраняют значение. return std::move(local) обычно мешает NRVO: не следует добавлять его автоматически ради скорости.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=copy-elision">Разобрать в учебнике: Возврат по значению: прямое создание, NRVO и запасной путь →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/class.copy.elision" target="_blank" rel="noopener noreferrer">C++20: copy elision и правила return ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/dcl.init" target="_blank" rel="noopener noreferrer">C++20: инициализация ↗</a></p></details>
+</article><article class="glossary-entry" id="term-null" tabindex="-1" data-group="Данные" data-aliases="NULL">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-null" title="Ссылка на этот термин">NULL<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Обозначение отсутствующего известного значения в SQL; не ноль и не пустая строка.</p>
+<div class="entry-detail"><p>Обычное сравнение с NULL не даёт привычного true или false: результат может быть неизвестным. Для проверки наличия NULL используют IS NULL, а условие WHERE сохраняет строки только с истинным результатом.</p><p>Это влияет на фильтры, соединения и подсчёт. Например, COUNT(expr) не считает NULL-значения выражения, а COUNT(*) считает строки. Нельзя переносить интуицию о нуле на отсутствие значения.</p></div>
+<a class="entry-lesson" href="cpp_station9_sql.html#section=sql-null-basics">Разобрать в учебнике: NULL: значение неизвестно, а не равно нулю →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/functions-comparison.html" target="_blank" rel="noopener noreferrer">PostgreSQL 18 — объяснение синтаксиса и правил ↗</a></p></details>
+</article><article class="glossary-entry" id="term-odr" tabindex="-1" data-group="Инструменты" data-aliases="ODR">
+<p class="entry-group">Инструменты</p>
+<h2><a href="#term-odr" title="Ссылка на этот термин">ODR<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Правило одного определения: ограничения на число и согласованность определений сущностей C++.</p>
+<div class="entry-detail"><p>Объявление сообщает о существовании сущности, а определение задаёт её устройство или реализацию. Заголовок может войти в несколько единиц трансляции; при этом нужно соблюдать правила допустимых повторных определений.</p><p>Не всякое определение запрещено помещать в заголовок: для inline-сущностей и шаблонов предусмотрены свои условия. С другой стороны, отсутствие ошибки линкера ещё не доказывает соблюдение ODR во всей программе.</p></div>
+<a class="entry-lesson" href="cpp_station5_build_tools.html#section=headers-sources">Разобрать в учебнике: Заголовки и .cpp: почему разделяют →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/basic.def" target="_blank" rel="noopener noreferrer">C++20: объявления и определения ↗</a></p></details>
+</article><article class="glossary-entry" id="term-openapi" tabindex="-1" data-group="API" data-aliases="OpenAPI">
+<p class="entry-group">API</p>
+<h2><a href="#term-openapi" title="Ссылка на этот термин">OpenAPI<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Стандарт машиночитаемого описания HTTP API.</p>
+<div class="entry-detail"><p>Описание фиксирует операции, параметры, представления входных и выходных данных и ожидаемые ответы. Его можно использовать для документации и проверок совместимости.</p><p>Наличие файла не доказывает, что реализация ему соответствует. Нужны проверки реального поведения, включая ошибки и ограничения. Добавление обязательного поля или нового значения перечисления может иметь последствия для уже существующих клиентов.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=task-contract">Разобрать в учебнике: Сначала договор о задаче, затем эндпоинты →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc8259.html#section-3" target="_blank" rel="noopener noreferrer">JSON: типы и строки ↗</a></p></details>
+</article><article class="glossary-entry" id="term-raii" tabindex="-1" data-group="C++" data-aliases="RAII">
+<p class="entry-group">C++</p>
+<h2><a href="#term-raii" title="Ссылка на этот термин">RAII<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Управление ресурсом через объект-владелец, который освобождает ресурс своим деструктором.</p>
+<div class="entry-detail"><p>Ресурсом может быть память, открытый файл или захваченная блокировка. После получения ресурса ответственность передают объекту. Когда владелец разрушается, его деструктор выполняет нужное освобождение независимо от обычной ветки выхода из функции.</p><p>Так уменьшается число ветвей ручной очистки, особенно при исключениях. Но RAII не откатывает произвольную запись в файл и не обещает запуск деструкторов при принудительном завершении процесса. Пустое состояние владельца тоже должно иметь понятные правила.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=raii">Разобрать в учебнике: RAII: освобождение привязано к владельцу →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-resource" target="_blank" rel="noopener noreferrer">C++ Core Guidelines: управление ресурсами ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/except.ctor" target="_blank" rel="noopener noreferrer">C++20: разрушение при исключении ↗</a></p></details>
+</article><article class="glossary-entry" id="term-rest" tabindex="-1" data-group="API" data-aliases="REST">
+<p class="entry-group">API</p>
+<h2><a href="#term-rest" title="Ссылка на этот термин">REST<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Архитектурный стиль сетевого взаимодействия с набором ограничений, а не просто JSON по HTTP.</p>
+<div class="entry-detail"><p>Стиль включает разделение клиента и сервера, правила кэширования, единообразный интерфейс, слои и отсутствие зависимости понимания запроса от скрытого разговорного состояния сервера. Важны также представления и связи, направляющие действия клиента.</p><p>Сервер при этом может хранить задачи, пользователей и данные. Stateless не означает «никаких записей в БД». В индустрии словом REST часто называют менее строгий ресурсно-ориентированный HTTP API; эти уровни полезно различать.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=rest-constraints">Разобрать в учебнике: REST: архитектурный стиль, не синоним JSON →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://roy.gbiv.com/pubs/dissertation/rest_arch_style.htm" target="_blank" rel="noopener noreferrer">Fielding: ограничения REST ↗</a></p></details>
+</article><article class="glossary-entry" id="term-rle" tabindex="-1" data-group="C++" data-aliases="RLE">
+<p class="entry-group">C++</p>
+<h2><a href="#term-rle" title="Ссылка на этот термин">RLE<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Кодирование серий: одинаковые подряд символы заменяются описанием символа и длины серии.</p>
+<div class="entry-detail"><p>В учебной задаче AAABB превращается в A3B2, а одиночная буква остаётся без единицы. Перед записью результата нужно договориться о допустимых входных символах, формате счётчика и поведении при отказе.</p><p>При записи в исходный буфер важно доказать, что уже полученный результат не затёр непрочитанный вход. Само название «сжатие» не обещает уменьшение каждого возможного входа.</p></div>
+<a class="entry-lesson" href="cpp_station3_stl_templates.html#section=rle-workbook">Разобрать в учебнике: RLE на месте: почему запись не обгонит чтение →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/string.capacity" target="_blank" rel="noopener noreferrer">C++20: размер и ёмкость строки ↗</a></p></details>
+</article><article class="glossary-entry" id="term-rmw" tabindex="-1" data-group="Многопоточность" data-aliases="RMW RMW-модификации">
+<p class="entry-group">Многопоточность</p>
+<h2><a href="#term-rmw" title="Ссылка на этот термин">RMW<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Единая атомарная операция чтения, вычисления и записи нового значения.</p>
+<div class="entry-detail"><p>Read-modify-write объединяет действия, которые иначе можно было бы разделить между потоками. Например, fetch_add прибавляет число как одну атомарную операцию, в отличие от отдельного load и последующего store.</p><p>Эта неделимость относится к соответствующему атомарному объекту. Она не превращает соседние поля и произвольную бизнес-операцию в транзакцию. Порядок передачи остальных данных нужно обосновывать отдельно.</p></div>
+<a class="entry-lesson" href="cpp_station6_multithreading.html#section=memory-order">Разобрать в учебнике: Модель памяти и memory_order →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/intro.races" target="_blank" rel="noopener noreferrer">C++20: release sequence и synchronizes-with ↗</a></p></details>
+</article><article class="glossary-entry" id="term-rpc" tabindex="-1" data-group="API" data-aliases="RPC">
+<p class="entry-group">API</p>
+<h2><a href="#term-rpc" title="Ссылка на этот термин">RPC<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Удалённый вызов операции: клиент передаёт запрос с аргументами и получает результат.</p>
+<div class="entry-detail"><p>Модель напоминает вызов функции, но между участниками находится сеть. Сервер может выполнить действие, а клиент не получить ответ, поэтому локальное исключение или timeout не обязательно означает отсутствие результата на сервере.</p><p>RPC не задаёт сам по себе единственный формат сообщений и не устраняет задачи совместимости, прав доступа и безопасных повторов. JSON тоже можно использовать в RPC — он не делает API автоматически REST.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=rest-constraints">Разобрать в учебнике: REST: архитектурный стиль, не синоним JSON →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://roy.gbiv.com/pubs/dissertation/rest_arch_style.htm" target="_blank" rel="noopener noreferrer">Fielding: ограничения REST ↗</a></p></details>
+</article><article class="glossary-entry" id="term-rss" tabindex="-1" data-group="Инструменты" data-aliases="RSS">
+<p class="entry-group">Инструменты</p>
+<h2><a href="#term-rss" title="Ссылка на этот термин">RSS<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Объём страниц процесса, находящихся сейчас в оперативной памяти; включает и общие страницы.</p>
+<div class="entry-detail"><p>Адресное пространство процесса и реально размещённые в оперативной памяти страницы — не одно и то же. Поэтому большой зарезервированный диапазон адресов не означает столь же большой RSS.</p><p>Освобождение объекта на уровне C++ не обязано сразу уменьшать RSS: распределитель может удерживать память для повторного использования. Кроме того, общие страницы могут учитываться у нескольких процессов, так что простое сложение RSS не даёт точного уникального объёма.</p></div>
+<a class="entry-lesson" href="cpp_station5_build_tools.html#section=linux-processes-memory">Разобрать в учебнике: Linux: виртуальная память, fork и exec →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://man7.org/linux/man-pages/man2/open.2.html" target="_blank" rel="noopener noreferrer">Linux: дескриптор и описание открытого файла ↗</a> · <a href="https://man7.org/linux/man-pages/man2/fork.2.html" target="_blank" rel="noopener noreferrer">Linux fork ↗</a> · <a href="https://man7.org/linux/man-pages/man2/execve.2.html" target="_blank" rel="noopener noreferrer">Linux execve ↗</a></p></details>
+</article><article class="glossary-entry" id="term-runner" tabindex="-1" data-group="Эксплуатация" data-aliases="Runner runner">
+<p class="entry-group">Эксплуатация</p>
+<h2><a href="#term-runner" title="Ссылка на этот термин">Runner<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Исполнитель, на котором запускаются команды автоматического задания.</p>
+<div class="entry-detail"><p>Это может быть среда платформы CI или собственная машина команды. Она получает исходники и выполняет шаги сборки и проверок, поэтому недоверенный код из предложения изменений может исполняться именно там.</p><p>Права и секреты исполнителя задают реальную границу риска. Нельзя считать безопасным любой чужой проект только потому, что запускается команда сборки, а не готовый бинарник: сборочные скрипты тоже исполняют команды.</p></div>
+<a class="entry-lesson" href="cpp_station10_production.html#section=ci-model">Разобрать в учебнике: CI: кто запускает проверки и почему зелёного значка мало →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions" target="_blank" rel="noopener noreferrer">GitHub Actions: workflow, job и runner ↗</a></p></details>
+</article><article class="glossary-entry" id="term-rvo" tabindex="-1" data-group="C++" data-aliases="RVO">
+<p class="entry-group">C++</p>
+<h2><a href="#term-rvo" title="Ссылка на этот термин">RVO<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Общее название устранения промежуточного копирования результата, возвращаемого по значению.</p>
+<div class="entry-detail"><p>На собеседовании полезнее уточнить конкретный случай, чем ограничиться сокращением. Возврат T{...} и возврат именованной локальной переменной local имеют разные правила.</p><p>Для возвращаемого выражения вида T{...} того же типа C++17+ предусматривает прямое создание результата. NRVO для подходящего именованного локального объекта разрешено, но не обязательно. Возврат по значению поэтому не означает автоматически лишнюю дорогую копию.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=copy-elision">Разобрать в учебнике: Возврат по значению: прямое создание, NRVO и запасной путь →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/class.copy.elision" target="_blank" rel="noopener noreferrer">C++20: copy elision и правила return ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/dcl.init" target="_blank" rel="noopener noreferrer">C++20: инициализация ↗</a></p></details>
+</article><article class="glossary-entry" id="term-sampling" tabindex="-1" data-group="Эксплуатация" data-aliases="Sampling sampling">
+<p class="entry-group">Эксплуатация</p>
+<h2><a href="#term-sampling" title="Ссылка на этот термин">Sampling<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Выборочное сохранение наблюдений вместо записи каждого события.</p>
+<div class="entry-detail"><p>При большой нагрузке система может сохранять лишь часть трассировок запросов. Это уменьшает объём данных и стоимость обработки, но влияет на то, какие конкретные случаи получится исследовать.</p><p>Отсутствие трассировки не доказывает отсутствие запроса. Для обязательного учёта денежных или других значимых операций нужен отдельный договор долговечных записей, а не только выборочная диагностика.</p></div>
+<a class="entry-lesson" href="cpp_station10_production.html#section=signals">Разобрать в учебнике: Логи, метрики и трассировки: три разных масштаба →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://opentelemetry.io/docs/concepts/signals/traces/" target="_blank" rel="noopener noreferrer">OpenTelemetry: traces и spans ↗</a></p></details>
+</article><article class="glossary-entry" id="term-sentinel" tabindex="-1" data-group="C++" data-aliases="Sentinel sentinels sentinel">
+<p class="entry-group">C++</p>
+<h2><a href="#term-sentinel" title="Ссылка на этот термин">Sentinel<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Признак конца диапазона, с которым сравнивают итератор; его тип может отличаться от типа итератора.</p>
+<div class="entry-detail"><p>Итератор предоставляет доступ к элементам при обходе. Во время обхода нужно знать не только текущую позицию, но и условие остановки. В привычном контейнере begin() и end() часто имеют один тип, однако общая модель диапазонов этого не требует.</p><p>Признак границы не означает существование доступного элемента на этой границе. Разыменовывать end() нельзя. При выборе алгоритма отдельно проверяют требования к итератору и способу определения конца.</p></div>
+<a class="entry-lesson" href="cpp_station3_stl_templates.html#section=iterators">Разобрать в учебнике: Итераторы: как STL всё связывает →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/iterator.concept.sentinel" target="_blank" rel="noopener noreferrer">C++20: требования к признаку конца диапазона ↗</a></p></details>
+</article><article class="glossary-entry" id="term-sfinae" tabindex="-1" data-group="C++" data-aliases="SFINAE">
+<p class="entry-group">C++</p>
+<h2><a href="#term-sfinae" title="Ссылка на этот термин">SFINAE<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Некоторые ошибки подстановки аргументов шаблона исключают кандидата, а не сразу делают всю программу ошибочной.</p>
+<div class="entry-detail"><p>Механизм участвует в выборе подходящих перегрузок. Но действует он в определённых местах объявления, а не для любой ошибки внутри произвольного тела шаблонной функции.</p><p>Поэтому нельзя считать SFINAE универсальным try/catch для компилятора. Для современных ограничений полезны concepts, но они тоже требуют ясного договора типов и не превращают любую ошибку реализации в мягкий отказ.</p></div>
+<a class="entry-lesson" href="cpp_station3_stl_templates.html#section=sfinae-and-constraints">Разобрать в учебнике: SFINAE и ограничения: почему кандидат исчезает →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/temp.deduct" target="_blank" rel="noopener noreferrer">C++20: подстановка и непосредственный контекст ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/dcl.type.decltype" target="_blank" rel="noopener noreferrer">C++20: decltype ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/expr.comma" target="_blank" rel="noopener noreferrer">C++20: оператор запятой ↗</a></p></details>
+</article><article class="glossary-entry" id="term-shared-ptr" tabindex="-1" data-group="C++" data-aliases="shared_ptr std::shared_ptr">
+<p class="entry-group">C++</p>
+<h2><a href="#term-shared-ptr" title="Ссылка на этот термин">shared_ptr<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Умный указатель с совместным владением через общую группу владельцев.</p>
+<div class="entry-detail"><p>Копирование shared_ptr обычно добавляет сильного владельца в ту же группу. Когда сильных владельцев не остаётся, управляемый объект освобождается по правилам группы. Два независимо созданных shared_ptr из одного обычного указателя не обязаны разделять одну группу.</p><p>Взаимные сильные ссылки могут удерживать цикл объектов. Кроме того, безопасное обслуживание счётчиков не делает безопасными произвольные параллельные изменения самого объекта.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=smart-ptr-deep">Разобрать в учебнике: Что хранит владелец: удалитель, управляющий блок и слабая ссылка →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.shared" target="_blank" rel="noopener noreferrer">C++20: shared_ptr ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.enab" target="_blank" rel="noopener noreferrer">C++20: enable_shared_from_this ↗</a></p></details>
+</article><article class="glossary-entry" id="term-slicing" tabindex="-1" data-group="C++" data-aliases="Slicing slicing срезка срезку">
+<p class="entry-group">C++</p>
+<h2><a href="#term-slicing" title="Ссылка на этот термин">Slicing<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">При создании отдельного объекта базы из производного объекта сохраняется только базовая часть.</p>
+<div class="entry-detail"><p>Если передать Derived в параметр Base по значению, параметр станет самостоятельным Base. Поля и поведение производной части в этот объект не перенесутся. Это отличается от ссылки Base&amp; на всё ещё существующий Derived.</p><p>Срезка не исправляется одним virtual: сначала нужно выбрать правильный способ передачи и хранения объектов. Для полиморфной работы обычно нужны ссылки или указатели с подходящим договором владения.</p></div>
+<a class="entry-lesson" href="cpp_station2_inheritance_polymorphism.html#section=polymorphism">Разобрать в учебнике: Полиморфизм: один код для многих типов →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/class.copy.ctor" target="_blank" rel="noopener noreferrer">C++20: копирование и перемещение объектов ↗</a></p></details>
+</article><article class="glossary-entry" id="term-spsc" tabindex="-1" data-group="Многопоточность" data-aliases="SPSC">
+<p class="entry-group">Многопоточность</p>
+<h2><a href="#term-spsc" title="Ссылка на этот термин">SPSC<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Один производитель и один потребитель очереди.</p>
+<div class="entry-detail"><p>Один назначенный поток добавляет элементы, другой забирает их. Такое ограничение убирает часть конкуренции за позиции очереди и позволяет строить более простой протокол публикации данных.</p><p>Нельзя без нового доказательства добавить второго производителя или потребителя. Атомарность одного индекса не выдаёт разным участникам разные свободные места и не обеспечивает сама по себе время жизни содержимого ячеек.</p></div>
+<a class="entry-lesson" href="cpp_station6_multithreading.html#section=spsc-ring-model">Разобрать в учебнике: SPSC-очередь: сначала распределим владение ячейками →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/intro.races" target="_blank" rel="noopener noreferrer">C++20: happens-before и data race ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/atomics.order" target="_blank" rel="noopener noreferrer">release/acquire ↗</a> · <a href="https://www.boost.org/doc/libs/latest/doc/html/lockfree.html" target="_blank" rel="noopener noreferrer">Boost.Lockfree ↗</a></p></details>
+</article><article class="glossary-entry" id="term-sql" tabindex="-1" data-group="Данные" data-aliases="SQL">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-sql" title="Ссылка на этот термин">SQL<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Язык описания структуры данных, запросов и изменений в реляционной базе.</p>
+<div class="entry-detail"><p>Запрос описывает требуемый результат, а СУБД выбирает способ его получения. SELECT вычисляет результат, INSERT добавляет строки, UPDATE изменяет их, а DELETE удаляет.</p><p>Нужно изучать не только слова команд, но и смысл таблиц, связей и NULL. Особенности диалекта и поведение при конкурентной работе зависят от выбранной СУБД; браузерный тренажёр курса использует SQLite, а серверная глава — PostgreSQL.</p></div>
+<a class="entry-lesson" href="cpp_station9_sql.html#section=sql-language">Разобрать в учебнике: SQL — язык, PostgreSQL — исполнитель →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/tutorial-sql.html" target="_blank" rel="noopener noreferrer">PostgreSQL 18 — объяснение синтаксиса и правил ↗</a></p></details>
+</article><article class="glossary-entry" id="term-sso" tabindex="-1" data-group="C++" data-aliases="SSO">
+<p class="entry-group">C++</p>
+<h2><a href="#term-sso" title="Ссылка на этот термин">SSO<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Распространённая оптимизация: короткая строка хранит символы внутри собственного объекта.</p>
+<div class="entry-detail"><p>Так реализация string может обходиться без отдельного выделения памяти для небольшого содержимого. Если сам объект находится внутри динамически созданного владельца, встроенные символы находятся там же, а не обязательно «на стеке».</p><p>Стандарт не обещает конкретный порог длины и одинаковый sizeof(string) для всех библиотек. Нельзя использовать предполагаемый размер короткой строки как переносимый договор интерфейса.</p></div>
+<a class="entry-lesson" href="cpp_station3_stl_templates.html#section=sequence-container-topology">Разобрать в учебнике: deque, list, string и адаптеры: цена привычного интерфейса →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/deque.modifiers" target="_blank" rel="noopener noreferrer">C++20: deque ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/container.adaptors" target="_blank" rel="noopener noreferrer">C++20: container adaptors ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/vector.capacity" target="_blank" rel="noopener noreferrer">C++20: vector capacity ↗</a></p></details>
+</article><article class="glossary-entry" id="term-starvation" tabindex="-1" data-group="Многопоточность" data-aliases="Starvation starvation голодание голодания">
+<p class="entry-group">Многопоточность</p>
+<h2><a href="#term-starvation" title="Ссылка на этот термин">Starvation<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Другие участники продвигаются, а конкретный участник слишком долго не получает нужный ресурс.</p>
+<div class="entry-detail"><p>Голодание отличается от взаимной блокировки: система в целом продолжает работать. Например, один поток всё время проигрывает доступ к общей структуре, пока соседи успешно заканчивают свои операции.</p><p>Наличие прогресса у кого-то не даёт гарантии завершения каждому. Справедливость планирования и алгоритма проверяют отдельно; нельзя обещать её только потому, что код использует стандартный мьютекс или lock-free атомик.</p></div>
+<a class="entry-lesson" href="cpp_station6_multithreading.html#section=mutex-types">Разобрать в учебнике: Виды мьютексов →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/intro.progress" target="_blank" rel="noopener noreferrer">C++20: гарантии продвижения ↗</a></p></details>
+</article><article class="glossary-entry" id="term-move" tabindex="-1" data-group="C++" data-aliases="std::move move-семантика move-семантику семантика перемещения">
+<p class="entry-group">C++</p>
+<h2><a href="#term-move" title="Ссылка на этот термин">std::move<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">std::move разрешает выбрать перемещающую операцию, но сам не переносит ресурсы.</p>
+<div class="entry-detail"><p>Перемещающая операция может передать ресурс от одного объекта другому, вместо создания независимой копии ресурса. std::move только меняет категорию выражения на xvalue (выражение, обозначающее существующий объект как возможный источник перемещения): после этого правила выбора функции определяют, какая операция действительно будет вызвана.</p><p>Из const-объекта обычное перемещение ресурса часто недоступно, поэтому может выбираться копирование. После выполненного перемещения состояние источника оценивают по договору его типа: нельзя обещать пустоту для любого объекта.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=move">Разобрать в учебнике: Перемещение: разрешение передать ресурс и сама передача →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/forward" target="_blank" rel="noopener noreferrer">C++20: move и forward ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/unique.ptr.single.ctor" target="_blank" rel="noopener noreferrer">C++20: перемещение unique_ptr ↗</a></p></details>
+</article><article class="glossary-entry" id="term-stl" tabindex="-1" data-group="C++" data-aliases="STL">
+<p class="entry-group">C++</p>
+<h2><a href="#term-stl" title="Ссылка на этот термин">STL<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Шаблонные контейнеры, итераторы и алгоритмы стандартной библиотеки C++.</p>
+<div class="entry-detail"><p>Контейнер хранит элементы, итераторы задают доступ к диапазону, алгоритм обрабатывает его. Благодаря общим требованиям один алгоритм может работать с разными подходящими контейнерами.</p><p>STL — не другое название всего C++. У алгоритмов и контейнеров есть требования к типам, сложности и допустимым операциям. Для корректности недостаточно помнить имя метода: нужно понимать, какие итераторы он принимает и что может сделать недействительным.</p></div>
+<a class="entry-lesson" href="cpp_station3_stl_templates.html#section=what-is-stl">Разобрать в учебнике: Что такое STL и зачем она →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/iterator.requirements.general" target="_blank" rel="noopener noreferrer">C++20: итераторы и диапазоны ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/algorithms.requirements" target="_blank" rel="noopener noreferrer">C++20: требования алгоритмов ↗</a></p></details>
+</article><article class="glossary-entry" id="term-strand" tabindex="-1" data-group="Сети" data-aliases="Strand strand">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-strand" title="Ссылка на этот термин">Strand<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Механизм Asio, не допускающий одновременного выполнения связанных с ним обработчиков.</p>
+<div class="entry-detail"><p>Несколько потоков могут исполнять обработчики одного io_context. Если обработчики одной сессии меняют общее состояние, нужно согласовать доступ. Strand позволяет сериализовать соответствующую группу обработчиков.</p><p>Он не означает навсегда назначенный один физический поток и не делает безопасным произвольный внешний доступ в обход этого протокола. Все связанные действия должны действительно проходить через нужную организацию выполнения.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=asio-mental-model">Разобрать в учебнике: Boost.Asio: модель выполнения →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.boost.org/doc/libs/latest/doc/html/boost_asio/overview/core/strands.html" target="_blank" rel="noopener noreferrer">Boost.Asio: strands ↗</a></p></details>
+</article><article class="glossary-entry" id="term-tcp" tabindex="-1" data-group="Сети" data-aliases="TCP">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-tcp" title="Ссылка на этот термин">TCP<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Транспортный протокол надёжной передачи упорядоченного потока байтов через соединение.</p>
+<div class="entry-detail"><p>Приложение читает поток: одно чтение может вернуть часть отправленного блока или объединить данные нескольких отправок. TCP занимается передачей и порядком байтов, но не восстанавливает границы прикладных сообщений.</p><p>Успешный send не означает, что сервер уже выполнил бизнес-операцию. Для сообщений нужен прикладной формат, а для подтверждения результата — соответствующий ответ или другой договор.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=tcp-stream-handshake">Разобрать в учебнике: TCP: соединение и поток →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.5" target="_blank" rel="noopener noreferrer">RFC 9293 §3.5: установление соединения ↗</a></p></details>
+</article><article class="glossary-entry" id="term-tdd" tabindex="-1" data-group="Эксплуатация" data-aliases="TDD">
+<p class="entry-group">Эксплуатация</p>
+<h2><a href="#term-tdd" title="Ссылка на этот термин">TDD<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Разработка через цикл: неуспешный тест, минимальная реализация, улучшение кода при проходящих проверках.</p>
+<div class="entry-detail"><p>Сначала фиксируют ожидаемое поведение так, чтобы проверка показала его отсутствие. Затем добавляют минимальное решение и перерабатывают устройство кода, сохраняя подтверждённое поведение.</p><p>Это способ организации работы, а не доказательство полноты тестов. Нужно содержательно выбирать случаи и ожидания. Если проверка не замечает неверный результат, порядок её написания сам по себе не помогает.</p></div>
+<a class="entry-lesson" href="cpp_station10_production.html#section=test-contract">Разобрать в учебнике: Из требования в проверку: сначала наблюдаемый результат →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://martinfowler.com/bliki/TestDrivenDevelopment.html" target="_blank" rel="noopener noreferrer">Martin Fowler: Test-Driven Development ↗</a></p></details>
+</article><article class="glossary-entry" id="term-tls" tabindex="-1" data-group="Сети" data-aliases="TLS">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-tls" title="Ссылка на этот термин">TLS<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Протокол защиты обмена данными между концами конкретного соединения.</p>
+<div class="entry-detail"><p>TLS организует согласование защиты и проверку подлинности по выбранной политике, затем защищает передаваемые данные. Проверка сертификата и имени сервиса — часть договора доверия, а не просто факт наличия шифрования.</p><p>Если посредник завершает TLS у себя, соединение до следующего сервера — отдельный участок с отдельными решениями о защите. TLS не заменяет авторизацию пользователя и не доказывает правильность бизнес-операции.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=tls13-handshake">Разобрать в учебнике: TLS 1.3: что именно защищено →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/info/rfc9846/" target="_blank" rel="noopener noreferrer">RFC 9846 ↗</a></p></details>
+</article><article class="glossary-entry" id="term-udp" tabindex="-1" data-group="Сети" data-aliases="UDP">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-udp" title="Ссылка на этот термин">UDP<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Транспортный протокол обмена отдельными датаграммами без собственного подтверждения доставки.</p>
+<div class="entry-detail"><p>В отличие от потока TCP, границы посылок сохраняют смысл: приложение отправляет отдельную датаграмму. Однако она может потеряться, прийти повторно или не в том порядке, который ожидал отправитель.</p><p>Если приложению нужны повторы, упорядочивание или подтверждения, оно организует их отдельно. Нельзя выбирать UDP только по лозунгу «быстрее»: сначала формулируют допустимые потери, задержки и размер сообщений.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=udp-semantics">Разобрать в учебнике: UDP: datagram без обещаний →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://man7.org/linux/man-pages/man7/udp.7.html" target="_blank" rel="noopener noreferrer">Linux udp(7): одна датаграмма на приём и усечение ↗</a></p></details>
+</article><article class="glossary-entry" id="term-unique-ptr" tabindex="-1" data-group="C++" data-aliases="unique_ptr std::unique_ptr">
+<p class="entry-group">C++</p>
+<h2><a href="#term-unique-ptr" title="Ссылка на этот термин">unique_ptr<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Умный указатель с единоличной ответственностью за освобождение управляемого ресурса.</p>
+<div class="entry-detail"><p>Владение нельзя копировать, но можно передать перемещением. Когда непустой владелец уничтожается или заменяет ресурс, он вызывает предусмотренный удалитель. Получение raw-указателя через get() владение другому коду не передаёт.</p><p>Такой тип может иметь пустое состояние и использовать особое правило освобождения. Сохраняемые внешние указатели всё равно могут стать висячими после уничтожения владельца: умный указатель не делает любой доступ автоматически безопасным.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=smart-ptr">Разобрать в учебнике: Умные указатели →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/unique.ptr" target="_blank" rel="noopener noreferrer">C++20: unique_ptr ↗</a></p></details>
+</article><article class="glossary-entry" id="term-upsert" tabindex="-1" data-group="Данные" data-aliases="UPSERT">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-upsert" title="Ссылка на этот термин">UPSERT<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Вставка с заданным действием при конфликте уникальности.</p>
+<div class="entry-detail"><p>Приложение может хотеть создать запись или обработать ситуацию, когда соответствующий ключ уже занят. В PostgreSQL для этого применяют INSERT с подходящим ON CONFLICT.</p><p>Конфликт должен быть связан с реальным ограничением или индексом, а действие при нём — соответствовать договору приложения. UPSERT не является универсальной заменой всем проверкам и не устраняет сам по себе потерю обновлений в сложных последовательностях.</p></div>
+<a class="entry-lesson" href="cpp_station9_sql.html#section=sql-backend-boundaries">Разобрать в учебнике: Страницы, время и повторная запись →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/sql-insert.html" target="_blank" rel="noopener noreferrer">Документация PostgreSQL 18 ↗</a> · <a href="https://www.postgresql.org/docs/18/datatype-datetime.html" target="_blank" rel="noopener noreferrer">даты и время ↗</a> · <a href="https://www.postgresql.org/docs/18/queries-limit.html" target="_blank" rel="noopener noreferrer">LIMIT и OFFSET ↗</a></p></details>
+</article><article class="glossary-entry" id="term-vtable" tabindex="-1" data-group="C++" data-aliases="vtable / vptr vtable vptr">
+<p class="entry-group">C++</p>
+<h2><a href="#term-vtable" title="Ссылка на этот термин">vtable / vptr<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Типичный механизм виртуальных вызовов: таблица адресов функций и служебный указатель на неё.</p>
+<div class="entry-detail"><p>При распространённой реализации компилятор организует таблицу виртуальных функций. Вызов через базовый интерфейс использует служебные данные объекта, чтобы выбрать подходящую реализацию производного класса.</p><p>Это удобная модель устройства конкретного ABI (соглашений о двоичном взаимодействии), но не требование стандарта о расположении байтов. Нельзя по ней без проверки обещать ровно один vptr, фиксированный размер объекта или одинаковые таблицы на всех платформах.</p></div>
+<a class="entry-lesson" href="cpp_station2_inheritance_polymorphism.html#section=virtual">Разобрать в учебнике: Виртуальные функции — главное →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable" target="_blank" rel="noopener noreferrer">Itanium C++ ABI: виртуальные таблицы ↗</a></p></details>
+</article><article class="glossary-entry" id="term-weak-ptr" tabindex="-1" data-group="C++" data-aliases="weak_ptr std::weak_ptr">
+<p class="entry-group">C++</p>
+<h2><a href="#term-weak-ptr" title="Ссылка на этот термин">weak_ptr<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Наблюдатель за группой shared_ptr, который сам не удерживает объект живым.</p>
+<div class="entry-detail"><p>Чтобы получить временного сильного владельца, вызывают lock() и проверяют результат. Если сильного владения уже нет, создать его таким способом не получится.</p><p>Отдельная проверка expired() не закрепляет жизнь объекта до следующего действия. weak_ptr полезен для разрыва циклов и наблюдения, но его наличие не является разрешением разыменовать прежний raw-указатель без проверки.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=smart-ptr-deep">Разобрать в учебнике: Что хранит владелец: удалитель, управляющий блок и слабая ссылка →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.shared" target="_blank" rel="noopener noreferrer">C++20: shared_ptr ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.enab" target="_blank" rel="noopener noreferrer">C++20: enable_shared_from_this ↗</a></p></details>
+</article><article class="glossary-entry" id="term-xss" tabindex="-1" data-group="API" data-aliases="XSS">
+<p class="entry-group">API</p>
+<h2><a href="#term-xss" title="Ссылка на этот термин">XSS<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Выполнение кода злоумышленника в браузере посетителя от имени сайта.</p>
+<div class="entry-detail"><p>Опасность возникает, когда недоверенные данные попадают в контекст, где браузер начинает понимать их как код или активную разметку. Защита зависит от места использования: текст, HTML, атрибут или JavaScript имеют разные правила.</p><p>Корректный JSON и включённый TLS не доказывают безопасность последующего вывода. Нужно использовать безопасные способы вставки данных и не смешивать пользовательский ввод с исполняемой разметкой.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=json-domain">Разобрать в учебнике: Корректный JSON ещё не является корректной задачей →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc8259.html" target="_blank" rel="noopener noreferrer">JSON: синтаксис и совместимость ↗</a> · <a href="https://json.nlohmann.me/api/basic_json/parse/" target="_blank" rel="noopener noreferrer">nlohmann/json: parse ↗</a> · <a href="https://json.nlohmann.me/api/basic_json/parser_callback_t/" target="_blank" rel="noopener noreferrer">nlohmann/json: parser callbacks ↗</a></p></details>
+</article><article class="glossary-entry" id="term-authorization" tabindex="-1" data-group="API" data-aliases="Авторизация авторизация авторизации авторизацию">
+<p class="entry-group">API</p>
+<h2><a href="#term-authorization" title="Ссылка на этот термин">Авторизация<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Проверка, разрешено ли этому участнику выполнить конкретное действие.</p>
+<div class="entry-detail"><p>Проверка обычно учитывает не только роль, но и объект: кому принадлежит задача, к какой организации относится запись и что разрешено в её текущем состоянии. Угадать адрес или идентификатор недостаточно для получения права.</p><p>Аутентификация и авторизация отвечают на разные вопросы. Даже корректная подпись токена не означает, что любой указанный в запросе объект доступен его предъявителю.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=identity-permissions">Разобрать в учебнике: Кто ты и что тебе можно: два разных вопроса →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-11" target="_blank" rel="noopener noreferrer">HTTP: аутентификация и challenge ↗</a> · <a href="https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">OWASP: REST access control ↗</a></p></details>
+</article><article class="glossary-entry" id="term-allocator" tabindex="-1" data-group="C++" data-aliases="Аллокатор аллокатор аллокатором аллокатора">
+<p class="entry-group">C++</p>
+<h2><a href="#term-allocator" title="Ссылка на этот термин">Аллокатор<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Объект, через который контейнер получает и освобождает память.</p>
+<div class="entry-detail"><p>Контейнеру нужно место для элементов. Аллокатор отделяет выбор памяти от остальной логики контейнера; создание и уничтожение самих элементов остаются отдельными действиями, хотя библиотека связывает их через общие правила.</p><p>Освобождение памяти контейнером не обязательно немедленно уменьшает память процесса, видимую ОС. Распределитель может сохранить блок для повторного использования. Это не само по себе доказательство утечки.</p></div>
+<a class="entry-lesson" href="cpp_station3_stl_templates.html#section=allocation-containers">Разобрать в учебнике: size, capacity и сохранённые указатели →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/allocator.requirements" target="_blank" rel="noopener noreferrer">C++20: требования к аллокаторам ↗</a></p></details>
+</article><article class="glossary-entry" id="term-artifact" tabindex="-1" data-group="Инструменты" data-aliases="Артефакт артефакт артефакты артефакта артефактов">
+<p class="entry-group">Инструменты</p>
+<h2><a href="#term-artifact" title="Ссылка на этот термин">Артефакт<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Сохранённый результат конкретной сборки или проверки: программа, библиотека, образ или отчёт.</p>
+<div class="entry-detail"><p>Проверка должна относиться к определённому результату. Если после тестов исходники пересобрали с другими зависимостями, новый файл уже нельзя без проверки считать тем же протестированным артефактом.</p><p>Для выпуска связывают версию исходников, параметры сборки, результаты проверок и конкретный распространяемый файл. Кэш промежуточных данных помогает ускорить сборку, но не заменяет такой учёт.</p></div>
+<a class="entry-lesson" href="cpp_station5_build_tools.html#section=build-reproducibility">Разобрать в учебнике: Повторяемая сборка: настройки, чистое дерево и проверяемые входы →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://cmake.org/cmake/help/v3.28/manual/cmake-presets.7.html" target="_blank" rel="noopener noreferrer">CMake 3.28: формат пресетов и минимальные версии ↗</a> · <a href="https://cmake.org/cmake/help/v3.28/manual/cmake-toolchains.7.html" target="_blank" rel="noopener noreferrer">Выбор toolchain ↗</a> · <a href="https://cmake.org/cmake/help/v3.28/command/target_precompile_headers.html" target="_blank" rel="noopener noreferrer">Предкомпилированные заголовки ↗</a></p></details>
+</article><article class="glossary-entry" id="term-complexity" tabindex="-1" data-group="C++" data-aliases="Асимптотическая сложность асимптотика асимптотики асимптотическая сложность">
+<p class="entry-group">C++</p>
+<h2><a href="#term-complexity" title="Ссылка на этот термин">Асимптотическая сложность<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Описание того, как растёт число рассматриваемых действий при увеличении размера входа.</p>
+<div class="entry-detail"><p>O(n) и O(log n) помогают сравнивать рост работы, но нужно уточнять, что считается: сравнения, перемещения, обращения к структуре или другой ресурс. Амортизированная оценка рассматривает серию операций, а не обещает одинаковую цену каждого вызова.</p><p>Это не точное время в наносекундах. Размер элементов, распределение данных и работа с памятью могут изменить практический выбор. Теоретическую оценку соединяют с понятной моделью стоимости и измерениями.</p></div>
+<a class="entry-lesson" href="cpp_station3_stl_templates.html#section=container-cost-model">Разобрать в учебнике: Выбор контейнера: асимптотика, память и реальная стоимость →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://eel.is/c++draft/vector.overview" target="_blank" rel="noopener noreferrer">C++: гарантии сложности std::vector ↗</a></p></details>
+</article><article class="glossary-entry" id="term-atomic" tabindex="-1" data-group="Многопоточность" data-aliases="Атомарная операция атомарная операция атомарных операциях атомарные операции атомик атомики">
+<p class="entry-group">Многопоточность</p>
+<h2><a href="#term-atomic" title="Ссылка на этот термин">Атомарная операция<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Действие над атомарным объектом, которое другие потоки не наблюдают частично выполненным.</p>
+<div class="entry-detail"><p>Атомарное чтение или изменение решает вопрос неделимости конкретной операции. Но две отдельные операции, например прочитать остаток и затем записать новый, не превращаются от этого в единое неделимое действие.</p><p>Кроме неделимости важен порядок и видимость других данных. Для передачи состояния между потоками нужны подходящие правила синхронизации. Слово atomic не доказывает ни корректность всего алгоритма, ни отсутствие внутренних блокировок.</p></div>
+<a class="entry-lesson" href="cpp_station6_multithreading.html#section=atomic">Разобрать в учебнике: std::atomic — атомарные операции и порядок памяти →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/atomics.order" target="_blank" rel="noopener noreferrer">C++20: атомарные операции и порядок ↗</a></p></details>
+</article><article class="glossary-entry" id="term-authentication" tabindex="-1" data-group="API" data-aliases="Аутентификация аутентификация аутентификацию аутентификации">
+<p class="entry-group">API</p>
+<h2><a href="#term-authentication" title="Ссылка на этот термин">Аутентификация<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Проверка подлинности пользователя или другого клиента.</p>
+<div class="entry-detail"><p>Сервер проверяет предъявленные учётные данные по принятой политике и устанавливает, с какой личностью связан запрос. Пароль, сессия или токен — способы участия в таком протоколе, а не одинаковые по свойствам механизмы.</p><p>После проверки личности ещё нужно проверить права на действие и конкретный объект. Пользователь может успешно войти, но не иметь доступа к чужой задаче. Это уже вопрос авторизации.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=identity-permissions">Разобрать в учебнике: Кто ты и что тебе можно: два разных вопроса →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-11" target="_blank" rel="noopener noreferrer">HTTP: аутентификация и challenge ↗</a> · <a href="https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">OWASP: REST access control ↗</a></p></details>
+</article><article class="glossary-entry" id="term-validation" tabindex="-1" data-group="API" data-aliases="Валидация валидация валидацию валидации">
+<p class="entry-group">API</p>
+<h2><a href="#term-validation" title="Ссылка на этот термин">Валидация<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Проверка входных данных на соответствие договору приложения.</p>
+<div class="entry-detail"><p>Сначала проверяют допустимый размер и формат, затем структуру, типы и диапазоны значений. После этого проверяют бизнес-условия: например, можно ли выполнить выбранный переход состояния.</p><p>Синтаксически правильный JSON не равен допустимой команде. Проверка данных также не заменяет проверку прав. Ошибки полезно сообщать так, чтобы клиент понимал исправление, но не получал секретные внутренние сведения.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=json-domain">Разобрать в учебнике: Корректный JSON ещё не является корректной задачей →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc8259.html" target="_blank" rel="noopener noreferrer">JSON: синтаксис и совместимость ↗</a> · <a href="https://json.nlohmann.me/api/basic_json/parse/" target="_blank" rel="noopener noreferrer">nlohmann/json: parse ↗</a> · <a href="https://json.nlohmann.me/api/basic_json/parser_callback_t/" target="_blank" rel="noopener noreferrer">nlohmann/json: parser callbacks ↗</a></p></details>
+</article><article class="glossary-entry" id="term-ownership" tabindex="-1" data-group="C++" data-aliases="Владение владение владения владением">
+<p class="entry-group">C++</p>
+<h2><a href="#term-ownership" title="Ссылка на этот термин">Владение<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Ответственность за время жизни объекта или освобождение ресурса.</p>
+<div class="entry-detail"><p>Указатель показывает, где находится объект; владение отвечает на другой вопрос: кто обязан удерживать его живым и кто его уничтожит. unique_ptr выражает единоличное владение, shared_ptr — совместное владение через общую группу.</p><p>Ссылка и обычный T* часто используются для доступа без владения. По одному синтаксису указателя нельзя восстановить весь договор. Важно явно понимать, может ли вызывающий сохранить адрес и что гарантирует существование объекта после возврата.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=ownership-contracts">Разобрать в учебнике: Владение в интерфейсе функции: читать, менять, забирать →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rr-smartptrparam" target="_blank" rel="noopener noreferrer">Core Guidelines: параметры умных указателей, R.30–R.36 ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.shared" target="_blank" rel="noopener noreferrer">C++20: shared_ptr ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/unique.ptr" target="_blank" rel="noopener noreferrer">C++20: unique_ptr ↗</a></p></details>
+</article><article class="glossary-entry" id="term-foreign-key" tabindex="-1" data-group="Данные" data-aliases="Внешний ключ внешний ключ внешние ключи внешнего ключа">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-foreign-key" title="Ссылка на этот термин">Внешний ключ<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Ограничение ссылки на допустимые значения другой или той же таблицы.</p>
+<div class="entry-detail"><p>Например, owner_id задачи должен соответствовать существующему пользователю. СУБД проверяет ссылочную целостность по объявленному правилу, включая согласованное поведение при удалении или изменении родительской записи.</p><p>Ограничение не означает автоматическую проверку прав клиента на владельца. Оно также не подменяет все бизнес-условия. Для команды приложения нужны и корректные связи, и соответствующая проверка доступа.</p></div>
+<a class="entry-lesson" href="cpp_station9_sql.html#section=tables">Разобрать в учебнике: Из объектов — в строки с правилами →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/tutorial-concepts.html" target="_blank" rel="noopener noreferrer">таблицы и реляционная модель ↗</a> · <a href="https://www.postgresql.org/docs/18/ddl-constraints.html" target="_blank" rel="noopener noreferrer">ограничения PostgreSQL ↗</a> · <a href="https://www.postgresql.org/docs/18/functions-comparison.html" target="_blank" rel="noopener noreferrer">сравнения и NULL ↗</a></p></details>
+</article><article class="glossary-entry" id="term-lifetime" tabindex="-1" data-group="C++" data-aliases="Время жизни время жизни объекта времени жизни объекта lifetime">
+<p class="entry-group">C++</p>
+<h2><a href="#term-lifetime" title="Ссылка на этот термин">Время жизни<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Период, когда объект существует по правилам языка и к нему можно обращаться как к живому объекту.</p>
+<div class="entry-detail"><p>Наличие адреса ещё не доказывает, что по нему находится живой объект нужного типа. Локальная переменная может уже разрушиться, хотя сохранённая ссылка или указатель по-прежнему содержит прежний адрес.</p><p>Отдельно различают время жизни объекта, срок хранения памяти и область видимости имени. Переменная-указатель может существовать дольше объекта, на который указывала. Ссылка сама по себе жизнь этого объекта не продлевает.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=lifetime-storage">Разобрать в учебнике: Имя, память и время жизни: три разных вопроса →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/basic.life" target="_blank" rel="noopener noreferrer">C++20: время жизни ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/basic.stc" target="_blank" rel="noopener noreferrer">Длительность хранения ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/class.temporary" target="_blank" rel="noopener noreferrer">Временные объекты и продление жизни ↗</a></p></details>
+</article><article class="glossary-entry" id="term-deadline" tabindex="-1" data-group="Сети" data-aliases="Дедлайн deadline дедлайн дедлайна дедлайном">
+<p class="entry-group">Сети</p>
+<h2><a href="#term-deadline" title="Ссылка на этот термин">Дедлайн<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Предельный момент, к которому операция должна завершиться или перестать делать новые попытки.</p>
+<div class="entry-detail"><p>Дедлайн задаёт общий бюджет времени: ожидание в очереди, соединение, обработка и повторы тратят его вместе. Если каждому этапу независимо выдать полный новый timeout, общий запрос может длиться намного дольше ожиданий клиента.</p><p>Истечение времени не доказывает, что внешний эффект отменён. Сервер мог уже сохранить запись, а ответ потерялся. Поэтому ограничение времени соединяют с договором отмены и безопасного повтора.</p></div>
+<a class="entry-lesson" href="cpp_station7_networking.html#section=request-time-and-failure-model">Разобрать в учебнике: Глубже: время, неизвестный результат и end-to-end контракт →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc3986.html" target="_blank" rel="noopener noreferrer">RFC 3986 ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc9110.html" target="_blank" rel="noopener noreferrer">RFC 9110 ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc9111.html" target="_blank" rel="noopener noreferrer">RFC 9111 ↗</a></p></details>
+</article><article class="glossary-entry" id="term-deduplication" tabindex="-1" data-group="API" data-aliases="Дедупликация дедупликация дедупликации дедупликацию">
+<p class="entry-group">API</p>
+<h2><a href="#term-deduplication" title="Ссылка на этот термин">Дедупликация<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Распознавание повторной операции, чтобы не применить её эффект заново.</p>
+<div class="entry-detail"><p>Клиент может повторить запрос, потому что не получил ответ, хотя запись уже произошла. Устойчивый идентификатор операции позволяет серверу связать повтор с ранее принятым действием.</p><p>Нужно определить владельца ключа, содержимое запроса, одновременные повторы, срок хранения и ответ при повторном использовании ключа с другими данными. Таблица в памяти одного процесса не даёт автоматически долговечность и общий результат между репликами.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=idempotency-state">Разобрать в учебнике: Ключ повтора: хранить нужно состояние операции, не только строку →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2" target="_blank" rel="noopener noreferrer">HTTP: предполагаемый эффект и повторы ↗</a> · <a href="https://docs.stripe.com/api/idempotent_requests" target="_blank" rel="noopener noreferrer">Stripe: пример конкретного API идемпотентных запросов ↗</a></p></details>
+</article><article class="glossary-entry" id="term-destructor" tabindex="-1" data-group="C++" data-aliases="Деструктор деструктор деструктора деструктором деструкторы">
+<p class="entry-group">C++</p>
+<h2><a href="#term-destructor" title="Ссылка на этот термин">Деструктор<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Специальная функция, выполняемая при уничтожении объекта; обычно освобождает его ресурсы.</p>
+<div class="entry-detail"><p>Для обычного локального объекта выход из области видимости запускает разрушение автоматически. Сначала выполняется тело деструктора, затем уничтожаются поля и базовые части в предусмотренном языком обратном порядке.</p><p>Разрушение объекта и освобождение занимаемой им памяти — разные действия. Например, delete объединяет их, а отдельный явный вызов деструктора сам по себе не освобождает динамическую память. RAII использует разрушение владельца для освобождения ресурса.</p></div>
+<a class="entry-lesson" href="cpp_station0_oop_basics.html#section=destructor">Разобрать в учебнике: Разрушение по шагам: блоки, поля и тело деструктора →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/class.dtor" target="_blank" rel="noopener noreferrer">C++20: разрушение элементов массива ↗</a></p></details>
+</article><article class="glossary-entry" id="term-closure" tabindex="-1" data-group="C++" data-aliases="Замыкание замыкание замыкания замыкании">
+<p class="entry-group">C++</p>
+<h2><a href="#term-closure" title="Ссылка на этот термин">Замыкание<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Объект лямбды, который хранит её захваты и позволяет вызвать её тело.</p>
+<div class="entry-detail"><p>Лямбда позволяет записать небольшую безымянную функцию прямо в месте использования. Захват по значению сохраняет собственную копию значения внутри объекта лямбды. Захват по ссылке даёт доступ к чужому объекту: копия лямбды не превращает его в собственность замыкания.</p><p>Для отложенного выполнения нужно проверить, кто удерживает живым каждый захваченный объект. Лямбда, возвращённая из функции, может пережить локальные переменные этой функции; ссылки на них тогда станут висячими.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=lambda-lifetime">Разобрать в учебнике: Лямбда хранит захваты: что переживёт возврат из функции →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/expr.prim.lambda.closure" target="_blank" rel="noopener noreferrer">C++20: тип объекта лямбды ↗</a></p></details>
+</article><article class="glossary-entry" id="term-idempotence" tabindex="-1" data-group="API" data-aliases="Идемпотентность идемпотентность идемпотентная операция идемпотентной операции">
+<p class="entry-group">API</p>
+<h2><a href="#term-idempotence" title="Ссылка на этот термин">Идемпотентность<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Повтор одного действия имеет тот же предусмотренный эффект, что и его однократное выполнение.</p>
+<div class="entry-detail"><p>Повторно установить один и тот же целевой статус можно без накопления дополнительного изменения. При этом ответы или записи диагностического журнала не обязаны быть буквально одинаковыми.</p><p>Не каждое добавление или списание идемпотентно. При потере ответа важно учитывать уже возможный эффект; для безопасных повторов часто нужен отдельный ключ операции и протокол дедупликации.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=method-semantics">Разобрать в учебнике: Метод описывает намерение, а не расположение параметров →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2" target="_blank" rel="noopener noreferrer">HTTP: безопасные и идемпотентные методы ↗</a></p></details>
+</article><article class="glossary-entry" id="term-invalidation" tabindex="-1" data-group="C++" data-aliases="Инвалидация инвалидация инвалидации инвалидацию">
+<p class="entry-group">C++</p>
+<h2><a href="#term-invalidation" title="Ссылка на этот термин">Инвалидация<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Утрата пригодности ранее полученного итератора, указателя или ссылки после изменения контейнера.</p>
+<div class="entry-detail"><p>При перевыделении памяти vector прежние элементы переезжают в другой буфер, и сохранённые адреса больше не дают доступа к ним. Другие изменения могут иметь более узкие правила: например, затронуть только определённые итераторы.</p><p>Отсутствие перевыделения ещё не означает, что сохраняется вообще всё. В частности, прежняя граница end() может стать недействительной. Правило проверяют для конкретной операции и конкретного вида сохранённого доступа.</p></div>
+<a class="entry-lesson" href="cpp_station3_stl_templates.html#section=vector">Разобрать в учебнике: vector — главный контейнер →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/vector.bool" target="_blank" rel="noopener noreferrer">C++20: особенности vector&lt;bool&gt; ↗</a></p></details>
+</article><article class="glossary-entry" id="term-invariant" tabindex="-1" data-group="C++" data-aliases="Инвариант инвариант инварианта инвариантом инварианты инвариантов">
+<p class="entry-group">C++</p>
+<h2><a href="#term-invariant" title="Ссылка на этот термин">Инвариант<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Условие, которому должно удовлетворять допустимое состояние объекта.</p>
+<div class="entry-detail"><p>У банковского счёта таким условием может быть неотрицательный баланс. Конструктор создаёт допустимое состояние, а публичные операции должны сохранять его: нельзя разрешить списание, после которого счёт нарушит это правило.</p><p>Инвариант не означает, что каждое поле неизменно. Баланс меняется, но остаётся допустимым. Внутри операции промежуточное состояние иногда временно нарушает условие; важно, где договор разрешает наблюдать объект. Само слово private такой договор не доказывает.</p></div>
+<a class="entry-lesson" href="cpp_station0_oop_basics.html#section=invariants">Разобрать в учебнике: Инвариант: какие состояния диапазона мы разрешаем →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-struct" target="_blank" rel="noopener noreferrer">Core Guidelines C.2 ↗</a> · <a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-ctor" target="_blank" rel="noopener noreferrer">Core Guidelines C.40 ↗</a></p></details>
+</article><article class="glossary-entry" id="term-encapsulation" tabindex="-1" data-group="C++" data-aliases="Инкапсуляция инкапсуляция инкапсуляции инкапсуляцию">
+<p class="entry-group">C++</p>
+<h2><a href="#term-encapsulation" title="Ссылка на этот термин">Инкапсуляция<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Доступ к состоянию организован через контролируемые операции, а детали реализации скрыты.</p>
+<div class="entry-detail"><p>Вместо прямой записи в balance клиент вызывает deposit или withdraw. Класс может проверить сумму и сохранить правила допустимого состояния. Внешнему коду не обязательно знать, как внутри представлено число.</p><p>Закрыть поля недостаточно, если затем вернуть изменяемую ссылку на них или добавить setter, допускающий любое значение. Цель — понятная граница ответственности, а не механическая замена полей набором get/set.</p></div>
+<a class="entry-lesson" href="cpp_station0_oop_basics.html#section=encapsulation">Разобрать в учебнике: Инкапсуляция: public и private →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/class.access" target="_blank" rel="noopener noreferrer">C++20 draft: member access control ↗</a></p></details>
+</article><article class="glossary-entry" id="term-constructor" tabindex="-1" data-group="C++" data-aliases="Конструктор конструктор конструктора конструктором конструкторы">
+<p class="entry-group">C++</p>
+<h2><a href="#term-constructor" title="Ссылка на этот термин">Конструктор<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Специальная функция, которая задаёт начальное состояние создаваемого объекта.</p>
+<div class="entry-detail"><p>Конструктор вызывается при создании объекта, а не при каждом присваивании ему нового значения. Сначала создаются базовые части и поля, затем выполняется тело конструктора. Начальные значения полей задают в списке инициализации или при их объявлении.</p><p>Если создать допустимое состояние не удалось и конструктор бросил исключение, полного готового объекта нет. Уже успешно созданные части очищаются, но деструктор самого недостроенного объекта не вызывается.</p></div>
+<a class="entry-lesson" href="cpp_station0_oop_basics.html#section=initialization-deep">Разобрать в учебнике: Скобки, начальные значения и explicit: меняем по одному условию →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/class.base.init" target="_blank" rel="noopener noreferrer">C++20: инициализация баз и полей ↗</a></p></details>
+</article><article class="glossary-entry" id="term-mutex" tabindex="-1" data-group="Многопоточность" data-aliases="Мьютекс mutex мьютекс мьютекса мьютексов">
+<p class="entry-group">Многопоточность</p>
+<h2><a href="#term-mutex" title="Ссылка на этот термин">Мьютекс<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Замок, который разрешает одному потоку за раз выполнять защищаемую работу.</p>
+<div class="entry-detail"><p>Поток захватывает мьютекс перед доступом к общему состоянию и освобождает после. Другой поток должен соблюдать тот же протокол. Защита относится к договору доступа, а не становится волшебным свойством переменной рядом с mutex.</p><p>Обёртки вроде lock_guard связывают освобождение с временем жизни объекта. Нужно защищать целый переход состояния, а не только отдельные строки, если между проверкой условия и изменением нельзя допустить вмешательство.</p></div>
+<a class="entry-lesson" href="cpp_station6_multithreading.html#section=mutex-types">Разобрать в учебнике: Виды мьютексов →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/thread.mutex.requirements" target="_blank" rel="noopener noreferrer">C++20: требования к мьютексам ↗</a></p></details>
+</article><article class="glossary-entry" id="term-undefined-behavior" tabindex="-1" data-group="C++" data-aliases="Неопределённое поведение неопределённое поведение неопределённого поведения UB undefined behavior">
+<p class="entry-group">C++</p>
+<h2><a href="#term-undefined-behavior" title="Ссылка на этот термин">Неопределённое поведение<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Ситуация, для которой стандарт не задаёт требований к поведению программы.</p>
+<div class="entry-detail"><p>Неверный доступ к памяти или гонка данных не получают особый гарантированный «ошибочный результат». Программа может упасть, внешне работать или вести себя иначе после оптимизации; перечислить все допустимые симптомы невозможно.</p><p>Поэтому нельзя доказывать корректность таким запуском и нельзя надёжно предсказывать вывод программы с UB. Предупреждения и санитайзеры помогают находить отдельные случаи, но не доказывают отсутствие всех ошибок.</p></div>
+<a class="entry-lesson" href="cpp_station1_modern_cpp.html#section=new-delete">Разобрать в учебнике: new/delete и почему их избегают →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/except.ctor" target="_blank" rel="noopener noreferrer">C++20: уборка при ошибке конструктора ↗</a></p></details>
+</article><article class="glossary-entry" id="term-normalization" tabindex="-1" data-group="Данные" data-aliases="Нормализация данных нормализация нормализации">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-normalization" title="Ссылка на этот термин">Нормализация данных<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Организация таблиц с учётом зависимостей между фактами, уменьшающая аномалии обновления.</p>
+<div class="entry-detail"><p>Если имя владельца скопировано в каждую задачу, его переименование требует согласованно изменить много строк. Выделение владельца в отдельную таблицу помогает хранить этот факт в одном подходящем месте.</p><p>Нормализация — не лозунг «никогда не дублировать данные». Иногда ради чтения выбирают осознанное дублирование, но тогда нужно определить источник истины и способ поддержания копий согласованными.</p></div>
+<a class="entry-lesson" href="cpp_station9_databases.html#section=design">Разобрать в учебнике: Схема начинается с вопросов к данным →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/ddl-constraints.html" target="_blank" rel="noopener noreferrer">ограничения ↗</a> · <a href="https://www.postgresql.org/docs/18/ddl-partitioning.html" target="_blank" rel="noopener noreferrer">секционирование ↗</a> · <a href="https://www.postgresql.org/docs/18/indexes-types.html" target="_blank" rel="noopener noreferrer">BRIN и другие индексы ↗</a></p></details>
+</article><article class="glossary-entry" id="term-rollback" tabindex="-1" data-group="C++" data-aliases="Откат откат отката откатить">
+<p class="entry-group">C++</p>
+<h2><a href="#term-rollback" title="Ссылка на этот термин">Откат<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Возврат состояния к тому, что было до неуспешной операции, в пределах оговорённых гарантий.</p>
+<div class="entry-detail"><p>Уборка временных объектов освобождает ресурсы, но не обязательно отменяет все выполненные действия. Если функция успела записать файл или отправить сообщение, разрушение её локального vector не вернёт внешний мир в прежнее состояние.</p><p>Поэтому нужно назвать границу отката: память одного объекта, изменения в транзакции БД или отдельно организованные внешние эффекты. Обещание «всё откатится» без этой границы обычно слишком сильное.</p></div>
+<a class="entry-lesson" href="cpp_station4_error_handling.html#section=external-effects-guarantees">Разобрать в учебнике: Что исключение не отменяет: файл, запрос и чужое состояние →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/except.ctor" target="_blank" rel="noopener noreferrer">C++20: что именно делает раскрутка стека ↗</a> · <a href="https://man7.org/linux/man-pages/man2/send.2.html" target="_blank" rel="noopener noreferrer">Linux send: результат вызова и доставка ↗</a> · <a href="https://man7.org/linux/man-pages/man2/fsync.2.html" target="_blank" rel="noopener noreferrer">Linux fsync: файл и каталог ↗</a></p></details>
+</article><article class="glossary-entry" id="term-pagination" tabindex="-1" data-group="API" data-aliases="Пагинация пагинация пагинации пагинацию">
+<p class="entry-group">API</p>
+<h2><a href="#term-pagination" title="Ссылка на этот термин">Пагинация<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Выдача большого результата отдельными порциями-страницами.</p>
+<div class="entry-detail"><p>Offset пропускает заданное число строк, а курсор задаёт позицию продолжения по выбранному порядку. Для устойчивости нужен однозначный порядок, обычно с уникальным дополнительным ключом при равенстве основных полей.</p><p>При изменениях данных страницы могут иметь пропуски и повторы. Курсор сам по себе не создаёт неизменного снимка всей выборки. Размер страницы, доступ к строкам и содержимое курсора должны проверяться сервером.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=tenant-scope">Разобрать в учебнике: Подмена id: типичная ошибка объектного доступа →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/" target="_blank" rel="noopener noreferrer">OWASP API Security: Broken Object Level Authorization ↗</a></p></details>
+</article><article class="glossary-entry" id="term-primary-key" tabindex="-1" data-group="Данные" data-aliases="Первичный ключ PRIMARY KEY первичный ключ первичного ключа">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-primary-key" title="Ссылка на этот термин">Первичный ключ<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Уникальный идентификатор строки из одного или нескольких столбцов; его значения не могут быть NULL.</p>
+<div class="entry-detail"><p>База проверяет, что у двух строк не совпадает весь выбранный ключ. Так приложение может устойчиво ссылаться на конкретную запись. Название столбца id само по себе такой проверки не включает.</p><p>Первичный ключ может быть составным. Он не обязан совпадать с физическим адресом строки и не доказывает право пользователя получить запись. Идентификацию строки и авторизацию различают.</p></div>
+<a class="entry-lesson" href="cpp_station9_sql.html#section=sql-create-basics">Разобрать в учебнике: Таблица: сначала форма, затем содержимое →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/tutorial-table.html" target="_blank" rel="noopener noreferrer">PostgreSQL 18 — объяснение синтаксиса и правил ↗</a></p></details>
+</article><article class="glossary-entry" id="term-polymorphism" tabindex="-1" data-group="C++" data-aliases="Полиморфизм полиморфизм полиморфизма полиморфизмом">
+<p class="entry-group">C++</p>
+<h2><a href="#term-polymorphism" title="Ссылка на этот термин">Полиморфизм<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Работа с разными реализациями через общий интерфейс; в этой части курса — через виртуальные функции.</p>
+<div class="entry-detail"><p>Ссылка или указатель на базовый класс может обозначать производный объект. При подходящем виртуальном вызове выбирается реализация по правилам динамического типа, а не просто по написанному типу переменной-указателя.</p><p>Общий синтаксис не доказывает соблюдение общего поведения: производная реализация должна сохранять договор интерфейса. Передача базы по значению может создать отдельный срезанный объект и потерять нужную производную часть.</p></div>
+<a class="entry-lesson" href="cpp_station2_inheritance_polymorphism.html#section=polymorphism">Разобрать в учебнике: Полиморфизм: один код для многих типов →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/class.virtual" target="_blank" rel="noopener noreferrer">C++20: виртуальные функции ↗</a></p></details>
+</article><article class="glossary-entry" id="term-precondition" tabindex="-1" data-group="C++" data-aliases="Предусловие предусловие предусловия предусловию">
+<p class="entry-group">C++</p>
+<h2><a href="#term-precondition" title="Ссылка на этот термин">Предусловие<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Требование, которое вызывающий код должен выполнить перед операцией.</p>
+<div class="entry-detail"><p>Если функция требует индекс внутри диапазона, вызывающий должен обеспечить это до обращения. Взамен функция обещает определённый результат при соблюдении своего договора.</p><p>Нарушение предусловия отличается от штатного результата «не найдено». Не следует автоматически смешивать ошибку программы, допустимый отрицательный ответ и внешний сбой: для них могут быть разные способы сообщения и восстановления.</p></div>
+<a class="entry-lesson" href="cpp_station4_error_handling.html#section=error-contracts">Разобрать в учебнике: Ошибка как часть контракта API →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/structure.requirements" target="_blank" rel="noopener noreferrer">C++20: требования библиотеки и предусловия ↗</a></p></details>
+</article><article class="glossary-entry" id="term-replication" tabindex="-1" data-group="Данные" data-aliases="Репликация репликация репликации репликацию">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-replication" title="Ссылка на этот термин">Репликация<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Поддержание копий данных на других экземплярах системы.</p>
+<div class="entry-detail"><p>Копия может помогать с доступностью или чтением, но важен договор передачи изменений. Если подтверждение записи не требует нужной копии, её состояние может отставать от основного экземпляра.</p><p>Репликация не равна резервной копии: ошибочное удаление тоже может быстро распространиться. Для восстановления после таких ошибок нужны подходящие сохранённые данные и проверенная процедура возврата к нужному состоянию.</p></div>
+<a class="entry-lesson" href="cpp_station9_databases.html#section=durability-limits">Разобрать в учебнике: Что именно переживает сбой →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/runtime-config-wal.html" target="_blank" rel="noopener noreferrer">настройки WAL ↗</a> · <a href="https://www.postgresql.org/docs/18/functions-sequence.html" target="_blank" rel="noopener noreferrer">последовательности ↗</a> · <a href="https://www.postgresql.org/docs/18/ddl-identity-columns.html" target="_blank" rel="noopener noreferrer">identity columns ↗</a></p></details>
+</article><article class="glossary-entry" id="term-snapshot" tabindex="-1" data-group="Данные" data-aliases="Снимок данных snapshot снимок данных снимок">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-snapshot" title="Ссылка на этот термин">Снимок данных<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Набор данных, зафиксированный для чтения по выбранным правилам.</p>
+<div class="entry-detail"><p>В приложении снимком может быть отдельная копия показаний, которую дальше не меняют. В PostgreSQL снимок определяет набор видимых версий строк по правилам транзакции; это не копирование всей базы в новый файл.</p><p>Поэтому значение слова зависит от контекста. Копирование указателя на изменяемый объект ещё не создаёт неизменных данных, а последовательные чтения по отдельности не всегда относятся к одному общему моменту.</p></div>
+<a class="entry-lesson" href="cpp_station9_databases.html#section=isolation">Разобрать в учебнике: Чтение прошлого состояния — не обязательно ошибка →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/mvcc-intro.html" target="_blank" rel="noopener noreferrer">MVCC ↗</a> · <a href="https://www.postgresql.org/docs/18/transaction-iso.html" target="_blank" rel="noopener noreferrer">уровни изоляции PostgreSQL ↗</a> · <a href="https://www.postgresql.org/docs/18/explicit-locking.html" target="_blank" rel="noopener noreferrer">блокировки и deadlock ↗</a></p></details>
+</article><article class="glossary-entry" id="term-dbms" tabindex="-1" data-group="Данные" data-aliases="СУБД">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-dbms" title="Ссылка на этот термин">СУБД<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Система управления базами данных: программа, организующая хранение и доступ к данным.</p>
+<div class="entry-detail"><p>PostgreSQL — конкретная СУБД, SQL — язык команд для работы с данными, а текст запроса — отдельная команда. Эти понятия нельзя подменять друг другом.</p><p>СУБД не только хранит байты: она проверяет ограничения, организует конкурентный доступ и предоставляет договор фиксации изменений. Но правильность бизнес-правил и использование нужных гарантий остаются ответственностью приложения.</p></div>
+<a class="entry-lesson" href="cpp_station9_sql.html#section=sql-language">Разобрать в учебнике: SQL — язык, PostgreSQL — исполнитель →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/tutorial-sql.html" target="_blank" rel="noopener noreferrer">PostgreSQL 18 — объяснение синтаксиса и правил ↗</a></p></details>
+</article><article class="glossary-entry" id="term-token" tabindex="-1" data-group="API" data-aliases="Токен доступа токен токена токеном">
+<p class="entry-group">API</p>
+<h2><a href="#term-token" title="Ссылка на этот термин">Токен доступа<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Значение, которое клиент предъявляет как часть учётных данных для доступа.</p>
+<div class="entry-detail"><p>Сервер должен проверять токен по конкретному договору: кому он выдан, для чего предназначен, не истёк ли срок и допустим ли он сейчас. Одно наличие строки в заголовке не доказывает право доступа.</p><p>Токен может быть секретом, позволяющим действовать от имени владельца. Его не стоит записывать в логи и диагностические ответы. Формат JWT — один из вариантов представления, а не обязательное свойство любого токена.</p></div>
+<a class="entry-lesson" href="cpp_station8_rest_api.html#section=session-token">Разобрать в учебнике: Сессия, bearer и JWT: где хранится доверие →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1" target="_blank" rel="noopener noreferrer">JWT: registered claims ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc6750.html" target="_blank" rel="noopener noreferrer">Bearer token usage ↗</a> · <a href="https://www.rfc-editor.org/rfc/rfc8725.html" target="_blank" rel="noopener noreferrer">JWT best current practices ↗</a></p></details>
+</article><article class="glossary-entry" id="term-transaction" tabindex="-1" data-group="Данные" data-aliases="Транзакция транзакция транзакции транзакцией транзакцию">
+<p class="entry-group">Данные</p>
+<h2><a href="#term-transaction" title="Ссылка на этот термин">Транзакция<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Группа действий с оговорёнными правилами совместной фиксации, отказа и видимости изменений.</p>
+<div class="entry-detail"><p>В базе изменения обычных данных можно зафиксировать вместе или отменить. При конкурентном доступе дополнительно важны правила того, какие версии видит чтение и какие сочетания операций допустимы.</p><p>Транзакция базы не откатывает уже отправленный email и не гарантирует получение клиентом ответа на COMMIT. Потеря ответа может оставить для клиента неизвестным исход, поэтому внешние эффекты и повторы требуют отдельного договора.</p></div>
+<a class="entry-lesson" href="cpp_station9_databases.html#section=transactions">Разобрать в учебнике: Задача завершена, запись в журнале отсутствует — допустимо ли это? →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://www.postgresql.org/docs/18/tutorial-transactions.html" target="_blank" rel="noopener noreferrer">транзакционные блоки ↗</a> · <a href="https://www.postgresql.org/docs/18/sql-rollback.html" target="_blank" rel="noopener noreferrer">ROLLBACK ↗</a> · <a href="https://www.postgresql.org/docs/18/sql-savepoint.html" target="_blank" rel="noopener noreferrer">SAVEPOINT ↗</a></p></details>
+</article><article class="glossary-entry" id="term-condition-variable" tabindex="-1" data-group="Многопоточность" data-aliases="Условная переменная condition variable condition_variable условная переменная условной переменной">
+<p class="entry-group">Многопоточность</p>
+<h2><a href="#term-condition-variable" title="Ссылка на этот термин">Условная переменная<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Средство ожидания изменения состояния с повторной проверкой условия под мьютексом.</p>
+<div class="entry-detail"><p>Потребитель проверяет, есть ли работа. Если её нет, wait освобождает мьютекс и позволяет потоку ждать; перед продолжением мьютекс снова захватывается. Условие проверяют повторно, потому что пробуждение ещё не означает, что работа доступна именно этому участнику.</p><p>notify не хранит в себе само условие «очередь непуста». Состояние и правило его изменения должны быть согласованы с ожидающей стороной. Бесконтрольная замена этой схемы на sleep не даёт гарантии нужного порядка.</p></div>
+<a class="entry-lesson" href="cpp_station6_multithreading.html#section=condition-variable">Разобрать в учебнике: condition_variable — ожидание события →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/thread.condition.condvar" target="_blank" rel="noopener noreferrer">C++20: условные переменные ↗</a></p></details>
+</article><article class="glossary-entry" id="term-hash" tabindex="-1" data-group="C++" data-aliases="Хеш хеш хеша хешем">
+<p class="entry-group">C++</p>
+<h2><a href="#term-hash" title="Ссылка на этот термин">Хеш<span aria-hidden="true">#</span></a></h2>
+<p class="entry-short">Число, вычисленное из ключа, которое помогает выбрать группу кандидатов для поиска.</p>
+<div class="entry-detail"><p>Хеш-таблица сначала использует значение хеша, чтобы сузить поиск, затем проверяет равенство ключей. Разные ключи могут иметь одинаковый хеш: это нормальная коллизия, которую структура обязана обрабатывать.</p><p>Хеш не является уникальным идентификатором. Для корректной unordered-структуры равные по выбранному сравнению ключи должны иметь одинаковые хеши. Качество распределения влияет на стоимость работы, но не заменяет проверку равенства.</p></div>
+<a class="entry-lesson" href="cpp_station3_stl_templates.html#section=map-set">Разобрать в учебнике: map, unordered_map и set →</a>
+<details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://timsong-cpp.github.io/cppwp/n4861/dcl.struct.bind" target="_blank" rel="noopener noreferrer">C++20: структурные привязки ↗</a> · <a href="https://timsong-cpp.github.io/cppwp/n4861/associative.reqmts" target="_blank" rel="noopener noreferrer">C++20: эквивалентность ключей ↗</a></p></details>
+</article></main></div>
+<footer class="glossary-footer"><a href="#top">К началу ↑</a><a href="cpp_backend_roadmap.html">Вернуться к курсу →</a><p>Определения служат опорой для чтения, а не заменой учебной главы. Основная версия C++ — C++20; серверная глава о данных использует PostgreSQL 18.</p></footer>
+<script src="assets/glossary.js" defer></script></body></html>
