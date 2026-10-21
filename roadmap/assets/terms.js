@@ -57,6 +57,7 @@
         anchor.href = 'glossary.html#term-' + match.id;
         anchor.textContent = match.label;
         anchor.dataset.courseTerm = match.id;
+        anchor.dataset.termDefinition = model.entries.get(match.id).short;
         anchor.setAttribute('aria-haspopup', 'dialog');
         anchor.setAttribute('aria-expanded', 'false');
         anchor.setAttribute('aria-label', match.label + ' — краткое определение');

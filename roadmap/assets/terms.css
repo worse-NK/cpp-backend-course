@@ -11,4 +11,4 @@ a.course-term:focus-visible,.term-popup :focus-visible{outline:2px solid #287b8f
 .term-popup a.term-popup-more{display:inline-block;border-top:1px solid #e4ecea;padding-top:14px;color:#206578;font-size:13px;font-weight:600;text-decoration:none}
 .term-popup a.term-popup-more:hover{text-decoration:underline;text-underline-offset:3px}
 @media(max-width:600px){.term-popup{max-height:65vh;max-height:65dvh;border-radius:16px;padding:23px}.term-popup h2{font-size:21px}}
-@media print{a.course-term{color:inherit;font-weight:inherit;border:0;text-decoration:none}.term-popup{display:none}}
+@media print{a.course-term{color:inherit;font-weight:inherit;border:0;text-decoration:none}a.course-term::after{content:" (" attr(data-term-definition) ")";font:normal .9em/1.5 system-ui,sans-serif;color:inherit}.term-popup{display:none}}
