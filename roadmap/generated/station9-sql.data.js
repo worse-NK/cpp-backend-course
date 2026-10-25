@@ -55,7 +55,7 @@ window.STATION_DATA = {
       "blocks": [
         {
           "type": "text",
-          "html": "Сначала научимся читать таблицу и выбирать строки. Затем свяжем несколько таблиц и посчитаем группы. Только после этого перейдём к вложенным запросам и оконным функциям. Для каждого запроса спрашивай: что означает одна строка ответа, какие строки должны исчезнуть, какие значения могут отсутствовать?"
+          "html": "Сначала научимся читать таблицу и выбирать строки. Затем свяжем несколько таблиц и посчитаем группы: отдельно проследим, почему две независимые связи могут умножить строки отчёта. После этого перейдём к составным запросам и оконным функциям, включая равные ключи сортировки и рамку расчёта. Для каждого запроса спрашивай: что означает одна строка ответа, какие строки должны исчезнуть, какие значения могут отсутствовать?"
         },
         {
           "type": "text",
@@ -592,11 +592,68 @@ window.STATION_DATA = {
           "type": "lab",
           "lab": "sql",
           "scenario": "left"
+        }
+      ]
+    },
+    {
+      "id": "sql-join-multiplication",
+      "substation": "aggregation",
+      "title": "Две задачи и три платежа: откуда в отчёте шесть строк",
+      "lead": "Следим за смыслом каждой строки до COUNT и SUM. Исправляем форму промежуточных данных, а не маскируем ошибку словом DISTINCT.",
+      "blocks": [
+        {
+          "type": "text",
+          "html": "<p>Предыдущий отчёт соединял пользователя с задачами. Теперь рядом нужны число его задач, число платежей и общая сумма платежей. У Анны две задачи и три платежа: 100, 100 и 300 условных единиц. Два платежа по 100 — разные реальные записи, а не ошибка. Правильный результат: 2 задачи, 3 платежа, сумма 500. У Бориса нет ни задач, ни платежей: его тоже нужно показать, с тремя нулями.</p><p>Связи независимы: задача ссылается на владельца, платёж тоже ссылается на владельца, но не на конкретную задачу. Мы не считаем, что один платёж обязательно соответствует одной задаче. Именно это условие определяет, какие сочетания допустит JOIN. Перед запросом выпиши <strong>смысл одной строки</strong>: в исходных таблицах это пользователь, задача или платёж; в отчёте хотим снова одного пользователя.</p><p>Следующая подготовка предназначена для новой пустой учебной базы. В тренажёре можно выполнять весь сценарий, начиная с CREATE, в одном запуске: следующий запуск получает новую базу. Названия join_demo_* не меняют встроенные users и tasks. В обычном PostgreSQL подготовку выполняют один раз; при повторе не добавляй DROP к нужным таблицам, а выбери отдельную учебную базу.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "Подготовка JOIN-сценария: две независимые связи с пользователем",
+          "code": "CREATE TABLE join_demo_users (\n    id integer PRIMARY KEY,\n    name text NOT NULL\n);\nCREATE TABLE join_demo_tasks (\n    id integer PRIMARY KEY,\n    owner_id integer NOT NULL REFERENCES join_demo_users(id)\n);\nCREATE TABLE join_demo_payments (\n    id integer PRIMARY KEY,\n    owner_id integer NOT NULL REFERENCES join_demo_users(id),\n    amount integer NOT NULL CHECK (amount >= 0)\n);\nINSERT INTO join_demo_users VALUES (1, 'Анна'), (2, 'Борис');\nINSERT INTO join_demo_tasks VALUES (10, 1), (11, 1);\nINSERT INTO join_demo_payments VALUES\n    (101, 1, 100), (102, 1, 100), (103, 1, 300);"
+        },
+        {
+          "type": "text",
+          "html": "<h3>1. Сначала посмотрим на пары, не считая итоги</h3><p>Первый LEFT JOIN создаёт по одной строке на каждую задачу Анны. Второй ищет платежи по u.id. Для каждой из двух уже полученных строк подходят все три платежа. Поэтому задача 10 сочетается с 101, 102 и 103, затем задача 11 — с теми же тремя. Мы не просили декартово произведение всей базы, но внутри одного владельца возникло 2 × 3 = 6 подходящих сочетаний.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "До агрегатов: какая строка действительно поступит в расчёт",
+          "code": "SELECT u.id AS user_id, t.id AS task_id, p.id AS payment_id, p.amount\nFROM join_demo_users AS u\nLEFT JOIN join_demo_tasks AS t ON t.owner_id = u.id\nLEFT JOIN join_demo_payments AS p ON p.owner_id = u.id\nORDER BY u.id, t.id, p.id;"
+        },
+        {
+          "type": "text",
+          "html": "<div class=\"db-table-wrap\"><table><caption>Семь строк промежуточного результата</caption><thead><tr><th>user_id</th><th>task_id</th><th>payment_id</th><th>amount</th></tr></thead><tbody><tr><td>1</td><td>10</td><td>101</td><td>100</td></tr><tr><td>1</td><td>10</td><td>102</td><td>100</td></tr><tr><td>1</td><td>10</td><td>103</td><td>300</td></tr><tr><td>1</td><td>11</td><td>101</td><td>100</td></tr><tr><td>1</td><td>11</td><td>102</td><td>100</td></tr><tr><td>1</td><td>11</td><td>103</td><td>300</td></tr><tr><td>2</td><td>NULL</td><td>NULL</td><td>NULL</td></tr></tbody></table></div><p>Последняя строка сохранена LEFT JOIN для Бориса. Шесть строк Анны — не шесть задач и не шесть платежей: каждая означает сочетание «пользователь — задача — платёж». Если забыть этот смысл и сразу считать, агрегаты честно обработают не тот набор.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "Неверный отчёт: агрегаты работают над размноженными записями",
+          "code": "SELECT u.id, COUNT(t.id) AS task_count,\n       COUNT(p.id) AS payment_count, SUM(p.amount) AS paid\nFROM join_demo_users AS u\nLEFT JOIN join_demo_tasks AS t ON t.owner_id = u.id\nLEFT JOIN join_demo_payments AS p ON p.owner_id = u.id\nGROUP BY u.id\nORDER BY u.id;"
+        },
+        {
+          "type": "text",
+          "html": "<p>Анна получит (1, 6, 6, 1000): каждый платёж повторился для двух задач. Борис получит (2, 0, 0, NULL): COUNT ненулевых идентификаторов даёт ноль, SUM отсутствующих сумм не выдумывает нулевой платёж. GROUP BY не отменяет уже образовавшиеся сочетания; он лишь собирает их в группы.</p><h3>2. Почему DISTINCT помогает не всегда</h3><p>COUNT(DISTINCT t.id) здесь вернёт 2, COUNT(DISTINCT p.id) — 3: считаем разные идентификаторы сущностей. Но SUM(DISTINCT p.amount) вернёт 400, а не 500. Она складывает разные <em>значения сумм</em>, то есть 100 и 300, и теряет второй настоящий платёж по 100. Одинаковая сумма и один и тот же платёж — не одно понятие. А DISTINCT у всего SELECT после GROUP BY не исправит уже вычисленные 6 и 1000.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "Проверка неуниверсального исправления DISTINCT",
+          "code": "SELECT u.id, COUNT(DISTINCT t.id) AS task_count,\n       COUNT(DISTINCT p.id) AS payment_count,\n       SUM(DISTINCT p.amount) AS paid\nFROM join_demo_users AS u\nLEFT JOIN join_demo_tasks AS t ON t.owner_id = u.id\nLEFT JOIN join_demo_payments AS p ON p.owner_id = u.id\nGROUP BY u.id\nORDER BY u.id;\n-- Анна: (1, 2, 3, 400), Борис: (2, 0, 0, NULL)."
+        },
+        {
+          "type": "text",
+          "html": "<h3>3. Приведём каждую ветвь к одной строке на владельца</h3><p>Сначала независимо посчитаем задачи по owner_id. Отдельно посчитаем платежи и их сумму по owner_id. В каждой сводке будет не более одной строки на владельца. Теперь соединение пользователя со сводками не умножает его строки: для Анны есть одна сводка задач и одна сводка платежей.</p><p>В следующем запросе SELECT в круглых скобках после JOIN — вложенный запрос, используемый как таблица результата. Псевдонимы tc и pc обозначают именно эти результаты, а не исходные tasks и payments. Для понимания сначала выполни внутренние SELECT отдельно: tc должен дать (1, 2), pc — (1, 3, 500). В подглаве 9A.4 научимся также давать промежуточным запросам имена через WITH.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "Исправленный отчёт: одна строка пользователя и по одной строке сводок",
+          "code": "SELECT u.id, u.name,\n       COALESCE(tc.task_count, 0) AS task_count,\n       COALESCE(pc.payment_count, 0) AS payment_count,\n       COALESCE(pc.paid, 0) AS paid\nFROM join_demo_users AS u\nLEFT JOIN (\n    SELECT owner_id, COUNT(*) AS task_count\n    FROM join_demo_tasks GROUP BY owner_id\n) AS tc ON tc.owner_id = u.id\nLEFT JOIN (\n    SELECT owner_id, COUNT(*) AS payment_count, SUM(amount) AS paid\n    FROM join_demo_payments GROUP BY owner_id\n) AS pc ON pc.owner_id = u.id\nORDER BY u.id;"
+        },
+        {
+          "type": "text",
+          "html": "<div class=\"db-table-wrap\"><table><caption>Теперь числа соответствуют исходным сущностям</caption><thead><tr><th>id</th><th>name</th><th>task_count</th><th>payment_count</th><th>paid</th></tr></thead><tbody><tr><td>1</td><td>Анна</td><td>2</td><td>3</td><td>500</td></tr><tr><td>2</td><td>Борис</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><p>Для Бориса сводок нет, поэтому LEFT JOIN подставляет NULL. COALESCE превращает отсутствие счётчика или суммы в 0 <em>по выбранному договору</em>: мы знаем, что платежей не было. Это не универсальное правило превращать неизвестную денежную величину в ноль. Здесь amount запрещает NULL, поэтому отсутствующая сводка и неизвестная сумма существующего платежа не смешиваются.</p><p>Проверь три дополнительных случая: только задачи; только платежи; несколько пользователей с одинаковым именем. Каждая сводка группируется по устойчивому owner_id, а не имени. Если нужен лишь ответ «есть ли платёж», расчёт суммы избыточен: дальше разберём EXISTS. А выбор индекса и физического плана оставим 9B: сначала добиваемся правильного результата.</p><p>Первоисточники: <a href=\"https://www.postgresql.org/docs/18/queries-table-expressions.html\">PostgreSQL 18: образование пар JOIN, группировка и производные таблицы</a>, <a href=\"https://www.postgresql.org/docs/18/functions-aggregate.html\">COUNT и SUM</a>, <a href=\"https://www.postgresql.org/docs/18/sql-expressions.html#SYNTAX-AGGREGATES\">DISTINCT внутри агрегата</a>. Примеры выполняются и в SQLite; это проверка их общего SQL-подмножества, не всех свойств PostgreSQL.</p>"
         },
         {
           "type": "note",
-          "kind": "tip",
-          "html": "<b>Контрольная точка.</b> Перед закреплением объясни своими словами: LEFT JOIN оставляет пользователя без задач? Для пользователя без задач после LEFT JOIN чему равен COUNT(tasks.id)? Если пока трудно, вернись к исходным состояниям и проследи изменение по шагам."
+          "kind": "key",
+          "html": "<b>Контрольная точка.</b> LEFT JOIN сохраняет пользователя без задач, COUNT(tasks.id) тогда даёт 0. Объясни следующий шаг: почему два независимых JOIN дают Анне 6 сочетаний и почему SUM(DISTINCT amount) не восстанавливает сумму её трёх платежей?"
         }
       ]
     },
@@ -762,11 +819,67 @@ window.STATION_DATA = {
           "type": "note",
           "kind": "tip",
           "html": "<b>Источник.</b> <a href=\"https://www.postgresql.org/docs/18/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS\">Документация PostgreSQL 18</a>. Примеры и разборы в этой главе составлены для курса."
+        }
+      ]
+    },
+    {
+      "id": "sql-window-peers",
+      "substation": "windows",
+      "title": "Равное время событий: чем рамка отличается от порядка",
+      "lead": "Считаем окно на трёх строках. Сначала меняем только рамку, затем отдельно вводим однозначный порядок и проверяем LAST_VALUE.",
+      "blocks": [
+        {
+          "type": "text",
+          "html": "<p>В предыдущем примере id были разными, поэтому текущую строку легко отличить от следующей. В рабочих данных несколько событий часто имеют одинаковую отметку времени. Представь три события одного владельца: id=1 на минуте 600 с суммой 10, id=2 на той же минуте с суммой 20, id=3 на минуте 601 с суммой 5. Минуты здесь целые числа условной шкалы, не новый тип даты; так пример одинаково выполняется в PostgreSQL и SQLite.</p><p>Чтобы не зависеть от существующих таблиц, каждый листинг сам задаёт данные через WITH events(...) AS (VALUES ...). VALUES перечисляет строки, а имена в events(id, owner_id, at_minute, amount) задают их столбцы. Это уже знакомый именованный промежуточный результат, а не создание таблицы на диске. Можно выполнять каждый листинг независимо.</p><h3>1. Раздел, порядок и рамка отвечают на разные вопросы</h3><p>PARTITION BY owner_id выбирает <strong>раздел</strong> (все строки данного владельца). ORDER BY внутри OVER задаёт порядок для вычисления. Peer group (группа равных) — строки, равные по <em>всем выражениям этого ORDER BY</em>. При ORDER BY at_minute события 1 и 2 равны; при ORDER BY at_minute, id — уже нет. Frame (рамка) определяет, какую часть раздела агрегат видит для текущей строки. Наконец, внешний ORDER BY задаёт порядок показа готового результата, но не переупорядочивает строки внутри уже вычисленного окна.</p>"
+        },
+        {
+          "type": "text",
+          "html": "<h3>2. Рамка по умолчанию захватывает равных соседей</h3><p>Для SUM с ORDER BY и без явной рамки PostgreSQL использует RANGE от начала раздела до текущей группы равных включительно. Поэтому «до текущей строки» здесь не означает «до одного физически выбранного события». Проверим, что отсутствие рамки и её явная запись дают одинаковый результат при <em>том же ORDER BY at_minute</em>.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "Равные ключи: рамка по умолчанию и явная RANGE совпадают",
+          "code": "WITH events(id, owner_id, at_minute, amount) AS (\n    VALUES (1, 1, 600, 10), (2, 1, 600, 20), (3, 1, 601, 5)\n)\nSELECT id, at_minute, amount,\n       SUM(amount) OVER (\n           PARTITION BY owner_id ORDER BY at_minute\n       ) AS default_total,\n       SUM(amount) OVER (\n           PARTITION BY owner_id ORDER BY at_minute\n           RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n       ) AS explicit_range_total\nFROM events\nORDER BY at_minute, id;"
+        },
+        {
+          "type": "text",
+          "html": "<div class=\"db-table-wrap\"><table><caption>Оба события минуты 600 видят сумму всей группы равных</caption><thead><tr><th>id</th><th>at_minute</th><th>amount</th><th>default_total</th><th>explicit_range_total</th></tr></thead><tbody><tr><td>1</td><td>600</td><td>10</td><td>30</td><td>30</td></tr><tr><td>2</td><td>600</td><td>20</td><td>30</td><td>30</td></tr><tr><td>3</td><td>601</td><td>5</td><td>35</td><td>35</td></tr></tbody></table></div><p>Для каждого события минуты 600 рамка включает и 10, и 20. Для минуты 601 — уже все три суммы. Это не двойной платёж и не размножение JOIN: исходных событий по-прежнему три. Мы просто задали расчёт, в котором равные по времени строки получают общий накопительный итог. Если продукту нужен итог «на конец минуты», такое поведение может быть правильным.</p>"
+        },
+        {
+          "type": "text",
+          "html": "<h3>3. Меняем только RANGE на ROWS, не подменяя сортировку</h3><p>ROWS считает строки в порядке окна, а не всю группу равных сразу. При одном ORDER BY at_minute два события минуты 600 не имеют заданного взаимного порядка: одно будет первым, другое вторым. Чтобы честно показать разницу рамок, ниже выводим время и размеры рамок без утверждения, какому id досталось первое место. Итоговая сортировка по rows_size лишь располагает уже вычисленные счётчики для чтения.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "Только рамка меняется: ORDER BY внутри двух окон одинаков",
+          "code": "WITH events(id, owner_id, at_minute, amount) AS (\n    VALUES (1, 1, 600, 10), (2, 1, 600, 20), (3, 1, 601, 5)\n)\nSELECT at_minute,\n       COUNT(*) OVER (\n           PARTITION BY owner_id ORDER BY at_minute\n       ) AS range_size,\n       COUNT(*) OVER (\n           PARTITION BY owner_id ORDER BY at_minute\n           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n       ) AS rows_size\nFROM events\nORDER BY at_minute, rows_size;"
+        },
+        {
+          "type": "text",
+          "html": "<div class=\"db-table-wrap\"><table><caption>RANGE: обе равные строки сразу; ROWS: сначала одна, затем две</caption><thead><tr><th>at_minute</th><th>range_size</th><th>rows_size</th></tr></thead><tbody><tr><td>600</td><td>2</td><td>1</td></tr><tr><td>600</td><td>2</td><td>2</td></tr><tr><td>601</td><td>3</td><td>3</td></tr></tbody></table></div><p>Если вернуть id в этот пример, нельзя без дополнительного порядка обещать «у id=1 будет rows_size=1». Внешний ORDER BY id этого не исправит. Для однозначной накопительной суммы по событиям добавим id в порядок <em>обоих</em> сравниваемых окон. Теперь полные ключи уникальны, и каждая группа равных состоит из одной строки.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "Однозначный порядок: добавляем id в оба окна",
+          "code": "WITH events(id, owner_id, at_minute, amount) AS (\n    VALUES (1, 1, 600, 10), (2, 1, 600, 20), (3, 1, 601, 5)\n)\nSELECT id,\n       SUM(amount) OVER (\n           PARTITION BY owner_id ORDER BY at_minute, id\n       ) AS default_unique_total,\n       SUM(amount) OVER (\n           PARTITION BY owner_id ORDER BY at_minute, id\n           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n       ) AS rows_total\nFROM events\nORDER BY at_minute, id;"
+        },
+        {
+          "type": "text",
+          "html": "<p>Получаем (1, 10, 10), (2, 30, 30), (3, 35, 35). RANGE по умолчанию и ROWS снова совпали: теперь равных полных ключей нет. Не приписывай отличие от первого листинга одному слову ROWS: после добавления id изменился и сам порядок равенства. В предыдущем листинге мы изолированно сравнили рамки; в этом задали воспроизводимый порядок конкретных событий.</p><h3>4. Последнее в рамке — не последнее во всём разделе</h3><p>LAST_VALUE (значение последней строки текущей рамки) легко принять за «последнее событие владельца». При уникальном порядке и рамке по умолчанию она заканчивается на текущей строке. Для значения с конца всего раздела нужно явно включить его конец: UNBOUNDED FOLLOWING означает «до конца раздела», независимо от положения текущего события.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "LAST_VALUE: одинаковый порядок, разная правая граница рамки",
+          "code": "WITH events(id, owner_id, at_minute, amount) AS (\n    VALUES (1, 1, 600, 10), (2, 1, 600, 20), (3, 1, 601, 5)\n)\nSELECT id,\n       LAST_VALUE(amount) OVER (\n           PARTITION BY owner_id ORDER BY at_minute, id\n           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n       ) AS current_frame_last,\n       LAST_VALUE(amount) OVER (\n           PARTITION BY owner_id ORDER BY at_minute, id\n           ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\n       ) AS partition_last\nFROM events\nORDER BY at_minute, id;"
+        },
+        {
+          "type": "text",
+          "html": "<div class=\"db-table-wrap\"><table><caption>Конец выбранного окна и конец всего раздела дают разные ответы</caption><thead><tr><th>id</th><th>current_frame_last</th><th>partition_last</th></tr></thead><tbody><tr><td>1</td><td>10</td><td>5</td></tr><tr><td>2</td><td>20</td><td>5</td></tr><tr><td>3</td><td>5</td><td>5</td></tr></tbody></table></div><p>Это по-прежнему три строки результата. Ни GROUP BY, ни MAX(amount) не являются заменой: максимум суммы здесь 20, а значение последнего события — 5. Аналогично, RANK отвечает на вопрос о месте среди значений, а не об этой рамке агрегирования. Выбираем функцию после вопроса к данным, а не по похожему английскому имени.</p><p>Проверь вариант с другим владельцем: PARTITION BY должен отделить его события от этих трёх. Затем поменяй только вторую сумму: порядок и размеры рамок останутся прежними, изменятся вычисленные суммы. Такой эксперимент отличает устройство окна от случайных чисел примера.</p><p>Первоисточники PostgreSQL 18: <a href=\"https://www.postgresql.org/docs/18/functions-window.html\">группы равных, LAST_VALUE и рамка по умолчанию</a>, <a href=\"https://www.postgresql.org/docs/18/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS\">точное значение RANGE, ROWS и границ рамки</a>. Приведённые запросы используют совместимое с SQLite подмножество; их выполнение на SQLite не проверяет PostgreSQL-планировщик или поведение всех других режимов окна.</p>"
         },
         {
           "type": "note",
           "kind": "key",
-          "html": "<b>Контрольная точка.</b> Объясни, почему ROW_NUMBER не сворачивает строки и зачем для фильтра rn нужен внешний запрос."
+          "html": "<b>Контрольная точка.</b> ROW_NUMBER сохраняет исходные строки, а фильтр по rn требует внешнего уровня. Теперь объясни ещё три различия: порядок окна и порядок показа; равная группа и отдельная строка; последняя строка текущей рамки и последняя строка всего раздела."
         }
       ]
     },
@@ -1242,6 +1355,66 @@ window.STATION_DATA = {
         "answer": 0,
         "why": "Это явно отделяет агрегацию задач от сохранения всех пользователей.",
         "level": "medium"
+      },
+      {
+        "level": "medium",
+        "substation": "aggregation",
+        "theoryRefs": [
+          "sql-join-multiplication"
+        ],
+        "q": "У Анны две задачи и три независимых платежа. Оба набора присоединены к users по owner_id без предварительной группировки. Сколько подходящих сочетаний Анны попадёт в агрегаты?",
+        "options": [
+          "Пять: складываем числа исходных записей",
+          "Шесть: каждая задача сочетается с каждым платежом",
+          "Два: JOIN всегда сохраняет число задач"
+        ],
+        "answer": 1,
+        "why": "Внутри одного пользователя обе задачи подходят к каждому из трёх платежей: 2×3. Одна строка результата обозначает сочетание, а не отдельную сущность одного источника."
+      },
+      {
+        "level": "medium",
+        "substation": "aggregation",
+        "theoryRefs": [
+          "sql-join-multiplication"
+        ],
+        "q": "Три разных платежа имеют суммы 100, 100 и 300. Почему SUM(DISTINCT amount) не восстанавливает правильную сумму после размножения JOIN?",
+        "options": [
+          "Она удаляет повтор значения 100 и даёт 400 вместо 500",
+          "Она считает только строки с NULL",
+          "DISTINCT запрещён внутри любого агрегата"
+        ],
+        "answer": 0,
+        "why": "Разные платежи могут иметь одинаковую сумму. Устранение одинаковых значений не равно устранению повторных сочетаний одного платежа; предварительно агрегируют каждую независимую ветвь."
+      },
+      {
+        "level": "medium",
+        "substation": "windows",
+        "theoryRefs": [
+          "sql-window-peers"
+        ],
+        "q": "В наборе только два события на минуте 600 с суммами 10 и 20. SUM(amount) OVER (ORDER BY at_minute) использует рамку по умолчанию. Какие итоги у этих двух событий?",
+        "options": [
+          "Обязательно 10 у первого id и 30 у второго",
+          "Одну строку с суммой 30 вместо двух событий",
+          "30 у каждого: рамка включает всю текущую группу равных"
+        ],
+        "answer": 2,
+        "why": "При этом ORDER BY события равны. Рамка по умолчанию доходит до конца группы равных; окно сохраняет обе исходные строки."
+      },
+      {
+        "level": "medium",
+        "substation": "windows",
+        "theoryRefs": [
+          "sql-window-peers"
+        ],
+        "q": "Почему внешний ORDER BY id не делает порядок равных событий внутри окна ORDER BY at_minute однозначным?",
+        "options": [
+          "Потому что id нельзя использовать в SQL-сортировке",
+          "Он упорядочивает готовый результат, а не меняет порядок вычисленного окна",
+          "Потому что любая оконная функция удаляет id"
+        ],
+        "answer": 1,
+        "why": "Для однозначной построчной рамки нужен достаточный порядок внутри OVER. Внешняя сортировка показывает уже рассчитанные значения."
       }
     ],
     "advanced": [
@@ -1458,6 +1631,66 @@ window.STATION_DATA = {
         "answer": 0,
         "why": "Курсор задаёт условие над текущими ключами, а не хранит старые положения строк. Для стабильного обхода изменяемых данных нужен дополнительный договор снимка или ограничений на изменения.",
         "level": "hard"
+      },
+      {
+        "level": "hard",
+        "substation": "aggregation",
+        "theoryRefs": [
+          "sql-join-multiplication"
+        ],
+        "q": "В исправленном отчёте задачи и платежи сначала группируются независимо. Борису добавили один платёж 50, задач у него по-прежнему нет. Что вернёт его строка?",
+        "options": [
+          "Борис исчезнет: для JOIN всегда нужна задача",
+          "0 задач, 0 платежей и 0: одна отсутствующая ветвь обнуляет все",
+          "0 задач, 1 платёж, сумма 50"
+        ],
+        "answer": 2,
+        "why": "LEFT JOIN каждой сводки независимо сохраняет пользователя. Отсутствие сводки задач даёт NULL только в её полях; COALESCE превращает этот счётчик в 0, не отменяя платежи другой ветви."
+      },
+      {
+        "level": "hard",
+        "substation": "aggregation",
+        "theoryRefs": [
+          "sql-join-multiplication"
+        ],
+        "q": "После двух независимых JOIN COUNT(DISTINCT task_id) и COUNT(DISTINCT payment_id) исправили числа сущностей, но SUM(amount) всё ещё удвоена. Как обосновать исправление?",
+        "options": [
+          "Привести каждую независимую ветвь к одной строке на владельца до соединения",
+          "Добавить DISTINCT к итоговому SELECT после уже выполненного SUM",
+          "Заменить SUM(amount) на SUM(DISTINCT amount), даже если разные платежи равны"
+        ],
+        "answer": 0,
+        "why": "Нужно восстановить правильный набор суммируемых фактов. Предварительная агрегация отделяет одну сумму владельца от сочетаний с его задачами; равные суммы разных платежей сохраняются."
+      },
+      {
+        "level": "hard",
+        "substation": "windows",
+        "theoryRefs": [
+          "sql-window-peers"
+        ],
+        "q": "У событий (600,id1,10), (600,id2,20), (601,id3,5) оба окна сортируют по at_minute,id. Первое использует рамку по умолчанию, второе ROWS от начала до текущей строки. Что получится?",
+        "options": [
+          "Первое: 30,30,35; второе: 10,30,35 при тех же полных ключах",
+          "Оба дадут 10,30,35: уникальный полный ключ исключил равных соседей",
+          "Оба вернут одну строку 35, как GROUP BY"
+        ],
+        "answer": 1,
+        "why": "RANGE по умолчанию доходит до конца группы равных. По полному ключу at_minute,id каждая такая группа состоит из одной строки, поэтому выбранные RANGE и ROWS совпадают."
+      },
+      {
+        "level": "hard",
+        "substation": "windows",
+        "theoryRefs": [
+          "sql-window-peers"
+        ],
+        "q": "В одном разделе суммы событий в однозначном порядке равны 10,20,5. LAST_VALUE с рамкой ROWS от начала до текущей строки и с рамкой до конца раздела дадут что?",
+        "options": [
+          "Оба: 20,20,20, поскольку последнее значит максимальное",
+          "Первое: 5,5,5; второе: 10,20,5",
+          "Первое: 10,20,5; второе: 5,5,5"
+        ],
+        "answer": 2,
+        "why": "LAST_VALUE выбирает значение последней строки рамки, а не максимум и не обязательно конец раздела. В первом окне это текущая строка, во втором — событие с суммой 5."
       }
     ]
   },
@@ -1599,6 +1832,31 @@ window.STATION_DATA = {
       "notes": "Выполни в SQL-тренажёре. Все команды одного эксперимента вводи в одном запуске: следующий запуск восстанавливает данные.",
       "level": "Практика",
       "solutionFormat": "text"
+    },
+    {
+      "level": "Практика",
+      "title": "Лаборатория: две сводки и равное время событий",
+      "substation": "windows",
+      "theoryRefs": [
+        "sql-join-multiplication",
+        "sql-window-peers"
+      ],
+      "brief": "Напиши два запроса на данных ниже. Первый: одна строка на пользователя с числом задач, числом платежей и общей суммой; Борис должен остаться с нулями. Второй: для каждого события покажи сумму нарастающим итогом в порядке at_minute,id и значение amount последнего события всего раздела. Сначала предскажи ответы, затем выполни код подготовки и свои запросы в одном запуске. После этого добавь Борису только платёж, не добавляя задач, и проверь независимость сводок.",
+      "code": "CREATE TABLE join_demo_users (id integer PRIMARY KEY, name text NOT NULL);\nCREATE TABLE join_demo_tasks (\n    id integer PRIMARY KEY,\n    owner_id integer NOT NULL REFERENCES join_demo_users(id)\n);\nCREATE TABLE join_demo_payments (\n    id integer PRIMARY KEY,\n    owner_id integer NOT NULL REFERENCES join_demo_users(id),\n    amount integer NOT NULL CHECK (amount >= 0)\n);\nINSERT INTO join_demo_users VALUES (1, 'Анна'), (2, 'Борис');\nINSERT INTO join_demo_tasks VALUES (10, 1), (11, 1);\nINSERT INTO join_demo_payments VALUES\n    (101, 1, 100), (102, 1, 100), (103, 1, 300);\n\n-- Первый запрос напиши здесь.\n-- Отдельный набор для второго запроса:\nWITH events(id, owner_id, at_minute, amount) AS (\n    VALUES (1, 1, 600, 10), (2, 1, 600, 20), (3, 1, 601, 5)\n)\nSELECT * FROM events ORDER BY at_minute, id;\n-- Замени этот SELECT вторым запросом с окнами.\n-- WITH действует только на свой запрос; не отделяй его точкой с запятой от SELECT.",
+      "hints": [
+        "Сначала получи отдельные сводки задач и платежей по owner_id; затем присоедини их к пользователям.",
+        "Для однозначного итога по событиям порядок at_minute,id должен быть внутри OVER, не только в конце SELECT.",
+        "Последнее значение раздела требует рамки до UNBOUNDED FOLLOWING, а не MAX(amount)."
+      ],
+      "solutionFormat": "code",
+      "solution": "-- Выполни вместе с CREATE/INSERT из условия в одном запуске.\nSELECT u.id, u.name,\n       COALESCE(tc.task_count, 0) AS task_count,\n       COALESCE(pc.payment_count, 0) AS payment_count,\n       COALESCE(pc.paid, 0) AS paid\nFROM join_demo_users AS u\nLEFT JOIN (\n    SELECT owner_id, COUNT(*) AS task_count\n    FROM join_demo_tasks GROUP BY owner_id\n) AS tc ON tc.owner_id = u.id\nLEFT JOIN (\n    SELECT owner_id, COUNT(*) AS payment_count, SUM(amount) AS paid\n    FROM join_demo_payments GROUP BY owner_id\n) AS pc ON pc.owner_id = u.id\nORDER BY u.id;\n\nWITH events(id, owner_id, at_minute, amount) AS (\n    VALUES (1, 1, 600, 10), (2, 1, 600, 20), (3, 1, 601, 5)\n)\nSELECT id,\n       SUM(amount) OVER (\n           PARTITION BY owner_id ORDER BY at_minute, id\n           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n       ) AS running_total,\n       LAST_VALUE(amount) OVER (\n           PARTITION BY owner_id ORDER BY at_minute, id\n           ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\n       ) AS partition_last\nFROM events\nORDER BY at_minute, id;",
+      "notes": "Ожидаемый отчёт: (1,Анна,2,3,500), (2,Борис,0,0,0). Окна: (1,10,5), (2,30,5), (3,35,5). После отдельного платежа Бориса на 50 его строка должна стать (2,Борис,0,1,50). Используй новую пустую учебную базу либо весь сценарий в одном запуске браузерного тренажёра; повторный запуск редактора создаёт новую базу. Движок не должен получать команды удаления рабочих данных. Это упражнение на результат SQL, не на нагрузку, индексы или транзакционную конкуренцию.",
+      "checks": [
+        "Каждый пользователь представлен один раз; суммы считаются по разным платежам, включая два одинаковых значения 100.",
+        "Отсутствие задач не удаляет существующие платежи пользователя из отчёта.",
+        "Оконный порядок однозначен внутри OVER, а последнее значение 5 не подменено максимумом 20.",
+        "Фактические строки совпали с предсказанными; ты объяснил промежуточные наборы, а не только отсутствие SQL-ошибки."
+      ]
     }
   ]
 };

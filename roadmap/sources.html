@@ -648,6 +648,15 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://timsong-cpp.github.io/cppwp/n4861/new.delete.placement" target="_blank" rel="noopener noreferrer">C++20: placement new</a> <span class="muted">— timsong-cpp.github.io</span></li>
 </ul>
 </details>
+<details><summary>Память одного запроса: арена, контейнеры и граница времени жизни · источников: 5</summary><p><a href="cpp_station3_stl_templates.html#section=request-memory-arena">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://timsong-cpp.github.io/cppwp/n4861/mem.res.monotonic.buffer" target="_blank" rel="noopener noreferrer">monotonic_buffer_resource: выделение, release и отсутствие эффекта deallocate</a> <span class="muted">— timsong-cpp.github.io</span></li>
+<li><a href="https://timsong-cpp.github.io/cppwp/n4861/mem.poly.allocator.class" target="_blank" rel="noopener noreferrer">polymorphic_allocator и конструирование элементов</a> <span class="muted">— timsong-cpp.github.io</span></li>
+<li><a href="https://timsong-cpp.github.io/cppwp/n4861/mem.res.global" target="_blank" rel="noopener noreferrer">null_memory_resource</a> <span class="muted">— timsong-cpp.github.io</span></li>
+<li><a href="https://cplusplus.github.io/LWG/issue3120" target="_blank" rel="noopener noreferrer">LWG 3120</a> <span class="muted">— cplusplus.github.io</span></li>
+<li><a href="https://eel.is/c++draft/mem.res.monotonic.buffer.mem" target="_blank" rel="noopener noreferrer">исправленная формулировка</a> <span class="muted">— eel.is</span></li>
+</ul>
+</details>
 <details><summary>Разбираем задачу целиком: самые частые коды ошибок · источников: 3</summary><p><a href="cpp_station3_stl_templates.html#section=frequency-final-workbook">Открыть раздел теории</a></p>
 <ul>
 <li><a href="https://timsong-cpp.github.io/cppwp/n4861/map.access" target="_blank" rel="noopener noreferrer">C++20: map::operator[]</a> <span class="muted">— timsong-cpp.github.io</span></li>
@@ -861,6 +870,14 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 </details>
 <details><summary>Символ проходит от объявления до загруженной программы · источников: 0</summary><p><a href="cpp_station5_build_tools.html#section=symbol-journey">Открыть раздел теории</a></p>
 <p class="muted">В этом разделе пока нет прямой внешней ссылки. У вводных маршрутов и итогов источники могут находиться в соответствующих тематических разделах.</p>
+</details>
+<details><summary>Бинарник существует, но до main не доходит: путь запуска по свидетельствам · источников: 4</summary><p><a href="cpp_station5_build_tools.html#section=loader-before-main">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/execve.2.html" target="_blank" rel="noopener noreferrer">execve(2): замена программы, ENOENT и ENOEXEC</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ld.so.8.html" target="_blank" rel="noopener noreferrer">ld.so(8): зависимости, RUNPATH, ORIGIN и режимы безопасности</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://sourceware.org/binutils/docs/binutils/readelf.html" target="_blank" rel="noopener noreferrer">GNU readelf</a> <span class="muted">— sourceware.org</span></li>
+<li><a href="https://sourceware.org/binutils/docs/ld/Options.html" target="_blank" rel="noopener noreferrer">GNU ld: параметры линковки</a> <span class="muted">— sourceware.org</span></li>
+</ul>
 </details>
 <details><summary>ABI как контракт между уже собранными частями · источников: 4</summary><p><a href="cpp_station5_build_tools.html#section=abi-evolution">Открыть раздел теории</a></p>
 <ul>
@@ -1202,6 +1219,15 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://man7.org/linux/man-pages/man3/pthread_mutexattr_setpshared.3.html" target="_blank" rel="noopener noreferrer">POSIX mutex: межпроцессный атрибут</a> <span class="muted">— man7.org</span></li>
 </ul>
 </details>
+<details><summary>Два читателя и новое поколение файла: обновление без усечения · источников: 5</summary><p><a href="cpp_station5_linux_systems.html#section=linux-mapped-generations">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/mmap.2.html" target="_blank" rel="noopener noreferrer">mmap: срок жизни, MAP_FAILED и SIGBUS</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/stat.2.html" target="_blank" rel="noopener noreferrer">fstat: открытый объект вместо повторного поиска имени</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/rename.2.html" target="_blank" rel="noopener noreferrer">rename: замена имени</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/fsync.2.html" target="_blank" rel="noopener noreferrer">fsync: файл и каталог</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man3/mkdtemp.3.html" target="_blank" rel="noopener noreferrer">mkdtemp: новый приватный каталог</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
 <details><summary>Память под давлением: почему free не равно отсутствию проблемы · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-memory-pressure">Открыть раздел теории</a></p>
 <ul>
 <li><a href="https://docs.kernel.org/admin-guide/mm/concepts.html" target="_blank" rel="noopener noreferrer">Linux: reclaim, page cache и OOM</a> <span class="muted">— docs.kernel.org</span></li>
@@ -1228,6 +1254,13 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://docs.kernel.org/admin-guide/cgroup-v2.html" target="_blank" rel="noopener noreferrer">Linux: cgroup v2</a> <span class="muted">— docs.kernel.org</span></li>
 <li><a href="https://man7.org/linux/man-pages/man7/namespaces.7.html" target="_blank" rel="noopener noreferrer">namespaces(7)</a> <span class="muted">— man7.org</span></li>
 <li><a href="https://man7.org/linux/man-pages/man7/capabilities.7.html" target="_blank" rel="noopener noreferrer">capabilities(7)</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
+<details><summary>CPU свободен, а программа ждёт: квота и время запроса · источников: 3</summary><p><a href="cpp_station5_linux_systems.html#section=linux-cpu-quota-workbook">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://docs.kernel.org/admin-guide/cgroup-v2.html" target="_blank" rel="noopener noreferrer">cgroup v2: cpu.max, cpu.stat и иерархия</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://docs.kernel.org/scheduler/sched-bwc.html" target="_blank" rel="noopener noreferrer">Linux: bandwidth control, периоды и ограничения реализации</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html" target="_blank" rel="noopener noreferrer">affinity: допустимые CPU</a> <span class="muted">— man7.org</span></li>
 </ul>
 </details>
 <details><summary>Процесс как служба: запуск, журналы и доказательство причины · источников: 4</summary><p><a href="cpp_station5_linux_systems.html#section=linux-service-observation">Открыть раздел теории</a></p>
@@ -1496,6 +1529,16 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <ul>
 <li><a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.shared.const" target="_blank" rel="noopener noreferrer">C++20: копирование shared_ptr</a> <span class="muted">— timsong-cpp.github.io</span></li>
 <li><a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.atomic.shared" target="_blank" rel="noopener noreferrer">C++20: атомарный владелец снимка</a> <span class="muted">— timsong-cpp.github.io</span></li>
+</ul>
+</details>
+<details><summary>Выбираем архитектуру общего состояния: замок, снимок или один владелец · источников: 6</summary><p><a href="cpp_station6_multithreading.html#section=shared-state-architecture">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.atomic.shared" target="_blank" rel="noopener noreferrer">atomic&lt;shared_ptr&gt;: load/store и допустимые порядки</a> <span class="muted">— timsong-cpp.github.io</span></li>
+<li><a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.atomic" target="_blank" rel="noopener noreferrer">атомарная замена и последующее освобождение</a> <span class="muted">— timsong-cpp.github.io</span></li>
+<li><a href="https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.shared.const" target="_blank" rel="noopener noreferrer">совместное владение shared_ptr</a> <span class="muted">— timsong-cpp.github.io</span></li>
+<li><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rconc-data" target="_blank" rel="noopener noreferrer">CP.3: сокращать разделяемые изменяемые данные</a> <span class="muted">— isocpp.github.io</span></li>
+<li><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rconc-unknown" target="_blank" rel="noopener noreferrer">CP.22: неизвестный код под замком</a> <span class="muted">— isocpp.github.io</span></li>
+<li><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rconc-time" target="_blank" rel="noopener noreferrer">CP.43: время критической секции</a> <span class="muted">— isocpp.github.io</span></li>
 </ul>
 </details>
 <details><summary>Асинхронный логгер: сообщения, ожидание и остановка · источников: 2</summary><p><a href="cpp_station6_multithreading.html#section=async-logger-workbook">Открыть раздел теории</a></p>
@@ -2785,6 +2828,13 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://www.postgresql.org/docs/18/functions-aggregate.html" target="_blank" rel="noopener noreferrer">PostgreSQL 18: агрегаты</a> <span class="muted">— www.postgresql.org</span></li>
 </ul>
 </details>
+<details><summary>Две задачи и три платежа: откуда в отчёте шесть строк · источников: 3</summary><p><a href="cpp_station9_sql.html#section=sql-join-multiplication">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.postgresql.org/docs/18/queries-table-expressions.html" target="_blank" rel="noopener noreferrer">PostgreSQL 18: образование пар JOIN, группировка и производные таблицы</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/functions-aggregate.html" target="_blank" rel="noopener noreferrer">COUNT и SUM</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/sql-expressions.html#SYNTAX-AGGREGATES" target="_blank" rel="noopener noreferrer">DISTINCT внутри агрегата</a> <span class="muted">— www.postgresql.org</span></li>
+</ul>
+</details>
 <details><summary>Подзапрос: ответ на вопрос внутри другого вопроса · источников: 1</summary><p><a href="cpp_station9_sql.html#section=sql-exists">Открыть раздел теории</a></p>
 <ul>
 <li><a href="https://www.postgresql.org/docs/18/functions-subquery.html" target="_blank" rel="noopener noreferrer">Документация PostgreSQL 18</a> <span class="muted">— www.postgresql.org</span></li>
@@ -2804,6 +2854,12 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <details><summary>Размер группы и накопительный результат · источников: 1</summary><p><a href="cpp_station9_sql.html#section=sql-window-frame">Открыть раздел теории</a></p>
 <ul>
 <li><a href="https://www.postgresql.org/docs/18/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS" target="_blank" rel="noopener noreferrer">Документация PostgreSQL 18</a> <span class="muted">— www.postgresql.org</span></li>
+</ul>
+</details>
+<details><summary>Равное время событий: чем рамка отличается от порядка · источников: 2</summary><p><a href="cpp_station9_sql.html#section=sql-window-peers">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.postgresql.org/docs/18/functions-window.html" target="_blank" rel="noopener noreferrer">группы равных, LAST_VALUE и рамка по умолчанию</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS" target="_blank" rel="noopener noreferrer">точное значение RANGE, ROWS и границ рамки</a> <span class="muted">— www.postgresql.org</span></li>
 </ul>
 </details>
 <details><summary>Страницы, время и повторная запись · источников: 3</summary><p><a href="cpp_station9_sql.html#section=sql-backend-boundaries">Открыть раздел теории</a></p>

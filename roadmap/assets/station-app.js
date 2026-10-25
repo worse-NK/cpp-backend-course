@@ -90,6 +90,11 @@
   // These references are editorial priorities, not a second question bank.
   function assessmentPriorityRefs(stationId) {
     var refs = {
+      station3: ["request-memory-arena"],
+      station5: ["loader-before-main"],
+      "station5-linux": ["linux-mapped-generations", "linux-cpu-quota-workbook"],
+      station6: ["shared-state-architecture"],
+      "station9-sql": ["sql-join-multiplication", "sql-window-peers"],
       station7: ["private-public-addresses", "dhcp-network-config",
         "linux-packet-to-handler", "server-queues-two-bottlenecks", "load-balancing-connections-requests"],
       station8: ["request-execution-workbook", "architecture-boundaries",
@@ -101,8 +106,24 @@
     return (refs[stationId] || []).slice();
   }
 
+  function assessmentFinalBudgets(stationId) {
+    // 5Б keeps its complete original bank reachable. The extra memory case
+    // needs the last slot more than strace, which remains in its checkpoint.
+    // Exact IDs leave the C++ build station and all other tracks unchanged.
+    return stationId === "station5-linux" ? {
+      "os-boundary": 4, processes: 4, descriptors: 4,
+      "files-storage": 4, memory: 5, "signals-limits": 4
+    } : null;
+  }
+
+  function assessmentCheckpointRefs(stationId) {
+    // Both new basic cases per 5Б topic are already in its final. Keep the
+    // three old short checks instead of hiding them behind those additions.
+    return stationId === "station5-linux" ? [] : assessmentPriorityRefs(stationId);
+  }
+
   // Stable, balanced station-wide selection. Source banks remain untouched.
-  function finalQuestions(bank, modules, limit, preferCoverage, priorityRefs) {
+  function finalQuestions(bank, modules, limit, preferCoverage, priorityRefs, moduleBudgets) {
     // Editorial exclusions from the final exam only: these remain in chapter
     // checkpoints and source banks, but repeat a skill already tested here.
     var repeatedStems = [
@@ -148,10 +169,14 @@
       });
       return representatives.concat(remainder);
     });
-    var selected = [], covered = new Set();
-    while (selected.length < limit && buckets.some(function (bucket) { return bucket.length; })) {
-      buckets.forEach(function (bucket) {
-        if (!bucket.length || selected.length >= limit) return;
+    var selected = [], covered = new Set(), moduleCounts = modules.map(function () { return 0; });
+    function available(bucket, index) {
+      var budget = moduleBudgets && moduleBudgets[modules[index].id];
+      return bucket.length && (budget === undefined || budget === null || moduleCounts[index] < budget);
+    }
+    while (selected.length < limit && buckets.some(available)) {
+      buckets.forEach(function (bucket, moduleIndex) {
+        if (!available(bucket, moduleIndex) || selected.length >= limit) return;
         // Within each chapter, prefer a rule not already tested. Keep the
         // basic/advanced order as the stable tie-breaker, not random sampling.
         var index = preferCoverage ? bucket.findIndex(function (question) {
@@ -159,6 +184,7 @@
         }) : 0;
         var question = bucket.splice(index < 0 ? 0 : index, 1)[0];
         selected.push(question);
+        moduleCounts[moduleIndex]++;
         (question.theoryRefs || []).forEach(function (ref) { covered.add(ref); });
       });
     }
@@ -819,13 +845,14 @@
     var activeTasks = tasks.filter(isPracticeTask);
     var analysisTasks = tasks.filter(function (task) { return !isPracticeTask(task); });
     var priorityRefs = assessmentPriorityRefs(meta.id);
-    var activeQuizzes = { basic: finalQuestions(quizzes, substations, 25, meta.number <= 4, priorityRefs), interview: quizzes.interview || [] };
-    var checkpointQuestions = chapterQuestions(quizzes, activeSubstationId, priorityRefs);
+    var activeQuizzes = { basic: finalQuestions(quizzes, substations, 25, meta.number <= 4, priorityRefs, assessmentFinalBudgets(meta.id)), interview: quizzes.interview || [] };
+    var checkpointQuestions = chapterQuestions(quizzes, activeSubstationId, assessmentCheckpointRefs(meta.id));
     var workedSections = theory.filter(function (section) { return /(?:-final-workbook|clock-worked-example)$/.test(section.id); });
     var doneSections = theory.filter(function (item) { return store["sec:" + item.id]; }).length;
     var doneActiveSections = activeTheory.filter(function (item) { return store["sec:" + item.id]; }).length;
 
     function quizStoreKey(kind) {
+      if (["station3", "station5", "station5-linux", "station6", "station9-sql"].indexOf(meta.id) >= 0) return "station-final:systems-depth-20261025:v1:" + kind;
       if (["station7", "station8", "station9", "station10"].indexOf(meta.id) >= 0) return "station-final:architecture-20261025:v1:" + kind;
       if (meta.id === "station7-netlab") return "station-final:netlab-20261021:v1:" + kind;
       if (meta.number === 7 && (kind === "basic" || kind === "interview")) return "station-final:network-foundation-20261021:v1:" + kind;
