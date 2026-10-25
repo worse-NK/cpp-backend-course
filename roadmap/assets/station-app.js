@@ -568,7 +568,7 @@
       h("h2", null, choice.title),
       h("p", null, choice.text),
       h("div", { className: "quiz-choice-meta" },
-        h("span", null, props.quizzes[choice.id].length + " вопросов"),
+        h("span", null, "Вопросов: " + props.quizzes[choice.id].length),
         h("span", { className: choice.result ? "quiz-choice-score" : "" }, scoreText(choice.result))));
     }));
   }
@@ -886,7 +886,7 @@
           h("button", { type: "button", "aria-pressed": !textSizeState[0], onClick: function () { setLargeText(false); } }, "Обычный"),
           h("button", { type: "button", "aria-pressed": textSizeState[0], onClick: function () { setLargeText(true); } }, "Крупнее")),
         location.protocol === "file:" ? h("div", { className: "file-warning" }, "Страница открыта как файл. Для надёжной загрузки React и сохранения прогресса запусти roadmap через локальный HTTP-сервер.") : null,
-        h("p", { className: "reading-progress" }, "Отмечено изученным: " + doneSections + " из " + theory.length + " разделов")),
+        h("p", { className: "reading-progress" }, "Изученные разделы: " + doneSections + " / " + theory.length)),
       hasSubstations ? h(SubstationNav, { items: substations, active: activeSubstationId, selected: selectedSectionId, view: tab, store: store, onChoose: chooseSubstation, onNavigate: navigateSection, onCheckpoint: function (id) { openPage("checkpoint", id); }, onPage: openPage }) : null,
       (tab === "quiz" || tab === "interview" || tab === "tasks" || (tab === "theory" && selectedWorkbook)) ? h("button", { className: "ghost", onClick: function () { openPage("final"); } }, "← Завершение станции") : null,
       tab === "theory" && data.readingOrder ? h("div", { className: "section-actions", "aria-label": "Порядок чтения" },
@@ -895,7 +895,7 @@
       tab === "theory" ? h(Theory, { key: (activeSubstationId || "all") + ":" + selectedSectionId, sections: activeTheory, initialSectionId: selectedSectionId, readingOrder: routeMode ? data.readingOrder : null, onNavigate: navigateSection, onComplete: function () { if (selectedWorkbook) openPage("quiz"); else openPage("checkpoint", activeSubstationId); }, store: store, toggleSection: function (id) { var change = {}; change["sec:" + id] = !store["sec:" + id]; updateStore(change); } }) : null,
       (tab === "quiz" || tab === "interview") ? h("section", null,
         h("h2", null, tab === "quiz" ? "Итоговый тест по станции" : "Интервью-тренажёр"),
-        tab === "quiz" && analysisTasks.length ? h("div", { className: "assessment-extra" }, h("p", null, "Дополнительно: " + analysisTasks.length + " вопросов с самостоятельным ответом и разбором. Это бывшие аналитические задания; их подсказки и решения сохранены."), h("button", { className: "secondary", onClick: function () { openPage("analysis"); } }, "Открыть вопросы с разбором →")) : null,
+        tab === "quiz" && analysisTasks.length ? h("div", { className: "assessment-extra" }, h("p", null, "Дополнительно — вопросы с самостоятельным ответом и разбором: " + analysisTasks.length + ". Попробуй ответить самостоятельно, потом открой подсказки и решение."), h("button", { className: "secondary", onClick: function () { openPage("analysis"); } }, "Открыть вопросы с разбором →")) : null,
         h(Quiz, { key: tab, hideBack: true, kind: tab === "quiz" ? "basic" : "interview", questions: tab === "quiz" ? activeQuizzes.basic : activeQuizzes.interview, onSave: function (score, total) {
           var change = {}; change[quizStoreKey(tab === "quiz" ? "basic" : "interview")] = { score: score, total: total, at: new Date().toISOString() }; updateStore(change);
         } }),
@@ -912,7 +912,7 @@
         h("div", { className: "finale-grid" },
           h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "01 · РАЗБОР"), h("h3", null, "Задача с объяснением"), workedSections.map(function (section) { return h("button", { className: "secondary", key: section.id, onClick: function () { navigateSection(section.id); } }, section.title); })),
           h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "02 · ПРОВЕРКА"), h("h3", null, "Итоговый тест"), h("p", null, activeQuizzes.basic.length + " вопросов по темам всей станции с объяснением ответов."), h("button", { className: "secondary", onClick: function () { openPage("quiz"); } }, "Открыть итоговый тест →")),
-          h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "03 · СОБЕСЕДОВАНИЕ"), h("h3", null, "Интервью-тренажёр"), h("p", null, activeQuizzes.interview.length + " вопросов для подготовки к собеседованию. Прежде чем выбирать ответ, попробуй объяснить решение вслух."), h("button", { className: "secondary", onClick: function () { openPage("interview"); } }, "Открыть интервью-тренажёр →")),
+          h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "03 · СОБЕСЕДОВАНИЕ"), h("h3", null, "Интервью-тренажёр"), h("p", null, "Вопросов для подготовки к собеседованию: " + activeQuizzes.interview.length + ". Прежде чем выбирать ответ, попробуй объяснить решение вслух."), h("button", { className: "secondary", onClick: function () { openPage("interview"); } }, "Открыть интервью-тренажёр →")),
           h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "04 · ПРИМЕНЕНИЕ"), h("h3", null, "Практика"), h("p", null, "Задачи из открытых курсов, лабораторные и LeetCode по теме станции. Вопросы на предсказание вывода перенесены к тестам."), h("button", { className: "secondary", onClick: function () { openPage("tasks"); } }, "Перейти к заданиям →")))) : null,
       tab === "analysis" ? h("section", null, h("h2", null, "Вопросы с разбором"), h("p", { className: "notes" }, "Ответь своими словами до открытия подсказок. Эти вопросы не входят в оценку итогового теста на 25 вопросов."), h("button", { className: "ghost", onClick: function () { openPage("quiz"); } }, "← К итоговому тесту"), analysisTasks.length ? h(Tasks, { key: "analysis", tasks: analysisTasks }) : null) : null,
       tab === "tasks" ? h("section", null, h(PracticeLinks), activeTasks.length ? h("div", null, h("h3", null, "Задачи учебника"), h(Tasks, { key: "station-practice", tasks: activeTasks })) : null) : null,
