@@ -2,6 +2,14 @@
   'use strict';
   var chapters = Array.from(document.querySelectorAll('.workshop-chapter'));
   var links = Array.from(document.querySelectorAll('.workshop-contents nav a'));
+  var contents = document.getElementById('workshop-contents');
+  var compact = window.matchMedia ? window.matchMedia('(max-width: 780px)') : null;
+  if (contents && compact) {
+    contents.open = !compact.matches;
+    if (compact.addEventListener) compact.addEventListener('change', function () {
+      contents.open = !compact.matches;
+    });
+  }
   var lastId = null;
   function selectChapter() {
     var id;
@@ -19,6 +27,7 @@
       else link.removeAttribute('aria-current');
     });
     document.title = chapter.querySelector('h1').textContent + ' · Свой C++-сервис';
+    if (contents && compact && compact.matches) contents.open = false;
     if (lastId !== null && lastId !== chapter.id) {
       chapter.focus({preventScroll: true});
       window.scrollTo({top: 0, behavior: 'instant'});
