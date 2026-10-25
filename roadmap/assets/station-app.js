@@ -184,6 +184,7 @@
     if (meta.id === "station9-sql") entries = [["PostgreSQL · официальный практикум SQL", "https://www.postgresql.org/docs/18/tutorial-sql.html", "Для локальной практики PostgreSQL пройди таблицы, запросы и агрегаты. Встроенные задания этой станции можно решать в SQL-тренажёре; транзакционная лабораторная относится к следующей станции 9B."]];
     return h("section", { className: "practice-links" }, h("h2", null, "Практика"),
       h("p", { className: "section-lead" }, "Здесь нужно самостоятельно построить решение, а не выбрать готовый ответ."),
+      ["station8", "station9", "station10"].indexOf(meta.id) >= 0 ? h(ServiceWorkshopEntry) : null,
       entries.length ? h("div", null,
         h("p", { className: "notes" }, "Внешняя практика: LeetCode, открытые курсы и лабораторные. У каждой задачи указаны границы и способ работы. Материалы преимущественно на английском; часть требует локального компилятора, а платформы могут попросить вход."),
         entries.map(function (entry) { return h("article", { className: "finale-item", key: entry[1] },
@@ -321,6 +322,17 @@
       h("small", null, "В новой вкладке · возврат к этому разделу внутри лаборатории"));
   }
 
+  function ServiceWorkshopEntry() {
+    var stage = { station8: "local", station9: "database", station10: "vm" }[meta.id];
+    if (!stage) return null;
+    return h("aside", { className: "course-lab-entry", "aria-label": "Сквозной серверный практикум" },
+      h("span", { className: "course-lab-eyebrow" }, "РЕАЛЬНЫЙ ПРОЕКТ · ЛОКАЛЬНО И НА LINUX-VM"),
+      h("h3", null, "Свой C++-сервис: от localhost до сервера"),
+      h("p", null, "Пошаговый маршрут с исходниками: сборка API, запросы curl, PostgreSQL, Docker Compose, SSH-туннель и необязательный VPS/HTTPS. У каждой команды указано место выполнения."),
+      h("a", { href: "service_workshop.html#" + stage, target: "_blank", rel: "noopener noreferrer" }, "Открыть практикум ↗"),
+      h("small", null, "Нужен свой Linux-терминал · команды не исполняются в браузере · возвращайся к этапам по мере прохождения станций 8–10"));
+  }
+
   function SubstationNav(props) {
     var contentsState = useState(function () { return window.matchMedia("(min-width: 1001px)").matches; });
     var searchState = useState("");
@@ -393,6 +405,7 @@
       })),
       h("nav", { className: "contents-ending", "aria-label": "Завершение станции" },
         h("button", { "aria-current": props.view === "final" ? "page" : undefined, onClick: function () { props.onPage("final"); } }, "Завершение станции")),
+      ["station8", "station9", "station10"].indexOf(meta.id) >= 0 ? h("a", { href: "service_workshop.html#" + ({station8:"local", station9:"database", station10:"vm"}[meta.id]), className: "contents-all-labs", target: "_blank", rel: "noopener noreferrer" }, "Свой сервер · сквозной практикум ↗") : null,
       h("a", { href: "visual_labs.html", className: "contents-all-labs" }, "Все визуальные лаборатории →"),
       h("a", { href: "glossary.html", className: "contents-all-labs", target: "_blank", rel: "noopener" }, "Глоссарий терминов ↗"));
   }
@@ -488,6 +501,7 @@
           }
           return null;
         }),
+        ((meta.id === "station8" && section.id === "httplib-example") || (meta.id === "station9" && section.id === "cpp-storage") || (meta.id === "station10" && section.id === "docker-network-data")) ? h(ServiceWorkshopEntry) : null,
         h("div", { className: "section-actions" },
           h("button", {
             className: "primary" + (props.store["sec:" + section.id] ? " done" : ""),

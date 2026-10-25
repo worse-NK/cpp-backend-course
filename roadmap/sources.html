@@ -2980,4 +2980,48 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <details><summary>Разбираем задачу целиком: ограниченный приём и мягкая остановка · источников: 0</summary><p><a href="cpp_station10_production.html#section=gate-final-workbook">Открыть раздел теории</a></p>
 <p class="muted">В этом разделе пока нет прямой внешней ссылки. У вводных маршрутов и итогов источники могут находиться в соответствующих тематических разделах.</p>
 </details>
-</main></html>
+<section id="service-workshop"><h2>Сквозной серверный практикум</h2><p>Ссылки для воспроизведения команд: версии библиотек и ограничения учебного стенда указаны в самом практикуме. Проверка локального приложения и PostgreSQL не означает, что инструкция была развёрнута на публичном VPS.</p>
+<h3><a href="service_workshop.html#start">Сначала — карта</a></h3><ul>
+<li><a href="https://docs.docker.com/engine/install/ubuntu/">официальной инструкции для Ubuntu</a></li>
+<li><a href="https://cmake.org/cmake/help/latest/manual/cmake.1.html">CMake: configure, build, test</a></li>
+<li><a href="https://docs.docker.com/engine/install/linux-postinstall/">Docker: права на daemon</a></li>
+<li><a href="https://docs.docker.com/engine/network/port-publishing/">Docker: публикация портов и ограничения старых версий</a></li>
+</ul>
+<h3><a href="service_workshop.html#local">Запускаем локально</a></h3><ul>
+<li><a href="https://github.com/yhirose/cpp-httplib/tree/v0.59.0">cpp-httplib 0.59.0</a></li>
+<li><a href="https://github.com/nlohmann/json/tree/v3.12.0">nlohmann/json 3.12.0</a></li>
+<li><a href="https://cmake.org/cmake/help/latest/module/FetchContent.html">CMake FetchContent</a></li>
+<li><a href="https://curl.se/docs/manpage.html">curl: config, include и ограничения времени</a></li>
+<li><a href="https://man7.org/linux/man-pages/man7/ip.7.html">Linux ip(7): loopback и адрес привязки</a></li>
+</ul>
+<h3><a href="service_workshop.html#http">Работаем с API</a></h3><ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-13.1.1">RFC 9110: If-Match</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc6585.html#section-3">RFC 6585: 428</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8259.html">RFC 8259: JSON</a></li>
+</ul>
+<h3><a href="service_workshop.html#database">Добавляем PostgreSQL</a></h3><ul>
+<li><a href="https://docs.docker.com/compose/how-tos/networking/">Compose: имена сервисов, сети и порты</a></li>
+<li><a href="https://docs.docker.com/compose/how-tos/startup-order/">Compose: running не равно ready</a></li>
+<li><a href="https://docs.docker.com/reference/cli/docker/compose/down/">Compose down и volumes</a></li>
+<li><a href="https://hub.docker.com/_/postgres">Официальный образ PostgreSQL: init-скрипты и PGDATA 18+</a></li>
+<li><a href="https://www.postgresql.org/docs/18/sql-grant.html">PostgreSQL GRANT</a></li>
+</ul>
+<h3><a href="service_workshop.html#vm">Переносим на Linux-VM</a></h3><ul>
+<li><a href="https://man.openbsd.org/ssh.1">OpenSSH ssh(1): -L, -N, host authentication</a></li>
+<li><a href="https://man.openbsd.org/ssh_config.5#ExitOnForwardFailure">OpenSSH: ExitOnForwardFailure и его границы</a></li>
+<li><a href="https://man.openbsd.org/scp.1">OpenSSH scp(1)</a></li>
+</ul>
+<h3><a href="service_workshop.html#vps">Необязательно: VPS и HTTPS</a></h3><ul>
+<li><a href="https://caddyserver.com/docs/automatic-https">Caddy: автоматический HTTPS, требования и ACME</a></li>
+<li><a href="https://caddyserver.com/docs/caddyfile/directives/reverse_proxy">Caddy reverse_proxy</a></li>
+<li><a href="https://docs.docker.com/engine/network/packet-filtering-firewalls/#docker-and-ufw">Docker и UFW</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc5737.html">RFC 5737: адреса для документации</a></li>
+<li><a href="https://curl.se/docs/sslcerts.html">curl: проверка сертификатов</a></li>
+</ul>
+<h3><a href="service_workshop.html#operate">Проверяем и останавливаем</a></h3><ul>
+<li><a href="https://www.postgresql.org/docs/18/app-pgdump.html">PostgreSQL 18: pg_dump и логический снимок</a></li>
+<li><a href="https://www.postgresql.org/docs/18/app-pgrestore.html">PostgreSQL 18: pg_restore, доверие к архиву и транзакция</a></li>
+<li><a href="https://docs.docker.com/reference/cli/docker/compose/up/">Compose up: сборка, замена и ожидание</a></li>
+<li><a href="https://docs.docker.com/reference/cli/docker/compose/down/">Compose down: что удаляется и что сохраняется</a></li>
+</ul>
+</section></main></html>

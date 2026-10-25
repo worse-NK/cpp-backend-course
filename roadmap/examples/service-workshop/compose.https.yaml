@@ -1,0 +1,25 @@
+# Optional public HTTPS layer; enable only on a prepared server you control.
+# Does not remove the app's loopback-only diagnostic port from compose.yaml.
+services:
+  caddy:
+    image: caddy:2.11.7-alpine
+    restart: unless-stopped
+    environment:
+      COURSE_DOMAIN: ${COURSE_DOMAIN:?Set a real DNS name for your own server}
+      ACME_EMAIL: ${ACME_EMAIL:?Set your ACME contact email}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - edge
+
+volumes:
+  caddy_data:
+  caddy_config:

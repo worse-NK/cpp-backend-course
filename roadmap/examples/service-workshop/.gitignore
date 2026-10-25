@@ -1,0 +1,11 @@
+.env
+.env.*
+.secrets*/
+backups/
+*.dump
+build/
+build-*/
+__pycache__/
+*.pyc
+*.tar
+*.tar.gz

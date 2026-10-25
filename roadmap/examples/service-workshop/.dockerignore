@@ -1,0 +1,16 @@
+# Allowlist: local secrets, archives, VCS data and builds never enter context.
+**
+!CMakeLists.txt
+!app.cpp
+!storage*.cpp
+!storage*.hpp
+!Dockerfile
+.env
+.env.*
+.secrets*/
+backups/
+*.dump
+build/
+build-*/
+*.tar
+*.tar.gz

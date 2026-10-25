@@ -1,0 +1,16 @@
+{
+	email {$ACME_EMAIL}
+	admin off
+}
+
+{$COURSE_DOMAIN} {
+	request_body {
+		max_size 16KB
+	}
+	reverse_proxy app:8080 {
+		transport http {
+			dial_timeout 2s
+			response_header_timeout 5s
+		}
+	}
+}

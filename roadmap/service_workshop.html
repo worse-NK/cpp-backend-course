@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Свой C++-сервис: от localhost до Linux-сервера · Практикум</title>
+<meta name="description" content="Пошаговый практикум: C++ HTTP API, curl, PostgreSQL, Docker Compose, SSH, Linux-VM и необязательный HTTPS на VPS.">
+<link rel="stylesheet" href="assets/service-workshop.css?v=20261025"></head>
+<body><a class="skip-link" href="#workshop-main">К текущему шагу</a>
+<div class="workshop-layout"><aside class="workshop-sidebar"><a class="course-link" href="cpp_backend_roadmap.html">← C++ и backend</a>
+<p class="eyebrow">СКВОЗНАЯ ПРАКТИКА</p><p class="workshop-name">Один сервис.<br>Три среды.</p>
+<p class="sidebar-intro">От процесса на своём компьютере до сервиса на отдельной Linux-машине.</p>
+<details class="workshop-contents" open><summary>Маршрут практикума</summary><nav aria-label="Этапы практикума"><a href="#start"><span>01</span><span>Сначала — карта<small>Что и где запускается</small></span></a><a href="#local"><span>02</span><span>Запускаем локально<small>C++ · память процесса</small></span></a><a href="#http"><span>03</span><span>Работаем с API<small>curl · JSON · версии</small></span></a><a href="#database"><span>04</span><span>Добавляем PostgreSQL<small>Compose · контейнеры · данные</small></span></a><a href="#vm"><span>05</span><span>Переносим на Linux-VM<small>SSH · другая машина · туннель</small></span></a><a href="#vps"><span>06</span><span>Необязательно: VPS и HTTPS<small>Публичный адрес · домен · TLS</small></span></a><a href="#operate"><span>07</span><span>Проверяем и останавливаем<small>Сбои · резервная копия · уборка</small></span></a></nav></details>
+<div class="course-stations"><span>Опираемся на главы</span><a href="cpp_station8_rest_api.html">8 · HTTP API</a><a href="cpp_station9_databases.html">9B · PostgreSQL</a><a href="cpp_station10_production.html">10 · Эксплуатация</a></div>
+<a class="download-link" href="https://github.com/worse-NK/cpp-backend-course/tree/main/roadmap/examples/service-workshop">Файлы проекта на GitHub ↗</a>
+</aside><main id="workshop-main"><article class="workshop-chapter" id="start" tabindex="-1" aria-labelledby="start-title">
+<header class="chapter-header"><p class="eyebrow">ПРАКТИКУМ · ШАГ 1 ИЗ 7</p>
+<h1 id="start-title">Сначала — карта</h1><p class="lead">Не арендуем сервер и не открываем порты. Сначала договоримся о маршруте, инструментах и границах учебного проекта.</p></header>
+<h2>Что получится в конце</h2>
+<p>Сервер — слово с двумя значениями. <strong>Серверная программа</strong> принимает запросы и выдаёт ответы. <strong>Серверная машина</strong> — компьютер, на котором эта программа работает. Сначала обе стороны будут на твоём компьютере: <code>curl</code> выступит клиентом, а собранный C++-процесс — сервером. Позже программу перенесём на другую машину. Никакой особой «серверной версии C++» для этого не нужно.</p>
+<figure class="diagram">
+  <strong class="diagram-title">Три запуска одного проекта — не три разных API</strong>
+  <div class="topology">
+    <div class="node"><b>1. На своём компьютере</b><small>curl → C++-процесс<br>Задачи в оперативной памяти<br><code>127.0.0.1:8080</code></small></div>
+    <div class="connector" aria-hidden="true">→</div>
+    <div class="node"><b>2. С базой данных</b><small>curl → контейнер app → db<br>PostgreSQL и отдельный volume<br>Тот же адрес для клиента</small></div>
+    <div class="connector" aria-hidden="true">→</div>
+    <div class="node"><b>3. На Linux-VM</b><small>curl → SSH-туннель → app → db<br>Программа работает на другой ОС<br>Публичный HTTP не требуется</small></div>
+  </div>
+  <figcaption>Дополнительный этап — собственный VPS и домен с HTTPS. Он не нужен, чтобы выполнить основную практику и понять удалённую работу.</figcaption>
+</figure>
+<p>Проект называется <code>course_tasks</code>. Он хранит задачи с полями <code>id</code>, <code>title</code>, <code>done</code> и <code>version</code>. Мы не будем переписывать сервер после каждого этапа: один интерфейс хранилища имеет реализацию в памяти и реализацию для PostgreSQL. Так можно увидеть, где HTTP-контракт не зависит от места хранения, а где появляются новые отказы.</p>
+
+<h2>Когда проходить практикум</h2>
+<div class="table-scroll"><table><thead><tr><th>Этап</th><th>Что прочитать до него</th><th>Что проверить руками</th></tr></thead><tbody>
+<tr><td>Локальный запуск и API</td><td>Станции 5, 7 и 8</td><td>Процесс, порт, запрос, JSON, авторизация, конфликт версий.</td></tr>
+<tr><td>PostgreSQL и Compose</td><td>9A, 9B и разделы Docker в 10</td><td>Контейнерные адреса, права роли, сохранение данных после перезапуска.</td></tr>
+<tr><td>Linux-VM и эксплуатация</td><td>5Б, доступ по SSH в 7, станция 10</td><td>Удалённый запуск, туннель, резервная копия и восстановление.</td></tr>
+</tbody></table></div>
+<p>Это не дополнительная станция с новым обязательным экзаменом. Это место, где знания нескольких глав соединяются в одну работающую систему. Если пока изучена только станция 8, выполни первые три шага и вернись к остальным позже.</p>
+
+<h2>Среда, для которой написаны команды</h2>
+<p>Основной маршрут рассчитан на <strong>Ubuntu 24.04 LTS, Linux x86-64</strong> и обычный пользовательский аккаунт. Подойдёт отдельная VM (виртуальная машина — другая ОС, запущенная внутри твоего компьютера). В Windows можно использовать Ubuntu в WSL2 для локальных шагов. Перенос на отдельную VM всё равно полезен: он не даст случайно принять второй терминал той же ОС за другую машину. Нативные команды PowerShell и macOS здесь не обещаются.</p>
+<p>Для сборки нужны компилятор с C++20, CMake не ниже 3.24, Python 3.10+ и curl. Первый запуск скачивает закреплённые библиотеки по HTTPS. Для контейнерного этапа нужны настроенный Docker Engine и Compose v2. Используй поддерживаемую актуальную версию Engine не ниже 28: у старых версий были особенности доступности опубликованных на loopback портов. Практический ориентир для учебной VM — 2 виртуальных CPU, 4 ГБ RAM и не менее 10 ГБ свободного диска; это запас для сборки, не требование самого API.</p>
+<div class="command"><div class="command-place">Локальная Ubuntu · только если этих инструментов ещё нет</div><pre><code>sudo apt update
+sudo apt install build-essential cmake python3 curl git ca-certificates</code></pre></div>
+<p><code>sudo</code> выполняет установку с правами администратора. На рабочей машине сначала согласуй установку с её владельцем. Docker устанавливай по <a href="https://docs.docker.com/engine/install/ubuntu/">официальной инструкции для Ubuntu</a>, а не случайным скриптом из статьи. Доступ к Docker daemon практически равен административному доступу к машине; не добавляй себя в группу <code>docker</code>, считая это безобидным разрешением.</p>
+<div class="command"><div class="command-place">Локальная Ubuntu · проверка инструментов</div><pre><code>g++ --version
+cmake --version
+python3 --version
+curl --version
+git --version</code></pre></div>
+<p>Для следующего этапа будет ещё <code>docker compose version</code>. Если написано <code>command not found</code>, исправь установку соответствующего инструмента. Не продолжай копировать команды в надежде, что отсутствие зависимости «само пройдёт».</p>
+
+<h2>Правило подписи команд</h2>
+<p>У каждого блока указан компьютер и, где нужно, терминал. <strong>Локальный компьютер</strong> — место, с которого ты управляешь практикумом. <strong>Linux-VM/VPS</strong> — другая машина, куда входишь по SSH. Команда <code>docker compose exec db …</code> запускается в терминале хоста, но её последняя часть выполняется внутри контейнера <code>db</code>. Никакие команды со страницы не исполняются браузером.</p>
+<p>Связка <code>&amp;&amp;</code> между командами означает «выполни следующую только при успешном завершении предыдущей». Это защита от продолжения в неправильном каталоге или перезаписи после неудачной подготовки. Если блок остановился с ошибкой, разбирай её, а не убирай связку. Проверочные запросы с намеренно ошибочными статусами показываются отдельно.</p>
+<div class="callout warning"><p><strong>Пока всё доступно только локально.</strong> Не заменяй <code>127.0.0.1</code> на <code>0.0.0.0</code> в надежде «починить сеть». Не открывай 8080 или 5432 в роутере и облачном firewall (фильтре сетевых соединений). Публичный доступ разбирается отдельно, после проверок.</p></div>
+
+<h2>Граница учебного проекта</h2>
+<p>Здесь есть проверка JSON, случайный Bearer-токен (секрет, предъявление которого даёт доступ), лимит тела запроса и условные изменения по версии. Но один общий токен — <strong>не полноценная система пользователей и прав</strong>. Лимит очереди и таймауты — не исчерпывающая защита от перегрузки. PostgreSQL-реализация открывает соединение на операцию, а не демонстрирует промышленный пул соединений. Не размещай личные данные, реальные пароли пользователей и рабочую информацию в этом сервисе.</p>
+<p>Позже полезно будет заменить общий токен личностями и разрешениями, добавить миграции схемы, пул, метрики и отдельное управление секретами. Сначала нужно уверенно пройти базовый путь запроса и уметь объяснить каждое соединение. Сам факт аренды VPS не превращает учебный проект в промышленный.</p>
+<details class="explanation"><summary>Что действительно проверено в этом примере</summary><p>25 октября 2026 проверены сборка и тесты C++20, реальные HTTP-запросы к нативному процессу и контейнерному приложению с PostgreSQL 18, ошибки входа, одновременные изменения, лимит задач, остановка, перезапуски, отказ базы и восстановление данных из логической копии. Caddyfile проверен настоящим <code>caddy validate</code> в изолированном контейнере. Инструкции SSH и публичного размещения сверены с документацией, но развёртывание на отдельной пользовательской VM/VPS, реальный DNS и получение публичного сертификата в эту проверку не входили. Особенности твоего гипервизора, сети и провайдера нужно проверить отдельно.</p></details>
+<div class="stage-result"><h3>Перед следующим шагом</h3><ul class="checklist"><li>Понимаешь разницу между программой и машиной-сервером.</li><li>Есть Linux-окружение и инструменты; работа не требует root-запуска приложения.</li><li>Понимаешь, что сначала никто из интернета к API подключаться не должен.</li></ul></div>
+<section class="sources"><h3>На что опирается этап</h3><ul><li><a href="https://cmake.org/cmake/help/latest/manual/cmake.1.html">CMake: configure, build, test</a></li><li><a href="https://docs.docker.com/engine/install/linux-postinstall/">Docker: права на daemon</a></li><li><a href="https://docs.docker.com/engine/network/port-publishing/">Docker: публикация портов и ограничения старых версий</a></li></ul></section>
+
+<nav class="chapter-pagination" aria-label="Следующий этап"><a href="cpp_station8_rest_api.html#section=httplib-example">← К станции 8</a><a href="#local">Запускаем локально →</a></nav></article><article class="workshop-chapter" id="local" tabindex="-1" aria-labelledby="local-title">
+<header class="chapter-header"><p class="eyebrow">ПРАКТИКУМ · ШАГ 2 ИЗ 7</p>
+<h1 id="local-title">Запускаем локально</h1><p class="lead">Соберём настоящий HTTP-сервис, запустим его в одном терминале и обратимся к нему из другого.</p></header>
+<h2>1. Получаем исходники, не секреты</h2>
+<p>Открой терминал в каталоге, где можно создать новый учебный проект. Следующая команда создаст папку <code>cpp-course</code>. Если папка уже существует, выбери другое имя или используй свою ранее скачанную копию — не удаляй её наугад.</p>
+<div class="command"><div class="command-place">Локальный компьютер · новый каталог для курса</div><pre><code>git clone --depth 1 https://github.com/worse-NK/cpp-backend-course.git cpp-course &amp;&amp;
+cd cpp-course/roadmap/examples/service-workshop &amp;&amp;
+pwd</code></pre></div>
+<p>Последняя команда показывает текущий каталог. Его конец должен быть <code>/roadmap/examples/service-workshop</code>. Далее все локальные команды выполняются отсюда, если явно не указано другое. Если Git не нужен, можно скачать ZIP репозитория и открыть эту же вложенную папку после распаковки.</p>
+<div class="table-scroll"><table><thead><tr><th>Файл</th><th>За что отвечает</th></tr></thead><tbody>
+<tr><td><a href="examples/service-workshop/app.cpp">app.cpp</a></td><td>HTTP-маршруты, проверка запроса, ответ, настройки запуска.</td></tr>
+<tr><td><a href="examples/service-workshop/storage.hpp">storage.hpp</a>, <a href="examples/service-workshop/storage.cpp">storage.cpp</a></td><td>Операции с задачами: реализация в памяти и PostgreSQL.</td></tr>
+<tr><td><a href="examples/service-workshop/CMakeLists.txt">CMakeLists.txt</a>, <a href="examples/service-workshop/tests.cpp">tests.cpp</a></td><td>Повторяемая конфигурация сборки, закреплённые зависимости, тесты хранилища.</td></tr>
+<tr><td><a href="examples/service-workshop/lab.py">lab.py</a></td><td>Небольшой помощник: создать локальные секреты, проверить их наличие, запустить бинарник или упаковать исходники. Сам Docker и SSH он не запускает.</td></tr>
+<tr><td><a href="examples/service-workshop/compose.yaml">compose.yaml</a>, <a href="examples/service-workshop/schema.sql">schema.sql</a></td><td>Окружение с PostgreSQL. Понадобится на следующем этапе.</td></tr>
+</tbody></table></div>
+
+<h2>2. Создаём свои секреты</h2>
+<div class="command"><div class="command-place">Локальный компьютер · каталог service-workshop</div><pre><code>python3 lab.py init &amp;&amp;
+python3 lab.py check-env</code></pre></div>
+<p><code>init</code> один раз создаёт <code>.env</code> с тремя независимыми случайными секретами и <code>.secrets/client.curl</code> с заголовком авторизации для клиента. Каждый секрет содержит 64 шестнадцатеричных символа. Файлы доступны только владельцу (режим <code>0600</code>), каталог <code>.secrets</code> — только владельцу на чтение, запись и проход (<code>0700</code>). Помощник не печатает значения и не заменяет существующие файлы.</p>
+<p class="output-label">Ожидаемая проверка наличия, без значений</p><pre class="output">APP_TOKEN: present
+POSTGRES_PASSWORD: present
+APP_DB_PASSWORD: present</pre>
+<p>Для локального режима пока нужен только <code>APP_TOKEN</code>. Два других значения понадобятся базе: администратору PostgreSQL и отдельной роли приложения. Они не должны совпадать. Не отправляй <code>.env</code> и <code>client.curl</code> в Git, чат или скриншот. Не выполняй <code>source .env</code>: помощник сам читает только известные имена и проверяет формат, не исполняя содержимое как shell-код.</p>
+<details class="explanation"><summary>Если init пишет, что файл уже существует</summary><p>Это защита от случайной смены токена и паролей. Если ты уже выполнял шаг в этой копии, продолжай с <code>check-env</code>. Не удаляй файл ради повторного запуска: при существующей PostgreSQL смена текста в <code>.env</code> не меняет пароль внутри базы. Для независимого эксперимента создай отдельную копию проекта.</p></details>
+
+<h2>3. Собираем и проверяем</h2>
+<div class="command"><div class="command-place">Локальный компьютер · каталог service-workshop</div><pre><code>cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug &amp;&amp;
+cmake --build build --parallel 2 &amp;&amp;
+ctest --test-dir build --output-on-failure</code></pre></div>
+<p>Первая команда читает проект из текущего каталога (<code>-S .</code>) и создаёт отдельный каталог сборки <code>build</code>. Она скачивает cpp-httplib 0.59.0 и nlohmann/json 3.12.0: версии и SHA-256 архивов закреплены в CMake, чтобы другой архив не был молча принят. Вторая компилирует программу двумя параллельными заданиями. Третья запускает тесты. Итог сборки — <code>build/course_tasks</code>. Отключённая опция <code>COURSE_WITH_POSTGRES</code> означает, что сейчас не требуются заголовки libpq и работающая база.</p>
+<p>Если загрузка зависимости не удалась, проверь интернет, прокси и доверенные сертификаты. Не отключай проверку TLS или контроль хеша, чтобы «продавить» сборку. Ошибка компилятора — другой класс сбоя: сохрани первую содержательную ошибку, версии инструментов и точную команду. Предупреждения перед ней не всегда являются причиной.</p>
+
+<h2>4. Запускаем процесс</h2>
+<div class="command"><div class="command-place">Локальный компьютер · терминал A · оставить работающим</div><pre><code>python3 lab.py run</code></pre></div>
+<p>Помощник запускает собранный бинарник, передаёт токен и принудительно выбирает хранилище в памяти и <code>127.0.0.1:8080</code>. Терминал не возвращает приглашение, пока процесс работает. Это нормальное поведение: мы не запускали фоновую службу.</p>
+<figure class="diagram"><strong class="diagram-title">Что означает адрес прослушивания</strong><div class="topology">
+<div class="machine"><span>ОДНО LINUX-ОКРУЖЕНИЕ</span><div class="topology"><div class="node"><b>Терминал B: curl</b><small>Начинает TCP-соединение<br>с <code>127.0.0.1:8080</code></small></div><div class="connector" aria-hidden="true">HTTP<br>→</div><div class="node"><b>Терминал A: course_tasks</b><small>Слушает loopback:8080<br>Задачи в памяти процесса</small></div></div></div>
+<div class="node"><b>Другой компьютер</b><small>Его <code>127.0.0.1</code> — он сам.<br>Это не адрес твоего API.</small></div></div><figcaption>Loopback — виртуальный интерфейс для обращения к той же сетевой среде. В контейнере, отдельной VM и на хосте это разные окружения.</figcaption></figure>
+<div class="command"><div class="command-place">Локальный компьютер · терминал B · тот же каталог проекта</div><pre><code>curl --noproxy 127.0.0.1 --connect-timeout 2 --max-time 5 -i http://127.0.0.1:8080/health/ready
+curl --config .secrets/client.curl -i http://127.0.0.1:8080/tasks</code></pre></div>
+<p>Первый ответ должен иметь статус <code>200</code>. Второй — <code>200</code> и пустой JSON-массив <code>[]</code>, если процесс ещё не получал задач. <code>-i</code> добавляет заголовки <em>ответа</em> к выводу. Конфиг клиента добавляет Bearer-токен, ограничение соединения двумя секундами и всего запроса пятью секундами. Не включай <code>-v</code> или трассировку curl: они могут показать секретный заголовок <em>запроса</em>.</p>
+<div class="table-scroll"><table><thead><tr><th>Наблюдение</th><th>Что проверить</th></tr></thead><tbody>
+<tr><td>Connection refused</td><td>Процесс жив? Запущен ли он в том же Linux-окружении? Совпадает ли порт? Отказ соединения ещё не является HTTP-ошибкой.</td></tr>
+<tr><td>Порт занят</td><td>Не запускай второй экземпляр поверх первого. Посмотри <code>ss -ltnp 'sport = :8080'</code>. Останови только свой известный процесс или выбери другой порт.</td></tr>
+<tr><td>401 Unauthorized</td><td>TCP и HTTP уже работают. Отсутствует или не совпадает токен. Проверь путь к конфигу, не печатая его содержимое.</td></tr>
+<tr><td>curl не находит config</td><td>Второй терминал открыт не в каталоге проекта. Сверь <code>pwd</code>.</td></tr>
+</tbody></table></div>
+<p>Если нужен другой порт, останови процесс <code>Ctrl-C</code> в терминале A, запусти <code>python3 lab.py run --port 18080</code> и замени порт во всех локальных URL. Не пытайся устранить конфликт командой, завершающей все процессы с похожим именем.</p>
+<div class="stage-result"><h3>Результат этапа</h3><p>Ты запустил собственный HTTP-сервер. Пока «собственный» означает собранный и управляемый тобой процесс, а не обязательно написанную с нуля реализацию TCP и HTTP.</p><p>Перед переходом убедись: объясняешь, почему нужны два терминала, что занимает порт и почему другой компьютер не достигает сервиса по твоему <code>127.0.0.1</code>.</p></div>
+<section class="sources"><h3>Проверяемые контракты инструментов</h3><ul><li><a href="https://github.com/yhirose/cpp-httplib/tree/v0.59.0">cpp-httplib 0.59.0</a> и <a href="https://github.com/nlohmann/json/tree/v3.12.0">nlohmann/json 3.12.0</a></li><li><a href="https://cmake.org/cmake/help/latest/module/FetchContent.html">CMake FetchContent</a></li><li><a href="https://curl.se/docs/manpage.html">curl: config, include и ограничения времени</a></li><li><a href="https://man7.org/linux/man-pages/man7/ip.7.html">Linux ip(7): loopback и адрес привязки</a></li></ul></section>
+
+<nav class="chapter-pagination" aria-label="Следующий этап"><a href="#start">← Сначала — карта</a><a href="#http">Работаем с API →</a></nav></article><article class="workshop-chapter" id="http" tabindex="-1" aria-labelledby="http-title">
+<header class="chapter-header"><p class="eyebrow">ПРАКТИКУМ · ШАГ 3 ИЗ 7</p>
+<h1 id="http-title">Работаем с API</h1><p class="lead">Создадим задачу, прочитаем ответ и проследим, как сервер защищает изменение от устаревшей версии.</p></header>
+<h2>1. Создание — это запрос и наблюдаемый результат</h2>
+<p>Сервер из предыдущего шага должен работать. Команды выполняй во втором терминале, из каталога проекта. Сначала убедимся, что защита действительно включена:</p>
+<div class="command"><div class="command-place">Локальный компьютер · терминал B · намеренно без токена</div><pre><code>curl --noproxy 127.0.0.1 --connect-timeout 2 --max-time 5 -i http://127.0.0.1:8080/tasks</code></pre></div>
+<p>Ожидается <code>401</code>. Это не «сервис сломан»: клиент не предъявил право доступа. Дальше конфиг клиента будет добавлять токен. Не вводим токен вручную в команду, чтобы не сохранять его в истории shell.</p>
+<div class="command"><div class="command-place">Локальный компьютер · терминал B · создать задачу</div><pre><code>curl --config .secrets/client.curl -i \
+  -H 'Content-Type: application/json' \
+  --data '{"title":"Understand one HTTP request","done":false}' \
+  http://127.0.0.1:8080/tasks</code></pre></div>
+<p>Обратная косая черта в конце строки продолжает одну shell-команду. После неё не должно быть пробелов. <code>--data</code> без явного метода выбирает POST. Заголовок <code>Content-Type</code> говорит серверу, что тело содержит JSON, а не форму.</p>
+<p class="output-label">Существенная часть ответа на первое создание в пустом хранилище</p><pre class="output">HTTP/1.1 201 Created
+Location: /tasks/1
+ETag: "v1"
+
+{"done":false,"id":1,"title":"Understand one HTTP request","version":1}</pre>
+<p>Порядок заголовков и JSON-полей не важен. <code>201</code> сообщает о создании; <code>Location</code> указывает ресурс; <code>ETag</code> — метку этой версии представления. Идентификатор назначает сервер. Если ты уже создавал задачи, ID не обязан быть 1. <strong>Далее подставь фактический ID из своего ответа</strong>:</p>
+<div class="command"><div class="command-place">Локальный компьютер · терминал B · заменить 1 при необходимости</div><pre><code>TASK_ID=1
+curl --config .secrets/client.curl -i "http://127.0.0.1:8080/tasks/$TASK_ID"
+curl --config .secrets/client.curl -i http://127.0.0.1:8080/tasks</code></pre></div>
+<p><code>TASK_ID</code> — переменная текущего shell, а не настройка сервера. Двойные кавычки позволяют подставить её в URL. GET одной задачи возвращает объект и его ETag; GET списка — массив по возрастанию ID. В учебной реализации не более 1000 задач: это явная граница, а не обещание бесконечной выдачи.</p>
+
+<h2>2. Обновление: почему нужен If-Match</h2>
+<p>Представь двух клиентов, прочитавших версию 1. Первый отметил задачу выполненной. Второй всё ещё видит старую копию и меняет заголовок. Без проверки версии второй может незаметно вернуть <code>done:false</code>. Условное изменение означает: «запиши это <em>только если</em> текущая метка всё ещё та, которую я прочитал».</p>
+<div class="command"><div class="command-place">Локальный компьютер · терминал B · обновление прочитанной v1</div><pre><code>curl --config .secrets/client.curl -i -X PUT \
+  -H 'Content-Type: application/json' \
+  -H 'If-Match: "v1"' \
+  --data '{"title":"Understand one HTTP request","done":true}' \
+  "http://127.0.0.1:8080/tasks/$TASK_ID"</code></pre></div>
+<p>Если задача всё ещё имеет версию 1, получишь <code>200</code>, <code>done:true</code>, <code>version:2</code> и <code>ETag: "v2"</code>. Повтори <em>ровно ту же команду</em>. Теперь ожидается <code>412 Precondition Failed</code>: условие <code>"v1"</code> уже ложно. Повтор не должен незаметно перезаписать новую версию.</p>
+<p>Наш API намеренно принимает только одну сильную метку вида <code>"vN"</code>, где N — положительное десятичное число без ведущих нулей в диапазоне signed 64-bit. Списки меток, <code>*</code> и слабые метки <code>W/…</code> здесь не реализованы. Это <strong>учебное подмножество</strong>, не полный синтаксис HTTP If-Match. Сервер возвращает <code>428</code>, когда условие отсутствует, <code>400</code> — когда этот поддерживаемый формат нарушен, <code>412</code> — когда подходящей текущей версии нет.</p>
+<details class="explanation"><summary>Что делать клиенту после 412?</summary><p>Сначала заново прочитать задачу. Потом решить, как совместить своё намерение с новым состоянием, и только после этого отправить изменение с актуальным ETag. Слепое повторение со «свежей меткой любой ценой» убирает смысл защиты. После сетевого таймаута тоже нельзя автоматически считать, что запись не произошла: проверь наблюдаемое состояние.</p></details>
+
+<h2>3. Различаем ошибки входа</h2>
+<p>Для POST и PUT разрешены ровно два поля: непустой UTF-8 заголовок <code>title</code> длиной до 200 <em>байт</em> без нулевого символа и булево <code>done</code>. Кириллическая буква обычно занимает больше байта; лимит в байтах — не обещание 200 любых символов. ID и версию нельзя назначить из тела.</p>
+<div class="command"><div class="command-place">Локальный компьютер · терминал B · намеренно неправильный тип</div><pre><code>curl --config .secrets/client.curl -i \
+  -H 'Content-Type: application/json' \
+  --data '{"title":"Wrong type","done":"false"}' \
+  http://127.0.0.1:8080/tasks</code></pre></div>
+<p>Ожидается <code>422</code>: JSON корректен синтаксически, но строка <code>"false"</code> — не булево значение <code>false</code>. Из-за <code>fail-with-body</code> в конфиге curl завершится с ненулевым кодом и всё равно покажет ответ. Для намеренных ошибок это ожидаемо.</p>
+<div class="table-scroll"><table><thead><tr><th>Измени запрос</th><th>Ожидаемый статус</th><th>Что именно проверили</th></tr></thead><tbody>
+<tr><td>Оборви JSON после <code>{</code> или повтори ключ <code>title</code></td><td>400</td><td>Синтаксис и однозначность JSON.</td></tr>
+<tr><td>Добавь поле <code>id</code>, убери <code>done</code>, передай пустой title</td><td>422</td><td>Допустимая схема данных.</td></tr>
+<tr><td>Убери заголовок Content-Type из POST</td><td>415</td><td>Поддерживаемый формат тела.</td></tr>
+<tr><td>Отправь тело больше 4096 байт</td><td>413</td><td>Ограничение объёма входа, не замена проверке схемы.</td></tr>
+<tr><td>GET допустимого ID, которого нет</td><td>404</td><td>Такого ресурса нет. ID записывается без ведущих нулей: от 1 до 9223372036854775807.</td></tr>
+<tr><td>GET с ID <code>01</code>, <code>0</code> или числом вне диапазона</td><td>400</td><td>Идентификатор не соответствует контракту, а не просто отсутствует в хранилище.</td></tr>
+<tr><td>PUT без If-Match</td><td>428</td><td>Клиент не дал обязательное предусловие.</td></tr>
+</tbody></table></div>
+<p>Выбери два неправильных запроса и исправь их сам. Цель — уметь по статусу отделить отсутствие соединения, отсутствие доступа, неверный формат и конфликт состояния. Не учи номера в отрыве от запроса.</p>
+
+<h2>4. Удаление и потеря памяти процесса</h2>
+<div class="command"><div class="command-place">Локальный компьютер · терминал B · после успешного PUT до v2</div><pre><code>curl --config .secrets/client.curl -i -X DELETE \
+  -H 'If-Match: "v2"' "http://127.0.0.1:8080/tasks/$TASK_ID"
+curl --config .secrets/client.curl -i "http://127.0.0.1:8080/tasks/$TASK_ID"</code></pre></div>
+<p>DELETE с текущей меткой возвращает <code>204</code> без тела; последующий GET — <code>404</code>. Если ты делал дополнительные изменения, сначала прочитай настоящий ETag. Повтор DELETE с прежней меткой вернёт <code>412</code>, потому что текущего представления уже нет. Идемпотентность метода не требует одинакового статуса каждого повтора.</p>
+<p>Снова создай одну задачу. В терминале A нажми <code>Ctrl-C</code>, дождись завершения и запусти <code>python3 lab.py run</code>. GET списка покажет <code>[]</code>. Это не ошибка базы: её ещё нет. Все данные принадлежали памяти завершившегося процесса. Перед следующим этапом <strong>останови нативный процесс</strong>, чтобы освободить порт 8080.</p>
+<div class="stage-result"><h3>Проверь себя без подсказки</h3><ol><li>Почему 401 доказывает больше о доступности сервера, чем Connection refused?</li><li>Почему повтор старого PUT даёт 412, а не ещё одно успешное изменение?</li><li>Где были задачи и почему перезапуск их потерял?</li></ol><p>Сохрани свои команды и обезличенные статусы в заметку. Токен и заголовок Authorization в неё не входят.</p></div>
+<section class="sources"><h3>Контракт и первоисточники</h3><ul><li><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-13.1.1">RFC 9110: If-Match</a> и <a href="https://www.rfc-editor.org/rfc/rfc6585.html#section-3">RFC 6585: 428</a></li><li><a href="https://www.rfc-editor.org/rfc/rfc8259.html">RFC 8259: JSON</a>. Более строгая проверка повторяющихся ключей — решение нашего API.</li><li><a href="examples/service-workshop/app.cpp">Реализация именно учебного контракта</a>, <a href="cpp_station8_rest_api.html#section=conditional-update">теория условных изменений в станции 8</a></li></ul></section>
+
+<nav class="chapter-pagination" aria-label="Следующий этап"><a href="#local">← Запускаем локально</a><a href="#database">Добавляем PostgreSQL →</a></nav></article><article class="workshop-chapter" id="database" tabindex="-1" aria-labelledby="database-title">
+<header class="chapter-header"><p class="eyebrow">ПРАКТИКУМ · ШАГ 4 ИЗ 7</p>
+<h1 id="database-title">Добавляем PostgreSQL</h1><p class="lead">Контракт API остаётся прежним. Меняются место хранения и способ запуска: вместо одного процесса — приложение и база в разных контейнерах.</p></header>
+<h2>1. Что меняется, а что остаётся прежним</h2>
+<p>POST, GET, PUT и DELETE остаются теми же. Но завершение процесса больше не должно уничтожать задачи: теперь они записаны в PostgreSQL. <strong>Контейнер</strong> — изолированное окружение процесса, а не отдельный физический компьютер. <strong>Образ</strong> содержит файлы для его запуска. <strong>Volume</strong> — отдельное хранилище Docker, которое не исчезает при замене контейнера.</p>
+<p>Файл <code>compose.yaml</code> описывает два сервиса: <code>app</code> и <code>db</code>. Compose создаёт их вместе с сетями и хранилищем. Образ приложения собирается из нашего Dockerfile; образ PostgreSQL 18 берётся из официального репозитория. Версии C++-библиотек закреплены архивами и хешами; теги базовых образов могут получать обновления. Для строгой воспроизводимости релиза дополнительно закрепляют digest образа (хеш его содержимого), но не отказываются из-за этого от обновлений безопасности.</p>
+<figure class="diagram"><strong class="diagram-title">У каждого контейнера свой localhost</strong><div class="topology">
+<div class="node"><b>Клиент на хосте</b><small><code>127.0.0.1:8080</code><br>Только с этой машины</small></div><div class="connector" aria-hidden="true">порт<br>→</div>
+<div class="machine"><span>DOCKER · СЕТЬ EDGE</span><div class="node"><b>app</b><small>Внутри слушает <code>0.0.0.0:8080</code><br>Соединяется с <code>db:5432</code></small></div></div><div class="connector" aria-hidden="true">SQL<br>→</div>
+<div class="machine"><span>DOCKER · СЕТЬ BACKEND, INTERNAL</span><div class="node"><b>db · PostgreSQL</b><small>На хост порт не опубликован<br>Данные → volume pgdata</small></div></div>
+</div><figcaption>app подключён к обеим сетям; db — только к backend. Имя db разрешается внутри Compose-сети. На твоём компьютере это не новое общедоступное DNS-имя.</figcaption></figure>
+<p>Почему приложение внутри контейнера слушает <code>0.0.0.0</code>, хотя раньше мы это запрещали менять наугад? Этот адрес означает «все IPv4-интерфейсы <em>данного окружения</em>». Привязка к контейнерному <code>127.0.0.1</code> не принимала бы перенаправленные снаружи контейнера соединения. Видимость на машине-хосте задаётся отдельно: <code>127.0.0.1:8080:8080</code>. Слева — адрес и порт хоста, справа — порт контейнера. Если удалить адрес слева, можно случайно опубликовать порт на внешних интерфейсах.</p>
+
+<h2>2. Запускаем, не раскрывая настройки</h2>
+<div class="callout warning"><p><strong>До первого запуска проверь цель.</strong> У проекта фиксированное имя <code>course-service-workshop</code>. Две папки с этим именем на одном Docker daemon не являются независимыми стендами. Если такой проект у тебя уже есть, остановись и не заменяй его другой копией. Выполни <code>docker context show</code>: Docker должен управлять именно выбранным учебным хостом, а не рабочим или неожиданно удалённым сервером. Контекст с названием default тоже стоит сверить со своей настройкой; переменные DOCKER_HOST/DOCKER_CONTEXT не должны незаметно менять цель.</p></div>
+<p>Нативный процесс из предыдущего шага должен быть остановлен. Docker уже должен быть настроен. Команда <code>docker version</code> должна показывать и клиента, и сервер, а <code>docker compose version</code> — Compose v2. При ошибке доступа к daemon следуй инструкции администратора; не меняй права сокета на <code>666</code> и не публикуй Docker API в сеть.</p>
+<div class="command"><div class="command-place">Локальный компьютер · каталог service-workshop</div><pre><code>unset APP_TOKEN POSTGRES_PASSWORD APP_DB_PASSWORD
+python3 lab.py check-env &amp;&amp;
+docker compose config --quiet &amp;&amp;
+docker compose up --build -d --wait --wait-timeout 240 &amp;&amp;
+docker compose ps</code></pre></div>
+<p><code>unset</code> убирает только три переменные из текущего терминала. Это важно: экспортированное значение из shell может переопределить одноимённую запись <code>.env</code>, а <code>check-env</code> проверяет именно файл. Секреты в файле сохраняются. <code>config --quiet</code> проверяет конфигурацию, не печатая подставленные значения. <strong>Не убирай <code>--quiet</code></strong> при отправке результата проверки в чат.</p>
+<p><code>--build</code> собирает образ, <code>-d</code> запускает контейнеры в фоне, <code>--wait</code> ждёт их готовности. Первая сборка может занять несколько минут; сборка ещё не является HTTP-запросом. После неё app и db должны стать <code>healthy</code>. Если ожидание истекло, команда завершится ошибкой, но контейнеры могут остаться запущенными — проверь состояние, а не запускай новые копии вслепую.</p>
+<div class="command"><div class="command-place">Локальный компьютер · диагностика, без вывода секретов</div><pre><code>docker compose logs --tail 40 app
+docker compose logs --tail 40 db
+docker compose port app 8080
+curl --noproxy 127.0.0.1 --connect-timeout 2 --max-time 5 -i http://127.0.0.1:8080/health/ready
+curl --config .secrets/client.curl -i http://127.0.0.1:8080/tasks</code></pre></div>
+<p>Публикация должна показывать <code>127.0.0.1:8080</code>, не <code>0.0.0.0:8080</code>. При первом запуске список задач пустой: прежние задачи жили в памяти другого процесса, автоматического переноса не было. Сообщения приложения содержат шаблон маршрута и статус, но не токен, тело запроса и пароль базы. Всё равно просматривай диагностический вывод перед публикацией: сторонние инструменты могут писать больше, чем наше приложение.</p>
+
+<h2>3. Проверяем сохранность, а не наличие контейнера</h2>
+<p>Создай задачу командами из шага «Работаем с API», например с заголовком <code>Survives restart</code>. Запиши её ID. Затем:</p>
+<div class="command"><div class="command-place">Локальный компьютер · перезапуск только своего приложения</div><pre><code>docker compose restart app &amp;&amp;
+docker compose up -d --wait --wait-timeout 90 &amp;&amp;
+curl --config .secrets/client.curl -i http://127.0.0.1:8080/tasks</code></pre></div>
+<p>Задача должна остаться. Теперь остановим весь проект и создадим контейнеры заново, сохранив volume:</p>
+<div class="command"><div class="command-place">Локальный компьютер · тот же проект и каталог</div><pre><code>docker compose down &amp;&amp;
+docker compose up -d --wait --wait-timeout 90 &amp;&amp;
+curl --config .secrets/client.curl -i http://127.0.0.1:8080/tasks</code></pre></div>
+<p>Задача снова должна быть в ответе. <code>down</code> удаляет контейнеры и сети проекта, но по умолчанию сохраняет именованный volume. Мы <strong>не добавляем <code>-v</code></strong>: эта опция удалила бы данные. Также не используем общие команды <code>prune</code>, затрагивающие другие проекты.</p>
+<p>У Compose задано имя <code>course-service-workshop</code>. Все команды здесь должны относиться к одной копии проекта и одному Docker daemon. Две папки с тем же именем проекта не являются двумя независимыми стендами. Если Docker CLI настроен на удалённый context, контейнеры запускаются на его машине, а <code>127.0.0.1</code> клиента остаётся твоим: до дальнейшего выполнения выбери нужный локальный context по документации Docker.</p>
+
+<h2>4. Кто имеет право работать с базой</h2>
+<p>Первичная инициализация выполняется администратором PostgreSQL и создаёт таблицу <code>public.tasks</code>. Сам API подключается под отдельной ролью <code>course_app</code>: ей разрешены чтение, вставка, изменение, удаление задач и использование sequence (генератора последовательных ID). Ей не выданы права создавать роли или базы. Параметры запросов передаются отдельно от SQL-текста.</p>
+<div class="command"><div class="command-place">Локальный компьютер · SQL выполнится внутри db</div><pre><code>docker compose exec -T db psql -U postgres -d course_tasks \
+  -v ON_ERROR_STOP=1 -c 'SELECT id, title, done, version FROM public.tasks ORDER BY id;'</code></pre></div>
+<p>Это административное учебное наблюдение через локальный сокет контейнера, не соединение приложения. В промышленной системе доступ к daemon и административной роли контролируется отдельно. Environment-секреты контейнера может прочитать владелец Docker daemon/root; режим <code>0600</code> защищает файл от обычных соседних пользователей, но не от администратора.</p>
+<div class="callout warning"><p><strong>Инициализация не повторяется при каждом старте.</strong> Скрипт из <code>docker-entrypoint-initdb.d</code> выполняется только для нового пустого хранилища PostgreSQL. Правка <code>schema.sql</code> не обновляет работающую таблицу, а смена <code>APP_DB_PASSWORD</code> в файле не меняет пароль уже созданной роли. Для существующей базы нужны миграция и согласованная смена учётных данных. Не «лечи» это удалением volume с нужными данными.</p></div>
+<p>Для PostgreSQL 18 volume в примере смонтирован в <code>/var/lib/postgresql</code>, а не в путь из старых статей про PostgreSQL 17. У приложения есть ограничение времени соединения и SQL-операции; при отказе базы клиент получает общий <code>503</code>, а не строку подключения. Перезапуск по <code>restart: unless-stopped</code> относится к завершению контейнера, а <code>unhealthy</code> сам по себе не заставляет обычный Compose автоматически его перезапустить.</p>
+<div class="stage-result"><h3>Результат этапа</h3><ul class="checklist"><li>API доступен на loopback хоста, PostgreSQL не имеет опубликованного порта.</li><li>Задача пережила перезапуск app и down/up проекта.</li><li>Можешь объяснить различие трёх адресов: localhost хоста, localhost app и db:5432.</li><li>Не ожидаешь, что правка init-скрипта обновит существующую базу.</li></ul></div>
+<section class="sources"><h3>Проверка устройства окружения</h3><ul><li><a href="https://docs.docker.com/compose/how-tos/networking/">Compose: имена сервисов, сети и порты</a></li><li><a href="https://docs.docker.com/compose/how-tos/startup-order/">Compose: running не равно ready</a></li><li><a href="https://docs.docker.com/reference/cli/docker/compose/down/">Compose down и volumes</a></li><li><a href="https://hub.docker.com/_/postgres">Официальный образ PostgreSQL: init-скрипты и PGDATA 18+</a></li><li><a href="https://www.postgresql.org/docs/18/sql-grant.html">PostgreSQL GRANT</a></li></ul></section>
+
+<nav class="chapter-pagination" aria-label="Следующий этап"><a href="#http">← Работаем с API</a><a href="#vm">Переносим на Linux-VM →</a></nav></article><article class="workshop-chapter" id="vm" tabindex="-1" aria-labelledby="vm-title">
+<header class="chapter-header"><p class="eyebrow">ПРАКТИКУМ · ШАГ 5 ИЗ 7</p>
+<h1 id="vm-title">Переносим на Linux-VM</h1><p class="lead">Теперь сервер работает не в том же окружении, где находится клиент. Учимся различать адреса машин, их localhost и назначение SSH-туннеля.</p></header>
+<h2>1. Какая VM нужна</h2>
+<p>Нужна отдельная Ubuntu 24.04 LTS, которой ты управляешь: например, VM в VirtualBox, VMware, UTM или другом гипервизоре. Создай обычного пользователя и снимок чистого состояния (snapshot — сохранённое состояние VM, к которому можно вернуться). Для удалённого входа внутри гостевой ОС должен работать OpenSSH Server. Docker Engine, Compose v2, Python 3 и curl настраиваются <em>внутри этой VM</em>. Компилятор на хосте VM не заменяет компилятор внутри образа; Dockerfile принесёт инструменты сборки сам.</p>
+<p>Способ сетевого подключения зависит от гипервизора. В NAT-режиме может понадобиться его перенаправление SSH-порта; в host-only или bridged у VM может быть собственный доступный адрес. Не меняй режимы наугад. Сначала добейся простого входа по SSH по инструкции своего гипервизора и узнай IP гостя через его консоль. Для практики не требуется пробрасывать HTTP 8080 наружу.</p>
+<div class="callout warning"><p><strong>Рабочий сервер организации для этого не подходит.</strong> Не устанавливай Docker и не запускай Compose на машине, которой не имеешь права управлять. Основной маршрут предназначен для отдельной учебной VM. Оставь доступ к её консоли, чтобы ошибка SSH не отрезала управление.</p></div>
+
+<h2>2. Первый SSH-вход: пользователь и адрес — разные вещи</h2>
+<p>В записи <code>learner@192.168.56.101</code> слева имя пользователя <em>на удалённой машине</em>, справа адрес машины, а не имя твоего локального аккаунта. Ниже <code>VM_HOST</code> — пример, который нужно заменить реальными значениями. Адрес из частной сети работает только там, откуда к ней есть маршрут; он не становится доступным всему миру.</p>
+<div class="command"><div class="command-place">Локальный компьютер · подставить пользователя и доступный адрес своей VM</div><pre><code>VM_HOST=learner@192.168.56.101
+ssh "$VM_HOST"</code></pre></div>
+<p>При первом входе SSH показывает fingerprint (краткий отпечаток) ключа <em>сервера</em>. Сверь его через доверенную консоль VM, а не просто отвечай yes привычным движением. Это позволяет отличить нужную машину от подмены. При неожиданной смене ключа сначала выясни причину, а не отключай проверку или удаляй запись автоматически. Ключ сервера и твой пользовательский SSH-ключ решают разные задачи: первый удостоверяет машину, второй может удостоверять тебя.</p>
+<div class="command remote"><div class="command-place">Linux-VM · после SSH-входа</div><pre><code>hostname
+whoami
+pwd
+python3 --version
+docker version
+docker compose version
+exit</code></pre></div>
+<p>После <code>exit</code> снова работаешь в локальном терминале. Если непонятно, где сейчас выполняется команда, остановись и проверь <code>hostname</code>. Не продолжай перенос, пока обычный вход и работа Docker в VM не проверены. Если SSH использует нестандартный порт, добавь к <code>ssh</code> опцию <code>-p</code>, а к <code>scp</code> — <code>-P</code>, либо настрой эти параметры в отдельной записи <code>~/.ssh/config</code>. Примеры ниже используют порт 22.</p>
+
+<h2>3. Переносим только исходники</h2>
+<div class="command"><div class="command-place">Локальный компьютер · каталог service-workshop</div><pre><code>python3 lab.py pack &amp;&amp;
+ssh "$VM_HOST" 'mkdir -m 700 course-workshop-upload' &amp;&amp;
+scp service-workshop-source.tar.gz "$VM_HOST:course-workshop-upload/"</code></pre></div>
+<p>Архив создаётся по явному списку: C++-исходники, CMake, Dockerfile и конфигурации. В нём <strong>нет</strong> <code>.env</code>, клиентского токена, SSH-ключей, каталога build или всей истории Git. Помощник откажется заменить существующий архив. Если папка загрузки на VM уже существует, не продолжай слепо: используй новый явно выбранный каталог для нового эксперимента или проверь содержимое старого.</p>
+<div class="command"><div class="command-place">Локальный компьютер · открыть отдельный SSH-сеанс</div><pre><code>ssh "$VM_HOST"</code></pre></div>
+<div class="command remote"><div class="command-place">Linux-VM · в SSH-сеансе</div><pre><code>cd course-workshop-upload &amp;&amp;
+tar -tzf service-workshop-source.tar.gz &amp;&amp;
+tar -xzf service-workshop-source.tar.gz &amp;&amp;
+cd service-workshop &amp;&amp;
+python3 lab.py init &amp;&amp;
+python3 lab.py check-env &amp;&amp;
+unset APP_TOKEN POSTGRES_PASSWORD APP_DB_PASSWORD &amp;&amp;
+docker compose config --quiet &amp;&amp;
+docker compose up --build -d --wait --wait-timeout 240 &amp;&amp;
+docker compose port app 8080 &amp;&amp;
+curl --config .secrets/client.curl -i http://127.0.0.1:8080/tasks</code></pre></div>
+<p>Распаковываем <em>свой</em> архив в новый учебный каталог; произвольные чужие tar-архивы могут быть опасны. Секреты создаются заново на VM, поэтому локальный токен не подойдёт удалённому API. Публикация app и здесь должна быть <code>127.0.0.1:8080</code>. Последний curl выполняется <strong>внутри VM</strong>, так что обращается к её loopback. Это пока не проверка доступа с твоего компьютера.</p>
+
+<h2>4. Строим SSH-туннель и прослеживаем адреса</h2>
+<figure class="diagram"><strong class="diagram-title">Какая сторона понимает каждый localhost</strong><div class="topology">
+<div class="machine"><span>ТВОЙ КОМПЬЮТЕР</span><div class="node"><b>curl</b><small><code>127.0.0.1:18080</code></small></div><div class="node"><b>SSH-клиент</b><small>Локальный порт 18080<br>принимает только loopback</small></div></div>
+<div class="connector">SSH<br>→</div>
+<div class="machine"><span>LINUX-VM</span><div class="node"><b>SSH-сервер → порт хоста</b><small><code>127.0.0.1:8080</code><br>Этот адрес понимает VM</small></div><div class="node"><b>app → db</b><small>Своя Compose-сеть VM<br>Не база локального компьютера</small></div></div>
+</div><figcaption>Локальный 18080 и удалённый 8080 специально различаются. Так локальный сервис не выдаёт себя за удалённый, а назначение перенаправления видно прямо в команде.</figcaption></figure>
+<p>Оставь SSH-сеанс управления открытым. В <strong>новом локальном терминале</strong> задай тот же <code>VM_HOST</code> и запусти туннель:</p>
+<div class="command"><div class="command-place">Локальный компьютер · отдельный терминал для туннеля</div><pre><code>VM_HOST=learner@192.168.56.101
+ssh -N -o ExitOnForwardFailure=yes \
+  -L 127.0.0.1:18080:127.0.0.1:8080 "$VM_HOST"</code></pre></div>
+<p><code>-N</code> не запускает удалённую команду. В <code>-L</code> первые адрес и порт относятся к <em>локальному слушателю</em>; последние — к соединению, которое SSH-сервер откроет на удалённой стороне. <code>ExitOnForwardFailure</code> не даёт молча продолжить, если локальный порт занят. Но он не гарантирует, что приложение по ту сторону живо: это проверит запрос. Терминал остаётся занят туннелем до <code>Ctrl-C</code>. Обрыв туннеля не останавливает удалённые контейнеры.</p>
+<div class="command"><div class="command-place">Локальный компьютер · другой терминал · безопасная проверка без токена</div><pre><code>curl --noproxy 127.0.0.1 --connect-timeout 2 --max-time 5 -i \
+  http://127.0.0.1:18080/health/ready</code></pre></div>
+<p>Ожидается <code>200</code>. При <code>Connection refused</code> проверь, жив ли локальный SSH-процесс и слушает ли 18080. Если SSH пишет <code>connect failed</code>, проверь приложение на самой VM. Если локальный 18080 уже занят, выбери другой и замени URL клиента. Не меняй локальную привязку туннеля на <code>0.0.0.0</code> — это сделало бы его доступным соседним компьютерам.</p>
+
+<h2>5. Авторизуем клиент именно для этой VM</h2>
+<p>Нужен токен удалённого проекта, но его не следует печатать или копировать через чат. Передадим готовый curl-конфиг по SSH. Следующий блок создаёт <strong>новый</strong> приватный локальный каталог. Если он уже существует, остановись: не заменяй старые учётные данные наугад.</p>
+<div class="command"><div class="command-place">Локальный компьютер · каталог service-workshop · VM_HOST задан в этом терминале</div><pre><code>mkdir -m 700 .secrets-vm &amp;&amp;
+scp "$VM_HOST:course-workshop-upload/service-workshop/.secrets/client.curl" .secrets-vm/client.curl &amp;&amp;
+chmod 600 .secrets-vm/client.curl &amp;&amp;
+curl --config .secrets-vm/client.curl -i http://127.0.0.1:18080/tasks</code></pre></div>
+<p>Каталог <code>0700</code> закрывает доступ соседним пользователям уже во время передачи; режим файла затем явно ограничивается. Не добавляй этот каталог в Git: он начинается с <code>.secrets</code> и исключён правилами проекта. Не передавай приватный SSH-ключ на VM — он остаётся на клиенте. Измени и прочитай задачу через туннель; затем в SSH-сеансе на VM прочитай список напрямую по 8080. Оба клиента должны видеть одни данные.</p>
+<div class="stage-result"><h3>Результат этапа</h3><ul class="checklist"><li>Один сервис работает в отдельной VM; локальный нативный процесс для него не нужен.</li><li>На своей машине обращаешься к 18080, на VM — к 8080.</li><li>Токен создан на VM, передан клиенту по SSH и не попал в архив исходников.</li><li>Закрытие туннеля убирает доступ через него, но не останавливает сервер.</li></ul></div>
+<section class="sources"><h3>Проверка SSH-механики</h3><ul><li><a href="https://man.openbsd.org/ssh.1">OpenSSH ssh(1): -L, -N, host authentication</a></li><li><a href="https://man.openbsd.org/ssh_config.5#ExitOnForwardFailure">OpenSSH: ExitOnForwardFailure и его границы</a></li><li><a href="https://man.openbsd.org/scp.1">OpenSSH scp(1)</a></li><li><a href="cpp_station7_networking.html#section=ssh-home-access">Станция 7: SSH, частные сети и удалённый доступ</a></li></ul></section>
+
+<nav class="chapter-pagination" aria-label="Следующий этап"><a href="#database">← Добавляем PostgreSQL</a><a href="#vps">Необязательно: VPS и HTTPS →</a></nav></article><article class="workshop-chapter" id="vps" tabindex="-1" aria-labelledby="vps-title">
+<header class="chapter-header"><p class="eyebrow">ПРАКТИКУМ · ШАГ 6 ИЗ 7</p>
+<h1 id="vps-title">Необязательно: VPS и HTTPS</h1><p class="lead">Тот же проект можно запустить на арендованной Linux-машине. Публичный доступ — отдельное осознанное действие, а не побочный эффект запуска.</p></header>
+<div class="callout"><p><strong>Этот шаг необязателен.</strong> Основной практикум уже дал настоящий удалённый запуск в VM. VPS полезен, если хочешь увидеть публичный адрес, DNS, сертификат и ответственность за доступный из интернета сервис. Аренда и домен могут стоить денег; обещание бесплатного бессрочного сервера здесь не даётся.</p></div>
+<h2>1. VPS не меняет смысл команд</h2>
+<p>VPS (виртуальный выделенный сервер) — Linux-машина у провайдера. Ты получаешь доступ по SSH и управляешь процессами почти так же, как в своей VM, но машина обычно имеет публичный IP и постоянно встречает посторонние попытки подключения. Считай её отдельным окружением: новые секреты, свой volume и свой каталог проекта.</p>
+<p>Выбирай небольшой Linux-сервер с ресурсами не меньше учебной VM и понятным способом удаления. До оплаты проверь стоимость диска, публичного IP, трафика и резервных копий: выключенная машина не обязательно перестаёт оплачиваться. Убедись, что есть консоль восстановления. На сервере не должно быть рабочих данных и чужих приложений. Не используй эту инструкцию для машины работодателя.</p>
+<p>Подготовь поддерживаемую Ubuntu, обычного пользователя с необходимыми административными правами, проверенный SSH-вход и Docker по официальной документации. Не отключай парольный вход, не меняй порт SSH и политику firewall одновременно с первым размещением: потерять управление проще, чем кажется. Разбор SSH-ключей есть в станции 7; первый fingerprint сверяется через доверенную консоль провайдера. Никому не передавай приватный ключ и пароль панели.</p>
+<p>Повтори перенос из <a href="#vm">предыдущего шага</a>, подставив пользователя и публичный адрес своего VPS. Сначала запусти <strong>только базовый <code>compose.yaml</code></strong> и проверь его через SSH-туннель. Порты приложения 8080 и базы 5432 не открываем. Для первого удалённого опыта на этом можно остановиться: сервер уже удалённый, хотя API ещё не публичный.</p>
+
+<h2>2. Что добавляет HTTPS</h2>
+<figure class="diagram"><strong class="diagram-title">Только один новый публичный вход</strong><div class="topology">
+<div class="node"><b>Клиент из интернета</b><small><code>https://tasks.твой-домен/tasks</code><br>Проверяет сертификат<br>и отправляет токен по TLS</small></div><div class="connector" aria-hidden="true">443<br>→</div>
+<div class="machine"><span>ТВОЙ VPS</span><div class="node"><b>Caddy · reverse proxy</b><small>Принимает HTTPS<br>Сертификат и TLS — здесь</small></div><div class="node"><b>app:8080 → db:5432</b><small>Внутренние соединения Docker<br>Не опубликованы на внешнем IP</small></div></div></div>
+<figcaption>Reverse proxy (обратный прокси) принимает клиентское соединение и делает отдельный запрос к приложению. Здесь TLS заканчивается на Caddy; участок Caddy → app использует HTTP внутри сети одного хоста.</figcaption></figure>
+<p>Домен — понятное имя, DNS связывает его с адресом. Сам DNS не запускает приложение и не открывает firewall. TLS защищает канал и позволяет клиенту проверить имя сервера; он не решает, имеет ли конкретный пользователь право менять задачу. Поэтому проверка токена остаётся в API.</p>
+<p>Для простого маршрута нужен принадлежащий тебе домен или поддомен. Создай A-запись на публичный IPv4 VPS. Если есть AAAA, IPv6 тоже должен вести на этот сервер и работать; неверный AAAA может ломать часть подключений и проверку сертификата. В первом опыте не добавляй CDN-прокси поверх DNS: иначе появится ещё один участник, который нужно отдельно настраивать и понимать.</p>
+<ul class="checklist"><li>Домен принадлежит тебе, A/AAAA проверены и указывают на нужный сервер.</li><li>По SSH есть рабочий вход и доступ к консоли восстановления.</li><li>Базовый API проверен на loopback через туннель.</li><li>На сервере свободны TCP 80 и 443. Входящие соединения разрешены в нужном облачном и хостовом фильтре.</li><li>У Caddy есть исходящий доступ к DNS и ACME — протоколу выдачи сертификатов.</li></ul>
+<div class="callout warning"><p><strong>Не полагайся только на UFW для опубликованных Docker-портов.</strong> Docker добавляет свои правила перенаправления; трафик может обходить ожидаемые UFW-правила. В этом примере внешние 80/443 открываются намеренно, а app остаётся на loopback. Не отключай Docker firewall и не сбрасывай таблицы фильтрации ради «починки». Конкретные правила провайдера проверяй по его документации, сохраняя SSH и консоль.</p></div>
+
+<h2>3. Включаем отдельный HTTPS-слой</h2>
+<p>Ниже <code>tasks.example.org</code> и email — <strong>заполнители</strong>. Они не дадут работающий сертификат; замени их своими значениями. Вводи эти команды только на подготовленном VPS, из каталога проекта. Имена не являются секретами, но не добавляй их в строгий файл <code>.env</code>: помощник разрешает в нём только три секретных переменных.</p>
+<div class="command remote"><div class="command-place">VPS · каталог service-workshop · после проверки всех условий</div><pre><code>export COURSE_DOMAIN=tasks.example.org
+export ACME_EMAIL=admin@example.org
+unset APP_TOKEN POSTGRES_PASSWORD APP_DB_PASSWORD
+docker compose -f compose.yaml -f compose.https.yaml config --quiet &amp;&amp;
+docker compose -f compose.yaml -f compose.https.yaml up --build -d --wait --wait-timeout 240 &amp;&amp;
+docker compose -f compose.yaml -f compose.https.yaml ps &amp;&amp;
+docker compose -f compose.yaml -f compose.https.yaml logs --tail 50 caddy</code></pre></div>
+<p>Второй файл добавляет Caddy, публикации TCP 80/443 и отдельное хранилище его сертификатов. Он не заменяет loopback-привязку app и не публикует PostgreSQL. TCP 80 нужен для перенаправления HTTP и одного из способов ACME-проверки; 443 — для HTTPS и другого способа проверки. HTTP/3 по UDP 443 в этом примере не включён.</p>
+<p>Успешный <code>up --wait</code> ещё не доказывает, что клиент из интернета принимает сертификат и достигает API. Caddy может работать как процесс, пока DNS или ACME-проверка ещё не исправлены. Проверка с внешней стороны обязательна. Не запускай бесконечные перевыпуски сертификата: у удостоверяющих центров есть ограничения частоты.</p>
+
+<h2>4. Проверяем с локального компьютера</h2>
+<p>Туннель для HTTPS-проверки не нужен. Сначала проверь только публичную общую health-точку <strong>без токена</strong>. Здесь снова укажи реальное доменное имя:</p>
+<div class="command"><div class="command-place">Локальный компьютер · реальный домен своего VPS</div><pre><code>COURSE_DOMAIN=tasks.example.org
+curl --connect-timeout 5 --max-time 15 -i "https://$COURSE_DOMAIN/health/ready"</code></pre></div>
+<p>Ожидается <code>200</code>, без ошибки проверки сертификата и без перенаправления на чужой адрес. Если сертификат не подходит имени, просрочен или цепочка не доверена, остановись и исправь причину. <strong>Не добавляй <code>-k</code></strong>: отключение проверки скрывает проблему, а не устраняет её.</p>
+<p>Только после этого передай curl-конфиг данного VPS на локальную машину тем же способом, что для VM, но в новый приватный каталог <code>.secrets-vps</code>. Не используй конфиг локального проекта или другой VM. Для VPS с тем же каталогом загрузки пример выглядит так:</p>
+<div class="command"><div class="command-place">Локальный компьютер · заменить пользователя и публичный адрес своего VPS</div><pre><code>VPS_HOST=learner@203.0.113.10
+mkdir -m 700 .secrets-vps &amp;&amp;
+scp "$VPS_HOST:course-workshop-upload/service-workshop/.secrets/client.curl" .secrets-vps/client.curl &amp;&amp;
+chmod 600 .secrets-vps/client.curl &amp;&amp;
+curl --config .secrets-vps/client.curl -i "https://$COURSE_DOMAIN/tasks"</code></pre></div>
+<p><code>203.0.113.10</code> — адрес из диапазона для документации, не реальный сервер для подключения. Не отправляй Bearer-токен по публичному <code>http://</code>, даже «один раз для проверки». Не добавляй <code>-L</code> к авторизованному запросу без понимания цепочки перенаправлений. На управляемом корпоративном компьютере также учитывай доверенный HTTPS-прокси: для личных секретов используй разрешённое и понятное сетевое окружение.</p>
+<div class="stage-result"><h3>Результат и границы</h3><p>Ты увидел публичную цепочку DNS → TCP → TLS → reverse proxy → приложение → база. Это проверка учебного размещения, не аттестация безопасности и не доказательство высокой доступности. Для курса достаточно уметь объяснить каждый переход и показать обезличенные запросы; держать VPS включённым постоянно не требуется.</p></div>
+<section class="sources"><h3>Проверка публичного слоя</h3><ul><li><a href="https://caddyserver.com/docs/automatic-https">Caddy: автоматический HTTPS, требования и ACME</a></li><li><a href="https://caddyserver.com/docs/caddyfile/directives/reverse_proxy">Caddy reverse_proxy</a></li><li><a href="https://docs.docker.com/engine/network/packet-filtering-firewalls/#docker-and-ufw">Docker и UFW</a></li><li><a href="https://www.rfc-editor.org/rfc/rfc5737.html">RFC 5737: адреса для документации</a></li><li><a href="https://curl.se/docs/sslcerts.html">curl: проверка сертификатов</a></li></ul></section>
+
+<nav class="chapter-pagination" aria-label="Следующий этап"><a href="#vm">← Переносим на Linux-VM</a><a href="#operate">Проверяем и останавливаем →</a></nav></article><article class="workshop-chapter" id="operate" tabindex="-1" aria-labelledby="operate-title">
+<header class="chapter-header"><p class="eyebrow">ПРАКТИКУМ · ШАГ 7 ИЗ 7</p>
+<h1 id="operate-title">Проверяем и останавливаем</h1><p class="lead">Работающий запрос — только начало. Проверим восстановление после остановки, сохранность данных и возможность завершить эксперимент без потери контроля.</p></header>
+<h2>1. Проверка «жив» не равна проверке «готов»</h2>
+<p>Выполняй этот эксперимент только на своём учебном Compose-проекте. Выбери одно окружение: локальный Docker или VM. Все команды ниже относятся к <em>его</em> каталогу и <em>его</em> loopback. Если работаешь на VM, выполняй их в SSH-сеансе. Не останавливай базу рабочего приложения.</p>
+<div class="command"><div class="command-place">Выбранный учебный Linux-хост · каталог service-workshop</div><pre><code>docker compose stop db
+curl --noproxy 127.0.0.1 --connect-timeout 2 --max-time 5 -i http://127.0.0.1:8080/health/live
+curl --noproxy 127.0.0.1 --connect-timeout 2 --max-time 5 -i http://127.0.0.1:8080/health/ready
+curl --config .secrets/client.curl -i http://127.0.0.1:8080/tasks</code></pre></div>
+<p>Ожидаем <code>live → 200</code>, <code>ready → 503</code>, <code>tasks → 503</code>. Процесс способен принять HTTP-запрос, но сейчас не может выполнить обещанную операцию с базой. Первая проверка нужна для обнаружения неработающего процесса; вторая — для решения, можно ли направлять ему рабочие запросы. Внешний мониторинг должен учитывать обе, а не объявлять сервис исправным по одному живому PID.</p>
+<div class="command"><div class="command-place">Тот же учебный Linux-хост · восстановление db</div><pre><code>docker compose start db &amp;&amp;
+docker compose up -d --wait --wait-timeout 90 &amp;&amp;
+curl --config .secrets/client.curl -i http://127.0.0.1:8080/tasks &amp;&amp;
+docker compose logs --tail 30 app</code></pre></div>
+<p>Список должен снова читаться, а прежние задачи сохраняться. Не меняй пароль и схему в середине этого опыта: тогда это уже другой отказ. Если db не становится healthy, начни с её логов. Время ожидания ограничено намеренно — бесконечное ожидание не является диагностикой.</p>
+
+<h2>2. Резервная копия, которую действительно прочитали</h2>
+<p>Volume — не резервная копия. Он защищает от обычной замены контейнера, но не от ошибочного DELETE, потери диска или удаления volume. Сделаем логическую копию (описание схемы и данных в переносимом формате PostgreSQL) и восстановим её <strong>в другую, новую пустую базу</strong>. Нужны только собственные учебные данные и доверенный источник копии.</p>
+<p>Сначала создай две задачи и измени одну, чтобы в таблице были разные ID и версии. Не меняй данные между сверками. Создай новый приватный каталог; если он уже существует, выбери новое имя и скорректируй пути:</p>
+<div class="command"><div class="command-place">Выбранный учебный Linux-хост · каталог service-workshop</div><pre><code>mkdir -m 700 backups &amp;&amp;
+(
+  umask 077
+  set -C
+  docker compose exec -T db pg_dump -U postgres -d course_tasks \
+    -Fc --no-owner --no-acl &gt; backups/tasks-before-test.dump
+)</code></pre></div>
+<p><code>-Fc</code> выбирает архивный формат PostgreSQL, <code>-T</code> убирает псевдотерминал, чтобы бинарный вывод не был испорчен. Перенаправление <code>&gt;</code> выполняет shell <em>хоста</em>, значит файл лежит не в контейнере. <code>umask 077</code> ограничивает права нового файла; <code>set -C</code> запрещает перезапись существующего. Скобки ограничивают эти shell-настройки данным блоком. Если pg_dump завершился ошибкой, файл может существовать, но быть неполным: не считай наличие файла успехом.</p>
+<div class="command"><div class="command-place">Тот же учебный Linux-хост · проверить архив и создать НОВУЮ базу</div><pre><code>docker compose exec -T db pg_restore --list &lt; backups/tasks-before-test.dump
+docker compose exec -T db createdb -U postgres --template=template0 course_tasks_restore_check</code></pre></div>
+<p><strong>Продолжай только если createdb завершился успешно.</strong> Если база уже существует, не добавляй DROP, <code>--clean</code> и команды удаления: выбери новое имя и используй его последовательно. Следующий шаг никогда не должен указывать на исходную <code>course_tasks</code>.</p>
+<div class="command"><div class="command-place">Тот же учебный Linux-хост · восстановление только в новую restore_check</div><pre><code>docker compose exec -T db pg_restore -U postgres \
+  -d course_tasks_restore_check --exit-on-error --single-transaction \
+  --no-owner --no-acl &lt; backups/tasks-before-test.dump
+docker compose exec -T db psql -U postgres -d course_tasks_restore_check \
+  -v ON_ERROR_STOP=1 -c 'SELECT id, title, done, version FROM public.tasks ORDER BY id;'
+docker compose exec -T db psql -U postgres -d course_tasks \
+  -v ON_ERROR_STOP=1 -c 'SELECT id, title, done, version FROM public.tasks ORDER BY id;'</code></pre></div>
+<p>Сверь <em>все значения</em>, а не только число строк. Успешный pg_restore и совпадение данных показывают, что эту копию можно прочитать. <code>--single-transaction</code> делает данный restore одной транзакцией, <code>--exit-on-error</code> не позволяет молча продолжать после ошибки.</p>
+<p>При восстановлении <code>--no-owner</code> запрещает применять исходное владение, а <code>--no-acl</code> — исходные разрешения. Архивный формат может сохранять сведения о владельце; нужное поведение здесь задаёт именно pg_restore. Восстановленная таблица принадлежит восстанавливающему администратору; <code>course_app</code> не получает автоматически рабочие разрешения в новой базе. Это <strong>проверка логической схемы и данных</strong>, не полное аварийное восстановление приложения. Для реального восстановления дополнительно проверяют роли, GRANT, настройки, миграции, секреты, подключение API и время возврата в работу. Копия на том же диске также не защищает от потери этого диска; переносить её нужно отдельно и безопасно, учитывая наличие данных внутри.</p>
+
+<h2>3. Обновление кода — отдельная операция</h2>
+<p>Правка исходника не меняет уже работающий процесс. В Compose нужно собрать новый образ и заменить контейнер app. Перед опытом сохрани рабочую редакцию исходников, результаты тестов и текущий образ. Потренируйся на нейтральном изменении, например дополнительном безопасном сообщении о старте, а не на несовместимой схеме данных.</p>
+<div class="command"><div class="command-place">Учебный Linux-хост · перед заменой app · имя образа запиши</div><pre><code>docker compose images app
+docker compose build app
+docker compose up -d --wait --wait-timeout 90 app
+curl --config .secrets/client.curl -i http://127.0.0.1:8080/tasks</code></pre></div>
+<p>Для осмысленного rollback (возврата на предыдущую версию) старый образ нужно заранее сохранить под отдельным тегом или digest и уметь выбрать его конфигурацией релиза. Сборка прежних исходников — другой, менее надёжный путь, потому что внешние базовые образы могли обновиться. Здесь мы не выдаём <code>restart</code> за доставку новой версии и не обещаем автоматический откат.</p>
+<p>Отдельно подумай: если новая версия успела несовместимо изменить таблицу, поможет ли возврат одного бинарника? Нет — совместимость данных и приложения нужно планировать вместе. В этом практикуме init-скрипт не заменяет инструмент миграций. Более полный безопасный цикл релиза разобран в станции 10.</p>
+
+<h2>4. Нагрузка — только на своём ограниченном стенде</h2>
+<p>Не запускай нагрузку на чужие адреса и публичную версию учебника. Для первого опыта достаточно последовательных запросов и пары одновременных клиентов; затем используй <a href="cpp_station10_production.html#section=capacity-local-lab">ограниченную локальную нагрузочную лабораторную станции 10</a>. Учебный API требует токен для <code>/tasks</code>, поэтому готовый скрипт той лабораторной нужно согласовать с авторизацией: общий health-запрос не измеряет SQL-путь, а ответы 401 не означают пропускную способность CRUD.</p>
+<p>Фиксируй число запросов в секунду, долю ошибок и задержки, а не «количество пользователей вообще». Один пользователь может отправлять запрос раз в минуту или сотни раз в секунду. При росте параллелизма следи за лимитом задач и соединениями базы. Останови опыт при ошибках или явной нехватке ресурсов; цель — понять предел и причину, а не любой ценой добиться красивой цифры.</p>
+
+<h2>5. Завершаем без случайной потери данных</h2>
+<div class="table-scroll"><table><thead><tr><th>Что нужно завершить</th><th>Правильное действие</th><th>Что останется</th></tr></thead><tbody>
+<tr><td>Нативный процесс</td><td>Ctrl-C в его терминале</td><td>Исходники и сборка; задачи из памяти исчезнут.</td></tr>
+<tr><td>SSH-туннель</td><td>Ctrl-C в локальном терминале туннеля</td><td>Удалённые контейнеры продолжат работать.</td></tr>
+<tr><td>Базовый Compose-проект</td><td><code>docker compose down</code> в его каталоге на нужном хосте</td><td>Именованный volume и его данные.</td></tr>
+<tr><td>Проект с Caddy</td><td><code>docker compose -f compose.yaml -f compose.https.yaml down</code> с заданными COURSE_DOMAIN/ACME_EMAIL</td><td>Данные PostgreSQL и Caddy. Домен/DNS и счёт провайдера отдельно.</td></tr>
+<tr><td>Аренду VPS</td><td>Сохранить нужное, затем удалить свой учебный ресурс в панели провайдера и проверить связанные диски/IP/копии</td><td>Только то, что явно сохранено вне удаляемой машины.</td></tr>
+</tbody></table></div>
+<p>Удаление volume и сервера необратимо без пригодной копии, поэтому автоматическая «уборка всего» здесь намеренно не предлагается. Контейнеры одного проекта останавливаем из его каталога, не командами «удалить все контейнеры/образы/диски Docker». Секреты остаются секретами и после выключения; не публикуй их вместе с отчётом.</p>
+<div class="stage-result"><h3>Что показать и рассказать после практикума</h3><ul class="checklist"><li>Схему запроса: клиент → адрес/порт → HTTP → app → SQL → ответ.</li><li>Примеры 201, 200, 204, 401, 412 и 503 с объяснением причины.</li><li>Доказательство сохранения задачи после пересоздания контейнеров.</li><li>Разницу live/ready при выключенной базе и результат восстановления.</li><li>Проверенную логическую резервную копию с оговоркой о правах и ролях.</li><li>Для удалённого этапа — различие двух localhost, путь SSH-туннеля и отсутствие публичного 8080/5432.</li></ul><p>Говори об этом как об учебном проекте и честно называй проверенные пределы. Осмысленное объяснение ограничений ценнее заявления «сделал production-ready high-load».</p></div>
+<section class="sources"><h3>Восстановление и жизненный цикл</h3><ul><li><a href="https://www.postgresql.org/docs/18/app-pgdump.html">PostgreSQL 18: pg_dump и логический снимок</a></li><li><a href="https://www.postgresql.org/docs/18/app-pgrestore.html">PostgreSQL 18: pg_restore, доверие к архиву и транзакция</a></li><li><a href="https://docs.docker.com/reference/cli/docker/compose/up/">Compose up: сборка, замена и ожидание</a></li><li><a href="https://docs.docker.com/reference/cli/docker/compose/down/">Compose down: что удаляется и что сохраняется</a></li></ul></section>
+
+<nav class="chapter-pagination" aria-label="Следующий этап"><a href="#vps">← Необязательно: VPS и HTTPS</a><a href="cpp_station10_production.html">Вернуться к станции 10 →</a></nav></article><p id="workshop-status" class="sr-only" role="status" aria-live="polite"></p></main></div>
+<script src="assets/service-workshop.js?v=20261025" defer></script></body></html>
