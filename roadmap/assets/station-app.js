@@ -23,7 +23,7 @@
   // A theory link opens a separate tab so the quiz attempt stays mounted.
   function isWorkbook(section) { return /(?:-final-workbook|clock-worked-example)$/.test(section.id); }
   var pageParams = new URLSearchParams(window.location.hash.slice(1));
-  var requestedView = ["checkpoint", "final", "quiz", "interview", "tasks", "analysis"].indexOf(pageParams.get("view")) >= 0 ? pageParams.get("view") : "theory";
+  var requestedView = ["checkpoint", "final", "quiz", "interview", "tasks", "analysis", "training"].indexOf(pageParams.get("view")) >= 0 ? pageParams.get("view") : "theory";
   var requestedModule = pageParams.get("module");
   var requestedSectionId = new URLSearchParams(window.location.hash.slice(1)).get("section");
   var requestedSection = theory.find(function (section) { return section.id === requestedSectionId; });
@@ -32,7 +32,8 @@
   var quizLabels = {
     basic: "БАЗОВЫЙ ТЕСТ",
     advanced: "УГЛУБЛЁННЫЙ ТЕСТ",
-    interview: "ИНТЕРВЬЮ-ТРЕНАЖЁР"
+    interview: "ИНТЕРВЬЮ-ТРЕНАЖЁР",
+    training: "ДОПОЛНИТЕЛЬНАЯ ТРЕНИРОВКА"
   };
 
   function loadStore() {
@@ -201,6 +202,49 @@
 
   function chapterQuestions(bank, id, refs) {
     return prioritizeQuestions((bank.basic || []).filter(function (q) { return q.substation === id; }), refs).slice(0, 3);
+  }
+
+  // Training exposes every authored position, including questions deliberately
+  // excluded from the short exam. Do not deduplicate or randomly sample it.
+  function trainingEntries(bank, moduleId, kind) {
+    var kinds = kind === "basic" || kind === "advanced" ? [kind] : ["basic", "advanced"];
+    return kinds.reduce(function (entries, sourceKind) {
+      return entries.concat((bank[sourceKind] || []).map(function (question, index) {
+        return { id: sourceKind + ":" + index, kind: sourceKind, question: question };
+      }).filter(function (entry) { return !moduleId || entry.question.substation === moduleId; }));
+    }, []);
+  }
+
+  function trainingSettings(params, modules) {
+    var moduleId = params.get("module") || "";
+    var kind = params.get("kind");
+    var size = Number(params.get("size")), batch = Number(params.get("set"));
+    return {
+      module: modules.some(function (module) { return module.id === moduleId; }) ? moduleId : "",
+      kind: kind === "basic" || kind === "advanced" ? kind : "all",
+      size: [5, 10, 15].indexOf(size) >= 0 ? size : 10,
+      batch: Number.isSafeInteger(batch) && batch >= 1 ? batch - 1 : null
+    };
+  }
+
+  function trainingHash(settings) {
+    var hash = "#view=training";
+    if (settings.module) hash += "&module=" + encodeURIComponent(settings.module);
+    if (settings.kind !== "all") hash += "&kind=" + settings.kind;
+    if (settings.size !== 10) hash += "&size=" + settings.size;
+    if (settings.batch !== null) hash += "&set=" + (settings.batch + 1);
+    return hash;
+  }
+
+  function trainingBatches(entries, size) {
+    size = [5, 10, 15].indexOf(size) >= 0 ? size : 10;
+    var batches = [];
+    for (var start = 0; start < entries.length; start += size) batches.push(entries.slice(start, start + size));
+    return batches;
+  }
+
+  function trainingResultKey(entries) {
+    return entries.length ? "station-training:v1:" + entries.map(function (entry) { return entry.id; }).join("|") : "";
   }
 
   // Keep the original task data (including hints and solutions) intact.
@@ -630,6 +674,7 @@
     function restart() {
       setQuestions(prepareQuestions(props.questions));
       setIdx(0); setSelected(null); setScore(0); setDone(false); scrollTop();
+      if (props.onRestart) props.onRestart();
     }
 
     if (done) {
@@ -714,6 +759,87 @@
       onBack: function () { setSelected(null); scrollTop(); },
       onSave: function (score, total) { props.saveResult(selected, score, total); }
     });
+  }
+
+  function Training(props) {
+    var settingsState = useState(function () { return trainingSettings(new URLSearchParams(window.location.hash.slice(1)), props.modules); });
+    var settings = settingsState[0], setSettings = settingsState[1];
+    var finishedState = useState(false), finished = finishedState[0], setFinished = finishedState[1];
+    React.useEffect(function () {
+      function followTrainingHash() {
+        var params = new URLSearchParams(window.location.hash.slice(1));
+        if (params.get("view") !== "training") return;
+        setSettings(trainingSettings(params, props.modules));
+        setFinished(false);
+      }
+      window.addEventListener("hashchange", followTrainingHash);
+      window.addEventListener("popstate", followTrainingHash);
+      return function () {
+        window.removeEventListener("hashchange", followTrainingHash);
+        window.removeEventListener("popstate", followTrainingHash);
+      };
+    }, [props.modules]);
+    function choose(changes) {
+      var next = Object.assign({}, settings, { batch: null }, changes);
+      setSettings(next); setFinished(false);
+      try { history.replaceState(null, "", trainingHash(next)); } catch (_) {}
+      scrollTop();
+    }
+    var entries = trainingEntries(props.bank, settings.module, settings.kind);
+    var batches = trainingBatches(entries, settings.size);
+    var batch = settings.batch === null ? null : batches[settings.batch];
+    var module = props.modules.find(function (item) { return item.id === settings.module; });
+    var kindLabel = settings.kind === "basic" ? "Базовые" : settings.kind === "advanced" ? "Углублённые" : "Базовые и углублённые";
+    if (batch) {
+      return h("section", { className: "station-training" },
+        h("h2", null, "Дополнительная тренировка"),
+        h("p", { className: "notes training-scope" }, (module ? module.label + " · " + module.title : "Вся станция") + " · " + kindLabel),
+        h("div", { className: "training-attempt-heading" },
+          h("strong", null, "Набор " + (settings.batch + 1) + " из " + batches.length),
+          h("span", null, "Вопросы " + (settings.batch * settings.size + 1) + "–" + Math.min((settings.batch + 1) * settings.size, entries.length) + " из " + entries.length)),
+        h(Quiz, { key: trainingResultKey(batch), kind: "training", questions: batch.map(function (entry) { return entry.question; }),
+          backLabel: "← К выбору набора", onBack: function () { choose({ batch: null }); },
+          onRestart: function () { setFinished(false); },
+          onSave: function (score, total) { props.onSave(trainingResultKey(batch), score, total); setFinished(true); } }),
+        finished ? h("details", { className: "training-review" }, h("summary", null, "Разборы вопросов этого набора"), batch.map(function (entry, index) {
+          var question = entry.question, parsed = splitQuestion(question.q);
+          return h("article", { className: "training-review-item", key: entry.id },
+            h("h3", null, (index + 1) + ". " + parsed.stem),
+            parsed.code ? h("pre", { className: "question-code" }, h("code", null, parsed.code)) : null,
+            h("p", { className: "training-review-answer" }, h("strong", null, "Верный ответ: "), question.options[question.answer]),
+            h("p", null, question.why),
+            h("ul", null, (question.theoryRefs || []).map(function (id) {
+              var section = theory.find(function (item) { return item.id === id; });
+              return section ? h("li", { key: id }, h("a", { href: "#section=" + encodeURIComponent(id), target: "_blank", rel: "noopener noreferrer" }, section.title, " ↗")) : null;
+            })));
+        })) : null,
+        finished ? h("div", { className: "training-next section-actions" },
+          settings.batch + 1 < batches.length ? h("button", { className: "primary", onClick: function () { choose({ batch: settings.batch + 1 }); } }, "Следующий набор →") : h("p", { className: "notes" }, "Это последний набор в выбранной подборке."),
+          h("button", { className: "secondary", onClick: function () { choose({ batch: null }); } }, "Выбрать другую подборку")) : null);
+    }
+    return h("section", { className: "station-training" },
+      h("div", { className: "kicker" }, "В СВОЁМ ТЕМПЕ"),
+      h("h2", null, "Дополнительная тренировка"),
+      h("p", { className: "section-lead" }, "Все базовые и углублённые вопросы станции — небольшими наборами. Выбери подглаву или повтори станцию целиком."),
+      h("p", { className: "notes" }, "Это необязательная практика: её результаты сохраняются отдельно и не меняют балл итогового теста или отметки изученных разделов. Интервью-вопросы остаются в отдельном тренажёре."),
+      h("div", { className: "training-filters", role: "group", "aria-label": "Подборка вопросов" },
+        h("label", null, h("span", null, "Что повторить"), h("select", { value: settings.module, onChange: function (event) { choose({ module: event.target.value }); } },
+          h("option", { value: "" }, "Вся станция"), props.modules.map(function (item) { return h("option", { key: item.id, value: item.id }, item.label + " · " + item.title); }))),
+        h("label", null, h("span", null, "Вопросы"), h("select", { value: settings.kind, onChange: function (event) { choose({ kind: event.target.value }); } },
+          h("option", { value: "all" }, "Базовые и углублённые"), h("option", { value: "basic" }, "Только базовые"), h("option", { value: "advanced" }, "Только углублённые"))),
+        h("label", null, h("span", null, "Размер набора"), h("select", { value: settings.size, onChange: function (event) { choose({ size: Number(event.target.value) }); } },
+          [5, 10, 15].map(function (size) { return h("option", { key: size, value: size }, "До " + size + " вопросов"); })))),
+      h("p", { className: "training-summary", role: "status" }, entries.length ? "В подборке: " + entries.length + " вопросов · Наборов: " + batches.length : "В этой подборке пока нет вопросов. Выбери другую подглаву или тип вопросов."),
+      settings.batch !== null ? h("p", { className: "notes" }, "Такого набора в выбранной подборке нет. Выбери один из доступных ниже.") : null,
+      batches.length ? h("div", { className: "training-batches", role: "group", "aria-label": "Наборы вопросов" }, batches.map(function (items, index) {
+        var result = props.store[trainingResultKey(items)];
+        return h("button", { key: trainingResultKey(items), className: "training-batch" + (result ? " is-attempted" : ""), onClick: function () { choose({ batch: index }); } },
+          h("span", { className: "training-batch-number" }, "Набор " + (index + 1)),
+          h("strong", null, "Вопросы " + (index * settings.size + 1) + "–" + Math.min((index + 1) * settings.size, entries.length)),
+          h("span", { className: "training-batch-result" }, result ? "Последняя попытка: " + scoreText(result) : "Ещё не пройден"),
+          h("span", { className: "training-batch-arrow", "aria-hidden": true }, "→"));
+      })) : null,
+      h("p", { className: "notes training-order" }, "Наборы последовательные, без случайного отбора: сначала базовые вопросы, затем углублённые. Поэтому можно дойти до каждого вопроса. При повторе меняется только порядок вариантов ответа; после выбора доступны объяснение и ссылки на теорию."));
   }
 
   function Tasks(props) {
@@ -823,7 +949,15 @@
       function followHash() {
         var params = new URLSearchParams(window.location.hash.slice(1));
         var section = theory.find(function (item) { return item.id === params.get("section"); });
-        if (!section) return;
+        if (!section) {
+          var view = params.get("view");
+          if (["checkpoint", "final", "quiz", "interview", "tasks", "analysis", "training"].indexOf(view) < 0) return;
+          setTab(view);
+          var moduleId = params.get("module");
+          if (view === "checkpoint" && substations.some(function (item) { return item.id === moduleId; })) setActiveSubstationId(moduleId);
+          scrollTop();
+          return;
+        }
         setTab("theory");
         setSelectedSectionId(section.id);
         setActiveSubstationId(section.substation || "");
@@ -835,7 +969,11 @@
         scrollTop();
       }
       window.addEventListener("hashchange", followHash);
-      return function () { window.removeEventListener("hashchange", followHash); };
+      window.addEventListener("popstate", followHash);
+      return function () {
+        window.removeEventListener("hashchange", followHash);
+        window.removeEventListener("popstate", followHash);
+      };
     }, []);
     var hasSubstations = substations.length > 0;
     var activeSubstation = substations.find(function (item) { return item.id === activeSubstationId; });
@@ -915,7 +1053,7 @@
         location.protocol === "file:" ? h("div", { className: "file-warning" }, "Страница открыта как файл. Для надёжной загрузки React и сохранения прогресса запусти roadmap через локальный HTTP-сервер.") : null,
         h("p", { className: "reading-progress" }, "Изученные разделы: " + doneSections + " / " + theory.length)),
       hasSubstations ? h(SubstationNav, { items: substations, active: activeSubstationId, selected: selectedSectionId, view: tab, store: store, onChoose: chooseSubstation, onNavigate: navigateSection, onCheckpoint: function (id) { openPage("checkpoint", id); }, onPage: openPage }) : null,
-      (tab === "quiz" || tab === "interview" || tab === "tasks" || (tab === "theory" && selectedWorkbook)) ? h("button", { className: "ghost", onClick: function () { openPage("final"); } }, "← Завершение станции") : null,
+      (tab === "quiz" || tab === "interview" || tab === "tasks" || tab === "training" || (tab === "theory" && selectedWorkbook)) ? h("button", { className: "ghost", onClick: function () { openPage("final"); } }, "← Завершение станции") : null,
       tab === "theory" && data.readingOrder ? h("div", { className: "section-actions", "aria-label": "Порядок чтения" },
         h("button", { className: "secondary reading-mode", "aria-pressed": routeMode, onClick: function () { setRouteMode(true); updateStore({ readingRoute: true }); } }, "Первое чтение"),
         h("button", { className: "secondary reading-mode", "aria-pressed": !routeMode, onClick: function () { setRouteMode(false); updateStore({ readingRoute: false }); } }, "По темам")) : null,
@@ -938,10 +1076,15 @@
         h("p", { className: "section-lead" }, "Сначала проследи решение целой задачи, затем проверь знания всей станции и переходи к самостоятельной работе."),
         h("div", { className: "finale-grid" },
           h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "01 · РАЗБОР"), h("h3", null, "Задача с объяснением"), workedSections.map(function (section) { return h("button", { className: "secondary", key: section.id, onClick: function () { navigateSection(section.id); } }, section.title); })),
-          h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "02 · ПРОВЕРКА"), h("h3", null, "Итоговый тест"), h("p", null, activeQuizzes.basic.length + " вопросов по темам всей станции с объяснением ответов."), h("button", { className: "secondary", onClick: function () { openPage("quiz"); } }, "Открыть итоговый тест →")),
+          h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "02 · ПРОВЕРКА"), h("h3", null, "Итоговый тест"), h("p", null, activeQuizzes.basic.length + " вопросов по темам всей станции с объяснением ответов."), h("button", { className: "secondary", onClick: function () { openPage("quiz"); } }, "Открыть итоговый тест →"),
+            h("div", { className: "training-entry" }, h("p", null, "Хочешь ещё потренироваться? Все " + trainingEntries(quizzes).length + " базовых и углублённых вопросов доступны по подглавам, небольшими наборами."), h("button", { className: "secondary", onClick: function () { openPage("training"); } }, "Дополнительная тренировка →"))),
           h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "03 · СОБЕСЕДОВАНИЕ"), h("h3", null, "Интервью-тренажёр"), h("p", null, "Вопросов для подготовки к собеседованию: " + activeQuizzes.interview.length + ". Прежде чем выбирать ответ, попробуй объяснить решение вслух."), h("button", { className: "secondary", onClick: function () { openPage("interview"); } }, "Открыть интервью-тренажёр →")),
           h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "04 · ПРИМЕНЕНИЕ"), h("h3", null, "Практика"), h("p", null, "Задачи из открытых курсов, лабораторные и LeetCode по теме станции. Вопросы на предсказание вывода перенесены к тестам."), h("button", { className: "secondary", onClick: function () { openPage("tasks"); } }, "Перейти к заданиям →")))) : null,
       tab === "analysis" ? h("section", null, h("h2", null, "Вопросы с разбором"), h("p", { className: "notes" }, "Ответь своими словами до открытия подсказок. Эти вопросы не входят в оценку итогового теста на 25 вопросов."), h("button", { className: "ghost", onClick: function () { openPage("quiz"); } }, "← К итоговому тесту"), analysisTasks.length ? h(Tasks, { key: "analysis", tasks: analysisTasks }) : null) : null,
+      tab === "training" ? h(Training, { bank: quizzes, modules: substations, store: store, onSave: function (key, score, total) {
+        if (!key || key.indexOf("station-training:v1:") !== 0 || !Number.isInteger(score) || !Number.isInteger(total) || total < 1 || score < 0 || score > total) return;
+        var change = {}; change[key] = { score: score, total: total, at: new Date().toISOString() }; updateStore(change);
+      } }) : null,
       tab === "tasks" ? h("section", null, h(PracticeLinks), activeTasks.length ? h("div", null, h("h3", null, "Задачи учебника"), h(Tasks, { key: "station-practice", tasks: activeTasks })) : null) : null,
       h("div", { className: "footer-row" }, h("button", { className: "reset", onClick: function () { if (confirm("Сбросить прогресс этой станции?")) { var cleared = meta.id === "station9-sql" ? { migratedFromDatabases: true } : {}; try { localStorage.setItem(meta.storeKey, JSON.stringify(cleared)); } catch (_) {} setStore(cleared); } } }, "Сбросить прогресс")),
       h("footer", null, h("a", { href: "cpp_backend_roadmap.html" }, "← К программе курса"), " · ", h("a", { href: "sources.html#" + meta.id }, "Источники станции")));

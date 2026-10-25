@@ -1,0 +1,5 @@
+.env
+.git
+build*
+*.tar.gz
+__pycache__

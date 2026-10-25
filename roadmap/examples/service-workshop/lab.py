@@ -24,7 +24,7 @@ ARCHIVE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\.tar\.gz\Z")
 SOURCE_FILES = (
     "CMakeLists.txt", "app.cpp", "storage.hpp", "storage.cpp", "tests.cpp",
     "schema.sql", "Dockerfile", "compose.yaml",
-    "compose.https.yaml", "Caddyfile", "init-db.sh", "lab.py", "README.md",
+    "compose.https.yaml", "Caddyfile", "init-db.sh", "lab.py", "load.py", "README.md",
     ".dockerignore", ".gitignore",
 )
 

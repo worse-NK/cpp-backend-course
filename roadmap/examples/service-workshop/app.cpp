@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <cerrno>
+#include <chrono>
 #include <csignal>
 #include <cstdlib>
 #include <iostream>
@@ -9,11 +10,31 @@
 #include <string>
 #include <syncstream>
 #include <thread>
+#include <utility>
 #include <httplib.h>
 #include <nlohmann/json.hpp>
 
 namespace {
 using Json = nlohmann::json;
+// Per-response context: never reuse the last request's metrics on this worker.
+// These intervals exclude HTTP parsing, the worker queue and socket writes.
+struct RequestTiming { std::int64_t handler_us = 0, storage_us = 0; };
+class Measure {
+  std::int64_t& elapsed_;
+  std::chrono::steady_clock::time_point start_ = std::chrono::steady_clock::now();
+public:
+  explicit Measure(std::int64_t& elapsed) : elapsed_(elapsed) {}
+  Measure(const Measure&) = delete;
+  Measure& operator=(const Measure&) = delete;
+  ~Measure() {
+    elapsed_ += std::chrono::duration_cast<std::chrono::microseconds>(
+      std::chrono::steady_clock::now() - start_).count();
+  }
+};
+template<class F> decltype(auto) measured_storage(RequestTiming& timing, F&& operation) {
+  Measure interval(timing.storage_us);
+  return std::forward<F>(operation)();
+}
 std::string env_or(const char* name, const char* fallback) {
   const char* value = std::getenv(name);
   return value ? value : fallback;
@@ -125,8 +146,16 @@ int main() {
     server.set_payload_max_length(course::max_body_bytes);
     server.set_logger([](const httplib::Request& request, const httplib::Response& response) {
       // Never print raw paths, query strings, tokens, bodies or DB exceptions.
-      std::osyncstream(std::cout) << "request method=" << log_method(request.method)
-        << " path=" << log_path(request.path) << " status=" << response.status << '\n' << std::flush;
+      std::osyncstream line(std::cout);
+      line << "request method=" << log_method(request.method)
+        << " path=" << log_path(request.path) << " status=" << response.status;
+      if (const auto* timing = response.user_data.get<RequestTiming>("course_timing")) {
+        line << " handler_us=" << timing->handler_us << " storage_us=" << timing->storage_us;
+      } else {
+        // Authentication/parser failures may never enter our handler.
+        line << " handler_us=not_measured storage_us=not_measured";
+      }
+      line << '\n' << std::flush;
     });
     server.set_exception_handler([](const auto&, auto& response, std::exception_ptr) {
       error_response(response, 503, "service_unavailable");
@@ -161,29 +190,33 @@ int main() {
     });
 
     auto handler = [&](const httplib::Request& request, httplib::Response& response) {
+      response.user_data.set("course_timing", RequestTiming{});
+      auto& timing = *response.user_data.get<RequestTiming>("course_timing");
+      Measure handler_interval(timing.handler_us);
       try {
         const auto selected = route(request.path);
         if (selected == Route::live || selected == Route::ready) {
-          bool ready = selected == Route::live || storage->ready();
+          bool ready = selected == Route::live || measured_storage(timing, [&] { return storage->ready(); });
           json_response(response, ready ? 200 : 503, {{"status",ready ? "ok" : "unavailable"}});
           return;
         }
         if (selected == Route::collection && request.method == "GET") {
           Json result = Json::array();
-          for (const auto& task : storage->list()) result.push_back(as_json(task));
+          for (const auto& task : measured_storage(timing, [&] { return storage->list(); })) result.push_back(as_json(task));
           json_response(response, 200, result);
           return;
         }
         const auto id = selected == Route::task ? course::parse_positive(std::string_view(request.path).substr(7)) : 0;
         if (request.method == "GET") {
-          auto task = storage->get(id);
+          auto task = measured_storage(timing, [&] { return storage->get(id); });
           if (!task) { error_response(response, 404, "not_found"); return; }
           response.set_header("ETag", etag(task->version));
           json_response(response, 200, as_json(*task));
           return;
         }
         if (request.method == "DELETE") {
-          if (!storage->erase(id, precondition(request))) error_response(response, 412, "precondition_failed");
+          const auto expected = precondition(request);
+          if (!measured_storage(timing, [&] { return storage->erase(id, expected); })) error_response(response, 412, "precondition_failed");
           else response.status = 204;
           return;
         }
@@ -191,12 +224,12 @@ int main() {
         if (!json_content_type(request)) { error_response(response, 415, "application_json_required"); return; }
         const auto input = course::parse_input(request.body);
         if (request.method == "POST") {
-          auto task = storage->create(input);
+          auto task = measured_storage(timing, [&] { return storage->create(input); });
           response.set_header("Location", "/tasks/" + std::to_string(task.id));
           response.set_header("ETag", etag(task.version));
           json_response(response, 201, as_json(task));
         } else {
-          auto task = storage->update(id, expected, input);
+          auto task = measured_storage(timing, [&] { return storage->update(id, expected, input); });
           if (!task) { error_response(response, 412, "precondition_failed"); return; }
           // RFC 9110 9.3.4: PUT input is transformed into a representation with
           // server-managed id/version. Do not return a validator for it here;

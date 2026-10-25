@@ -528,3 +528,44 @@ a:focus-visible, summary:focus-visible { outline:2px solid var(--blue); outline-
 .assessment-extra { margin:20px 0 28px; padding:16px 0; border-block:1px solid var(--line); }
 .assessment-extra p { color:var(--mute); font-size:14px; line-height:1.7; }
 .practice-links .finale-item { margin:16px 0; }
+
+/* Optional repetition stays inside the station ending, not in the reading UI. */
+.training-entry { margin-top:22px; padding-top:16px; border-top:1px solid var(--line); }
+.training-entry p { margin:0 0 12px; font-size:14px; }
+.station-training h2 { margin:10px 0 16px; }
+.training-filters { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(125px,.7fr); gap:16px; margin:28px 0 20px; }
+.training-filters label { min-width:0; display:flex; flex-direction:column; gap:8px; font-size:13px; color:var(--mute); }
+.training-filters select { min-width:0; width:100%; min-height:44px; padding:10px 30px 10px 12px; border:1px solid var(--line); border-radius:5px; background:#fff; color:var(--ink); font:inherit; line-height:1.5; cursor:pointer; }
+.training-filters select:focus-visible, .training-batch:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
+.training-summary { font-size:14px; line-height:1.7; color:var(--blue-deep); margin:0 0 18px; }
+.training-batches { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.training-batch { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:10px; min-width:0; padding:20px 34px 20px 18px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); text-align:left; font:inherit; cursor:pointer; }
+.training-batch:hover { border-color:var(--blue); background:#f5f8fa; }
+.training-batch.is-attempted { border-left:3px solid #829b90; padding-left:16px; }
+.training-batch-number { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--mute); }
+.training-batch strong { font-size:15px; font-weight:600; line-height:1.5; }
+.training-batch-result { font-size:12px; line-height:1.6; color:var(--mute); }
+.training-batch-arrow { position:absolute; right:16px; top:19px; color:var(--blue); }
+.training-order { margin-top:22px; }
+.training-attempt-heading { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px 20px; padding:15px 0; margin-bottom:8px; border-block:1px solid var(--line); font-size:14px; }
+.training-attempt-heading > span { font-size:13px; color:var(--mute); }
+.training-scope { margin-bottom:22px; }
+.training-next { align-items:center; }
+.training-next p { margin:0; }
+.training-review { margin-top:24px; padding:18px; border:1px solid var(--line); border-radius:6px; background:#fff; }
+.training-review > summary { color:var(--blue-deep); font-size:14px; line-height:1.6; cursor:pointer; }
+.training-review-item { padding-top:22px; margin-top:22px; border-top:1px solid var(--line); font-size:14px; line-height:1.75; }
+.training-review-item h3 { font-size:16px; line-height:1.6; font-weight:600; margin:0 0 16px; }
+.training-review-item p { margin:12px 0; }
+.training-review-item ul { padding-left:20px; margin:14px 0 0; }
+.training-review-item a { overflow-wrap:anywhere; }
+.training-review-answer { color:var(--blue-deep); }
+@media(max-width:760px) {
+  .training-filters { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .training-filters label:first-child { grid-column:1 / -1; }
+  .training-batches { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:440px) {
+  .training-filters, .training-batches { grid-template-columns:minmax(0,1fr); }
+  .training-filters label:first-child { grid-column:auto; }
+}

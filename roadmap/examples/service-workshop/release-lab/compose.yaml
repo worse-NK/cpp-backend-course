@@ -1,0 +1,67 @@
+name: ${RELEASE_LAB_PROJECT:?Run python3 release_lab.py init}
+
+x-client: &client
+  build: .
+  image: ${RELEASE_LAB_PROJECT:?Run init}-clients:local
+  profiles: [tools]
+  environment:
+    PGHOST: db
+    PGPORT: "5432"
+    PGDATABASE: release_course
+    PGUSER: release_app
+    PGPASSWORD: ${APP_DB_PASSWORD:?Run init}
+  labels:
+    org.cpp-backend-course.release-lab: ${RELEASE_LAB_PROJECT:?Run init}
+  networks: [backend]
+  read_only: true
+  tmpfs: ["/tmp:rw,noexec,nosuid,size=8m"]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  cpus: "0.5"
+  mem_limit: 128m
+  pids_limit: 64
+
+services:
+  db:
+    image: postgres:18-bookworm
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: release_course
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run init}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Run init}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    labels:
+      org.cpp-backend-course.release-lab: ${RELEASE_LAB_PROJECT:?Run init}
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./init-db.sh:/docker-entrypoint-initdb.d/10-release.sh:ro
+      - ./001-initial.sql:/opt/release-lab/001-initial.sql:ro
+      - ./002-expand-note.sql:/opt/release-lab/002-expand-note.sql:ro
+    networks: [backend]
+    cpus: "1.0"
+    mem_limit: 512m
+    pids_limit: 128
+    healthcheck:
+      test: [CMD, pg_isready, -h, "127.0.0.1", -U, postgres, -d, release_course]
+      interval: 2s
+      timeout: 2s
+      start_period: 10s
+      retries: 20
+  v1:
+    <<: *client
+    entrypoint: [/usr/local/bin/release_v1]
+    command: [show]
+  v2:
+    <<: *client
+    entrypoint: [/usr/local/bin/release_v2]
+    command: [show]
+
+volumes:
+  pgdata:
+    labels:
+      org.cpp-backend-course.release-lab: ${RELEASE_LAB_PROJECT:?Run init}
+networks:
+  backend:
+    internal: true
+    labels:
+      org.cpp-backend-course.release-lab: ${RELEASE_LAB_PROJECT:?Run init}
