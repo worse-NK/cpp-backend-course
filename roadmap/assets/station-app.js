@@ -281,6 +281,7 @@
     var entries = catalog[meta.number] || [];
     if (meta.id === "station5-linux") entries = [["Linux man-pages · программы из pipe(2)", "https://man7.org/linux/man-pages/man2/pipe.2.html", "После итогового разбора воспроизведи пример канала из раздела EXAMPLES в отдельном учебном каталоге Linux. Затем измени передачу одного байта на поток из нескольких порций и объясни, какие закрытия нужны для EOF. Это адаптация практики по контракту API, не онлайн-проверка. Не запускай упражнения от root и не направляй сигналы чужим процессам."]];
     if (meta.id === "station7-netlab") entries = [["iproute2 · network namespaces", "https://man7.org/linux/man-pages/man8/ip-netns.8.html", "Сопоставь официальный пример с четырьмя узлами учебного стенда. Настройки разрешены только внутри одноразовой VM; для разбора без запуска составь карту интерфейсов, маршрутов и времени жизни namespace. Не переноси физические интерфейсы и не повторяй из внешних примеров массовую очистку или kill."]];
+    if (meta.id === "station7-traffic") entries = [["Wireshark · Follow Stream и TCP Analysis", "https://www.wireshark.org/docs/wsug_html_chunked/ChapterAdvanced.html", "Открой учебные PCAP из станции, восстанови HTTP-обмен и составь отчёт: наблюдение, гипотеза, недостающая проверка. Затем сравни свои выводы с официальным описанием анализа TCP. Это работа с файлами, а не захват чужого трафика; устанавливать Wireshark для чтения готового разбора не обязательно."]];
     if (meta.id === "station9-sql") entries = [["PostgreSQL · официальный практикум SQL", "https://www.postgresql.org/docs/18/tutorial-sql.html", "Для локальной практики PostgreSQL пройди таблицы, запросы и агрегаты. Встроенные задания этой станции можно решать в SQL-тренажёре; транзакционная лабораторная относится к следующей станции 9B."]];
     return h("section", { className: "practice-links" }, h("h2", null, "Практика"),
       h("p", { className: "section-lead" }, "Здесь нужно самостоятельно построить решение, а не выбрать готовый ответ."),
@@ -546,7 +547,7 @@
       h("article", { className: "card fade-in", key: section.id, "data-terms-scope": section.id },
         h("nav", { className: "reading-breadcrumbs", "aria-label": "Положение в курсе" },
           h("a", { href: "cpp_backend_roadmap.html" }, "Курс"), h("span", { "aria-hidden": true }, "/"),
-          h("span", null, "Станция " + (meta.id === "station5-linux" ? "5Б" : meta.id === "station7-netlab" ? "7Б" : meta.number === 9 ? (meta.id === "station9-sql" ? "9A" : "9B") : meta.number)), h("span", { "aria-hidden": true }, "/"),
+          h("span", null, "Станция " + (meta.id === "station5-linux" ? "5Б" : meta.id === "station7-netlab" ? "7Б" : meta.id === "station7-traffic" ? "7В" : meta.number === 9 ? (meta.id === "station9-sql" ? "9A" : "9B") : meta.number)), h("span", { "aria-hidden": true }, "/"),
           h("span", { "aria-current": "location" }, "Теория")),
         h("div", { className: "kicker" }, routeIndex >= 0 ? "ПЕРВОЕ ЧТЕНИЕ · ШАГ " + (routeIndex + 1) + " / " + props.readingOrder.length : "РАЗДЕЛ " + (active + 1) + " / " + sections.length),
         h("h2", { className: "section-title" }, section.title),
@@ -993,6 +994,7 @@
       if (["station3", "station5", "station5-linux", "station6", "station9-sql"].indexOf(meta.id) >= 0) return "station-final:systems-depth-20261025:v1:" + kind;
       if (["station7", "station8", "station9", "station10"].indexOf(meta.id) >= 0) return "station-final:architecture-20261025:v1:" + kind;
       if (meta.id === "station7-netlab") return "station-final:netlab-20261021:v1:" + kind;
+      if (meta.id === "station7-traffic") return "station-final:traffic-20261026:v1:" + kind;
       if (meta.number === 7 && (kind === "basic" || kind === "interview")) return "station-final:network-foundation-20261021:v1:" + kind;
       if (kind === "interview" && [3,6,9].indexOf(meta.number) >= 0) return "station-final:audit-20261015:v1:" + kind;
       if (meta.number === 9) return "station-final:database-split:v1:" + kind;
@@ -1071,7 +1073,7 @@
         checkpointQuestions.length ? h(Quiz, { key: "checkpoint:" + activeSubstationId, backLabel: "← Вернуться к подглаве", kind: "basic", questions: checkpointQuestions,
           onBack: function () { var last = activeTheory[activeTheory.length - 1]; if (last) navigateSection(last.id); }, onSave: function (score, total) { var change = {}; change["checkpoint:v2:" + activeSubstationId] = { score: score, total: total }; updateStore(change); } }) : h("p", null, "Для этой темы короткая проверка ещё готовится."), h("div", { className: "section-actions" }, h("button", { className: "secondary", onClick: continueChapter }, "Далее по учебнику →"))) : null,
       tab === "final" ? h("section", { className: "station-finale" },
-        h("p", { className: "kicker" }, "ЗАВЕРШЕНИЕ СТАНЦИИ " + (meta.id === "station5-linux" ? "5Б" : meta.id === "station7-netlab" ? "7Б" : meta.number === 9 ? (meta.id === "station9-sql" ? "9A" : "9B") : meta.number)),
+        h("p", { className: "kicker" }, "ЗАВЕРШЕНИЕ СТАНЦИИ " + (meta.id === "station5-linux" ? "5Б" : meta.id === "station7-netlab" ? "7Б" : meta.id === "station7-traffic" ? "7В" : meta.number === 9 ? (meta.id === "station9-sql" ? "9A" : "9B") : meta.number)),
         h("h2", null, "Собираем знания вместе"),
         h("p", { className: "section-lead" }, "Сначала проследи решение целой задачи, затем проверь знания всей станции и переходи к самостоятельной работе."),
         h("div", { className: "finale-grid" },

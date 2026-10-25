@@ -506,6 +506,10 @@ a:focus-visible, summary:focus-visible { outline:2px solid var(--blue); outline-
 .theory-text table, .note-text table { width:100%; border-collapse:collapse; font-size:14px; line-height:1.65; }
 .theory-text th, .theory-text td, .note-text th, .note-text td { padding:12px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); }
 .theory-text th, .note-text th { background:#edf1f2; font-weight:600; }
+.theory-text .table-scroll { max-width:100%; overflow-x:auto; margin:24px 0; border:1px solid var(--line); border-radius:6px; }
+.theory-text .table-scroll table { min-width:600px; }
+.theory-text .table-scroll:focus-visible { outline:3px solid var(--blue-deep); outline-offset:3px; }
+@media print { .theory-text .table-scroll { overflow:visible; } .theory-text .table-scroll table { min-width:0; } }
 .section-actions { padding-top:24px; border-top:1px solid var(--line); margin-top:32px; }
 @media (max-width:540px) {
   .network-visual { padding:16px; }

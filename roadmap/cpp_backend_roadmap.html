@@ -702,6 +702,38 @@
         "label": "Станция 10"
       },
       "num": 14
+    },
+    {
+      "id": "traffic-analysis",
+      "num": 15,
+      "optional": true,
+      "phase": "НЕОБЯЗАТЕЛЬНО · ПОСЛЕ СЕТЕЙ",
+      "title": "Анализ трафика: Wireshark и диагностика",
+      "goal": "Научиться читать захват пакетов: от первого открытия PCAP до обоснованного вывода о TCP, DNS, HTTP и задержках.",
+      "why": "Станции 7 достаточно для начала; Linux-лабораторию 7Б проходить заранее не обязательно. Можно читать готовые разборы без установки инструментов или открыть учебные файлы в Wireshark. Эта станция не входит в обязательный счётчик маршрута.",
+      "skills": [
+        "Безопасно записывать только собственный учебный обмен и понимать границы точки захвата.",
+        "Различать фильтр захвата и фильтр отображения, связывать список пакетов, поля и байты.",
+        "Читать sequence/ACK, повторные передачи и окна TCP без поспешных выводов.",
+        "Разбирать DNS, собирать HTTP-поток и понимать, что скрывают TLS и QUIC.",
+        "Сравнивать трассы, считать интервалы и отделять наблюдение от гипотезы о причине."
+      ],
+      "res": [
+        {"name": "Wireshark User’s Guide", "url": "https://www.wireshark.org/docs/wsug_html_chunked/", "note": "официальное руководство"},
+        {"name": "Учебные PCAP и пояснения", "url": "examples/traffic-analysis/README.txt", "note": "синтетические, без чужого трафика"}
+      ],
+      "project": {
+        "title": "Отчёт о медленном HTTP-ответе",
+        "desc": "Сравни две учебные трассы, восстанови обмен и найди, где увеличился наблюдаемый интервал. Объясни, почему этого ещё недостаточно для обвинения сети или сервера.",
+        "deliver": "Два файла захвата, фильтры, таблица времён, подтверждённые факты и план следующей проверки.",
+        "skills": "Wireshark, TShark, TCP, DNS, HTTP, причинная диагностика."
+      },
+      "station": {
+        "file": "cpp_station7_traffic_analysis.html",
+        "storeKey": "cpp_station7_traffic_progress_v1",
+        "totalSections": 25,
+        "label": "Станция 7В"
+      }
     }
   ],
   "closing": "Практические задания помогают собрать портфолио и научиться объяснять решения: какие ограничения были у задачи, почему выбран этот подход, как проверялась корректность и что изменится при росте нагрузки. Учебный проект следует представлять как учебный, не подменяя им коммерческий опыт. Прохождение курса не гарантирует определённый грейд: готовность к собеседованию лучше оценивать по самостоятельному решению незнакомых задач и способности обсуждать альтернативы. Маршрут завершается станцией 10: тестирование, доставка изменений и эксплуатация сервиса.",
@@ -793,9 +825,10 @@ function loadStationProgress(storeKey, totalSections) {
         const auditedCpp = /^cpp_station[0-4]_progress_v1$/.test(storeKey);
         const networkFoundation = storeKey === 'cpp_station7_progress_v1';
         const networkLab = storeKey === 'cpp_station7_netlab_progress_v1';
+        const trafficLab = storeKey === 'cpp_station7_traffic_progress_v1';
         const architectureAudit = ['cpp_station7_progress_v1', 'cpp_station8_progress_v1', 'cpp_station9_progress_v1', 'cpp_station10_progress_v1'].includes(storeKey);
         const systemsDepthAudit = ['cpp_station3_progress_v1', 'cpp_station5_progress_v1', 'cpp_station5_linux_progress_v1', 'cpp_station6_progress_v1', 'cpp_station9_sql_progress_v1'].includes(storeKey);
-        const quiz = systemsDepthAudit ? data['station-final:systems-depth-20261025:v1:basic'] : architectureAudit ? data['station-final:architecture-20261025:v1:basic'] : splitDatabase ? data['station-final:database-split:v1:basic'] : auditedCpp ? data["station-final:coverage:v1:basic"] : networkLab ? data['station-final:netlab-20261021:v1:basic'] : networkFoundation ? data['station-final:network-foundation-20261021:v1:basic'] : data["station-final:v3:basic"] || data["station-final:v2:basic"] || data.quiz || aggregateModuleQuiz("basic");
+        const quiz = systemsDepthAudit ? data['station-final:systems-depth-20261025:v1:basic'] : architectureAudit ? data['station-final:architecture-20261025:v1:basic'] : splitDatabase ? data['station-final:database-split:v1:basic'] : auditedCpp ? data["station-final:coverage:v1:basic"] : networkLab ? data['station-final:netlab-20261021:v1:basic'] : trafficLab ? data['station-final:traffic-20261026:v1:basic'] : networkFoundation ? data['station-final:network-foundation-20261021:v1:basic'] : data["station-final:v3:basic"] || data["station-final:v2:basic"] || data.quiz || aggregateModuleQuiz("basic");
         const quizAdvanced = (splitDatabase || architectureAudit || systemsDepthAudit) ? null : data.quizAdvanced || aggregateModuleQuiz("advanced");
         return { secDone, totalSections, quiz, quizAdvanced };
     }
@@ -900,7 +933,7 @@ function Stage({ stage, index, done, expanded, onToggleDone, onToggleExpand, isL
     }, [expanded, stage.station]);
     return (React.createElement("div", { style: S.stageRow },
         React.createElement("div", { style: S.rail },
-            React.createElement("button", { style: Object.assign(Object.assign({}, S.node), { borderColor: accent, background: done ? accent : "#fff", color: done ? "#fff" : accent }), onClick: onToggleDone, "aria-pressed": done, "aria-label": (done ? "Снять отметку: " : "Отметить пройденным: ") + stage.title, title: done ? "Пройдено" : "Отметить пройденным" }, done ? React.createElement(Icon.check, null) : React.createElement("span", { style: S.nodeNum }, index + 1)),
+            React.createElement("button", { style: Object.assign(Object.assign({}, S.node), { borderColor: accent, background: done ? accent : "#fff", color: done ? "#fff" : accent }), onClick: onToggleDone, "aria-pressed": done, "aria-label": (done ? "Снять отметку: " : "Отметить пройденным: ") + stage.title, title: done ? "Пройдено" : "Отметить пройденным" }, done ? React.createElement(Icon.check, null) : React.createElement("span", { style: S.nodeNum }, stage.optional ? "+" : index + 1)),
             !isLast && React.createElement("div", { style: Object.assign(Object.assign({}, S.railLine), { background: done ? accent : C.line }) })),
         React.createElement("div", { style: Object.assign(Object.assign({}, S.stageCard), (done ? S.stageCardDone : {})) },
             React.createElement("button", { style: S.stageHead, "aria-expanded": expanded, onClick: onToggleExpand },
@@ -991,8 +1024,9 @@ function App() {
     }
     function expandAll() { const a = {}; DATA.stages.forEach((_, i) => a[i] = true); setExpanded(a); }
     function collapseAll() { setExpanded({}); }
-    const doneCount = DATA.stages.filter(s => store[s.id]).length;
-    const pct = Math.round(doneCount / DATA.stages.length * 100);
+    const requiredStages = DATA.stages.filter(s => !s.optional);
+    const doneCount = requiredStages.filter(s => store[s.id]).length;
+    const pct = Math.round(doneCount / requiredStages.length * 100);
     const h = React.createElement;
     const ready = DATA.stages.filter(stage => stage.station);
     function groupStatus(group) {
@@ -1007,7 +1041,7 @@ function App() {
     const groups = [
         { id: "foundation", label: "01 / ОСНОВЫ ЯЗЫКА", title: "Научиться понимать C++", description: "От устройства объекта до управления ресурсами, контейнеров и обработки ошибок.", indices: [0, 1, 2, 3, 4] },
         { id: "engineering", label: "02 / ИНЖЕНЕРНАЯ ПРАКТИКА", title: "От кода — к работающей программе", description: "Сборка, процессы и ресурсы Linux, затем потоки и координация нескольких операций.", indices: [5, 6, 7] },
-        { id: "backend", label: "03 / BACKEND", title: "Построить взаимодействие", description: "Сети, изолированная Linux-лаборатория и API: от пути пакета до ответа сервиса.", indices: [8, 9, 10] },
+        { id: "backend", label: "03 / BACKEND", title: "Построить взаимодействие", description: "Сети, изолированная Linux-лаборатория и API. Необязательная 7В — анализ пакетов в Wireshark; к ней можно перейти сразу после 7.", indices: [8, 9, 14, 10] },
         { id: "databases-group", label: "04 / БАЗЫ ДАННЫХ", title: "От запросов к надёжному хранению", description: "9A — SQL и практика запросов. Затем 9B — PostgreSQL, конкуренция, индексы и работа из C++.", indices: [11, 12] },
         { id: "planned", label: "05 / ЭКСПЛУАТАЦИЯ", title: "Эксплуатация сервиса", description: "Тесты, контейнеры, CI, безопасный выпуск и наблюдаемость — станция 10.", indices: [13] }
     ];
@@ -1044,7 +1078,7 @@ function App() {
             h("section", { id: "curriculum", className: "home-curriculum", "aria-labelledby": "curriculum-title" },
                 h("div", { className: "home-section-heading" }, h("div", null, h("p", { className: "home-eyebrow" }, "ПРОГРАММА"), h("h2", { id: "curriculum-title" }, "Шаг за шагом, без пробелов.")), h("p", null, "Раскройте станцию, чтобы увидеть темы, материалы и итоговый проект.")),
                 h("div", { className: "home-route-tools" },
-                    h("span", null, "Ваши отметки: ", h("strong", null, doneCount + " / " + DATA.stages.length), " этапов"),
+                    h("span", null, "Ваши отметки: ", h("strong", null, doneCount + " / " + requiredStages.length), " основных этапов · 7В — по желанию"),
                     h("div", null, h("button", { onClick: expandAll }, "Раскрыть всё"), h("button", { onClick: collapseAll }, "Свернуть всё"))),
                 groups.map(group => h("section", { id: group.id, className: "home-course-group" + (group.indices.every(index => !DATA.stages[index].station) ? " home-planned" : ""), key: group.id, "aria-labelledby": group.id + "-title" },
                     h("div", { className: "home-group-intro" }, h("p", { className: "home-eyebrow" }, group.label), h("h3", { id: group.id + "-title" }, group.title), h("p", null, group.description)),

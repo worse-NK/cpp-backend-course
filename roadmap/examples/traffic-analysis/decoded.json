@@ -1,0 +1,246 @@
+{
+  "synthetic": true,
+  "note": "Трасса создана программой. Время задано, а не измерено; это не захват реальной сети.",
+  "cases": {
+    "traffic_http_ok.pcap": [
+      {
+        "frame": 1,
+        "time_us": 0,
+        "time_ms": 0,
+        "source": "192.0.2.10:40000",
+        "destination": "192.0.2.20:8080",
+        "protocol": "TCP",
+        "summary": "Клиент начинает TCP-соединение: SYN."
+      },
+      {
+        "frame": 2,
+        "time_us": 10000,
+        "time_ms": 10,
+        "source": "192.0.2.20:8080",
+        "destination": "192.0.2.10:40000",
+        "protocol": "TCP",
+        "summary": "Сервер принимает начало соединения: SYN, ACK."
+      },
+      {
+        "frame": 3,
+        "time_us": 20000,
+        "time_ms": 20,
+        "source": "192.0.2.10:40000",
+        "destination": "192.0.2.20:8080",
+        "protocol": "TCP",
+        "summary": "Клиент подтверждает SYN сервера; согласование завершено."
+      },
+      {
+        "frame": 4,
+        "time_us": 30000,
+        "time_ms": 30,
+        "source": "192.0.2.10:40000",
+        "destination": "192.0.2.20:8080",
+        "protocol": "HTTP/1.1",
+        "summary": "Клиент отправляет полный HTTP-запрос GET /health; полезная нагрузка TCP — 62 байта."
+      },
+      {
+        "frame": 5,
+        "time_us": 40000,
+        "time_ms": 40,
+        "source": "192.0.2.20:8080",
+        "destination": "192.0.2.10:40000",
+        "protocol": "TCP",
+        "summary": "TCP сервера подтверждает получение всех байтов запроса; это ещё не HTTP-ответ."
+      },
+      {
+        "frame": 6,
+        "time_us": 80000,
+        "time_ms": 80,
+        "source": "192.0.2.20:8080",
+        "destination": "192.0.2.10:40000",
+        "protocol": "HTTP/1.1",
+        "summary": "Сервер отправляет полный HTTP 200 и JSON; Content-Length — 15 байт."
+      },
+      {
+        "frame": 7,
+        "time_us": 90000,
+        "time_ms": 90,
+        "source": "192.0.2.10:40000",
+        "destination": "192.0.2.20:8080",
+        "protocol": "TCP",
+        "summary": "TCP клиента подтверждает получение всех байтов ответа."
+      },
+      {
+        "frame": 8,
+        "time_us": 100000,
+        "time_ms": 100,
+        "source": "192.0.2.20:8080",
+        "destination": "192.0.2.10:40000",
+        "protocol": "TCP",
+        "summary": "Сервер сообщает, что больше не будет отправлять данные: FIN, ACK."
+      },
+      {
+        "frame": 9,
+        "time_us": 110000,
+        "time_ms": 110,
+        "source": "192.0.2.10:40000",
+        "destination": "192.0.2.20:8080",
+        "protocol": "TCP",
+        "summary": "Клиент подтверждает FIN сервера."
+      },
+      {
+        "frame": 10,
+        "time_us": 120000,
+        "time_ms": 120,
+        "source": "192.0.2.10:40000",
+        "destination": "192.0.2.20:8080",
+        "protocol": "TCP",
+        "summary": "Клиент также завершает своё направление передачи: FIN, ACK."
+      },
+      {
+        "frame": 11,
+        "time_us": 130000,
+        "time_ms": 130,
+        "source": "192.0.2.20:8080",
+        "destination": "192.0.2.10:40000",
+        "protocol": "TCP",
+        "summary": "Сервер подтверждает FIN клиента; обе стороны закрыли передачу."
+      }
+    ],
+    "traffic_http_delay.pcap": [
+      {
+        "frame": 1,
+        "time_us": 0,
+        "time_ms": 0,
+        "source": "192.0.2.10:40000",
+        "destination": "192.0.2.20:8080",
+        "protocol": "TCP",
+        "summary": "Клиент начинает TCP-соединение: SYN."
+      },
+      {
+        "frame": 2,
+        "time_us": 10000,
+        "time_ms": 10,
+        "source": "192.0.2.20:8080",
+        "destination": "192.0.2.10:40000",
+        "protocol": "TCP",
+        "summary": "Сервер принимает начало соединения: SYN, ACK."
+      },
+      {
+        "frame": 3,
+        "time_us": 20000,
+        "time_ms": 20,
+        "source": "192.0.2.10:40000",
+        "destination": "192.0.2.20:8080",
+        "protocol": "TCP",
+        "summary": "Клиент подтверждает SYN сервера; согласование завершено."
+      },
+      {
+        "frame": 4,
+        "time_us": 30000,
+        "time_ms": 30,
+        "source": "192.0.2.10:40000",
+        "destination": "192.0.2.20:8080",
+        "protocol": "HTTP/1.1",
+        "summary": "Клиент отправляет полный HTTP-запрос GET /health; полезная нагрузка TCP — 62 байта."
+      },
+      {
+        "frame": 5,
+        "time_us": 40000,
+        "time_ms": 40,
+        "source": "192.0.2.20:8080",
+        "destination": "192.0.2.10:40000",
+        "protocol": "TCP",
+        "summary": "TCP сервера подтверждает получение всех байтов запроса; это ещё не HTTP-ответ."
+      },
+      {
+        "frame": 6,
+        "time_us": 530000,
+        "time_ms": 530,
+        "source": "192.0.2.20:8080",
+        "destination": "192.0.2.10:40000",
+        "protocol": "HTTP/1.1",
+        "summary": "Сервер отправляет полный HTTP 200 и JSON; Content-Length — 15 байт."
+      },
+      {
+        "frame": 7,
+        "time_us": 540000,
+        "time_ms": 540,
+        "source": "192.0.2.10:40000",
+        "destination": "192.0.2.20:8080",
+        "protocol": "TCP",
+        "summary": "TCP клиента подтверждает получение всех байтов ответа."
+      },
+      {
+        "frame": 8,
+        "time_us": 550000,
+        "time_ms": 550,
+        "source": "192.0.2.20:8080",
+        "destination": "192.0.2.10:40000",
+        "protocol": "TCP",
+        "summary": "Сервер сообщает, что больше не будет отправлять данные: FIN, ACK."
+      },
+      {
+        "frame": 9,
+        "time_us": 560000,
+        "time_ms": 560,
+        "source": "192.0.2.10:40000",
+        "destination": "192.0.2.20:8080",
+        "protocol": "TCP",
+        "summary": "Клиент подтверждает FIN сервера."
+      },
+      {
+        "frame": 10,
+        "time_us": 570000,
+        "time_ms": 570,
+        "source": "192.0.2.10:40000",
+        "destination": "192.0.2.20:8080",
+        "protocol": "TCP",
+        "summary": "Клиент также завершает своё направление передачи: FIN, ACK."
+      },
+      {
+        "frame": 11,
+        "time_us": 580000,
+        "time_ms": 580,
+        "source": "192.0.2.20:8080",
+        "destination": "192.0.2.10:40000",
+        "protocol": "TCP",
+        "summary": "Сервер подтверждает FIN клиента; обе стороны закрыли передачу."
+      }
+    ],
+    "traffic_dns.pcap": [
+      {
+        "frame": 1,
+        "time_us": 0,
+        "time_ms": 0,
+        "source": "192.0.2.10:53000",
+        "destination": "192.0.2.20:53",
+        "protocol": "DNS",
+        "summary": "Клиент спрашивает A-запись api.course.test; ID запроса — 4660."
+      },
+      {
+        "frame": 2,
+        "time_us": 20000,
+        "time_ms": 20,
+        "source": "192.0.2.20:53",
+        "destination": "192.0.2.10:53000",
+        "protocol": "DNS",
+        "summary": "DNS-сервер отвечает: A-запись api.course.test содержит 192.0.2.20, TTL — 300 секунд."
+      },
+      {
+        "frame": 3,
+        "time_us": 100000,
+        "time_ms": 100,
+        "source": "192.0.2.10:53001",
+        "destination": "192.0.2.20:53",
+        "protocol": "DNS",
+        "summary": "Клиент спрашивает A-запись missing.course.test; ID запроса — 4661."
+      },
+      {
+        "frame": 4,
+        "time_us": 120000,
+        "time_ms": 120,
+        "source": "192.0.2.20:53",
+        "destination": "192.0.2.10:53001",
+        "protocol": "DNS",
+        "summary": "DNS-сервер отвечает NXDOMAIN: имя не существует. В секции authority есть SOA course.test."
+      }
+    ]
+  }
+}

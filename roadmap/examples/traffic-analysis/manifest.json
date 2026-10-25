@@ -1,0 +1,628 @@
+{
+  "format_version": 1,
+  "synthetic": true,
+  "captured_from_interface": false,
+  "generated_by": "roadmap/tools/build_traffic_examples.py (Python standard library)",
+  "privacy": {
+    "ipv4_documentation_range": "192.0.2.0/24",
+    "domains": "Invented names below .test",
+    "client_mac": "02:00:00:00:00:0a",
+    "server_mac": "02:00:00:00:00:14",
+    "no_real_hosts_or_credentials": true
+  },
+  "pcap": {
+    "byte_order": "little-endian",
+    "timestamp_unit": "microsecond",
+    "linktype": 1,
+    "linktype_name": "Ethernet",
+    "snaplen": 65535,
+    "fcs_included": false,
+    "artificial_epoch_utc": "2026-01-01T00:00:00Z"
+  },
+  "assumptions": [
+    "No socket, interface capture, host traffic or DNS lookup is performed",
+    "Complete unfragmented IPv4 packets, valid IPv4/TCP/UDP checksums, Ethernet padding where needed",
+    "One full TCP connection in each HTTP file; no TLS, packet loss, retransmissions or real performance claim",
+    "HTTP files contain identical Ethernet frame bytes; only response-and-later capture times differ",
+    "DNS file is independent of HTTP files; it does not prove a real application resolved its peer",
+    "Decoder configuration and versions may change displayed names; raw packet semantics remain explicit"
+  ],
+  "sources": [
+    "https://www.wireshark.org/docs/wsug_html_chunked/ChIOOpenSection.html",
+    "https://www.wireshark.org/docs/dfref/h/http.html",
+    "https://www.wireshark.org/docs/dfref/d/dns.html"
+  ],
+  "cases": {
+    "traffic_http_ok.pcap": {
+      "sha256": "b93b9bc4d3a76a3b64e0f7b51c8487fdad444c197a16d5d1050cfea2c00810a2",
+      "file_bytes": 1015,
+      "frame_count": 11,
+      "facts": {
+        "tcp_streams": 1,
+        "request_frame": 4,
+        "response_frame": 6,
+        "complete_request_time_us": 30000,
+        "response_time_us": 80000,
+        "request_to_response_us": 50000,
+        "request_http_bytes": 62,
+        "response_http_bytes": 105,
+        "response_content_length": 15,
+        "method": "GET",
+        "path": "/health",
+        "host": "course.test",
+        "status": 200,
+        "body": "{\"status\":\"ok\"}",
+        "transport_close": "Both FINs and their ACKs included",
+        "time_interpretation": "Invented capture interval; not backend execution time, RTT or benchmark"
+      },
+      "frames": [
+        {
+          "frame": 1,
+          "relative_us": 0,
+          "event": "TCP SYN",
+          "source": "192.0.2.10",
+          "source_port": 40000,
+          "destination": "192.0.2.20",
+          "destination_port": 8080,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 1000,
+          "tcp_acknowledgement_raw": 0,
+          "tcp_flags_hex": "0x02",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 2,
+          "relative_us": 10000,
+          "event": "TCP SYN, ACK",
+          "source": "192.0.2.20",
+          "source_port": 8080,
+          "destination": "192.0.2.10",
+          "destination_port": 40000,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 5000,
+          "tcp_acknowledgement_raw": 1001,
+          "tcp_flags_hex": "0x12",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 3,
+          "relative_us": 20000,
+          "event": "TCP ACK: handshake complete",
+          "source": "192.0.2.10",
+          "source_port": 40000,
+          "destination": "192.0.2.20",
+          "destination_port": 8080,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 1001,
+          "tcp_acknowledgement_raw": 5001,
+          "tcp_flags_hex": "0x10",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 4,
+          "relative_us": 30000,
+          "event": "Complete HTTP GET /health",
+          "source": "192.0.2.10",
+          "source_port": 40000,
+          "destination": "192.0.2.20",
+          "destination_port": 8080,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP",
+            "HTTP/1.1"
+          ],
+          "tcp_sequence_raw": 1001,
+          "tcp_acknowledgement_raw": 5001,
+          "tcp_flags_hex": "0x18",
+          "tcp_payload_bytes": 62,
+          "captured_bytes": 116
+        },
+        {
+          "frame": 5,
+          "relative_us": 40000,
+          "event": "TCP ACK of complete request",
+          "source": "192.0.2.20",
+          "source_port": 8080,
+          "destination": "192.0.2.10",
+          "destination_port": 40000,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 5001,
+          "tcp_acknowledgement_raw": 1063,
+          "tcp_flags_hex": "0x10",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 6,
+          "relative_us": 80000,
+          "event": "Complete HTTP 200 + JSON body",
+          "source": "192.0.2.20",
+          "source_port": 8080,
+          "destination": "192.0.2.10",
+          "destination_port": 40000,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP",
+            "HTTP/1.1"
+          ],
+          "tcp_sequence_raw": 5001,
+          "tcp_acknowledgement_raw": 1063,
+          "tcp_flags_hex": "0x18",
+          "tcp_payload_bytes": 105,
+          "captured_bytes": 159
+        },
+        {
+          "frame": 7,
+          "relative_us": 90000,
+          "event": "TCP ACK of complete response",
+          "source": "192.0.2.10",
+          "source_port": 40000,
+          "destination": "192.0.2.20",
+          "destination_port": 8080,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 1063,
+          "tcp_acknowledgement_raw": 5106,
+          "tcp_flags_hex": "0x10",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 8,
+          "relative_us": 100000,
+          "event": "Server FIN, ACK",
+          "source": "192.0.2.20",
+          "source_port": 8080,
+          "destination": "192.0.2.10",
+          "destination_port": 40000,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 5106,
+          "tcp_acknowledgement_raw": 1063,
+          "tcp_flags_hex": "0x11",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 9,
+          "relative_us": 110000,
+          "event": "Client ACK of server FIN",
+          "source": "192.0.2.10",
+          "source_port": 40000,
+          "destination": "192.0.2.20",
+          "destination_port": 8080,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 1063,
+          "tcp_acknowledgement_raw": 5107,
+          "tcp_flags_hex": "0x10",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 10,
+          "relative_us": 120000,
+          "event": "Client FIN, ACK",
+          "source": "192.0.2.10",
+          "source_port": 40000,
+          "destination": "192.0.2.20",
+          "destination_port": 8080,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 1063,
+          "tcp_acknowledgement_raw": 5107,
+          "tcp_flags_hex": "0x11",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 11,
+          "relative_us": 130000,
+          "event": "Server final ACK",
+          "source": "192.0.2.20",
+          "source_port": 8080,
+          "destination": "192.0.2.10",
+          "destination_port": 40000,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 5107,
+          "tcp_acknowledgement_raw": 1064,
+          "tcp_flags_hex": "0x10",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        }
+      ]
+    },
+    "traffic_http_delay.pcap": {
+      "sha256": "32c06f5190251351975a07daace1f023d9c1c4a597e185deda9cf02401a01c08",
+      "file_bytes": 1015,
+      "frame_count": 11,
+      "facts": {
+        "tcp_streams": 1,
+        "request_frame": 4,
+        "response_frame": 6,
+        "complete_request_time_us": 30000,
+        "response_time_us": 530000,
+        "request_to_response_us": 500000,
+        "request_http_bytes": 62,
+        "response_http_bytes": 105,
+        "response_content_length": 15,
+        "method": "GET",
+        "path": "/health",
+        "host": "course.test",
+        "status": 200,
+        "body": "{\"status\":\"ok\"}",
+        "transport_close": "Both FINs and their ACKs included",
+        "time_interpretation": "Invented capture interval; not backend execution time, RTT or benchmark"
+      },
+      "frames": [
+        {
+          "frame": 1,
+          "relative_us": 0,
+          "event": "TCP SYN",
+          "source": "192.0.2.10",
+          "source_port": 40000,
+          "destination": "192.0.2.20",
+          "destination_port": 8080,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 1000,
+          "tcp_acknowledgement_raw": 0,
+          "tcp_flags_hex": "0x02",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 2,
+          "relative_us": 10000,
+          "event": "TCP SYN, ACK",
+          "source": "192.0.2.20",
+          "source_port": 8080,
+          "destination": "192.0.2.10",
+          "destination_port": 40000,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 5000,
+          "tcp_acknowledgement_raw": 1001,
+          "tcp_flags_hex": "0x12",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 3,
+          "relative_us": 20000,
+          "event": "TCP ACK: handshake complete",
+          "source": "192.0.2.10",
+          "source_port": 40000,
+          "destination": "192.0.2.20",
+          "destination_port": 8080,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 1001,
+          "tcp_acknowledgement_raw": 5001,
+          "tcp_flags_hex": "0x10",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 4,
+          "relative_us": 30000,
+          "event": "Complete HTTP GET /health",
+          "source": "192.0.2.10",
+          "source_port": 40000,
+          "destination": "192.0.2.20",
+          "destination_port": 8080,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP",
+            "HTTP/1.1"
+          ],
+          "tcp_sequence_raw": 1001,
+          "tcp_acknowledgement_raw": 5001,
+          "tcp_flags_hex": "0x18",
+          "tcp_payload_bytes": 62,
+          "captured_bytes": 116
+        },
+        {
+          "frame": 5,
+          "relative_us": 40000,
+          "event": "TCP ACK of complete request",
+          "source": "192.0.2.20",
+          "source_port": 8080,
+          "destination": "192.0.2.10",
+          "destination_port": 40000,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 5001,
+          "tcp_acknowledgement_raw": 1063,
+          "tcp_flags_hex": "0x10",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 6,
+          "relative_us": 530000,
+          "event": "Complete HTTP 200 + JSON body",
+          "source": "192.0.2.20",
+          "source_port": 8080,
+          "destination": "192.0.2.10",
+          "destination_port": 40000,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP",
+            "HTTP/1.1"
+          ],
+          "tcp_sequence_raw": 5001,
+          "tcp_acknowledgement_raw": 1063,
+          "tcp_flags_hex": "0x18",
+          "tcp_payload_bytes": 105,
+          "captured_bytes": 159
+        },
+        {
+          "frame": 7,
+          "relative_us": 540000,
+          "event": "TCP ACK of complete response",
+          "source": "192.0.2.10",
+          "source_port": 40000,
+          "destination": "192.0.2.20",
+          "destination_port": 8080,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 1063,
+          "tcp_acknowledgement_raw": 5106,
+          "tcp_flags_hex": "0x10",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 8,
+          "relative_us": 550000,
+          "event": "Server FIN, ACK",
+          "source": "192.0.2.20",
+          "source_port": 8080,
+          "destination": "192.0.2.10",
+          "destination_port": 40000,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 5106,
+          "tcp_acknowledgement_raw": 1063,
+          "tcp_flags_hex": "0x11",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 9,
+          "relative_us": 560000,
+          "event": "Client ACK of server FIN",
+          "source": "192.0.2.10",
+          "source_port": 40000,
+          "destination": "192.0.2.20",
+          "destination_port": 8080,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 1063,
+          "tcp_acknowledgement_raw": 5107,
+          "tcp_flags_hex": "0x10",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 10,
+          "relative_us": 570000,
+          "event": "Client FIN, ACK",
+          "source": "192.0.2.10",
+          "source_port": 40000,
+          "destination": "192.0.2.20",
+          "destination_port": 8080,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 1063,
+          "tcp_acknowledgement_raw": 5107,
+          "tcp_flags_hex": "0x11",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        },
+        {
+          "frame": 11,
+          "relative_us": 580000,
+          "event": "Server final ACK",
+          "source": "192.0.2.20",
+          "source_port": 8080,
+          "destination": "192.0.2.10",
+          "destination_port": 40000,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "TCP"
+          ],
+          "tcp_sequence_raw": 5107,
+          "tcp_acknowledgement_raw": 1064,
+          "tcp_flags_hex": "0x10",
+          "tcp_payload_bytes": 0,
+          "captured_bytes": 60
+        }
+      ]
+    },
+    "traffic_dns.pcap": {
+      "sha256": "022a5a775a1013c1a176f5083db9255660f1505d3602734ff18a3a17e2ca85c9",
+      "file_bytes": 484,
+      "frame_count": 4,
+      "facts": {
+        "resolver": "192.0.2.20:53",
+        "query_response_us": [
+          20000,
+          20000
+        ],
+        "positive": {
+          "transaction_id": 4660,
+          "client_port": 53000,
+          "name": "api.course.test",
+          "type": "A",
+          "address": "192.0.2.20",
+          "ttl_seconds": 300
+        },
+        "negative": {
+          "transaction_id": 4661,
+          "client_port": 53001,
+          "name": "missing.course.test",
+          "rcode": 3,
+          "meaning": "NXDOMAIN; not a connection timeout",
+          "soa_owner": "course.test",
+          "soa_mname": "ns.course.test",
+          "soa_rname": "hostmaster.course.test",
+          "soa_serial": 1,
+          "soa_refresh": 3600,
+          "soa_retry": 600,
+          "soa_expire": 86400,
+          "soa_ttl_seconds": 60,
+          "soa_minimum_seconds": 60
+        },
+        "time_interpretation": "Invented query/response timestamps; not a measured resolver latency"
+      },
+      "frames": [
+        {
+          "frame": 1,
+          "relative_us": 0,
+          "event": "Query A api.course.test",
+          "source": "192.0.2.10",
+          "source_port": 53000,
+          "destination": "192.0.2.20",
+          "destination_port": 53,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "UDP",
+            "DNS"
+          ],
+          "transaction_id": 4660,
+          "query_name": "api.course.test",
+          "query_type": "A",
+          "response_code": null,
+          "captured_bytes": 75
+        },
+        {
+          "frame": 2,
+          "relative_us": 20000,
+          "event": "A api.course.test -> 192.0.2.20",
+          "source": "192.0.2.20",
+          "source_port": 53,
+          "destination": "192.0.2.10",
+          "destination_port": 53000,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "UDP",
+            "DNS"
+          ],
+          "transaction_id": 4660,
+          "query_name": "api.course.test",
+          "query_type": "A",
+          "response_code": 0,
+          "captured_bytes": 91
+        },
+        {
+          "frame": 3,
+          "relative_us": 100000,
+          "event": "Query A missing.course.test",
+          "source": "192.0.2.10",
+          "source_port": 53001,
+          "destination": "192.0.2.20",
+          "destination_port": 53,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "UDP",
+            "DNS"
+          ],
+          "transaction_id": 4661,
+          "query_name": "missing.course.test",
+          "query_type": "A",
+          "response_code": null,
+          "captured_bytes": 79
+        },
+        {
+          "frame": 4,
+          "relative_us": 120000,
+          "event": "NXDOMAIN missing.course.test + negative SOA",
+          "source": "192.0.2.20",
+          "source_port": 53,
+          "destination": "192.0.2.10",
+          "destination_port": 53001,
+          "layers": [
+            "Ethernet II",
+            "IPv4",
+            "UDP",
+            "DNS"
+          ],
+          "transaction_id": 4661,
+          "query_name": "missing.course.test",
+          "query_type": "A",
+          "response_code": 3,
+          "captured_bytes": 151
+        }
+      ]
+    }
+  }
+}

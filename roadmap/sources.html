@@ -30,6 +30,7 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <a href="#station6">СТАНЦИЯ 06</a>
 <a href="#station7">СТАНЦИЯ 07</a>
 <a href="#station7-netlab">СТАНЦИЯ 07Б</a>
+<a href="#station7-traffic">СТАНЦИЯ 7В · ПО ЖЕЛАНИЮ</a>
 <a href="#station8">СТАНЦИЯ 08</a>
 <a href="#station9-sql">СТАНЦИЯ 9A · SQL</a>
 <a href="#station9">СТАНЦИЯ 9B · POSTGRESQL</a>
@@ -2306,6 +2307,182 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://man7.org/linux/man-pages/man2/poll.2.html" target="_blank" rel="noopener noreferrer">poll(2)</a> <span class="muted">— man7.org</span></li>
 <li><a href="https://man7.org/linux/man-pages/man3/getnameinfo.3.html" target="_blank" rel="noopener noreferrer">getnameinfo(3)</a> <span class="muted">— man7.org</span></li>
 <li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Performing_Network_Address_Translation_(NAT)" target="_blank" rel="noopener noreferrer">nftables: NAT</a> <span class="muted">— wiki.nftables.org</span></li>
+</ul>
+</details>
+<h2 id="station7-traffic">Анализ трафика: Wireshark и диагностика</h2>
+<details><summary>С чего начать: файл трафика не равен всей сети · источников: 5</summary><p><a href="cpp_station7_traffic_analysis.html#section=learning-route">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChapterBuildInstall.html" target="_blank" rel="noopener noreferrer">официальной инструкции для своей ОС</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChStatSummary.html" target="_blank" rel="noopener noreferrer">Wireshark: сведения о файле захвата</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsdg_html_chunked/ChWorksCapturePackets.html" target="_blank" rel="noopener noreferrer">разделение захвата и разбора пакетов</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc5737.html" target="_blank" rel="noopener noreferrer">RFC 5737</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc2606.html" target="_blank" rel="noopener noreferrer">RFC 2606</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>Собственный первый захват: только учебный localhost · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-safe-capture">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/man-pages/dumpcap.html" target="_blank" rel="noopener noreferrer">dumpcap: интерфейс, фильтр, snaplen и пределы остановки</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://wiki.wireshark.org/CaptureSetup/CapturePrivileges" target="_blank" rel="noopener noreferrer">Wireshark: полномочия захвата</a> <span class="muted">— wiki.wireshark.org</span></li>
+<li><a href="https://docs.python.org/3/library/http.server.html#command-line-interface" target="_blank" rel="noopener noreferrer">Python http.server: bind и directory</a> <span class="muted">— docs.python.org</span></li>
+</ul>
+</details>
+<details><summary>Полнота записи: обрезанные байты, пропуски и offload · источников: 5</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-capture-quality">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://docs.kernel.org/networking/segmentation-offloads.html" target="_blank" rel="noopener noreferrer">документации ядра Linux</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://wiki.wireshark.org/SnapLen" target="_blank" rel="noopener noreferrer">snaplen</a> <span class="muted">— wiki.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChStatSummary.html" target="_blank" rel="noopener noreferrer">свойства файла</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvChecksums.html" target="_blank" rel="noopener noreferrer">контрольные суммы и offload</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/dfref/f/frame.html" target="_blank" rel="noopener noreferrer">поля frame</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Паспорт опыта: что разрешено утверждать по файлу · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-capture-evidence-record">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChStatSummary.html" target="_blank" rel="noopener noreferrer">Capture File Properties</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChWorkDisplayFilterSection.html" target="_blank" rel="noopener noreferrer">display-фильтр не удаляет записи из файла</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://wiki.wireshark.org/security/" target="_blank" rel="noopener noreferrer">безопасность Wireshark</a> <span class="muted">— wiki.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Три панели: строка, поля и настоящие байты · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-wireshark-three-panes">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChUsePacketListPaneSection.html" target="_blank" rel="noopener noreferrer">Packet List</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChUsePacketDetailsPaneSection.html" target="_blank" rel="noopener noreferrer">Packet Details и generated fields</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChUsePacketBytesPaneSection.html" target="_blank" rel="noopener noreferrer">Packet Bytes</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Два фильтра: что записывать и что сейчас показывать · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-filter-pipeline">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChCapCaptureFilterSection.html" target="_blank" rel="noopener noreferrer">capture filters</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChWorkDisplayFilterSection.html" target="_blank" rel="noopener noreferrer">display filters</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/dfref/t/tcp.html" target="_blank" rel="noopener noreferrer">точные имена полей TCP</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Поток TCP: как увидеть запрос целиком · источников: 4</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-stream-follow">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChCustProtocolDissectionSection.html" target="_blank" rel="noopener noreferrer">Control Protocol Dissection</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvFollowStreamSection.html" target="_blank" rel="noopener noreferrer">Follow Stream и его влияние на фильтр</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvReassemblySection.html" target="_blank" rel="noopener noreferrer">Packet Reassembly</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/dfref/t/tcp.html" target="_blank" rel="noopener noreferrer">tcp.stream и поля TCP</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Время на экране: сравниваем нужные события · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-time-comparison">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChWorkTimeFormatsSection.html" target="_blank" rel="noopener noreferrer">режимы времени и time reference</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTimestamps.html" target="_blank" rel="noopener noreferrer">источник отметок и точность</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/dfref/f/frame.html" target="_blank" rel="noopener noreferrer">поля frame.time</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>SEQ и ACK: маленькая бухгалтерия байтов · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-tcp-sequence-ledger">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.4" target="_blank" rel="noopener noreferrer">RFC 9293: пространство последовательности</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://wiki.wireshark.org/TCP_Relative_Sequence_Numbers" target="_blank" rel="noopener noreferrer">относительные SEQ/ACK в Wireshark</a> <span class="muted">— wiki.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/dfref/t/tcp.html" target="_blank" rel="noopener noreferrer">tcp.seq, tcp.ack и tcp.len</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Retransmission: полезная подсказка, но не готовый диагноз · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-tcp-retransmission-evidence">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTCPAnalysis.html" target="_blank" rel="noopener noreferrer">правила и ограничения TCP Analysis</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/dfref/t/tcp.html" target="_blank" rel="noopener noreferrer">поля tcp.analysis</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.8.1" target="_blank" rel="noopener noreferrer">TCP retransmission timeout</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>Window: кто просит притормозить и почему это не congestion window · источников: 4</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-tcp-window-boundaries">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.8.6" target="_blank" rel="noopener noreferrer">RFC 9293: управление окном</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7323.html#section-2" target="_blank" rel="noopener noreferrer">RFC 7323: Window Scale и исключение для SYN</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.wireshark.org/docs/dfref/t/tcp.html" target="_blank" rel="noopener noreferrer">raw/calculated window fields</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTCPAnalysis.html" target="_blank" rel="noopener noreferrer">Zero Window и window update в анализаторе</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>От TCP-свидетельств к аккуратному объяснению задержки · источников: 2</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-tcp-causal-report">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTCPAnalysis.html" target="_blank" rel="noopener noreferrer">Wireshark TCP Analysis</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTimestamps.html" target="_blank" rel="noopener noreferrer">источник временных отметок</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Как узнать, на какой DNS-вопрос пришёл ответ · источников: 2</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-dns-conversation">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc1035.html#section-4.1" target="_blank" rel="noopener noreferrer">RFC 1035: заголовок и вопрос DNS</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.wireshark.org/docs/dfref/d/dns.html" target="_blank" rel="noopener noreferrer">Wireshark: поля dns.id, dns.qry.name и связи ответов</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Адрес, NXDOMAIN и тишина — три разных результата · источников: 2</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-dns-results">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc2308.html" target="_blank" rel="noopener noreferrer">RFC 2308: NXDOMAIN, NODATA и отрицательный кэш</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc1034.html#section-4.3.4" target="_blank" rel="noopener noreferrer">RFC 1034: кэширование и время жизни записей</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>Почему фильтр UDP/53 не показывает весь DNS · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-dns-transports">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7766.html" target="_blank" rel="noopener noreferrer">RFC 7766: DNS поверх TCP</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7858.html" target="_blank" rel="noopener noreferrer">RFC 7858: DNS over TLS</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8484.html" target="_blank" rel="noopener noreferrer">RFC 8484: DNS over HTTPS</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>Разбираем два DNS-обмена, не генерируя ни одного пакета · источников: 2</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-dns-investigation">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/man-pages/tshark.html" target="_blank" rel="noopener noreferrer">TShark: чтение файла, два прохода и выбранные поля</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/dfref/d/dns.html" target="_blank" rel="noopener noreferrer">Wireshark: справочник DNS-полей</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>TCP-сегмент не является HTTP-сообщением · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-http-stream">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9112.html#section-6" target="_blank" rel="noopener noreferrer">RFC 9112: обрамление HTTP/1.1</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvReassemblySection.html" target="_blank" rel="noopener noreferrer">Wireshark: сборка сообщений</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvFollowStreamSection.html" target="_blank" rel="noopener noreferrer">Wireshark: Follow Stream</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Читаем полный HTTP-обмен: от GET до тела ответа · источников: 2</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-http-evidence">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/dfref/h/http.html" target="_blank" rel="noopener noreferrer">Wireshark: поля HTTP</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-8.6" target="_blank" rel="noopener noreferrer">RFC 9110: значение Content-Length</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>Что остаётся видимым, когда HTTP защищён TLS · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-tls-visibility">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8446.html" target="_blank" rel="noopener noreferrer">RFC 8446: TLS 1.3 и защищённое установление</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9849.html" target="_blank" rel="noopener noreferrer">RFC 9849: ECH и его границы</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://wiki.wireshark.org/TLS" target="_blank" rel="noopener noreferrer">Wireshark: условия расшифрования TLS</a> <span class="muted">— wiki.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Один разговор — несколько запросов: HTTP/2 и HTTP/3 · источников: 4</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-http2-quic">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9113.html#section-5" target="_blank" rel="noopener noreferrer">RFC 9113: потоки HTTP/2</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/info/rfc9114/" target="_blank" rel="noopener noreferrer">RFC 9114: HTTP/3</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9000.html#section-2" target="_blank" rel="noopener noreferrer">RFC 9000: QUIC и потоки</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.wireshark.org/docs/man-pages/tshark.html" target="_blank" rel="noopener noreferrer">TShark: Follow для потоков и подпотоков</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Сначала назовём границы измерения, потом сравним время · источников: 2</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-time-boundaries">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChWorkTimeFormatsSection.html" target="_blank" rel="noopener noreferrer">Wireshark: форматы времени и точки отсчёта</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTimestamps.html" target="_blank" rel="noopener noreferrer">Wireshark: метки времени и точность</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Две точки захвата: что меняется между ними · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-observation-points">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChStatConversations.html" target="_blank" rel="noopener noreferrer">Wireshark: Conversations и отдельные разговоры</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc3022.html" target="_blank" rel="noopener noreferrer">RFC 3022: преобразование адресов и портов</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.9.1" target="_blank" rel="noopener noreferrer">RFC 9293: интерфейс TCP и приложение</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>Проверяем гипотезу, а не выбираем виноватый слой · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-hypothesis-ladder">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTCPAnalysis.html" target="_blank" rel="noopener noreferrer">Wireshark: правила TCP Analysis</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-15.6.4" target="_blank" rel="noopener noreferrer">RFC 9110: HTTP 503</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9293.html" target="_blank" rel="noopener noreferrer">RFC 9293: подтверждения и TCP</a> <span class="muted">— www.rfc-editor.org</span></li>
+</ul>
+</details>
+<details><summary>Как написать короткий отчёт, который можно проверить · источников: 2</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-diagnostic-report">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvExpert.html" target="_blank" rel="noopener noreferrer">Wireshark: Expert Information как помощь анализу</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvFollowStreamSection.html" target="_blank" rel="noopener noreferrer">Wireshark: Follow Stream и восстановленное содержимое</a> <span class="muted">— www.wireshark.org</span></li>
+</ul>
+</details>
+<details><summary>Разбираем расследование целиком: тот же HTTP, но ответ в десять раз позже · источников: 3</summary><p><a href="cpp_station7_traffic_analysis.html#section=traffic-final-workbook">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvFollowStreamSection.html" target="_blank" rel="noopener noreferrer">Wireshark: Follow Stream</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTimestamps.html" target="_blank" rel="noopener noreferrer">Wireshark: время и точность</a> <span class="muted">— www.wireshark.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9112.html" target="_blank" rel="noopener noreferrer">RFC 9112: HTTP/1.1</a> <span class="muted">— www.rfc-editor.org</span></li>
 </ul>
 </details>
 <h2 id="station8">REST API и C++-сервис</h2>
