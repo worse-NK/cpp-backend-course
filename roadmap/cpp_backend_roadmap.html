@@ -434,17 +434,17 @@
         "7.2: OSI/TCP-IP, Ethernet, IPv4/IPv6, CIDR, routing, NAT, DNS, MTU/MSS",
         "7.2Б: домашняя и корпоративная сеть, публичный IPv4, CGNAT, VPN, SSH, ping и диагностика",
         "7.3: UDP, TCP handshake/ACK/retransmit, окна, FIN/RST/TIME-WAIT и QUIC",
-        "7.4: POSIX sockets, getaddrinfo, RAII fd, partial I/O, framing и error contracts",
+        "7.4: POSIX sockets, getaddrinfo, RAII fd, partial I/O, framing и путь данных через ядро Linux",
         "7.5: select/poll/epoll, LT/ET, reactor state machine, fairness и backpressure",
         "7.6: Boost.Asio executors/strand, lifetime buffers/Session, cancellation и C++20 coroutines",
         "7.7: HTTP/1.1–3, framing и request smuggling, TLS 1.3, certificates, SNI/ALPN и Beast",
-        "7.8: deadlines/retries, Slowloris, overload, proxy/container networking, diagnostics и graceful shutdown"
+        "7.8: сроки и повторы, разные очереди сервера, балансировка соединений/запросов, перегрузка и диагностика"
       ],
       "res": [
         {
           "name": "cpp_station7_networking.html",
           "url": "",
-          "note": "98 разделов · 9 подглав · 193 вопросов · 33 заданий"
+          "note": "101 раздел · 9 подглав · 199 вопросов · 33 задания"
         },
         {
           "name": "Boost.Asio — latest documentation",
@@ -476,7 +476,7 @@
       "station": {
         "file": "cpp_station7_networking.html",
         "storeKey": "cpp_station7_progress_v1",
-        "totalSections": 98,
+        "totalSections": 101,
         "label": "Станция 7"
       },
       "num": 9
@@ -542,7 +542,8 @@
         "Объектная авторизация, tenant scope, cookie/JWT, CORS, CSRF, SSRF и лимиты",
         "OpenAPI, совместимость, пагинация и развитие интерфейса",
         "RPC/gRPC, protobuf, SSE, WebSocket, webhook и восстановление после обрыва",
-        "Логи, метрики, контрактные проверки и защита учебного проекта"
+        "Логи, метрики, контрактные проверки и защита учебного проекта",
+        "Путь запроса через исполнителей, границы модулей, параллельные зависимости и состояние двух экземпляров"
       ],
       "res": [
         {
@@ -570,7 +571,7 @@
       "station": {
         "file": "cpp_station8_rest_api.html",
         "storeKey": "cpp_station8_progress_v1",
-        "totalSections": 62,
+        "totalSections": 66,
         "label": "Станция 8"
       },
       "num": 11
@@ -612,14 +613,17 @@
       "id": "databases",
       "phase": "Базы данных",
       "title": "9B · PostgreSQL и надёжность данных",
-      "goal": "Хранить данные по-настоящему: SQL, PostgreSQL и работа с БД из C++.",
-      "why": "Многим сервисам требуется долговременное хранение данных. Разберём реляционную модель, SQL и подключение PostgreSQL к C++-сервису. При этом не каждый backend использует собственную базу данных.",
+      "goal": "Объяснять хранение и изменение данных: транзакции, индексы, путь записи, репликацию, кэш и надёжную доставку событий.",
+      "why": "После языка SQL в 9A переходим к поведению настоящего PostgreSQL и C++-сервиса. Проследим запись до COMMIT, затем разберём свежесть копий, переключение после отказа, гонки кэша и доставку изменений. Не каждый сервис нуждается во всех этих механизмах: для каждого обсуждаем, какую проблему он решает и какую новую создаёт.",
       "skills": [
         "Реляционная модель, SQL: SELECT/INSERT/UPDATE/DELETE, JOIN, индексы",
         "PostgreSQL: запуск (через Docker), psql, схемы, миграции",
         "Подключение из C++: libpqxx (C++-библиотека поверх libpq)",
         "Connection pool, транзакции, защита от SQL-инъекций (параметризованные запросы)",
-        "Когда SQL, а когда NoSQL/кэш (Redis) — базовое понимание",
+        "MVCC, WAL, COMMIT и VACUUM: что происходит при записи",
+        "Репликация, свежесть чтения, failover и защита от двух писателей",
+        "Cache-aside: гонка заполнения, TTL, одновременные промахи и бюджет БД",
+        "Outbox и receipt: атомарная запись, повторная доставка, порядок и очистка",
         "Паттерн «репозиторий»: отделение доступа к данным от логики"
       ],
       "res": [
@@ -641,14 +645,14 @@
       ],
       "project": {
         "title": "Менеджер задач на PostgreSQL",
-        "desc": "Возьми REST API из этапа 9 и посади на настоящую БД: задачи хранятся в PostgreSQL, доступ через libpqxx, миграции схемы, connection pool. Подними БД и сервис вместе через docker-compose одной командой.",
-        "deliver": "Флагманский проект портфолио: REST API + PostgreSQL + параметризованные запросы + docker-compose. CRUD работает против реальной базы, данные переживают рестарт.",
-        "skills": "SQL, PostgreSQL, libpqxx, транзакции, репозиторий-слой, docker-compose."
+        "desc": "Подключи Task API к PostgreSQL и проверь транзакции, конфликты и сохранение данных после рестарта. Сквозной практикум содержит готовый вариант на libpq; в главе есть также примеры libpqxx. Пул соединений и доставка событий — отдельные шаги развития, а не скрытые возможности исходного приложения.",
+        "deliver": "REST API + PostgreSQL + параметризованные запросы + Compose; понятные проверки отказа и восстановления. Дополнительно — самостоятельный SQL-опыт с outbox и защитой от повторной обработки.",
+        "skills": "PostgreSQL, транзакции, границы гарантий, доступ из C++, хранение и доставка изменений."
       },
       "station": {
         "file": "cpp_station9_databases.html",
         "storeKey": "cpp_station9_progress_v1",
-        "totalSections": 14,
+        "totalSections": 21,
         "label": "Станция 9B"
       },
       "num": 13
@@ -665,7 +669,8 @@
         "Docker: написать Dockerfile (многоступенчатый — сборка отдельно от рантайма)",
         "CI: GitHub Actions — сборка, тесты, clang-format/clang-tidy на каждый push",
         "Наблюдаемость: структурное логирование, базовые метрики",
-        "Безопасность: валидация ввода, секреты через переменные окружения"
+        "Безопасность: валидация ввода, секреты через переменные окружения",
+        "Общий бюджет запроса, ожидание ресурсов, диагностика блокировок и выпуск за прокси"
       ],
       "res": [
         {
@@ -693,7 +698,7 @@
       "station": {
         "file": "cpp_station10_production.html",
         "storeKey": "cpp_station10_progress_v1",
-        "totalSections": 23,
+        "totalSections": 25,
         "label": "Станция 10"
       },
       "num": 14
@@ -788,8 +793,9 @@ function loadStationProgress(storeKey, totalSections) {
         const auditedCpp = /^cpp_station[0-4]_progress_v1$/.test(storeKey);
         const networkFoundation = storeKey === 'cpp_station7_progress_v1';
         const networkLab = storeKey === 'cpp_station7_netlab_progress_v1';
-        const quiz = splitDatabase ? data['station-final:database-split:v1:basic'] : auditedCpp ? data["station-final:coverage:v1:basic"] : networkLab ? data['station-final:netlab-20261021:v1:basic'] : networkFoundation ? data['station-final:network-foundation-20261021:v1:basic'] : data["station-final:v3:basic"] || data["station-final:v2:basic"] || data.quiz || aggregateModuleQuiz("basic");
-        const quizAdvanced = splitDatabase ? null : data.quizAdvanced || aggregateModuleQuiz("advanced");
+        const architectureAudit = ['cpp_station7_progress_v1', 'cpp_station8_progress_v1', 'cpp_station9_progress_v1', 'cpp_station10_progress_v1'].includes(storeKey);
+        const quiz = architectureAudit ? data['station-final:architecture-20261025:v1:basic'] : splitDatabase ? data['station-final:database-split:v1:basic'] : auditedCpp ? data["station-final:coverage:v1:basic"] : networkLab ? data['station-final:netlab-20261021:v1:basic'] : networkFoundation ? data['station-final:network-foundation-20261021:v1:basic'] : data["station-final:v3:basic"] || data["station-final:v2:basic"] || data.quiz || aggregateModuleQuiz("basic");
+        const quizAdvanced = (splitDatabase || architectureAudit) ? null : data.quizAdvanced || aggregateModuleQuiz("advanced");
         return { secDone, totalSections, quiz, quizAdvanced };
     }
     catch (e) {

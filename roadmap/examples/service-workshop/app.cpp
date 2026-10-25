@@ -198,7 +198,9 @@ int main() {
         } else {
           auto task = storage->update(id, expected, input);
           if (!task) { error_response(response, 412, "precondition_failed"); return; }
-          response.set_header("ETag", etag(task->version));
+          // RFC 9110 9.3.4: PUT input is transformed into a representation with
+          // server-managed id/version. Do not return a validator for it here;
+          // a subsequent GET returns the actual representation and its ETag.
           json_response(response, 200, as_json(*task));
         }
       } catch (const course::InputError& error) {

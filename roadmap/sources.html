@@ -1815,6 +1815,16 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://man7.org/linux/man-pages/man2/close.2.html" target="_blank" rel="noopener noreferrer">close(2)</a> <span class="muted">— man7.org</span></li>
 </ul>
 </details>
+<details><summary>Под капотом Linux: от пакета до обработчика · источников: 6</summary><p><a href="cpp_station7_networking.html#section=linux-packet-to-handler">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://docs.kernel.org/networking/napi.html" target="_blank" rel="noopener noreferrer">Linux NAPI: контекст и бюджет обработки</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://docs.kernel.org/networking/scaling.html" target="_blank" rel="noopener noreferrer">RSS и распределение сетевой работы</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://docs.kernel.org/networking/segmentation-offloads.html" target="_blank" rel="noopener noreferrer">границы segmentation offload</a> <span class="muted">— docs.kernel.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/recv.2.html" target="_blank" rel="noopener noreferrer">recv(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/send.2.html" target="_blank" rel="noopener noreferrer">send(2)</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man8/ss.8.html" target="_blank" rel="noopener noreferrer">ss(8)</a> <span class="muted">— man7.org</span></li>
+</ul>
+</details>
 <details><summary>Модели сетевой concurrency · источников: 0</summary><p><a href="cpp_station7_networking.html#section=concurrency-models">Открыть раздел теории</a></p>
 <p class="muted">В этом разделе пока нет прямой внешней ссылки. У вводных маршрутов и итогов источники могут находиться в соответствующих тематических разделах.</p>
 </details>
@@ -2022,10 +2032,26 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <details><summary>Глубже: capacity model, очереди и управляемый отказ · источников: 0</summary><p><a href="cpp_station7_networking.html#section=production-capacity-and-overload">Открыть раздел теории</a></p>
 <p class="muted">В этом разделе пока нет прямой внешней ссылки. У вводных маршрутов и итогов источники могут находиться в соответствующих тематических разделах.</p>
 </details>
+<details><summary>Разбор архитектуры: один сервер и две разные перегрузки · источников: 3</summary><p><a href="cpp_station7_networking.html#section=server-queues-two-bottlenecks">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/listen.2.html" target="_blank" rel="noopener noreferrer">listen(2): область действия backlog</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/send.2.html" target="_blank" rel="noopener noreferrer">send(2): локальный результат и EAGAIN</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://sre.google/sre-book/handling-overload/" target="_blank" rel="noopener noreferrer">Google SRE: ограничения ресурсов и управляемая перегрузка</a> <span class="muted">— sre.google</span></li>
+</ul>
+</details>
 <details><summary>Глубже: proxy, контейнеры и реальные connection boundaries · источников: 2</summary><p><a href="cpp_station7_networking.html#section=production-proxy-container-topology">Открыть раздел теории</a></p>
 <ul>
 <li><a href="https://www.rfc-editor.org/rfc/rfc7239.html#section-8.1" target="_blank" rel="noopener noreferrer">RFC 7239</a> <span class="muted">— www.rfc-editor.org</span></li>
 <li><a href="https://www.haproxy.org/download/3.0/doc/proxy-protocol.txt" target="_blank" rel="noopener noreferrer">спецификация PROXY protocol, раздел Security considerations</a> <span class="muted">— www.haproxy.org</span></li>
+</ul>
+</details>
+<details><summary>Разбор архитектуры: что именно распределяет балансировщик · источников: 5</summary><p><a href="cpp_station7_networking.html#section=load-balancing-connections-requests">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://nginx.org/en/docs/stream/ngx_stream_upstream_module.html" target="_blank" rel="noopener noreferrer">NGINX stream: выбор соединений</a> <span class="muted">— nginx.org</span></li>
+<li><a href="https://nginx.org/en/docs/http/ngx_http_upstream_module.html" target="_blank" rel="noopener noreferrer">HTTP upstream: запросы, веса, least_conn и точный смысл drain</a> <span class="muted">— nginx.org</span></li>
+<li><a href="https://manpages.debian.org/bookworm/ipvsadm/ipvsadm.8.en.html" target="_blank" rel="noopener noreferrer">ipvsadm(8): NAT, туннель и прямая доставка</a> <span class="muted">— manpages.debian.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9113.html#section-6.8" target="_blank" rel="noopener noreferrer">RFC 9113: GOAWAY</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination" target="_blank" rel="noopener noreferrer">Kubernetes: завершение Pod и обслуживание соединений</a> <span class="muted">— kubernetes.io</span></li>
 </ul>
 </details>
 <details><summary>Глубже: от симптома к доказательству и сильному проекту · источников: 4</summary><p><a href="cpp_station7_networking.html#section=production-incident-and-project-evidence">Открыть раздел теории</a></p>
@@ -2355,6 +2381,14 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://github.com/yhirose/cpp-httplib" target="_blank" rel="noopener noreferrer">cpp-httplib: серверные обработчики</a> <span class="muted">— github.com</span></li>
 </ul>
 </details>
+<details><summary>Под капотом запроса: соединение, очередь, worker и ответ · источников: 4</summary><p><a href="cpp_station8_rest_api.html#section=request-execution-workbook">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://github.com/yhirose/cpp-httplib/blob/v0.59.0/httplib.h" target="_blank" rel="noopener noreferrer">cpp-httplib 0.59.0: ThreadPool, listen_internal и process_server_socket_core</a> <span class="muted">— github.com</span></li>
+<li><a href="https://man7.org/linux/man-pages/man2/listen.2.html" target="_blank" rel="noopener noreferrer">Linux listen(2): очередь соединений</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9112.html#section-9.3" target="_blank" rel="noopener noreferrer">HTTP/1.1: постоянные соединения</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/probes/" target="_blank" rel="noopener noreferrer">различие liveness и readiness и риски неверной проверки</a> <span class="muted">— kubernetes.io</span></li>
+</ul>
+</details>
 <details><summary>Общие проверки: что должно происходить вокруг обработчика · источников: 2</summary><p><a href="cpp_station8_rest_api.html#section=middleware-chain">Открыть раздел теории</a></p>
 <ul>
 <li><a href="https://crowcpp.org/master/guides/middleware/" target="_blank" rel="noopener noreferrer">Crow: middleware</a> <span class="muted">— crowcpp.org</span></li>
@@ -2502,6 +2536,13 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://www.rfc-editor.org/rfc/rfc9110.html" target="_blank" rel="noopener noreferrer">HTTP: version и negotiated representations</a> <span class="muted">— www.rfc-editor.org</span></li>
 </ul>
 </details>
+<details><summary>Границы архитектуры: функция, модуль, процесс и сеть · источников: 3</summary><p><a href="cpp_station8_rest_api.html#section=architecture-boundaries">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man7/pthreads.7.html" target="_blank" rel="noopener noreferrer">POSIX threads: что разделяют потоки процесса</a> <span class="muted">— man7.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-3.3" target="_blank" rel="noopener noreferrer">HTTP: роли и соединения</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://martinfowler.com/bliki/MonolithFirst.html" target="_blank" rel="noopener noreferrer">Martin Fowler: цена раннего разделения и важность устойчивых границ</a> <span class="muted">— martinfowler.com</span></li>
+</ul>
+</details>
 <details><summary>RPC и gRPC: удалённая функция остаётся удалённой · источников: 3</summary><p><a href="cpp_station8_rest_api.html#section=rpc-grpc">Открыть раздел теории</a></p>
 <ul>
 <li><a href="https://grpc.io/docs/what-is-grpc/core-concepts/" target="_blank" rel="noopener noreferrer">gRPC: core concepts</a> <span class="muted">— grpc.io</span></li>
@@ -2530,6 +2571,13 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://grpc.io/docs/languages/go/basics/" target="_blank" rel="noopener noreferrer">gRPC: Go basics</a> <span class="muted">— grpc.io</span></li>
 <li><a href="https://grpc.io/docs/guides/deadlines/" target="_blank" rel="noopener noreferrer">gRPC: deadlines</a> <span class="muted">— grpc.io</span></li>
 <li><a href="https://spec.openapis.org/oas/v3.1.1.html" target="_blank" rel="noopener noreferrer">OpenAPI: возможности описания HTTP API</a> <span class="muted">— spec.openapis.org</span></li>
+</ul>
+</details>
+<details><summary>Один запрос, несколько зависимостей: что ждём и что отменяем · источников: 3</summary><p><a href="cpp_station8_rest_api.html#section=dependency-fanout-workbook">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://grpc.io/docs/guides/deadlines/" target="_blank" rel="noopener noreferrer">gRPC: deadlines и их распространение</a> <span class="muted">— grpc.io</span></li>
+<li><a href="https://grpc.io/docs/guides/cancellation/" target="_blank" rel="noopener noreferrer">gRPC: отмена и ответственность обработчика</a> <span class="muted">— grpc.io</span></li>
+<li><a href="https://sre.google/sre-book/handling-overload/" target="_blank" rel="noopener noreferrer">Google SRE: ограниченность ресурсов и осознанное упрощение ответа</a> <span class="muted">— sre.google</span></li>
 </ul>
 </details>
 <details><summary>Protobuf без RPC: две записи в одном файле · источников: 3</summary><p><a href="cpp_station8_rest_api.html#section=protobuf-file-workbook">Открыть раздел теории</a></p>
@@ -2598,6 +2646,13 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <ul>
 <li><a href="https://github.com/yhirose/cpp-httplib" target="_blank" rel="noopener noreferrer">cpp-httplib: ограничения и API</a> <span class="muted">— github.com</span></li>
 <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">OWASP: REST security</a> <span class="muted">— cheatsheetseries.owasp.org</span></li>
+</ul>
+</details>
+<details><summary>Два экземпляра API: где на самом деле живёт состояние · источников: 3</summary><p><a href="cpp_station8_rest_api.html#section=replica-state-workbook">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://nginx.org/en/docs/http/load_balancing.html" target="_blank" rel="noopener noreferrer">NGINX: балансировка и закрепление запросов</a> <span class="muted">— nginx.org</span></li>
+<li><a href="https://12factor.net/processes" target="_blank" rel="noopener noreferrer">The Twelve-Factor App: состояние между процессами</a> <span class="muted">— 12factor.net</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-8.8.3" target="_blank" rel="noopener noreferrer">HTTP: требования к ETag</a> <span class="muted">— www.rfc-editor.org</span></li>
 </ul>
 </details>
 <details><summary>Проект: защити договор Task API · источников: 3</summary><p><a href="cpp_station8_rest_api.html#section=project-review">Открыть раздел теории</a></p>
@@ -2832,7 +2887,7 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://www.postgresql.org/docs/18/runtime-config-client.html" target="_blank" rel="noopener noreferrer">таймауты PostgreSQL</a> <span class="muted">— www.postgresql.org</span></li>
 </ul>
 </details>
-<details><summary>Миграция, восстановление и кэш · источников: 3</summary><p><a href="cpp_station9_databases.html#section=evolution">Открыть раздел теории</a></p>
+<details><summary>Миграция и проверенное восстановление · источников: 3</summary><p><a href="cpp_station9_databases.html#section=evolution">Открыть раздел теории</a></p>
 <ul>
 <li><a href="https://www.postgresql.org/docs/18/backup-dump.html" target="_blank" rel="noopener noreferrer">логические копии</a> <span class="muted">— www.postgresql.org</span></li>
 <li><a href="https://www.postgresql.org/docs/18/continuous-archiving.html" target="_blank" rel="noopener noreferrer">восстановление с WAL</a> <span class="muted">— www.postgresql.org</span></li>
@@ -2844,6 +2899,16 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://www.postgresql.org/docs/18/runtime-config-wal.html" target="_blank" rel="noopener noreferrer">настройки WAL</a> <span class="muted">— www.postgresql.org</span></li>
 <li><a href="https://www.postgresql.org/docs/18/functions-sequence.html" target="_blank" rel="noopener noreferrer">последовательности</a> <span class="muted">— www.postgresql.org</span></li>
 <li><a href="https://www.postgresql.org/docs/18/ddl-identity-columns.html" target="_blank" rel="noopener noreferrer">identity columns</a> <span class="muted">— www.postgresql.org</span></li>
+</ul>
+</details>
+<details><summary>От UPDATE до восстановления: одна запись в трёх разных состояниях · источников: 6</summary><p><a href="cpp_station9_databases.html#section=write-lifecycle">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.postgresql.org/docs/18/storage-page-layout.html" target="_blank" rel="noopener noreferrer">страницы и версии строк</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/mvcc-intro.html" target="_blank" rel="noopener noreferrer">MVCC</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/wal-intro.html" target="_blank" rel="noopener noreferrer">правило WAL</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/wal-configuration.html" target="_blank" rel="noopener noreferrer">checkpoints</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/wal-async-commit.html" target="_blank" rel="noopener noreferrer">асинхронная фиксация</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/routine-vacuuming.html" target="_blank" rel="noopener noreferrer">уборка версий</a> <span class="muted">— www.postgresql.org</span></li>
 </ul>
 </details>
 <details><summary>Схема начинается с вопросов к данным · источников: 4</summary><p><a href="cpp_station9_databases.html#section=design">Открыть раздел теории</a></p>
@@ -2858,6 +2923,46 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <ul>
 <li><a href="https://www.postgresql.org/docs/18/transaction-iso.html" target="_blank" rel="noopener noreferrer">Read Committed и повторная проверка условий</a> <span class="muted">— www.postgresql.org</span></li>
 <li><a href="https://libpqxx.readthedocs.io/7.10.1/getting-started.html" target="_blank" rel="noopener noreferrer">libpqxx 7.10.1</a> <span class="muted">— libpqxx.readthedocs.io</span></li>
+</ul>
+</details>
+<details><summary>После COMMIT: почему другая машина ещё может видеть старую задачу · источников: 4</summary><p><a href="cpp_station9_databases.html#section=replication-path">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.postgresql.org/docs/18/warm-standby.html" target="_blank" rel="noopener noreferrer">physical standby и потоковая репликация</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/runtime-config-wal.html#GUC-SYNCHRONOUS-COMMIT" target="_blank" rel="noopener noreferrer">точные границы synchronous_commit</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/monitoring-stats.html#MONITORING-PG-STAT-REPLICATION-VIEW" target="_blank" rel="noopener noreferrer">pg_stat_replication</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/transaction-iso.html" target="_blank" rel="noopener noreferrer">правила снимков</a> <span class="muted">— www.postgresql.org</span></li>
+</ul>
+</details>
+<details><summary>Primary не отвечает: когда можно переключать запись · источников: 2</summary><p><a href="cpp_station9_databases.html#section=replication-failover">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://www.postgresql.org/docs/18/warm-standby-failover.html" target="_blank" rel="noopener noreferrer">PostgreSQL 18: failover, старый primary и внешняя автоматика</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/warm-standby.html#SYNCHRONOUS-REPLICATION" target="_blank" rel="noopener noreferrer">синхронная репликация и цена ожидания</a> <span class="muted">— www.postgresql.org</span></li>
+</ul>
+</details>
+<details><summary>Кэш: почему удалённый ключ может снова стать устаревшим · источников: 1</summary><p><a href="cpp_station9_databases.html#section=cache-race">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside" target="_blank" rel="noopener noreferrer">Microsoft Architecture Center: Cache-Aside</a> <span class="muted">— learn.microsoft.com</span></li>
+</ul>
+</details>
+<details><summary>Массовый промах: когда быстрый кэш перегружает базу · источников: 2</summary><p><a href="cpp_station9_databases.html#section=cache-pressure">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside" target="_blank" rel="noopener noreferrer">Cache-Aside: срок хранения, вытеснение и применимость</a> <span class="muted">— learn.microsoft.com</span></li>
+<li><a href="https://sre.google/sre-book/handling-overload/" target="_blank" rel="noopener noreferrer">Google SRE: ограничение перегрузки</a> <span class="muted">— sre.google</span></li>
+</ul>
+</details>
+<details><summary>Изменить задачу и отправить событие: где одной транзакции уже мало · источников: 3</summary><p><a href="cpp_station9_databases.html#section=outbox-transaction">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener noreferrer">Chris Richardson: Transactional Outbox</a> <span class="muted">— microservices.io</span></li>
+<li><a href="https://www.postgresql.org/docs/18/queries-with.html#QUERIES-WITH-MODIFYING" target="_blank" rel="noopener noreferrer">изменяющие команды в WITH</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/functions-json.html" target="_blank" rel="noopener noreferrer">построение JSON</a> <span class="muted">— www.postgresql.org</span></li>
+</ul>
+</details>
+<details><summary>Событие доставлено дважды: атомарная защита получателя и порядок · источников: 4</summary><p><a href="cpp_station9_databases.html#section=outbox-delivery">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener noreferrer">Transactional Outbox: окно повторной отправки</a> <span class="muted">— microservices.io</span></li>
+<li><a href="https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html" target="_blank" rel="noopener noreferrer">Chris Richardson: Idempotent Consumer</a> <span class="muted">— microservices.io</span></li>
+<li><a href="https://www.postgresql.org/docs/18/sql-insert.html#SQL-ON-CONFLICT" target="_blank" rel="noopener noreferrer">ON CONFLICT</a> <span class="muted">— www.postgresql.org</span></li>
+<li><a href="https://www.postgresql.org/docs/18/sql-select.html#SQL-FOR-UPDATE-SHARE" target="_blank" rel="noopener noreferrer">SKIP LOCKED и ограничения очередей</a> <span class="muted">— www.postgresql.org</span></li>
 </ul>
 </details>
 <h2 id="station10">От проверенного кода к работающему сервису</h2>
@@ -2977,6 +3082,23 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 <li><a href="https://kubernetes.io/docs/concepts/overview/" target="_blank" rel="noopener noreferrer">Kubernetes: назначение платформы</a> <span class="muted">— kubernetes.io</span></li>
 </ul>
 </details>
+<details><summary>Запрос медленный, CPU свободен: где на самом деле прошло время · источников: 4</summary><p><a href="cpp_station10_production.html#section=request-budget-architecture">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://sre.google/sre-book/handling-overload/" target="_blank" rel="noopener noreferrer">Google SRE: Handling Overload</a> <span class="muted">— sre.google</span></li>
+<li><a href="https://sre.google/sre-book/addressing-cascading-failures/" target="_blank" rel="noopener noreferrer">Addressing Cascading Failures</a> <span class="muted">— sre.google</span></li>
+<li><a href="https://grpc.io/docs/guides/deadlines/" target="_blank" rel="noopener noreferrer">gRPC deadlines</a> <span class="muted">— grpc.io</span></li>
+<li><a href="https://opentelemetry.io/docs/concepts/context-propagation/" target="_blank" rel="noopener noreferrer">OpenTelemetry context propagation</a> <span class="muted">— opentelemetry.io</span></li>
+</ul>
+</details>
+<details><summary>Выпуск за прокси: судьба двух запросов во время остановки · источников: 5</summary><p><a href="cpp_station10_production.html#section=proxy-release-timeline">Открыть раздел теории</a></p>
+<ul>
+<li><a href="https://nginx.org/en/docs/http/ngx_http_upstream_module.html" target="_blank" rel="noopener noreferrer">NGINX: группы upstream, keepalive и выбор сервера</a> <span class="muted">— nginx.org</span></li>
+<li><a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html" target="_blank" rel="noopener noreferrer">proxy: тайм-ауты и ограничения повторов</a> <span class="muted">— nginx.org</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7239.html" target="_blank" rel="noopener noreferrer">RFC 7239: Forwarded и доверие</a> <span class="muted">— www.rfc-editor.org</span></li>
+<li><a href="https://docs.docker.com/reference/cli/docker/container/stop/" target="_blank" rel="noopener noreferrer">Docker stop: сигналы и предел ожидания</a> <span class="muted">— docs.docker.com</span></li>
+<li><a href="https://sre.google/sre-book/release-engineering/" target="_blank" rel="noopener noreferrer">Google SRE: выпуск изменений</a> <span class="muted">— sre.google</span></li>
+</ul>
+</details>
 <details><summary>Разбираем задачу целиком: ограниченный приём и мягкая остановка · источников: 0</summary><p><a href="cpp_station10_production.html#section=gate-final-workbook">Открыть раздел теории</a></p>
 <p class="muted">В этом разделе пока нет прямой внешней ссылки. У вводных маршрутов и итогов источники могут находиться в соответствующих тематических разделах.</p>
 </details>
@@ -2996,6 +3118,7 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 </ul>
 <h3><a href="service_workshop.html#http">Работаем с API</a></h3><ul>
 <li><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-13.1.1">RFC 9110: If-Match</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.4">PUT и запрет validator после преобразования</a></li>
 <li><a href="https://www.rfc-editor.org/rfc/rfc6585.html#section-3">RFC 6585: 428</a></li>
 <li><a href="https://www.rfc-editor.org/rfc/rfc8259.html">RFC 8259: JSON</a></li>
 </ul>

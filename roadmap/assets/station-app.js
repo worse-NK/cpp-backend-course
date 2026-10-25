@@ -86,6 +86,21 @@
     return result.score + "/" + result.total + " · " + Math.round(result.score / result.total * 100) + "%";
   }
 
+  // Exact station IDs keep adjacent tracks (7Б and 9A) on their own content.
+  // These references are editorial priorities, not a second question bank.
+  function assessmentPriorityRefs(stationId) {
+    var refs = {
+      station7: ["private-public-addresses", "dhcp-network-config",
+        "linux-packet-to-handler", "server-queues-two-bottlenecks", "load-balancing-connections-requests"],
+      station8: ["request-execution-workbook", "architecture-boundaries",
+        "dependency-fanout-workbook", "replica-state-workbook"],
+      station9: ["write-lifecycle", "replication-path", "replication-failover",
+        "cache-race", "cache-pressure", "outbox-transaction", "outbox-delivery"],
+      station10: ["request-budget-architecture", "proxy-release-timeline"]
+    };
+    return (refs[stationId] || []).slice();
+  }
+
   // Stable, balanced station-wide selection. Source banks remain untouched.
   function finalQuestions(bank, modules, limit, preferCoverage, priorityRefs) {
     // Editorial exclusions from the final exam only: these remain in chapter
@@ -116,7 +131,22 @@
         if (basic[i]) mixed.push(basic[i]);
         if (advanced[i]) mixed.push(advanced[i]);
       }
-      return mixed;
+      // Promote one representative of each priority topic, rather than all
+      // questions of the first topic. Some modules get only two final slots:
+      // a repeated basic question must not hide the next architecture rule.
+      var priorityCovered = new Set(), representatives = [], remainder = [];
+      mixed.forEach(function (question) {
+        var refs = (question.theoryRefs || []).filter(function (ref) {
+          return (priorityRefs || []).indexOf(ref) >= 0;
+        });
+        if (refs.some(function (ref) { return !priorityCovered.has(ref); })) {
+          representatives.push(question);
+          refs.forEach(function (ref) { priorityCovered.add(ref); });
+        } else {
+          remainder.push(question);
+        }
+      });
+      return representatives.concat(remainder);
     });
     var selected = [], covered = new Set();
     while (selected.length < limit && buckets.some(function (bucket) { return bucket.length; })) {
@@ -788,7 +818,7 @@
     if (routeMode && data.readingOrder && !selectedWorkbook) activeTheory.sort(function (a, b) { return data.readingOrder.indexOf(a.id) - data.readingOrder.indexOf(b.id); });
     var activeTasks = tasks.filter(isPracticeTask);
     var analysisTasks = tasks.filter(function (task) { return !isPracticeTask(task); });
-    var priorityRefs = meta.number === 7 ? ["private-public-addresses", "dhcp-network-config"] : [];
+    var priorityRefs = assessmentPriorityRefs(meta.id);
     var activeQuizzes = { basic: finalQuestions(quizzes, substations, 25, meta.number <= 4, priorityRefs), interview: quizzes.interview || [] };
     var checkpointQuestions = chapterQuestions(quizzes, activeSubstationId, priorityRefs);
     var workedSections = theory.filter(function (section) { return /(?:-final-workbook|clock-worked-example)$/.test(section.id); });
@@ -796,6 +826,7 @@
     var doneActiveSections = activeTheory.filter(function (item) { return store["sec:" + item.id]; }).length;
 
     function quizStoreKey(kind) {
+      if (["station7", "station8", "station9", "station10"].indexOf(meta.id) >= 0) return "station-final:architecture-20261025:v1:" + kind;
       if (meta.id === "station7-netlab") return "station-final:netlab-20261021:v1:" + kind;
       if (meta.number === 7 && (kind === "basic" || kind === "interview")) return "station-final:network-foundation-20261021:v1:" + kind;
       if (kind === "interview" && [3,6,9].indexOf(meta.number) >= 0) return "station-final:audit-20261015:v1:" + kind;
