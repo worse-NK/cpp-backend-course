@@ -118,7 +118,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Источники: <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChStatSummary.html\">Wireshark: сведения о файле захвата</a>; <a href=\"https://www.wireshark.org/docs/wsdg_html_chunked/ChWorksCapturePackets.html\">разделение захвата и разбора пакетов</a>. Цепочки с прокси и границы TCP разобраны в <a href=\"cpp_station7_networking.html#section=production-proxy-container-topology\">станции 7</a>."
+          "html": "<b>Источники.</b> <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChStatSummary.html\">Wireshark: сведения о файле захвата</a>; <a href=\"https://www.wireshark.org/docs/wsdg_html_chunked/ChWorksCapturePackets.html\">разделение захвата и разбора пакетов</a>. Цепочки с прокси и границы TCP разобраны в <a href=\"cpp_station7_networking.html#section=production-proxy-container-topology\">станции 7</a>."
         },
         {
           "type": "note",
@@ -180,7 +180,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Официальные инструкции: <a href=\"https://www.wireshark.org/docs/man-pages/dumpcap.html\">dumpcap: интерфейс, фильтр, snaplen и пределы остановки</a>; <a href=\"https://wiki.wireshark.org/CaptureSetup/CapturePrivileges\">Wireshark: полномочия захвата</a>; <a href=\"https://docs.python.org/3/library/http.server.html#command-line-interface\">Python http.server: bind и directory</a>. Python-сервер здесь только учебный, не вариант публичного размещения."
+          "html": "<b>Источники и границы.</b> Официальные инструкции: <a href=\"https://www.wireshark.org/docs/man-pages/dumpcap.html\">dumpcap: интерфейс, фильтр, snaplen и пределы остановки</a>; <a href=\"https://wiki.wireshark.org/CaptureSetup/CapturePrivileges\">Wireshark: полномочия захвата</a>; <a href=\"https://docs.python.org/3/library/http.server.html#command-line-interface\">Python http.server: bind и directory</a>. Python-сервер здесь только учебный, не вариант публичного размещения."
         }
       ]
     },
@@ -236,7 +236,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Источники: <a href=\"https://wiki.wireshark.org/SnapLen\">snaplen</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChStatSummary.html\">свойства файла</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvChecksums.html\">контрольные суммы и offload</a>, <a href=\"https://www.wireshark.org/docs/dfref/f/frame.html\">поля frame</a>."
+          "html": "<b>Источники.</b> <a href=\"https://wiki.wireshark.org/SnapLen\">snaplen</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChStatSummary.html\">свойства файла</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvChecksums.html\">контрольные суммы и offload</a>, <a href=\"https://www.wireshark.org/docs/dfref/f/frame.html\">поля frame</a>."
         }
       ]
     },
@@ -292,7 +292,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Источники: <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChStatSummary.html\">Capture File Properties</a>; <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChWorkDisplayFilterSection.html\">display-фильтр не удаляет записи из файла</a>; <a href=\"https://wiki.wireshark.org/security/\">безопасность Wireshark</a>."
+          "html": "<b>Источники.</b> <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChStatSummary.html\">Capture File Properties</a>; <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChWorkDisplayFilterSection.html\">display-фильтр не удаляет записи из файла</a>; <a href=\"https://wiki.wireshark.org/security/\">безопасность Wireshark</a>."
         },
         {
           "type": "note",
@@ -356,7 +356,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Официальные описания: <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChUsePacketListPaneSection.html\">Packet List</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChUsePacketDetailsPaneSection.html\">Packet Details и generated fields</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChUsePacketBytesPaneSection.html\">Packet Bytes</a>."
+          "html": "<b>Источники и границы.</b> Официальные описания: <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChUsePacketListPaneSection.html\">Packet List</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChUsePacketDetailsPaneSection.html\">Packet Details и generated fields</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChUsePacketBytesPaneSection.html\">Packet Bytes</a>."
         }
       ]
     },
@@ -420,7 +420,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Источники: <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChCapCaptureFilterSection.html\">capture filters</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChWorkDisplayFilterSection.html\">display filters</a>, <a href=\"https://www.wireshark.org/docs/dfref/t/tcp.html\">точные имена полей TCP</a>."
+          "html": "<b>Источники.</b> <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChCapCaptureFilterSection.html\">capture filters</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChWorkDisplayFilterSection.html\">display filters</a>, <a href=\"https://www.wireshark.org/docs/dfref/t/tcp.html\">точные имена полей TCP</a>."
         }
       ]
     },
@@ -480,7 +480,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Источники: <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvFollowStreamSection.html\">Follow Stream и его влияние на фильтр</a>; <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvReassemblySection.html\">Packet Reassembly</a>; <a href=\"https://www.wireshark.org/docs/dfref/t/tcp.html\">tcp.stream и поля TCP</a>."
+          "html": "<b>Источники.</b> <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvFollowStreamSection.html\">Follow Stream и его влияние на фильтр</a>; <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvReassemblySection.html\">Packet Reassembly</a>; <a href=\"https://www.wireshark.org/docs/dfref/t/tcp.html\">tcp.stream и поля TCP</a>."
         }
       ]
     },
@@ -540,7 +540,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Источники: <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChWorkTimeFormatsSection.html\">режимы времени и time reference</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTimestamps.html\">источник отметок и точность</a>, <a href=\"https://www.wireshark.org/docs/dfref/f/frame.html\">поля frame.time</a>."
+          "html": "<b>Источники.</b> <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChWorkTimeFormatsSection.html\">режимы времени и time reference</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTimestamps.html\">источник отметок и точность</a>, <a href=\"https://www.wireshark.org/docs/dfref/f/frame.html\">поля frame.time</a>."
         },
         {
           "type": "note",
@@ -601,7 +601,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Источники: <a href=\"https://www.rfc-editor.org/rfc/rfc9293.html#section-3.4\">RFC 9293: пространство последовательности</a>; <a href=\"https://wiki.wireshark.org/TCP_Relative_Sequence_Numbers\">относительные SEQ/ACK в Wireshark</a>; <a href=\"https://www.wireshark.org/docs/dfref/t/tcp.html\">tcp.seq, tcp.ack и tcp.len</a>. Более глубокая модель sender/receiver уже дана в <a href=\"cpp_station7_networking.html#section=tcp-sender-receiver-internals\">станции 7</a>."
+          "html": "<b>Источники.</b> <a href=\"https://www.rfc-editor.org/rfc/rfc9293.html#section-3.4\">RFC 9293: пространство последовательности</a>; <a href=\"https://wiki.wireshark.org/TCP_Relative_Sequence_Numbers\">относительные SEQ/ACK в Wireshark</a>; <a href=\"https://www.wireshark.org/docs/dfref/t/tcp.html\">tcp.seq, tcp.ack и tcp.len</a>. Более глубокая модель sender/receiver уже дана в <a href=\"cpp_station7_networking.html#section=tcp-sender-receiver-internals\">станции 7</a>."
         }
       ]
     },
@@ -662,7 +662,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Источники: <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTCPAnalysis.html\">правила и ограничения TCP Analysis</a>; <a href=\"https://www.wireshark.org/docs/dfref/t/tcp.html\">поля tcp.analysis</a>; <a href=\"https://www.rfc-editor.org/rfc/rfc9293.html#section-3.8.1\">TCP retransmission timeout</a>. Значения порогов эвристик Wireshark могут меняться; их не выдаём за требования TCP."
+          "html": "<b>Источники.</b> <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTCPAnalysis.html\">правила и ограничения TCP Analysis</a>; <a href=\"https://www.wireshark.org/docs/dfref/t/tcp.html\">поля tcp.analysis</a>; <a href=\"https://www.rfc-editor.org/rfc/rfc9293.html#section-3.8.1\">TCP retransmission timeout</a>. Значения порогов эвристик Wireshark могут меняться; их не выдаём за требования TCP."
         }
       ]
     },
@@ -713,7 +713,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Источники: <a href=\"https://www.rfc-editor.org/rfc/rfc9293.html#section-3.8.6\">RFC 9293: управление окном</a>, <a href=\"https://www.rfc-editor.org/rfc/rfc7323.html#section-2\">RFC 7323: Window Scale и исключение для SYN</a>, <a href=\"https://www.wireshark.org/docs/dfref/t/tcp.html\">raw/calculated window fields</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTCPAnalysis.html\">Zero Window и window update в анализаторе</a>. Модель flow control и congestion control подробнее введена в <a href=\"cpp_station7_networking.html#section=flow-congestion-control\">станции 7</a>."
+          "html": "<b>Источники.</b> <a href=\"https://www.rfc-editor.org/rfc/rfc9293.html#section-3.8.6\">RFC 9293: управление окном</a>, <a href=\"https://www.rfc-editor.org/rfc/rfc7323.html#section-2\">RFC 7323: Window Scale и исключение для SYN</a>, <a href=\"https://www.wireshark.org/docs/dfref/t/tcp.html\">raw/calculated window fields</a>, <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTCPAnalysis.html\">Zero Window и window update в анализаторе</a>. Модель flow control и congestion control подробнее введена в <a href=\"cpp_station7_networking.html#section=flow-congestion-control\">станции 7</a>."
         }
       ]
     },
@@ -774,7 +774,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Границы выводов опираются на <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTCPAnalysis.html\">Wireshark TCP Analysis</a> и <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTimestamps.html\">источник временных отметок</a>. Сопоставление с внутренними очередями продолжает <a href=\"cpp_station7_networking.html#section=server-queues-two-bottlenecks\">разбор двух перегрузок одного сервера</a>."
+          "html": "<b>Источники и границы.</b> Границы выводов опираются на <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTCPAnalysis.html\">Wireshark TCP Analysis</a> и <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChAdvTimestamps.html\">источник временных отметок</a>. Сопоставление с внутренними очередями продолжает <a href=\"cpp_station7_networking.html#section=server-queues-two-bottlenecks\">разбор двух перегрузок одного сервера</a>."
         },
         {
           "type": "note",
