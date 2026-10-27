@@ -1,0 +1,124 @@
+{
+  "labs": [
+    {
+      "id": "lifetime", "title": "Жизнь объекта", "summary": "От первого поля до последнего деструктора: базы, отказ конструктора и освобождение памяти.", "file": "object_lifetime_demo.html",
+      "scenarios": ["members", "inheritance", "exception", "dynamic"],
+      "entries": [
+        {"station": "station0", "section": "destructor", "scenario": "members", "title": "Лаборатория: жизнь объекта", "description": "Проследи создание двух полей и обратный порядок разрушения. Поменяй список инициализации и объясни, почему вывод сохранился."},
+        {"station": "station2", "section": "ctor-order", "scenario": "inheritance", "title": "Лаборатория: база и поля одного объекта", "description": "Добавь базовый подобъект к уже знакомой Session. Найди момент вызова каждого конструктора и деструктора."},
+        {"station": "station4", "section": "constructor-transaction", "scenario": "exception", "title": "Лаборатория: конструктор завершился исключением", "description": "Сравни отказ поля и тела конструктора, затем вариант с new. Отдели разрушение готовых частей от освобождения памяти."}
+      ],
+      "sources": [{"title": "C++20: инициализация баз и полей", "url": "https://timsong-cpp.github.io/cppwp/n4861/class.base.init"}, {"title": "C++20: отказ конструктора", "url": "https://timsong-cpp.github.io/cppwp/n4861/except.ctor"}],
+      "boundary": "Подготовленные C++20-программы. Начальные варианты ограничены уже изученными темами."
+    },
+    {
+      "id": "ownership", "title": "Кто удерживает объект живым", "summary": "Перемещение unique_ptr, сильные и слабые ссылки, последний владелец и цикл владения.", "file": "visual_labs.html",
+      "scenarios": ["unique", "shared", "cycle", "weak-cycle"],
+      "entries": [
+        {"station": "station1", "section": "ownership-graph", "scenario": "shared", "title": "Лаборатория: граф владения", "description": "Пересчитай сильных владельцев после копирования, lock и reset. Сравни цикл shared_ptr со слабой обратной ссылкой."},
+        {"station": "station1", "section": "move-cost-model", "scenario": "unique", "title": "Лаборатория: перемещение владельца", "description": "Проследи передачу unique_ptr: меняется владелец, а управляемый объект остаётся тем же."}
+      ],
+      "sources": [{"title": "C++20: unique_ptr", "url": "https://timsong-cpp.github.io/cppwp/n4861/unique.ptr"}, {"title": "C++20: shared_ptr", "url": "https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.shared"}, {"title": "C++20: weak_ptr::lock", "url": "https://timsong-cpp.github.io/cppwp/n4861/util.smartptr.weak.obs"}],
+      "boundary": "Логический граф владения в одном потоке. Счётчики не используются как способ синхронизации."
+    },
+    {
+      "id": "vector", "title": "Контейнер и сохранённый доступ", "summary": "Размер, ёмкость, смена буфера и инвалидация после push_back, reserve и erase.", "file": "visual_labs.html",
+      "scenarios": ["growth", "reserved", "erase"],
+      "entries": [{"station": "station3", "section": "invalidation-erasure", "scenario": "growth", "title": "Лаборатория: vector меняет хранилище", "description": "Сравни вставку в заполненный и заранее подготовленный буфер. Затем удали элемент и проверь сохранённые итераторы."}],
+      "sources": [{"title": "C++20: изменение vector", "url": "https://timsong-cpp.github.io/cppwp/n4861/vector.modifiers"}, {"title": "C++20: ёмкость vector", "url": "https://timsong-cpp.github.io/cppwp/n4861/vector.capacity"}],
+      "boundary": "Конкретные размеры буферов — условия модели, а не обещанный стандартом коэффициент роста. Недействительный доступ не разыменовывается."
+    },
+    {
+      "id": "build", "title": "От изменения файла к новой программе", "summary": "Граф зависимостей, единицы трансляции, повторная компиляция и линковка.", "file": "visual_labs.html",
+      "scenarios": ["header", "source", "readme"],
+      "entries": [{"station": "station5", "section": "incremental-build-graph", "scenario": "header", "title": "Лаборатория: что нужно пересобрать", "description": "Измени заголовок, реализацию или README в одном проекте. По графу установи, какие объектные файлы и цели устарели."}],
+      "sources": [{"title": "CMake: модель сборки", "url": "https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html"}],
+      "boundary": "Указанный граф маленького проекта; нет unity build, модулей, генераторов и зависимостей от README."
+    },
+    {
+      "id": "concurrency", "title": "Два потока, одно изменение", "summary": "Выбирай следующий поток и проверяй, какие операции действительно составляют одно целое.", "file": "visual_labs.html",
+      "scenarios": ["separate", "mutex", "rmw"],
+      "entries": [{"station": "station6", "section": "atomic-protocols", "scenario": "separate", "title": "Лаборатория: составная операция и порядок потоков", "description": "Раздельные атомарные load/store могут потерять увеличение. Сам выбирай шаги потоков, затем сравни mutex и fetch_add."}],
+      "sources": [{"title": "C++20: атомарные операции", "url": "https://timsong-cpp.github.io/cppwp/n4861/atomics.types.operations"}, {"title": "C++20: fetch_add целого типа", "url": "https://timsong-cpp.github.io/cppwp/n4861/atomics.types.int"}, {"title": "C++20: mutex", "url": "https://timsong-cpp.github.io/cppwp/n4861/thread.mutex.requirements"}],
+      "boundary": "В раздельном варианте счётчик атомарный: показываем допустимую потерю обновления, а не вычисляем результат программы с data race."
+    },
+    {
+      "id": "network", "title": "Байты, запрос и ответ", "summary": "Границы сообщений в TCP, потерянный ответ, повтор операции и условное обновление.", "file": "visual_labs.html",
+      "scenarios": ["fragmented", "combined", "oversize", "retry", "dedup", "version"],
+      "entries": [
+        {"station": "station7", "section": "stream-parser-engineering", "scenario": "fragmented", "title": "Лаборатория: сообщение приходит по частям", "description": "Измени границы чтений одного потока байтов. Проследи буфер, длину ожидаемого тела и готовые сообщения."},
+        {"station": "station8", "section": "idempotency-state", "scenario": "retry", "title": "Лаборатория: ответ потерялся после записи", "description": "Раздели реальное состояние сервера и знания клиента. Сравни повтор с ключом и без него, затем проверку версии ресурса."}
+      ],
+      "sources": [{"title": "RFC 9293: поток TCP", "url": "https://www.rfc-editor.org/rfc/rfc9293.html"}, {"title": "RFC 9110: семантика HTTP", "url": "https://www.rfc-editor.org/rfc/rfc9110.html"}],
+      "boundary": "Парсер (код разбора входных байтов) использует учебный префикс длины в один байт, максимум 5 байт тела. Дедупликация (распознавание повторной операции без повторения её эффекта) рассматривается без перезапуска сервера; долговечность требует отдельного протокола."
+    },
+    {
+      "id": "sql", "title": "Как запрос получает свои строки", "summary": "Проследи пары JOIN, фильтрацию и группы. Увидь, где исчезает пользователь без задач.", "file": "visual_labs.html",
+      "scenarios": ["left", "where", "count-star", "inner"],
+      "entries": [{"station": "station9-sql", "section": "join-shapes", "scenario": "left", "title": "Лаборатория: JOIN, NULL и подсчёт", "description": "Проведи данные через соединение, фильтр и группировку. Меняй ON/WHERE и COUNT(t.id)/COUNT(*), сверяя смысл каждой строки."}],
+      "sources": [{"title": "PostgreSQL 18: выражения таблиц", "url": "https://www.postgresql.org/docs/18/queries-table-expressions.html"}, {"title": "PostgreSQL 18: агрегаты", "url": "https://www.postgresql.org/docs/18/functions-aggregate.html"}],
+      "boundary": "Показываем логический смысл запроса, а не физический порядок действий планировщика. Написать собственный SQL можно в отдельном тренажёре."
+    },
+    {
+      "id": "transactions", "title": "Две сессии и одна база", "summary": "Последнее место, ожидание блокировки, COMMIT/ROLLBACK и видимость снимков.", "file": "visual_labs.html",
+      "scenarios": ["commit", "rollback", "rc", "rr"],
+      "entries": [{"station": "station9", "section": "isolation", "scenario": "commit", "title": "Лаборатория: конкурирующие транзакции", "description": "Проследи захват последнего места в двух сессиях. Сравни фиксацию с откатом, а затем снимки Read Committed и Repeatable Read."}],
+      "sources": [{"title": "PostgreSQL 18: изоляция транзакций", "url": "https://www.postgresql.org/docs/18/transaction-iso.html"}, {"title": "PostgreSQL 18: блокировки", "url": "https://www.postgresql.org/docs/18/explicit-locking.html"}, {"title": "PostgreSQL 18: повторная проверка UPDATE в ExecUpdate", "url": "https://github.com/postgres/postgres/blob/REL_18_STABLE/src/backend/executor/nodeModifyTable.c"}],
+      "boundary": "Сценарии PostgreSQL 18 с явно заданными уровнями изоляции. Это модель для объяснения; реальная двухсессионная лабораторная дана в станции 9B."
+    },
+    {
+      "id": "overload", "title": "Приём, очередь и остановка", "summary": "Меняй поток задач, скорость обработки и буфер. Проверь отказ при перегрузке и завершение принятой работы.", "file": "visual_labs.html",
+      "scenarios": ["bounded", "drain"],
+      "entries": [{"station": "station10", "section": "overload-limits", "scenario": "bounded", "title": "Лаборатория: очередь не добавляет производительность", "description": "Настрой поток, число исполнителей и предел очереди. Проследи принятые, выполненные и отклонённые задачи, затем включи draining (завершение принятой работы без приёма новой)."}],
+      "sources": [{"title": "Google SRE: работа с перегрузкой", "url": "https://sre.google/sre-book/handling-overload/"}],
+      "boundary": "Дискретная модель: такт — одна секунда, каждая задача занимает исполнителя на один такт. Это не замер реального сервиса и не модель p99."
+    },
+    {
+      "id": "packetpath",
+      "title": "Пакет на разных участках пути",
+      "summary": "Маршрутизация, SNAT, forward-drop и IPv6 Packet Too Big: как меняются заголовки и что подтверждает каждое наблюдение.",
+      "file": "visual_labs.html",
+      "scenarios": [
+        "routed",
+        "snat",
+        "filtered",
+        "pmtu6"
+      ],
+      "entries": [
+        {
+          "station": "station7-netlab",
+          "section": "netlab-packet-walk",
+          "scenario": "routed",
+          "title": "Лаборатория: пакет от LAN до server",
+          "description": "Проследи next hop, канальные заголовки и TTL. Сравни обычную маршрутизацию, SNAT и отказ фильтра."
+        },
+        {
+          "station": "station7-netlab",
+          "section": "netlab-ipv6-pmtu",
+          "scenario": "pmtu6",
+          "title": "Лаборатория: IPv6-пакет не помещается в MTU",
+          "description": "Сопоставь размер IP-пакета и MTU выхода, Packet Too Big и следующий уменьшенный пакет."
+        }
+      ],
+      "sources": [
+        {
+          "title": "RFC 1812: IPv4 forwarding",
+          "url": "https://www.rfc-editor.org/rfc/rfc1812"
+        },
+        {
+          "title": "nftables: NAT",
+          "url": "https://wiki.nftables.org/wiki-nftables/index.php/Performing_Network_Address_Translation_(NAT)"
+        },
+        {
+          "title": "RFC 8201: IPv6 Path MTU Discovery",
+          "url": "https://www.rfc-editor.org/rfc/rfc8201"
+        },
+        {
+          "title": "Linux 6.1: IPv6 MTU check before forward",
+          "url": "https://github.com/torvalds/linux/blob/v6.1/net/ipv6/ip6_output.c#L570-L597"
+        }
+      ],
+      "boundary": "Подготовленные учебные трассы, не работающий сетевой стек и не захват Linux. MAC — символические метки; IPv4 TTL=64 выбран для примера. SNAT сохраняет порт при отсутствии конфликта. ICMPv6 PTB доходит до источника; его обработка показана отдельно от фрагментации. Модель не доказывает работу реального стенда или приложение в Интернете."
+    }
+  ]
+}

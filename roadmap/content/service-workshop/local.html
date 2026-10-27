@@ -1,0 +1,50 @@
+<h2>1. Получаем исходники, не секреты</h2>
+<p>Открой терминал в каталоге, где можно создать новый учебный проект. Следующая команда создаст папку <code>cpp-course</code>. Если папка уже существует, выбери другое имя или используй свою ранее скачанную копию — не удаляй её наугад.</p>
+<div class="command"><div class="command-place">Локальный компьютер · новый каталог для курса</div><pre><code>git clone --depth 1 https://github.com/worse-NK/cpp-backend-course.git cpp-course &amp;&amp;
+cd cpp-course/roadmap/examples/service-workshop &amp;&amp;
+pwd</code></pre></div>
+<p>Последняя команда показывает текущий каталог. Его конец должен быть <code>/roadmap/examples/service-workshop</code>. Далее все локальные команды выполняются отсюда, если явно не указано другое. Если Git не нужен, можно скачать ZIP репозитория и открыть эту же вложенную папку после распаковки.</p>
+<div class="table-scroll"><table><thead><tr><th>Файл</th><th>За что отвечает</th></tr></thead><tbody>
+<tr><td><a href="examples/service-workshop/app.cpp">app.cpp</a></td><td>HTTP-маршруты, проверка запроса, ответ, настройки запуска.</td></tr>
+<tr><td><a href="examples/service-workshop/storage.hpp">storage.hpp</a>, <a href="examples/service-workshop/storage.cpp">storage.cpp</a></td><td>Операции с задачами: реализация в памяти и PostgreSQL.</td></tr>
+<tr><td><a href="examples/service-workshop/CMakeLists.txt">CMakeLists.txt</a>, <a href="examples/service-workshop/tests.cpp">tests.cpp</a></td><td>Повторяемая конфигурация сборки, закреплённые зависимости, тесты хранилища.</td></tr>
+<tr><td><a href="examples/service-workshop/lab.py">lab.py</a></td><td>Небольшой помощник: создать локальные секреты, проверить их наличие, запустить бинарник или упаковать исходники. Сам Docker и SSH он не запускает.</td></tr>
+<tr><td><a href="examples/service-workshop/compose.yaml">compose.yaml</a>, <a href="examples/service-workshop/schema.sql">schema.sql</a></td><td>Окружение с PostgreSQL. Понадобится на следующем этапе.</td></tr>
+</tbody></table></div>
+
+<h2>2. Создаём свои секреты</h2>
+<div class="command"><div class="command-place">Локальный компьютер · каталог service-workshop</div><pre><code>python3 lab.py init &amp;&amp;
+python3 lab.py check-env</code></pre></div>
+<p><code>init</code> один раз создаёт <code>.env</code> с тремя независимыми случайными секретами и <code>.secrets/client.curl</code> с заголовком авторизации для клиента. Каждый секрет содержит 64 шестнадцатеричных символа. Файлы доступны только владельцу (режим <code>0600</code>), каталог <code>.secrets</code> — только владельцу на чтение, запись и проход (<code>0700</code>). Помощник не печатает значения и не заменяет существующие файлы.</p>
+<p class="output-label">Ожидаемая проверка наличия, без значений</p><pre class="output">APP_TOKEN: present
+POSTGRES_PASSWORD: present
+APP_DB_PASSWORD: present</pre>
+<p>Для локального режима пока нужен только <code>APP_TOKEN</code>. Два других значения понадобятся базе: администратору PostgreSQL и отдельной роли приложения. Они не должны совпадать. Не отправляй <code>.env</code> и <code>client.curl</code> в Git, чат или скриншот. Не выполняй <code>source .env</code>: помощник сам читает только известные имена и проверяет формат, не исполняя содержимое как shell-код.</p>
+<details class="explanation"><summary>Если init пишет, что файл уже существует</summary><p>Это защита от случайной смены токена и паролей. Если ты уже выполнял шаг в этой копии, продолжай с <code>check-env</code>. Не удаляй файл ради повторного запуска: при существующей PostgreSQL смена текста в <code>.env</code> не меняет пароль внутри базы. Для независимого эксперимента создай отдельную копию проекта.</p></details>
+
+<h2>3. Собираем и проверяем</h2>
+<div class="command"><div class="command-place">Локальный компьютер · каталог service-workshop</div><pre><code>cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug &amp;&amp;
+cmake --build build --parallel 2 &amp;&amp;
+ctest --test-dir build --output-on-failure</code></pre></div>
+<p>Первая команда читает проект из текущего каталога (<code>-S .</code>) и создаёт отдельный каталог сборки <code>build</code>. Она скачивает cpp-httplib 0.59.0 и nlohmann/json 3.12.0: версии и SHA-256 архивов закреплены в CMake, чтобы другой архив не был молча принят. Вторая компилирует программу двумя параллельными заданиями. Третья запускает тесты. Итог сборки — <code>build/course_tasks</code>. Отключённая опция <code>COURSE_WITH_POSTGRES</code> означает, что сейчас не требуются заголовки libpq и работающая база.</p>
+<p>Если загрузка зависимости не удалась, проверь интернет, прокси и доверенные сертификаты. Не отключай проверку TLS или контроль хеша, чтобы «продавить» сборку. Ошибка компилятора — другой класс сбоя: сохрани первую содержательную ошибку, версии инструментов и точную команду. Предупреждения перед ней не всегда являются причиной.</p>
+
+<h2>4. Запускаем процесс</h2>
+<div class="command"><div class="command-place">Локальный компьютер · терминал A · оставить работающим</div><pre><code>python3 lab.py run</code></pre></div>
+<p>Помощник запускает собранный бинарник, передаёт токен и принудительно выбирает хранилище в памяти и <code>127.0.0.1:8080</code>. Терминал не возвращает приглашение, пока процесс работает. Это нормальное поведение: мы не запускали фоновую службу.</p>
+<figure class="diagram"><strong class="diagram-title">Что означает адрес прослушивания</strong><div class="topology">
+<div class="machine"><span>ОДНО LINUX-ОКРУЖЕНИЕ</span><div class="topology"><div class="node"><b>Терминал B: curl</b><small>Начинает TCP-соединение<br>с <code>127.0.0.1:8080</code></small></div><div class="connector" aria-hidden="true">HTTP<br>→</div><div class="node"><b>Терминал A: course_tasks</b><small>Слушает loopback:8080<br>Задачи в памяти процесса</small></div></div></div>
+<div class="node"><b>Другой компьютер</b><small>Его <code>127.0.0.1</code> — он сам.<br>Это не адрес твоего API.</small></div></div><figcaption>Loopback — виртуальный интерфейс для обращения к той же сетевой среде. В контейнере, отдельной VM и на хосте это разные окружения.</figcaption></figure>
+<div class="command"><div class="command-place">Локальный компьютер · терминал B · тот же каталог проекта</div><pre><code>curl --noproxy 127.0.0.1 --connect-timeout 2 --max-time 5 -i http://127.0.0.1:8080/health/ready
+curl --config .secrets/client.curl -i http://127.0.0.1:8080/tasks</code></pre></div>
+<p>Первый ответ должен иметь статус <code>200</code>. Второй — <code>200</code> и пустой JSON-массив <code>[]</code>, если процесс ещё не получал задач. <code>-i</code> добавляет заголовки <em>ответа</em> к выводу. Конфиг клиента добавляет Bearer-токен, ограничение соединения двумя секундами и всего запроса пятью секундами. Не включай <code>-v</code> или трассировку curl: они могут показать секретный заголовок <em>запроса</em>.</p>
+<div class="table-scroll"><table><thead><tr><th>Наблюдение</th><th>Что проверить</th></tr></thead><tbody>
+<tr><td>Connection refused</td><td>Процесс жив? Запущен ли он в том же Linux-окружении? Совпадает ли порт? Отказ соединения ещё не является HTTP-ошибкой.</td></tr>
+<tr><td>Порт занят</td><td>Не запускай второй экземпляр поверх первого. Посмотри <code>ss -ltnp 'sport = :8080'</code>. Останови только свой известный процесс или выбери другой порт.</td></tr>
+<tr><td>401 Unauthorized</td><td>TCP и HTTP уже работают. Отсутствует или не совпадает токен. Проверь путь к конфигу, не печатая его содержимое.</td></tr>
+<tr><td>curl не находит config</td><td>Второй терминал открыт не в каталоге проекта. Сверь <code>pwd</code>.</td></tr>
+</tbody></table></div>
+<p>Если нужен другой порт, останови процесс <code>Ctrl-C</code> в терминале A, запусти <code>python3 lab.py run --port 18080</code> и замени порт во всех локальных URL. Не пытайся устранить конфликт командой, завершающей все процессы с похожим именем.</p>
+<details class="explanation"><summary>Под капотом: кто исполняет запрос и где он может ждать</summary><p>В этом проекте четыре рабочих потока и очередь до 32 заданий обслуживания соединений. Это не «32 пользователя»: одно соединение может нести несколько запросов, а до вызова обработчика есть отдельные места ожидания. В <a href="cpp_station8_rest_api.html#section=request-execution-workbook">разборе реального пути запроса</a> показаны именно эти настройки, удержание потока во время ожидания и причина, по которой даже лёгкая health-проверка не всегда ответит немедленно. Для первого запуска знать внутренний код библиотеки наизусть не требуется.</p></details>
+<div class="stage-result"><h3>Результат этапа</h3><p>Ты запустил собственный HTTP-сервер. Пока «собственный» означает собранный и управляемый тобой процесс, а не обязательно написанную с нуля реализацию TCP и HTTP.</p><p>Перед переходом убедись: объясняешь, почему нужны два терминала, что занимает порт и почему другой компьютер не достигает сервиса по твоему <code>127.0.0.1</code>.</p></div>
+<section class="sources"><h3>Проверяемые контракты инструментов</h3><ul><li><a href="https://github.com/yhirose/cpp-httplib/tree/v0.59.0">cpp-httplib 0.59.0</a> и <a href="https://github.com/nlohmann/json/tree/v3.12.0">nlohmann/json 3.12.0</a></li><li><a href="https://cmake.org/cmake/help/latest/module/FetchContent.html">CMake FetchContent</a></li><li><a href="https://curl.se/docs/manpage.html">curl: config, include и ограничения времени</a></li><li><a href="https://man7.org/linux/man-pages/man7/ip.7.html">Linux ip(7): loopback и адрес привязки</a></li></ul></section>

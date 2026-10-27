@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "modules": {
+    "execution-lifecycle": [
+      {
+        "bank": "basic",
+        "index": 2
+      },
+      {
+        "bank": "basic",
+        "index": 3
+      },
+      {
+        "bank": "basic",
+        "index": 4
+      },
+      {
+        "bank": "advanced",
+        "index": 51
+      },
+      {
+        "bank": "advanced",
+        "index": 23
+      }
+    ],
+    "races-model": [
+      {
+        "bank": "basic",
+        "index": 37
+      },
+      {
+        "bank": "advanced",
+        "index": 13
+      },
+      {
+        "bank": "advanced",
+        "index": 31
+      },
+      {
+        "bank": "advanced",
+        "index": 53
+      },
+      {
+        "bank": "basic",
+        "index": 38
+      }
+    ],
+    "mutex-locking": [
+      {
+        "bank": "basic",
+        "index": 8
+      },
+      {
+        "bank": "basic",
+        "index": 9
+      },
+      {
+        "bank": "basic",
+        "index": 12
+      },
+      {
+        "bank": "basic",
+        "index": 13
+      },
+      {
+        "bank": "advanced",
+        "index": 16
+      }
+    ],
+    "atomics-memory": [
+      {
+        "bank": "basic",
+        "index": 16
+      },
+      {
+        "bank": "basic",
+        "index": 33
+      },
+      {
+        "bank": "advanced",
+        "index": 6
+      },
+      {
+        "bank": "advanced",
+        "index": 17
+      },
+      {
+        "bank": "advanced",
+        "index": 57
+      }
+    ],
+    "waiting-coordination": [
+      {
+        "bank": "basic",
+        "index": 19
+      },
+      {
+        "bank": "basic",
+        "index": 28
+      },
+      {
+        "bank": "basic",
+        "index": 30
+      },
+      {
+        "bank": "advanced",
+        "index": 11
+      },
+      {
+        "bank": "advanced",
+        "index": 33
+      }
+    ],
+    "tasks-results": [
+      {
+        "bank": "basic",
+        "index": 24
+      },
+      {
+        "bank": "basic",
+        "index": 25
+      },
+      {
+        "bank": "basic",
+        "index": 27
+      },
+      {
+        "bank": "advanced",
+        "index": 10
+      },
+      {
+        "bank": "basic",
+        "index": 26
+      }
+    ],
+    "queues-pools": [
+      {
+        "bank": "basic",
+        "index": 40
+      },
+      {
+        "bank": "basic",
+        "index": 42
+      },
+      {
+        "bank": "basic",
+        "index": 43
+      },
+      {
+        "bank": "advanced",
+        "index": 40
+      },
+      {
+        "bank": "advanced",
+        "index": 38
+      }
+    ],
+    "production-interview": [
+      {
+        "bank": "basic",
+        "index": 35
+      },
+      {
+        "bank": "basic",
+        "index": 44
+      },
+      {
+        "bank": "basic",
+        "index": 45
+      },
+      {
+        "bank": "basic",
+        "index": 46
+      },
+      {
+        "bank": "basic",
+        "index": 49
+      }
+    ]
+  }
+}

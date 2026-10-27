@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "modules": {
+    "api-foundations": [
+      {
+        "bank": "basic",
+        "index": 2
+      },
+      {
+        "bank": "basic",
+        "index": 3
+      },
+      {
+        "bank": "advanced",
+        "index": 3
+      },
+      {
+        "bank": "advanced",
+        "index": 4
+      },
+      {
+        "bank": "advanced",
+        "index": 1
+      }
+    ],
+    "http-operations": [
+      {
+        "bank": "basic",
+        "index": 6
+      },
+      {
+        "bank": "basic",
+        "index": 7
+      },
+      {
+        "bank": "advanced",
+        "index": 6
+      },
+      {
+        "bank": "advanced",
+        "index": 8
+      },
+      {
+        "bank": "advanced",
+        "index": 7
+      }
+    ],
+    "validation-errors": [
+      {
+        "bank": "basic",
+        "index": 10
+      },
+      {
+        "bank": "basic",
+        "index": 11
+      },
+      {
+        "bank": "advanced",
+        "index": 11
+      },
+      {
+        "bank": "advanced",
+        "index": 13
+      },
+      {
+        "bank": "advanced",
+        "index": 12
+      }
+    ],
+    "cpp-service": [
+      {
+        "bank": "basic",
+        "index": 12
+      },
+      {
+        "bank": "basic",
+        "index": 13
+      },
+      {
+        "bank": "basic",
+        "index": 14
+      },
+      {
+        "bank": "basic",
+        "index": 15
+      },
+      {
+        "bank": "advanced",
+        "index": 16
+      }
+    ],
+    "consistency-retries": [
+      {
+        "bank": "basic",
+        "index": 18
+      },
+      {
+        "bank": "basic",
+        "index": 19
+      },
+      {
+        "bank": "basic",
+        "index": 40
+      },
+      {
+        "bank": "advanced",
+        "index": 21
+      },
+      {
+        "bank": "advanced",
+        "index": 24
+      }
+    ],
+    "api-security": [
+      {
+        "bank": "basic",
+        "index": 22
+      },
+      {
+        "bank": "basic",
+        "index": 23
+      },
+      {
+        "bank": "basic",
+        "index": 44
+      },
+      {
+        "bank": "advanced",
+        "index": 27
+      },
+      {
+        "bank": "advanced",
+        "index": 29
+      }
+    ],
+    "contracts-evolution": [
+      {
+        "bank": "basic",
+        "index": 24
+      },
+      {
+        "bank": "basic",
+        "index": 25
+      },
+      {
+        "bank": "basic",
+        "index": 26
+      },
+      {
+        "bank": "basic",
+        "index": 27
+      },
+      {
+        "bank": "advanced",
+        "index": 34
+      }
+    ],
+    "rpc-events": [
+      {
+        "bank": "basic",
+        "index": 28
+      },
+      {
+        "bank": "basic",
+        "index": 29
+      },
+      {
+        "bank": "basic",
+        "index": 30
+      },
+      {
+        "bank": "basic",
+        "index": 31
+      },
+      {
+        "bank": "basic",
+        "index": 37
+      }
+    ],
+    "api-project": [
+      {
+        "bank": "basic",
+        "index": 32
+      },
+      {
+        "bank": "basic",
+        "index": 33
+      },
+      {
+        "bank": "basic",
+        "index": 34
+      },
+      {
+        "bank": "basic",
+        "index": 35
+      },
+      {
+        "bank": "basic",
+        "index": 43
+      }
+    ]
+  }
+}

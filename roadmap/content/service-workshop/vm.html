@@ -1,0 +1,77 @@
+<h2>1. Какая VM нужна</h2>
+<p>Нужна отдельная Ubuntu 24.04 LTS, которой ты управляешь: например, VM в VirtualBox, VMware, UTM или другом гипервизоре. Создай обычного пользователя и снимок чистого состояния (snapshot — сохранённое состояние VM, к которому можно вернуться). Для удалённого входа внутри гостевой ОС должен работать OpenSSH Server. Docker Engine, Compose v2, Python 3 и curl настраиваются <em>внутри этой VM</em>. Компилятор на хосте VM не заменяет компилятор внутри образа; Dockerfile принесёт инструменты сборки сам.</p>
+<p>Способ сетевого подключения зависит от гипервизора. В NAT-режиме может понадобиться его перенаправление SSH-порта; в host-only или bridged у VM может быть собственный доступный адрес. Не меняй режимы наугад. Сначала добейся простого входа по SSH по инструкции своего гипервизора и узнай IP гостя через его консоль. Для практики не требуется пробрасывать HTTP 8080 наружу.</p>
+<p>Для скачивания пакетов и образов VM также нужен исходящий интернет. Один только host-only адаптер обычно даёт связь с хостом, но не выход в интернет; часто к нему добавляют второй адаптер NAT. Другой вариант — один NAT-адаптер и перенаправление <em>только SSH</em> с loopback хоста, например <code>127.0.0.1:2222 → VM:22</code>. Тогда SSH-клиент использует адрес 127.0.0.1 и порт 2222, а не внутренний IP гостя. Эти настройки относятся к гипервизору, не к Compose.</p>
+<p>Если SSH-сервер не был установлен вместе с Ubuntu, подготовь его через <strong>консоль самой VM</strong> (окно гостевой ОС, ещё не SSH). Команды ниже устанавливают службу, позволяют ей запускаться при загрузке и показывают её состояние. Выполняй их только в своей учебной VM:</p>
+<div class="command remote"><div class="command-place">Linux-VM · её консоль в гипервизоре · ещё до первого SSH-входа</div><pre><code>sudo apt update &amp;&amp;
+sudo apt install openssh-server python3 curl ca-certificates &amp;&amp;
+sudo systemctl enable --now ssh
+systemctl --no-pager status ssh
+ip -br address
+ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub</code></pre></div>
+<p>Ожидай активную службу (либо активную socket-активацию в конфигурациях Ubuntu), адрес нужного сетевого интерфейса и отпечаток публичного Ed25519-ключа. Последняя команда читает файл с окончанием <code>.pub</code>, не приватный ключ. Сравнивай его с приглашением клиента именно для этого алгоритма. Если интерфейс не получил адрес или SSH недоступен, исправь подключение VM; не отключай проверку ключа и firewall вслепую. Docker установи отдельно по ссылке из первого шага, внутри гостевой Ubuntu.</p>
+<div class="callout warning"><p><strong>Рабочий сервер организации для этого не подходит.</strong> Не устанавливай Docker и не запускай Compose на машине, которой не имеешь права управлять. Основной маршрут предназначен для отдельной учебной VM. Оставь доступ к её консоли, чтобы ошибка SSH не отрезала управление.</p></div>
+
+<h2>2. Первый SSH-вход: пользователь и адрес — разные вещи</h2>
+<p>В записи <code>learner@192.168.56.101</code> слева имя пользователя <em>на удалённой машине</em>, справа адрес машины, а не имя твоего локального аккаунта. Адрес из частной сети работает только там, откуда к ней есть маршрут; он не становится доступным всему миру. Чтобы не повторять пользователя, адрес и нестандартный порт во всех ssh/scp-командах, зададим одно короткое имя — <code>course-vm</code>.</p>
+<p>На <strong>локальном компьютере</strong> открой в редакторе <code>~/.ssh/config</code> (при необходимости создай каталог <code>.ssh</code> и файл). Добавь следующую отдельную запись, не заменяя существующие настройки. Это <strong>текст конфигурации, не команды терминала</strong>. Замени имя пользователя и адрес на свои:</p>
+<pre class="file-list"><code>Host course-vm
+    HostName 192.168.56.101
+    User learner
+    Port 22</code></pre>
+<p>Для варианта NAT с перенаправлением <code>127.0.0.1:2222 → VM:22</code> в этой записи укажи <code>HostName 127.0.0.1</code> и <code>Port 2222</code>. Имя <code>course-vm</code> — локальный псевдоним SSH, а не DNS-запись в интернете. Дальнейшие команды одинаковы для обоих способов подключения.</p>
+<div class="command"><div class="command-place">Локальный компьютер · после настройки записи course-vm</div><pre><code>VM_HOST=course-vm
+ssh "$VM_HOST"</code></pre></div>
+<p>При первом входе SSH показывает fingerprint (краткий отпечаток) ключа <em>сервера</em>. Сверь его через доверенную консоль VM, а не просто отвечай yes привычным движением. Это позволяет отличить нужную машину от подмены. При неожиданной смене ключа сначала выясни причину, а не отключай проверку или удаляй запись автоматически. Ключ сервера и твой пользовательский SSH-ключ решают разные задачи: первый удостоверяет машину, второй может удостоверять тебя.</p>
+<div class="command remote"><div class="command-place">Linux-VM · после SSH-входа</div><pre><code>hostname
+whoami
+pwd
+python3 --version
+docker version
+docker compose version
+exit</code></pre></div>
+<p>После <code>exit</code> снова работаешь в локальном терминале. Если непонятно, где сейчас выполняется команда, остановись и проверь <code>hostname</code>. Не продолжай перенос, пока обычный вход и работа Docker в VM не проверены. И ssh, и scp читают запись <code>course-vm</code>, поэтому нестандартный порт не нужно дописывать в каждой строке. Без такой записи у ssh порт задавался бы через <code>-p</code>, а у scp — через <code>-P</code>; это разные опции.</p>
+
+<h2>3. Переносим только исходники</h2>
+<div class="command"><div class="command-place">Локальный компьютер · каталог service-workshop</div><pre><code>python3 lab.py pack &amp;&amp;
+ssh "$VM_HOST" 'mkdir -m 700 course-workshop-upload' &amp;&amp;
+scp service-workshop-source.tar.gz "$VM_HOST:course-workshop-upload/"</code></pre></div>
+<p>Архив создаётся по явному списку: C++-исходники, CMake, Dockerfile и конфигурации. В нём <strong>нет</strong> <code>.env</code>, клиентского токена, SSH-ключей, каталога build или всей истории Git. Помощник откажется заменить существующий архив. Если папка загрузки на VM уже существует, не продолжай слепо: используй новый явно выбранный каталог для нового эксперимента или проверь содержимое старого.</p>
+<div class="command"><div class="command-place">Локальный компьютер · открыть отдельный SSH-сеанс</div><pre><code>ssh "$VM_HOST"</code></pre></div>
+<div class="command remote"><div class="command-place">Linux-VM · в SSH-сеансе</div><pre><code>cd course-workshop-upload &amp;&amp;
+tar -tzf service-workshop-source.tar.gz &amp;&amp;
+tar -xzf service-workshop-source.tar.gz &amp;&amp;
+cd service-workshop &amp;&amp;
+python3 lab.py init &amp;&amp;
+python3 lab.py check-env &amp;&amp;
+unset APP_TOKEN POSTGRES_PASSWORD APP_DB_PASSWORD &amp;&amp;
+docker compose config --quiet &amp;&amp;
+docker compose up --build -d --wait --wait-timeout 240 &amp;&amp;
+docker compose port app 8080 &amp;&amp;
+curl --config .secrets/client.curl -i http://127.0.0.1:8080/tasks</code></pre></div>
+<p>Распаковываем <em>свой</em> архив в новый учебный каталог; произвольные чужие tar-архивы могут быть опасны. Секреты создаются заново на VM, поэтому локальный токен не подойдёт удалённому API. Публикация app и здесь должна быть <code>127.0.0.1:8080</code>. Последний curl выполняется <strong>внутри VM</strong>, так что обращается к её loopback. Это пока не проверка доступа с твоего компьютера.</p>
+
+<h2>4. Строим SSH-туннель и прослеживаем адреса</h2>
+<figure class="diagram"><strong class="diagram-title">Какая сторона понимает каждый localhost</strong><div class="topology">
+<div class="machine"><span>ТВОЙ КОМПЬЮТЕР</span><div class="node"><b>curl</b><small><code>127.0.0.1:18080</code></small></div><div class="node"><b>SSH-клиент</b><small>Локальный порт 18080<br>принимает только loopback</small></div></div>
+<div class="connector">SSH<br>→</div>
+<div class="machine"><span>LINUX-VM</span><div class="node"><b>SSH-сервер → порт хоста</b><small><code>127.0.0.1:8080</code><br>Этот адрес понимает VM</small></div><div class="node"><b>app → db</b><small>Своя Compose-сеть VM<br>Не база локального компьютера</small></div></div>
+</div><figcaption>Локальный 18080 и удалённый 8080 специально различаются. Так локальный сервис не выдаёт себя за удалённый, а назначение перенаправления видно прямо в команде.</figcaption></figure>
+<p>Оставь SSH-сеанс управления открытым. В <strong>новом локальном терминале</strong> задай тот же <code>VM_HOST</code> и запусти туннель:</p>
+<div class="command"><div class="command-place">Локальный компьютер · отдельный терминал для туннеля</div><pre><code>VM_HOST=course-vm
+ssh -N -o ExitOnForwardFailure=yes \
+  -L 127.0.0.1:18080:127.0.0.1:8080 "$VM_HOST"</code></pre></div>
+<p><code>-N</code> не запускает удалённую команду. В <code>-L</code> первые адрес и порт относятся к <em>локальному слушателю</em>; последние — к соединению, которое SSH-сервер откроет на удалённой стороне. <code>ExitOnForwardFailure</code> не даёт молча продолжить, если локальный порт занят. Но он не гарантирует, что приложение по ту сторону живо: это проверит запрос. Терминал остаётся занят туннелем до <code>Ctrl-C</code>. Обрыв туннеля не останавливает удалённые контейнеры.</p>
+<div class="command"><div class="command-place">Локальный компьютер · другой терминал · безопасная проверка без токена</div><pre><code>curl --noproxy 127.0.0.1 --connect-timeout 2 --max-time 5 -i \
+  http://127.0.0.1:18080/health/ready</code></pre></div>
+<p>Ожидается <code>200</code>. При <code>Connection refused</code> проверь, жив ли локальный SSH-процесс и слушает ли 18080. Если SSH пишет <code>connect failed</code>, проверь приложение на самой VM. Если локальный 18080 уже занят, выбери другой и замени URL клиента. Не меняй локальную привязку туннеля на <code>0.0.0.0</code> — это сделало бы его доступным соседним компьютерам.</p>
+
+<h2>5. Авторизуем клиент именно для этой VM</h2>
+<p>Нужен токен удалённого проекта, но его не следует печатать или копировать через чат. Передадим готовый curl-конфиг по SSH. Следующий блок создаёт <strong>новый</strong> приватный локальный каталог. Если он уже существует, остановись: не заменяй старые учётные данные наугад.</p>
+<div class="command"><div class="command-place">Локальный компьютер · каталог service-workshop · VM_HOST задан в этом терминале</div><pre><code>mkdir -m 700 .secrets-vm &amp;&amp;
+scp "$VM_HOST:course-workshop-upload/service-workshop/.secrets/client.curl" .secrets-vm/client.curl &amp;&amp;
+chmod 600 .secrets-vm/client.curl &amp;&amp;
+curl --config .secrets-vm/client.curl -i http://127.0.0.1:18080/tasks</code></pre></div>
+<p>Каталог <code>0700</code> закрывает доступ соседним пользователям уже во время передачи; режим файла затем явно ограничивается. Не добавляй этот каталог в Git: он начинается с <code>.secrets</code> и исключён правилами проекта. Не передавай приватный SSH-ключ на VM — он остаётся на клиенте. Измени и прочитай задачу через туннель; затем в SSH-сеансе на VM прочитай список напрямую по 8080. Оба клиента должны видеть одни данные.</p>
+<div class="stage-result"><h3>Результат этапа</h3><ul class="checklist"><li>Один сервис работает в отдельной VM; локальный нативный процесс для него не нужен.</li><li>На своей машине обращаешься к 18080, на VM — к 8080.</li><li>Токен создан на VM, передан клиенту по SSH и не попал в архив исходников.</li><li>Закрытие туннеля убирает доступ через него, но не останавливает сервер.</li></ul></div>
+<section class="sources"><h3>Проверка SSH-механики</h3><ul><li><a href="https://ubuntu.com/server/docs/how-to/security/openssh-server/">Ubuntu: установка и устройство OpenSSH Server</a></li><li><a href="https://man.openbsd.org/ssh-keygen.1">OpenSSH ssh-keygen(1): отпечатки ключей</a></li><li><a href="https://man.openbsd.org/ssh.1">OpenSSH ssh(1): -L, -N, host authentication</a></li><li><a href="https://man.openbsd.org/ssh_config.5#ExitOnForwardFailure">OpenSSH: ExitOnForwardFailure и его границы</a></li><li><a href="https://man.openbsd.org/scp.1">OpenSSH scp(1)</a></li><li><a href="cpp_station7_networking.html#section=ssh-home-access">Станция 7: SSH, частные сети и удалённый доступ</a></li></ul></section>

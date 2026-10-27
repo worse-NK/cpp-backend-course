@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "modules": {
+    "containers-cost": [
+      {
+        "bank": "basic",
+        "index": 2
+      },
+      {
+        "bank": "basic",
+        "index": 3
+      },
+      {
+        "bank": "advanced",
+        "index": 13
+      },
+      {
+        "bank": "advanced",
+        "index": 26
+      },
+      {
+        "bank": "advanced",
+        "index": 46
+      }
+    ],
+    "iterators-algorithms": [
+      {
+        "bank": "basic",
+        "index": 11
+      },
+      {
+        "bank": "advanced",
+        "index": 7
+      },
+      {
+        "bank": "advanced",
+        "index": 15
+      },
+      {
+        "bank": "advanced",
+        "index": 32
+      },
+      {
+        "bank": "advanced",
+        "index": 42
+      }
+    ],
+    "templates-generic": [
+      {
+        "bank": "basic",
+        "index": 13
+      },
+      {
+        "bank": "advanced",
+        "index": 17
+      },
+      {
+        "bank": "advanced",
+        "index": 22
+      },
+      {
+        "bank": "advanced",
+        "index": 25
+      },
+      {
+        "bank": "advanced",
+        "index": 36
+      }
+    ],
+    "vocabulary-design": [
+      {
+        "bank": "basic",
+        "index": 15
+      },
+      {
+        "bank": "basic",
+        "index": 23
+      },
+      {
+        "bank": "advanced",
+        "index": 38
+      },
+      {
+        "bank": "advanced",
+        "index": 40
+      },
+      {
+        "bank": "advanced",
+        "index": 41
+      }
+    ]
+  }
+}

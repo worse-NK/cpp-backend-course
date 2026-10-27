@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "modules": {
+    "lifetime-raii": [
+      {
+        "bank": "basic",
+        "index": 18
+      },
+      {
+        "level": "easy",
+        "q": "В функции есть static int calls = 0; затем ++calls. Что вернёт второй последовательный вызов функции, если она возвращает calls и до этого вызывалась ровно один раз?",
+        "options": [
+          "0",
+          "1",
+          "2",
+          "Неопределённое значение"
+        ],
+        "answer": 2,
+        "why": "Локальным является имя calls, но его хранилище статическое. Инициализация не повторяется при каждом входе: первый вызов оставляет 1, второй увеличивает до 2.",
+        "theoryRefs": [
+          "lifetime-storage"
+        ],
+        "substation": "lifetime-raii"
+      },
+      {
+        "level": "medium",
+        "q": "Владелец std::unique_ptr<Item> перенесён из внутреннего блока в owner, объявленный снаружи. Объект Item не перемещали. Что произошло с адресом самого Item?",
+        "options": [
+          "Он остался тем же",
+          "Он стал адресом owner",
+          "Он стал адресом прежнего unique_ptr",
+          "Он перестал существовать при переносе"
+        ],
+        "answer": 0,
+        "why": "Передача unique_ptr меняет владельца, а не перемещает управляемый Item. При выходе из внутреннего блока пустой прежний владелец уничтожается, но Item остаётся жив благодаря owner.",
+        "theoryRefs": [
+          "lifetime-storage"
+        ],
+        "substation": "lifetime-raii"
+      },
+      {
+        "level": "medium",
+        "q": "Что напечатает программа? Вывод не бросает исключений.\n\n#include <iostream>\nstruct Trace { ~Trace(){ std::cout << \"D\"; } };\nint main() {\n    const Trace& local = Trace{};\n    std::cout << \"A\";\n}",
+        "options": [
+          "DA",
+          "AD",
+          "A",
+          "Ошибка компиляции"
+        ],
+        "answer": 1,
+        "why": "Прямое связывание локальной const-ссылки с временным Trace продлевает его жизнь до конца жизни ссылки. Поэтому сначала печатается A, а при выходе из main — D.",
+        "theoryRefs": [
+          "lifetime-storage"
+        ],
+        "substation": "lifetime-raii"
+      },
+      {
+        "level": "easy",
+        "q": "Что гарантирует переносимое объяснение для Widget local; внутри обычного блока функции?",
+        "options": [
+          "Объект обязательно находится в физическом стеке",
+          "Конструктор вообще не может быть устранён оптимизацией",
+          "Правила автоматического хранения и выхода из блока",
+          "Для объекта обязательно вызывается глобальный operator new"
+        ],
+        "answer": 2,
+        "why": "Язык задаёт время жизни и автоматическую длительность хранения, но не требует конкретного физического расположения в стеке. Оптимизация должна сохранять наблюдаемое поведение корректной программы.",
+        "theoryRefs": [
+          "local-object-journey"
+        ],
+        "substation": "lifetime-raii"
+      }
+    ],
+    "borrowing-const": [
+      {
+        "level": "easy",
+        "q": "Что выведет фрагмент?\n\nint value = 7;\nconst int& view = value;\nvalue = 9;\nstd::cout << view;",
+        "options": [
+          "7",
+          "9",
+          "Ошибка компиляции",
+          "Неопределённое поведение"
+        ],
+        "answer": 1,
+        "why": "view — другое имя того же int. const запрещает менять его через view, но исходный value не константный. Допустимое изменение через value видно и при чтении через view.",
+        "theoryRefs": [
+          "const-and-aliases"
+        ],
+        "substation": "borrowing-const"
+      },
+      {
+        "level": "medium",
+        "q": "Функция должна заменить именно unique_ptr вызывающего кода новым владельцем. Какая форма параметра выражает это намерение?",
+        "options": [
+          "Item& item",
+          "const Item& item",
+          "std::unique_ptr<Item> item",
+          "std::unique_ptr<Item>& item"
+        ],
+        "answer": 3,
+        "why": "Ссылка на unique_ptr позволяет заменить владеющий указатель вызывающего. Item& даёт доступ лишь к объекту, а unique_ptr по значению создаёт отдельного владельца-параметр.",
+        "theoryRefs": [
+          "ownership-contracts"
+        ],
+        "substation": "borrowing-const"
+      },
+      {
+        "level": "medium",
+        "q": "Какая строка допустима, если const std::unique_ptr<int> owner хранит живой int?",
+        "options": [
+          "owner.reset();",
+          "owner = std::make_unique<int>(4);",
+          "*owner = 4;",
+          "owner.release();"
+        ],
+        "answer": 2,
+        "why": "const относится к самому владельцу: его нельзя перенастроить, но operator* по-прежнему даёт int&. Для запрета изменения числа через владельца нужен unique_ptr<const int>.",
+        "theoryRefs": [
+          "const-and-aliases"
+        ],
+        "substation": "borrowing-const"
+      },
+      {
+        "level": "medium",
+        "q": "В классе есть std::string& data(); и const std::string& data() const;. Какой результат получает frozen.data(), если frozen объявлен const Buffer?",
+        "options": [
+          "Изменяемую ссылку на исходную строку",
+          "Константную ссылку на исходную строку",
+          "Отдельную копию строки",
+          "Владеющий указатель на новую строку"
+        ],
+        "answer": 1,
+        "why": "У const-объекта выбирается const-перегрузка. Она возвращает const std::string&, сохраняя запрет записи через этот путь; новой строки при вызове не создаётся.",
+        "theoryRefs": [
+          "const"
+        ],
+        "substation": "borrowing-const"
+      },
+      {
+        "level": "medium",
+        "q": "Функция void inspect(const Job& job) не сохраняет адрес. Что должен обеспечить вызывающий код?",
+        "options": [
+          "Существование Job всё время использования в вызове",
+          "Динамическое размещение Job через new",
+          "Наличие shared_ptr на Job в каждом вызове",
+          "Неизменность Job до завершения всей программы"
+        ],
+        "answer": 0,
+        "why": "Заимствующая ссылка не владеет Job. Достаточно живого объекта на весь период использования; размещение и наличие умных указателей сами по себе не обязательны.",
+        "theoryRefs": [
+          "ownership-contracts"
+        ],
+        "substation": "borrowing-const"
+      }
+    ],
+    "ownership": [
+      {
+        "bank": "basic",
+        "index": 8
+      },
+      {
+        "bank": "basic",
+        "index": 15
+      },
+      {
+        "bank": "advanced",
+        "index": 10
+      },
+      {
+        "bank": "advanced",
+        "index": 14
+      },
+      {
+        "bank": "advanced",
+        "index": 20
+      }
+    ],
+    "value-semantics": [
+      {
+        "bank": "basic",
+        "index": 13
+      },
+      {
+        "bank": "advanced",
+        "index": 2
+      },
+      {
+        "bank": "advanced",
+        "index": 6
+      },
+      {
+        "bank": "advanced",
+        "index": 9
+      },
+      {
+        "bank": "advanced",
+        "index": 16
+      }
+    ]
+  }
+}

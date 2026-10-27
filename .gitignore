@@ -1,0 +1,32 @@
+# Local releases and publication checkout are not course source files.
+/publish/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+.DS_Store
+.env
+.env.*
+!.env.example
+.codex/
+.agents/
+.aws/
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+*.o
+*.a
+*.so
+*.exe
+*.qcow2
+*.img
+*.deb
+# Only the three deterministic teaching captures belong in Git.
+*.pcap
+*.pcapng
+!roadmap/examples/traffic-analysis/traffic_dns.pcap
+!roadmap/examples/traffic-analysis/traffic_http_ok.pcap
+!roadmap/examples/traffic-analysis/traffic_http_delay.pcap

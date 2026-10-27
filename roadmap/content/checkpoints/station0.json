@@ -1,0 +1,365 @@
+{
+  "version": 1,
+  "modules": {
+    "object-model": [
+      {
+        "bank": "basic",
+        "index": 8
+      },
+      {
+        "level": "easy",
+        "q": "Что напечатает фрагмент внутри main?\n\nstruct Point { int x = 2; };\nPoint point;\nPoint* pointer = &point;\npointer->x = 6;\nstd::cout << point.x;",
+        "options": [
+          "2",
+          "6",
+          "Адрес point",
+          "Ошибка компиляции"
+        ],
+        "answer": 1,
+        "why": "pointer хранит адрес point, а не отдельную копию. pointer->x обращается к полю того же объекта, поэтому запись меняет point.x на 6.",
+        "theoryRefs": [
+          "this"
+        ],
+        "substation": "object-model"
+      },
+      {
+        "level": "medium",
+        "q": "Метод int value() const возвращает закрытое поле по значению. Что изменит такой код?\n\nint local = counter.value();\nlocal = 9;",
+        "options": [
+          "Только переменную local",
+          "Только закрытое поле counter",
+          "И local, и поле counter",
+          "Код не скомпилируется"
+        ],
+        "answer": 0,
+        "why": "Результат int — отдельное число. Переменная local получает его копию; её изменение не предоставляет доступ к закрытому полю объекта.",
+        "theoryRefs": [
+          "encapsulation",
+          "methods"
+        ],
+        "substation": "object-model"
+      },
+      {
+        "type": "assemble",
+        "level": "easy",
+        "q": "Собери внутри Counter обычный метод void add(int n), который увеличивает value на n. Используй форму с телом в фигурных скобках.",
+        "tokens": [
+          "void",
+          "add",
+          "(int n)",
+          "{",
+          "value",
+          "+=",
+          "n",
+          ";",
+          "}"
+        ],
+        "answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "before": "#include <cassert>\nclass Counter {\n    int value = 0;\npublic:\n    int get() const { return value; }\n    ",
+        "after": "\n};\nint main() {\n    Counter counter;\n    counter.add(3);\n    assert(counter.get() == 3);\n}\n",
+        "why": "void задаёт отсутствие результата, add — имя метода, (int n) — параметр. Внутри тела value += n изменяет поле объекта текущего вызова. Точка с запятой завершает эту операцию.",
+        "theoryRefs": [
+          "struct-to-class",
+          "methods"
+        ],
+        "substation": "object-model"
+      },
+      {
+        "type": "assemble",
+        "level": "easy",
+        "q": "Внутри set(int next) запиши присваивание полю value. Слева явно используй this->value, справа — next.",
+        "tokens": [
+          "next",
+          ";",
+          "this",
+          "=",
+          "value",
+          "->"
+        ],
+        "answer": [
+          2,
+          5,
+          4,
+          3,
+          0,
+          1
+        ],
+        "before": "#include <cassert>\nclass Counter {\n    int value = 0;\npublic:\n    int get() const { return value; }\n    void set(int next) {\n        ",
+        "after": "\n    }\n};\nint main() {\n    Counter a, b;\n    a.set(7);\n    assert(a.get() == 7 && b.get() == 0);\n}\n",
+        "why": "this указывает на объект вызова; -> выбирает его поле. Поэтому this->value = next записывает параметр в поле a при a.set(7), не затрагивая b.",
+        "theoryRefs": [
+          "this"
+        ],
+        "substation": "object-model"
+      }
+    ],
+    "construction-invariants": [
+      {
+        "bank": "advanced",
+        "index": 6
+      },
+      {
+        "bank": "advanced",
+        "index": 9
+      },
+      {
+        "bank": "advanced",
+        "index": 12
+      },
+      {
+        "type": "assemble",
+        "level": "easy",
+        "q": "Объяви и сразу определи explicit-конструктор Gauge(int n): инициализируй value_ через value_(n), оставь тело пустым.",
+        "tokens": [
+          "value_(n)",
+          "explicit",
+          "{}",
+          "Gauge",
+          ":",
+          "(int n)"
+        ],
+        "answer": [
+          1,
+          3,
+          5,
+          4,
+          0,
+          2
+        ],
+        "before": "#include <cassert>\nclass Gauge {\n    int value_;\npublic:\n    ",
+        "after": "\n    int value() const { return value_; }\n};\nint main() {\n    Gauge gauge{8};\n    assert(gauge.value() == 8);\n}\n",
+        "why": "У конструктора имя класса и нет типа результата. explicit располагается перед именем, двоеточие начинает список инициализации. value_(n) создаёт поле с переданным значением до выполнения пустого тела.",
+        "theoryRefs": [
+          "constructor",
+          "initialization-deep"
+        ],
+        "substation": "construction-invariants"
+      },
+      {
+        "type": "assemble",
+        "level": "easy",
+        "q": "В объявлении класса задай обычному полю int remaining_ начальное значение 3. Используй форму с =, не конструктор.",
+        "tokens": [
+          ";",
+          "remaining_",
+          "3",
+          "int",
+          "="
+        ],
+        "answer": [
+          3,
+          1,
+          4,
+          2,
+          0
+        ],
+        "before": "#include <cassert>\nclass Attempts {\n    ",
+        "after": "\npublic:\n    int remaining() const { return remaining_; }\n};\nint main() {\n    Attempts first, second;\n    assert(first.remaining() == 3 && second.remaining() == 3);\n}\n",
+        "why": "int remaining_ = 3; — инициализатор нестатического поля. В показанном классе каждый новый объект получает своё число 3: это не общая переменная класса.",
+        "theoryRefs": [
+          "constructor",
+          "initialization-model"
+        ],
+        "substation": "construction-invariants"
+      }
+    ],
+    "lifecycle-value": [
+      {
+        "bank": "basic",
+        "index": 14
+      },
+      {
+        "bank": "basic",
+        "index": 15
+      },
+      {
+        "bank": "advanced",
+        "index": 10
+      },
+      {
+        "type": "assemble",
+        "level": "easy",
+        "q": "Определи внутри Trace деструктор, который увеличивает глобальный count на 1. Имя деструктора запиши как ~Trace, тело — { ++count; }.",
+        "tokens": [
+          "Trace",
+          "{",
+          "~",
+          ";",
+          "++count",
+          "()",
+          "}"
+        ],
+        "answer": [
+          2,
+          0,
+          5,
+          1,
+          4,
+          3,
+          6
+        ],
+        "before": "#include <cassert>\nint count = 0;\nstruct Trace {\n    ",
+        "after": "\n};\nint main() {\n    { Trace value; }\n    assert(count == 1);\n}\n",
+        "why": "Тильда перед именем класса обозначает деструктор. У него нет типа результата и параметров. При выходе value из блока выполняется ++count; разрушение не требует явного вызова из main.",
+        "theoryRefs": [
+          "destructor"
+        ],
+        "substation": "lifecycle-value"
+      },
+      {
+        "type": "assemble",
+        "level": "easy",
+        "q": "Создай отдельный объект Value с именем copy из существующего original. Используй форму объявления с =, без ссылки.",
+        "tokens": [
+          "copy",
+          ";",
+          "original",
+          "=",
+          "Value"
+        ],
+        "answer": [
+          4,
+          0,
+          3,
+          2,
+          1
+        ],
+        "before": "#include <cassert>\nstruct Value { int number = 0; };\nint main() {\n    Value original{4};\n    ",
+        "after": "\n    copy.number = 8;\n    assert(original.number == 4 && copy.number == 8);\n}\n",
+        "why": "Value copy = original; создаёт новый объект и копирует значение поля. Это инициализация, а не присваивание существующей copy. Ссылки нет, поэтому последующее изменение copy.number не меняет original.number.",
+        "theoryRefs": [
+          "special-members-intro"
+        ],
+        "substation": "lifecycle-value"
+      }
+    ],
+    "class-design": [
+      {
+        "level": "medium",
+        "q": "У Ticket есть inline static int issued = 0; конструктор Ticket() увеличивает issued, а деструктор его не меняет. Что напечатает фрагмент?\n\n{ Ticket first; Ticket second; }\nstd::cout << Ticket::issued;",
+        "options": [
+          "0",
+          "1",
+          "2",
+          "Ошибка доступа к разрушенным объектам"
+        ],
+        "answer": 2,
+        "why": "Счётчик общий и существует независимо от first и second. Два вызова Ticket() увеличивают его до 2; выход из блока его не уменьшает. Это число выдач, а не текущих живых объектов.",
+        "theoryRefs": [
+          "static-friend"
+        ],
+        "substation": "class-design"
+      },
+      {
+        "level": "medium",
+        "q": "Attempts должен только расходовать выданные попытки. Какая добавка к его публичному интерфейсу позволяет обойти это ограничение даже при сохранении remaining_ >= 0?",
+        "options": [
+          "Читающий int remaining() const",
+          "Проверяющий bool try_use()",
+          "Запрос bool exhausted() const",
+          "Произвольный void set_remaining(int)"
+        ],
+        "answer": 3,
+        "why": "Setter позволяет вернуть себе новые попытки. Неотрицательность сохранится, но предметный договор «только расходовать» будет нарушен. Интерфейс должен ограничивать не только диапазон чисел, но и разрешённые действия.",
+        "theoryRefs": [
+          "class-api-design"
+        ],
+        "substation": "class-design"
+      },
+      {
+        "level": "medium",
+        "q": "В Point появился счётчик обращений, не относящийся к координатам. Что проверить перед сохранением operator== = default?",
+        "options": [
+          "Должен ли счётчик участвовать в равенстве значений",
+          "Совпадают ли адреса сравниваемых объектов",
+          "Созданы ли обе точки одним конструктором",
+          "Совпадают ли имена переменных у двух точек"
+        ],
+        "answer": 0,
+        "why": "Defaulted-сравнение учитывает нестатические поля, включая добавленный счётчик. Если смысл равенства — одинаковые координаты, служебное поле не должно незаметно менять этот смысл; возможно, сравнение нужно написать явно.",
+        "theoryRefs": [
+          "equality-operators"
+        ],
+        "substation": "class-design"
+      },
+      {
+        "type": "assemble",
+        "level": "easy",
+        "q": "Получи число выдач через статический метод Ticket::issued() и инициализируй им локальный int n. Используй квалификацию через имя класса.",
+        "tokens": [
+          "Ticket",
+          "int",
+          "::",
+          "issued",
+          ";",
+          "n",
+          "()",
+          "="
+        ],
+        "answer": [
+          1,
+          5,
+          7,
+          0,
+          2,
+          3,
+          6,
+          4
+        ],
+        "before": "#include <cassert>\nclass Ticket {\n    inline static int count_ = 0;\npublic:\n    Ticket() { ++count_; }\n    static int issued() { return count_; }\n};\nint main() {\n    Ticket ticket;\n    ",
+        "after": "\n    assert(n == 1);\n}\n",
+        "why": "Ticket::issued() вызывает функцию класса без выбора объекта. Она читает общую count_; результат int затем инициализирует локальное n. У static-метода нет this.",
+        "theoryRefs": [
+          "static-friend"
+        ],
+        "substation": "class-design"
+      },
+      {
+        "type": "assemble",
+        "level": "easy",
+        "q": "Внутри Secret объяви другом свободную функцию int read(const Secret& value). Здесь только объявление: заверши его точкой с запятой.",
+        "tokens": [
+          "read",
+          "friend",
+          "const",
+          "&",
+          "int",
+          "Secret",
+          "value",
+          "(",
+          ")",
+          ";"
+        ],
+        "answer": [
+          1,
+          4,
+          0,
+          7,
+          2,
+          5,
+          3,
+          6,
+          8,
+          9
+        ],
+        "before": "#include <cassert>\nclass Secret {\n    int value_ = 7;\n    ",
+        "after": "\n};\nint read(const Secret& value) { return value.value_; }\nint main() { assert(read(Secret{}) == 7); }\n",
+        "why": "friend выдаёт доступ именно функции read. Она остаётся свободной: получает Secret явным параметром и не имеет собственного this. const Secret& разрешает чтение без копирования; объявление не открывает value_ всему коду.",
+        "theoryRefs": [
+          "static-friend"
+        ],
+        "substation": "class-design"
+      }
+    ]
+  }
+}
