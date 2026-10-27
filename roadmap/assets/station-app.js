@@ -33,7 +33,8 @@
     basic: "БАЗОВЫЙ ТЕСТ",
     advanced: "УГЛУБЛЁННЫЙ ТЕСТ",
     interview: "ИНТЕРВЬЮ-ТРЕНАЖЁР",
-    training: "ДОПОЛНИТЕЛЬНАЯ ТРЕНИРОВКА"
+    training: "ДОПОЛНИТЕЛЬНАЯ ТРЕНИРОВКА",
+    checkpoint: "ЗАКРЕПЛЕНИЕ ПОДГЛАВЫ"
   };
 
   function loadStore() {
@@ -200,8 +201,18 @@
     return questions.filter(priority).concat(questions.filter(function (q) { return !priority(q); }));
   }
 
-  function chapterQuestions(bank, id, refs) {
-    return prioritizeQuestions((bank.basic || []).filter(function (q) { return q.substation === id; }), refs).slice(0, 3);
+  function chapterQuestions(bank, id, refs, checkpoints) {
+    return checkpoints && checkpoints[id] ? checkpoints[id] : [];
+  }
+
+  function excludeCheckpointQuestions(questions, checkpoints) {
+    var prompts = new Set();
+    Object.keys(checkpoints || {}).forEach(function (id) {
+      checkpoints[id].forEach(function (q) { prompts.add(q.q.replace(/\s+/g, " ").trim().toLocaleLowerCase("ru")); });
+    });
+    return questions.filter(function (q) {
+      return !prompts.has(q.q.replace(/\s+/g, " ").trim().toLocaleLowerCase("ru"));
+    });
   }
 
   // Training exposes every authored position, including questions deliberately
@@ -505,7 +516,8 @@
         }), h("button", { className: "contents-checkpoint", "aria-current": isActive && props.view === "checkpoint" ? "page" : undefined, onClick: function () { props.onCheckpoint(entry.id); } }, "Закрепление подглавы")) : null);
       })),
       h("nav", { className: "contents-ending", "aria-label": "Завершение станции" },
-        h("button", { "aria-current": props.view === "final" ? "page" : undefined, onClick: function () { props.onPage("final"); } }, "Завершение станции")),
+        h("button", { "aria-current": props.view === "final" ? "page" : undefined, onClick: function () { props.onPage("final"); } }, "Завершение станции"),
+        props.analysisCount ? h("button", { className: "contents-analysis", "aria-current": props.view === "analysis" ? "page" : undefined, onClick: function () { props.onPage("analysis"); } }, "Вопросы с разбором · " + props.analysisCount) : null),
       ["station8", "station9", "station10"].indexOf(meta.id) >= 0 ? h("a", { href: "service_workshop.html#" + ({station8:"local", station9:"database", station10:"vm"}[meta.id]), className: "contents-all-labs", target: "_blank", rel: "noopener noreferrer" }, "Свой сервер · сквозной практикум ↗") : null,
       h("a", { href: "visual_labs.html", className: "contents-all-labs" }, "Все визуальные лаборатории →"),
       h("a", { href: "glossary.html", className: "contents-all-labs", target: "_blank", rel: "noopener" }, "Глоссарий терминов ↗"));
@@ -567,6 +579,13 @@
           }
           if (block.type === "text") {
             return h("p", { className: "theory-text", key: index, dangerouslySetInnerHTML: { __html: block.html } });
+          }
+          if (block.type === "self-check") {
+            return h("aside", { className: "self-check", key: section.id + ":" + index },
+              h("span", { className: "kicker" }, "ПРОВЕРЬ СВОЁ ОБЪЯСНЕНИЕ"),
+              h("p", { dangerouslySetInnerHTML: { __html: block.prompt } }),
+              h("details", null, h("summary", null, "Сверить с разбором"),
+                h("div", { className: "self-check-answer", dangerouslySetInnerHTML: { __html: block.answer } })));
           }
           if (block.type === "code") {
             return h(CodeBlock, { key: section.id + ":" + index, block: block });
@@ -648,16 +667,55 @@
   // so a sequence of teaching examples still builds on the preceding question.
   function prepareQuestions(questions) {
     return questions.map(function (question) {
-      var order = question.options.map(function (_, index) { return index; });
+      var assembly = question.type === "assemble";
+      var order = (assembly ? question.tokens : question.options).map(function (_, index) { return index; });
       for (var i = order.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
         var saved = order[i]; order[i] = order[j]; order[j] = saved;
       }
+      if (assembly) return Object.assign({}, question, { tokenOrder: order, answer: question.answer.slice(), tokens: question.tokens.slice() });
       return Object.assign({}, question, {
         options: order.map(function (index) { return question.options[index]; }),
         answer: order.indexOf(question.answer)
       });
     });
+  }
+
+  function assembledText(question, positions) {
+    return positions.map(function (index) { return question.tokens[index]; }).join(" ").replace(/\s+/g, " ").trim();
+  }
+
+  function assemblyCorrect(question, positions) {
+    // Identical tokens are interchangeable. Compare the constructed text rather
+    // than a hidden identity of two equal semicolons or identifiers.
+    return assembledText(question, positions) === assembledText(question, question.answer);
+  }
+
+  function AssemblyAnswer(props) {
+    var state = useState([]), chosen = state[0], setChosen = state[1];
+    var question = props.question;
+    return h("div", { className: "assembly" },
+      h("p", { className: "notes" }, "Серый код уже готов. Нажимай на фрагменты в нужном порядке, чтобы заполнить выделенное место. Чтобы убрать фрагмент, нажми на него в собранной строке. Проверяется заданный фрагмент, а не произвольная программа."),
+      /\bassert\(/.test(question.after + question.before) ? h("p", { className: "notes" }, "В готовом примере assert проверяет условие в скобках: если оно ложно, программа останавливается с ошибкой. Эти проверки уже написаны, собирать их не нужно.") : null,
+      h("div", { className: "assembly-workspace", "aria-label": "Собираемый код" },
+        question.before ? h("pre", { className: "assembly-context" }, h("code", null, question.before)) : null,
+        h("div", { className: "assembly-answer", "aria-label": "Выбранные фрагменты" },
+          !chosen.length ? h("span", { className: "assembly-placeholder" }, "Здесь появится твой код") : null,
+          chosen.map(function (index, position) { return h("button", { type: "button", key: index, disabled: props.locked,
+            "aria-label": "Убрать фрагмент " + (position + 1) + ": " + question.tokens[index],
+            onClick: function () { setChosen(chosen.filter(function (_, i) { return i !== position; })); } }, h("code", null, question.tokens[index])); })),
+        question.after ? h("pre", { className: "assembly-context" }, h("code", null, question.after)) : null),
+      h("div", { className: "assembly-pool", role: "group", "aria-label": "Доступные фрагменты кода" },
+        question.tokenOrder.map(function (index) { return h("button", { type: "button", key: index,
+          disabled: props.locked || chosen.indexOf(index) >= 0,
+          "aria-label": "Добавить фрагмент: " + question.tokens[index],
+          onClick: function () { setChosen(chosen.concat(index)); } }, h("code", null, question.tokens[index])); })),
+      h("div", { className: "assembly-actions" },
+        h("button", { className: "secondary", disabled: props.locked || !chosen.length, onClick: function () { setChosen(chosen.slice(0, -1)); } }, "Убрать последний"),
+        h("button", { className: "ghost", disabled: props.locked || !chosen.length, onClick: function () { setChosen([]); } }, "Очистить"),
+        h("button", { className: "primary", disabled: props.locked || !chosen.length, onClick: function () { props.onCheck(assemblyCorrect(question, chosen)); } }, "Проверить код")),
+      props.locked ? h("div", { className: "assembly-solution" }, h("span", { className: "kicker" }, "ВАРИАНТ ПО УСЛОВИЮ"),
+        h("pre", null, h("code", null, question.before + assembledText(question, question.answer) + question.after))) : null);
   }
 
   function Quiz(props) {
@@ -696,6 +754,7 @@
     var current = questions[idx];
     var parsed = splitQuestion(current.q);
     var locked = selected !== null;
+    var correct = current.type === "assemble" ? selected === true : selected === current.answer;
     return h("div", null,
       !props.hideBack ? h("button", { className: "quiz-back", onClick: props.onBack }, props.backLabel || "← Выбрать другой тест") : null,
       h("div", { className: "card fade-in", key: idx },
@@ -705,7 +764,11 @@
         h("div", { className: "quiz-progress" }, h("div", { style: { width: ((idx + 1) / questions.length * 100) + "%" } })),
         h("h2", { className: "question" }, parsed.stem),
         parsed.code ? h("pre", { className: "question-code" }, h("code", null, parsed.code)) : null,
-        h("div", { className: "options" }, current.options.map(function (option, optionIndex) {
+        current.type === "assemble" ? h(AssemblyAnswer, { key: idx, question: current, locked: locked, onCheck: function (isCorrect) {
+          if (locked) return;
+          setSelected(isCorrect);
+          if (isCorrect) setScore(score + 1);
+        } }) : h("div", { className: "options" }, current.options.map(function (option, optionIndex) {
           var className = "option";
           if (locked) {
             if (optionIndex === current.answer) className += " correct";
@@ -723,7 +786,7 @@
           }, h("span", { className: "option-mark" }, String.fromCharCode(65 + optionIndex)), h("span", { className: "option-text" }, option));
         })),
         locked ? h("div", { className: "explanation" },
-          h("div", { className: "explanation-label" + (selected === current.answer ? " correct" : "") }, selected === current.answer ? "Верно" : "Разбор"),
+          h("div", { className: "explanation-label" + (correct ? " correct" : "") }, correct ? "Верно" : "Разбор"),
           h("p", null, current.why),
           current.theoryRefs && current.theoryRefs.length ? h("aside", { className: "quiz-theory-refs", "aria-label": "Объяснение в теории" },
             h("div", { className: "quiz-theory-label" }, "Повторить правило · откроется в новой вкладке"),
@@ -984,8 +1047,9 @@
     var activeTasks = tasks.filter(isPracticeTask);
     var analysisTasks = tasks.filter(function (task) { return !isPracticeTask(task); });
     var priorityRefs = assessmentPriorityRefs(meta.id);
-    var activeQuizzes = { basic: finalQuestions(quizzes, substations, 25, meta.number <= 4, priorityRefs, assessmentFinalBudgets(meta.id)), interview: quizzes.interview || [] };
-    var checkpointQuestions = chapterQuestions(quizzes, activeSubstationId, assessmentCheckpointRefs(meta.id));
+    var activeQuizzes = { basic: excludeCheckpointQuestions(finalQuestions(quizzes, substations, 25, meta.number <= 4, priorityRefs, assessmentFinalBudgets(meta.id)), data.checkpoints), interview: quizzes.interview || [] };
+    var checkpointQuestions = chapterQuestions(quizzes, activeSubstationId, assessmentCheckpointRefs(meta.id), data.checkpoints);
+    var checkpointKey = "checkpoint:v3:" + activeSubstationId + ":" + ((data.checkpointVersion || {})[activeSubstationId] || "unversioned");
     var workedSections = theory.filter(function (section) { return /(?:-final-workbook|clock-worked-example)$/.test(section.id); });
     var doneSections = theory.filter(function (item) { return store["sec:" + item.id]; }).length;
     var doneActiveSections = activeTheory.filter(function (item) { return store["sec:" + item.id]; }).length;
@@ -1054,8 +1118,8 @@
           h("button", { type: "button", "aria-pressed": textSizeState[0], onClick: function () { setLargeText(true); } }, "Крупнее")),
         location.protocol === "file:" ? h("div", { className: "file-warning" }, "Страница открыта как файл. Для надёжной загрузки React и сохранения прогресса запусти roadmap через локальный HTTP-сервер.") : null,
         h("p", { className: "reading-progress" }, "Изученные разделы: " + doneSections + " / " + theory.length)),
-      hasSubstations ? h(SubstationNav, { items: substations, active: activeSubstationId, selected: selectedSectionId, view: tab, store: store, onChoose: chooseSubstation, onNavigate: navigateSection, onCheckpoint: function (id) { openPage("checkpoint", id); }, onPage: openPage }) : null,
-      (tab === "quiz" || tab === "interview" || tab === "tasks" || tab === "training" || (tab === "theory" && selectedWorkbook)) ? h("button", { className: "ghost", onClick: function () { openPage("final"); } }, "← Завершение станции") : null,
+      hasSubstations ? h(SubstationNav, { items: substations, active: activeSubstationId, selected: selectedSectionId, view: tab, store: store, analysisCount: analysisTasks.length, onChoose: chooseSubstation, onNavigate: navigateSection, onCheckpoint: function (id) { openPage("checkpoint", id); }, onPage: openPage }) : null,
+      (tab === "quiz" || tab === "interview" || tab === "tasks" || tab === "training" || tab === "analysis" || (tab === "theory" && selectedWorkbook)) ? h("button", { className: "ghost", onClick: function () { openPage("final"); } }, "← Завершение станции") : null,
       tab === "theory" && data.readingOrder ? h("div", { className: "section-actions", "aria-label": "Порядок чтения" },
         h("button", { className: "secondary reading-mode", "aria-pressed": routeMode, onClick: function () { setRouteMode(true); updateStore({ readingRoute: true }); } }, "Первое чтение"),
         h("button", { className: "secondary reading-mode", "aria-pressed": !routeMode, onClick: function () { setRouteMode(false); updateStore({ readingRoute: false }); } }, "По темам")) : null,
@@ -1069,9 +1133,9 @@
         h("button", { className: "secondary", onClick: function () { openPage(tab === "quiz" ? "interview" : "tasks"); } }, tab === "quiz" ? "Далее: интервью-тренажёр →" : "Далее: практика →")) : null,
       tab === "checkpoint" ? h("section", { className: "station-checkpoint" },
         h("h2", null, "Закрепление: " + (activeSubstation ? activeSubstation.title : meta.title)),
-        h("p", { className: "notes" }, "Короткая проверка текущей темы. Общий тест и интервью находятся в завершении станции."),
-        checkpointQuestions.length ? h(Quiz, { key: "checkpoint:" + activeSubstationId, backLabel: "← Вернуться к подглаве", kind: "basic", questions: checkpointQuestions,
-          onBack: function () { var last = activeTheory[activeTheory.length - 1]; if (last) navigateSection(last.id); }, onSave: function (score, total) { var change = {}; change["checkpoint:v2:" + activeSubstationId] = { score: score, total: total }; updateStore(change); } }) : h("p", null, "Для этой темы короткая проверка ещё готовится."), h("div", { className: "section-actions" }, h("button", { className: "secondary", onClick: continueChapter }, "Далее по учебнику →"))) : null,
+        h("p", { className: "notes" }, "Пять заданий по текущей подглаве. Они не повторяются в итоговом тесте станции."),
+        checkpointQuestions.length ? h(Quiz, { key: checkpointKey, backLabel: "← Вернуться к подглаве", kind: "checkpoint", questions: checkpointQuestions,
+          onBack: function () { var last = activeTheory[activeTheory.length - 1]; if (last) navigateSection(last.id); }, onSave: function (score, total) { var change = {}; change[checkpointKey] = { score: score, total: total }; updateStore(change); } }) : h("p", null, "Не удалось загрузить задания. Обнови страницу или вернись к содержанию станции."), h("div", { className: "section-actions" }, h("button", { className: "secondary", onClick: continueChapter }, "Далее по учебнику →"))) : null,
       tab === "final" ? h("section", { className: "station-finale" },
         h("p", { className: "kicker" }, "ЗАВЕРШЕНИЕ СТАНЦИИ " + (meta.id === "station5-linux" ? "5Б" : meta.id === "station7-netlab" ? "7Б" : meta.id === "station7-traffic" ? "7В" : meta.number === 9 ? (meta.id === "station9-sql" ? "9A" : "9B") : meta.number)),
         h("h2", null, "Собираем знания вместе"),
@@ -1079,10 +1143,11 @@
         h("div", { className: "finale-grid" },
           h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "01 · РАЗБОР"), h("h3", null, "Задача с объяснением"), workedSections.map(function (section) { return h("button", { className: "secondary", key: section.id, onClick: function () { navigateSection(section.id); } }, section.title); })),
           h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "02 · ПРОВЕРКА"), h("h3", null, "Итоговый тест"), h("p", null, activeQuizzes.basic.length + " вопросов по темам всей станции с объяснением ответов."), h("button", { className: "secondary", onClick: function () { openPage("quiz"); } }, "Открыть итоговый тест →"),
+            analysisTasks.length ? h("div", { className: "analysis-entry" }, h("h4", null, "Объясни решение своими словами"), h("p", null, "Вопросы с разбором: " + analysisTasks.length + ". Сначала сформулируй ответ без вариантов, затем открой подсказку и объяснение."), h("button", { className: "secondary", onClick: function () { openPage("analysis"); } }, "К вопросам с разбором →")) : null,
             h("div", { className: "training-entry" }, h("p", null, "Хочешь ещё потренироваться? Базовые и углублённые вопросы (" + trainingEntries(quizzes).length + ") доступны по подглавам, небольшими наборами."), h("button", { className: "secondary", onClick: function () { openPage("training"); } }, "Дополнительная тренировка →"))),
           h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "03 · СОБЕСЕДОВАНИЕ"), h("h3", null, "Интервью-тренажёр"), h("p", null, "Вопросов для подготовки к собеседованию: " + activeQuizzes.interview.length + ". Прежде чем выбирать ответ, попробуй объяснить решение вслух."), h("button", { className: "secondary", onClick: function () { openPage("interview"); } }, "Открыть интервью-тренажёр →")),
           h("div", { className: "finale-item" }, h("span", { className: "kicker" }, "04 · ПРИМЕНЕНИЕ"), h("h3", null, "Практика"), h("p", null, "Лабораторные и задания для самостоятельной работы. Открой условия, подготовку и критерии проверки."), h("button", { className: "secondary", onClick: function () { openPage("tasks"); } }, "Перейти к заданиям →")))) : null,
-      tab === "analysis" ? h("section", null, h("h2", null, "Вопросы с разбором"), h("p", { className: "notes" }, "Ответь своими словами до открытия подсказок. Эти вопросы не входят в оценку итогового теста на 25 вопросов."), h("button", { className: "ghost", onClick: function () { openPage("quiz"); } }, "← К итоговому тесту"), analysisTasks.length ? h(Tasks, { key: "analysis", tasks: analysisTasks }) : null) : null,
+      tab === "analysis" ? h("section", null, h("h2", null, "Вопросы с разбором"), h("p", { className: "notes" }, "Ответь своими словами до открытия подсказок. Эти вопросы не входят в оценку итогового теста на 25 вопросов."), analysisTasks.length ? h(Tasks, { key: "analysis", tasks: analysisTasks }) : null) : null,
       tab === "training" ? h(Training, { bank: quizzes, modules: substations, store: store, onSave: function (key, score, total) {
         if (!key || key.indexOf("station-training:v1:") !== 0 || !Number.isInteger(score) || !Number.isInteger(total) || total < 1 || score < 0 || score > total) return;
         var change = {}; change[key] = { score: score, total: total, at: new Date().toISOString() }; updateStore(change);
