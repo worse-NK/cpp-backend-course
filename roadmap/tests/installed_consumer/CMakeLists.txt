@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(InstalledConsumer LANGUAGES CXX)
+if(NOT DEFINED LESSON_TARGETS)
+    message(FATAL_ERROR "Pass -DLESSON_TARGETS=/path/to/installed/LessonTargets.cmake")
+endif()
+include("${LESSON_TARGETS}")
+add_executable(consumer main.cpp)
+target_link_libraries(consumer PRIVATE Lesson::core)

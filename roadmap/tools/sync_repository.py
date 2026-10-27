@@ -24,6 +24,13 @@ def collect_repository_files() -> dict[str, bytes]:
         "content/service-workshop/route.json", "assets/sql-lab-worker.js",
         "vendor/sqljs/sql-asm.js", "vendor/sqljs/README.md",
     }
+    sources.update("tests/" + name for name in (
+        "build_example/CMakeLists.txt", "build_example/include/core.hpp",
+        "build_example/src/core.cpp", "build_example/src/main.cpp",
+        "build_example/tests/core_test.cpp", "installed_consumer/CMakeLists.txt",
+        "installed_consumer/main.cpp", "odr_example/left.cpp", "odr_example/main.cpp",
+        "odr_example/math.hpp", "pimpl_example/client.cpp", "pimpl_example/client.hpp",
+        "pimpl_example/main.cpp"))
     for station in stations:
         identifier = station["meta"]["id"]
         sources.update((f"content/{identifier}.json", f"content/checkpoints/{identifier}.json"))

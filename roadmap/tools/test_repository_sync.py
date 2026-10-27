@@ -63,10 +63,31 @@ class RepositoryInventory(unittest.TestCase):
         self.assertTrue('index.html' in self.files)
         self.assertTrue('roadmap/cpp_backend_roadmap.html' in self.files)
 
+    def test_cpp_and_cmake_regression_fixtures_are_complete(self):
+        fixtures = {
+            'build_example/CMakeLists.txt',
+            'build_example/include/core.hpp',
+            'build_example/src/core.cpp',
+            'build_example/src/main.cpp',
+            'build_example/tests/core_test.cpp',
+            'installed_consumer/CMakeLists.txt',
+            'installed_consumer/main.cpp',
+            'odr_example/left.cpp',
+            'odr_example/main.cpp',
+            'odr_example/math.hpp',
+            'pimpl_example/client.cpp',
+            'pimpl_example/client.hpp',
+            'pimpl_example/main.cpp',
+        }
+        names = {name for name in self.files if name.startswith('roadmap/tests/')}
+        self.assertEqual(names, {'roadmap/tests/' + name for name in fixtures})
+        for name in names:
+            self.assertIsInstance(self.files[name], bytes)
+
     def test_deployment_remains_source_free(self):
         files, _ = publication.collect()
         for name in files:
-            self.assertFalse(set(Path(name).parts) & {'content', 'tools', '__pycache__'})
+            self.assertFalse(set(Path(name).parts) & {'content', 'tools', 'tests', '__pycache__'})
         self.assertTrue('roadmap/content/station0.json' in self.files)
         self.assertFalse('roadmap/content/station0.json' in files)
 
