@@ -246,7 +246,7 @@
     "class-design": [
       {
         "level": "medium",
-        "q": "У Ticket есть inline static int issued = 0; конструктор Ticket() увеличивает issued, а деструктор его не меняет. Что напечатает фрагмент?\n\n{ Ticket first; Ticket second; }\nstd::cout << Ticket::issued;",
+        "q": "У Ticket есть открытое поле inline static int issued = 0. Перед выполнением фрагмента issued равен 0; конструктор Ticket() увеличивает его, а деструктор не меняет. Что напечатает фрагмент?\n\n{ Ticket first; Ticket second; }\nstd::cout << Ticket::issued;",
         "options": [
           "0",
           "1",

@@ -98,8 +98,10 @@ class Terminology(unittest.TestCase):
         station = json.loads((ROOT / "content/station0.json").read_text())
         paragraph = next(p for p in teaching_blocks(station) if re.search(r"инвариант\w*", p, re.I))
         self.assertIn("условие", paragraph)
-        self.assertIn("допустимое состояние", paragraph)
-        self.assertIn("remaining_ >= 0", paragraph)
+        self.assertRegex(paragraph, r"допустим(?:ое состояние|ого состояния)")
+        # Both ordinary words and a code expression may explain this rule.
+        # Require the concrete nonnegative-attempts example, not just a label.
+        self.assertRegex(paragraph, r"остаток не должен быть отрицательным|remaining_\s*>=\s*0")
 
     def test_plain_english_mix_is_removed_from_known_problem_passages(self):
         station = json.loads((ROOT / "content/station7.json").read_text())

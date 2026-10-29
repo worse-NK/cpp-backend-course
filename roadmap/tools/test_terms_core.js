@@ -7,10 +7,13 @@ new Function(read('roadmap/generated/terms.data.js'))();
 new Function(read('roadmap/assets/terms-core.js'))();
 const model=CourseTermsCore.create(COURSE_TERMS);
 assert(CourseTermsCore.create([]).scan('anything').length===0,'An empty catalog must not loop on an empty regex');
-const first=JSON.parse(read('roadmap/content/station0.json')).theory.find(s=>s.id==='why-oop').blocks.map(b=>b.html||'').find(text=>/инвариант/i.test(text));
+// The UI scans the combined text of DOM nodes, not raw HTML markup.
+const first=JSON.parse(read('roadmap/content/station0.json')).theory.find(s=>s.id==='why-oop').blocks.map(b=>b.html||'').find(text=>/инвариант/i.test(text)).replace(/<[^>]*>/g,'');
 const invariant=model.scan(first).find(m=>m.id==='invariant');
 assert(invariant&&invariant.definitionEnd>invariant.end,'The reported definition should become a small card');
-assert(first.slice(invariant.end,invariant.definitionEnd).startsWith(' (условием,'),'Remove exactly the existing explanation');
+assert(first.slice(invariant.end,invariant.definitionEnd)===' (условие допустимого состояния объекта)','Remove exactly the current approved explanation');
+const originalDefinition='инвариантом (условием, которому должно удовлетворять допустимое состояние объекта)';
+assert(model.scan(originalDefinition)[0].definitionEnd===originalDefinition.length,'Keep the original inflected definition supported');
 assert(model.scan('инвариантного').length===0,'Do not mark a substring inside an unknown inflection');
 assert(!model.scan('public').some(m=>m.id==='undefined-behavior'),'UB must not match inside public');
 assert(model.scan('NRVO')[0].id==='nrvo','RVO must not capture NRVO');
