@@ -578,7 +578,8 @@
               h("iframe", { src: trainerUrl, title: "SQL с нуля: редактор запросов и учебные таблицы", loading: "lazy", style: { width: "100%", height: "1100px", border: "1px solid #dce3e9", borderRadius: "8px", marginTop: "16px" } }));
           }
           if (block.type === "text") {
-            return h("p", { className: "theory-text", key: index, dangerouslySetInnerHTML: { __html: block.html } });
+            var hasBlockContent = /<(?:table|div|ul|ol|h[2-6])(?:\s|>)/i.test(block.html);
+            return h(hasBlockContent ? "div" : "p", { className: "theory-text", key: index, dangerouslySetInnerHTML: { __html: block.html } });
           }
           if (block.type === "self-check") {
             return h("aside", { className: "self-check", key: section.id + ":" + index },

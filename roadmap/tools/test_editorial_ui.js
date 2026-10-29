@@ -50,8 +50,13 @@ assert(!ordinaryCode.props.className.includes('output-wrap'), 'Code mentioning o
 const section = { id: 'example', title: 'Пример', blocks: [{type: 'note', html: '<b>Источники.</b> Правило', kind: 'tip'}] };
 const theory = components.Theory({ sections: [section], store: {}, onNavigate: () => {} });
 assert(find(theory, n => n.props.className === 'note source-note'), 'Sources must not appear as tips');
+const comparison = components.Theory({ sections: [{id:'comparison', title:'Сравнение', blocks:[{type:'text',html:'<table><tbody><tr><td>Случай</td></tr></tbody></table>'}]}], store:{} });
+assert(find(comparison, n => n.props.className === 'theory-text').type === 'div', 'A comparison table must not be nested in a paragraph');
+const paragraph = components.Theory({ sections: [{id:'paragraph', title:'Текст', blocks:[{type:'text',html:'Обычное объяснение с <code>int</code>.'}]}], store:{} });
+assert(find(paragraph, n => n.props.className === 'theory-text').type === 'p', 'Ordinary prose must remain a paragraph');
+// Each Theory render schedules a reading-position effect; check the last one.
 effects.forEach(effect => effect());
-assert(JSON.parse(writes.cpp_course_last_read_v1).section === 'example', 'Last reading position must be stored');
+assert(JSON.parse(writes.cpp_course_last_read_v1).section === 'paragraph', 'Last reading position must be stored');
 assert(Object.keys(writes).length === 1, 'Reading must not mark the lesson completed');
 const data = fakeWindow.STATION_DATA;
 const nav = components.SubstationNav({ items: data.substations, active: data.substations[0].id, view: 'theory', store: {}, onChoose: () => {}, onNavigate: () => {} });

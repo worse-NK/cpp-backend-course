@@ -19,9 +19,13 @@ class StationZeroExamples(unittest.TestCase):
         data = json.loads((ROOT / 'content/station0.json').read_text())
         cls.sections = {s['id']: s for s in data['theory']}
 
-    def code(self, sid, index=0):
-        return [b['code'] for b in self.sections[sid]['blocks']
-                if b['type'] == 'code'][index]
+    def code(self, sid, index=0, *, containing=None):
+        candidates = [b['code'] for b in self.sections[sid]['blocks']
+                      if b['type'] == 'code']
+        if containing is not None:
+            required = (containing,) if isinstance(containing, str) else containing
+            candidates = [code for code in candidates if all(part in code for part in required)]
+        return candidates[index]
 
     def compile(self, source, expected='', *, valid=True):
         with tempfile.TemporaryDirectory(prefix='station0-editorial-test-') as directory:
@@ -38,14 +42,14 @@ class StationZeroExamples(unittest.TestCase):
                 self.assertEqual(run.returncode, 0, run.stderr)
                 self.assertEqual(run.stdout.strip(), expected)
 
-    def definition(self, sid, index=0):
-        return self.code(sid, index).split('int main()', 1)[0]
+    def definition(self, sid, index=0, *, containing=None):
+        return self.code(sid, index, containing=containing).split('int main()', 1)[0]
 
     def test_first_worked_call_matches_output(self):
-        self.compile(self.code('why-oop'), '1 2')
+        self.compile(self.code('why-oop', containing='#include'), '1 2')
 
     def test_attempts_reject_repeated_calls_at_zero(self):
-        self.compile(self.definition('why-oop') + r'''
+        self.compile(self.definition('why-oop', containing='#include') + r'''
 #include <cassert>
 int main() {
     Attempts login;
@@ -66,13 +70,13 @@ int main() {
 ''')
 
     def test_closed_field_rejects_external_read_and_write(self):
-        prefix = self.definition('why-oop')
+        prefix = self.definition('why-oop', containing='#include')
         for expression in ('login.remaining_ = -5;', '(void)login.remaining_;'):
             with self.subTest(expression=expression):
                 self.compile(prefix + 'int main() { Attempts login; ' + expression + ' }', valid=False)
 
     def test_const_does_not_make_mutating_method_callable(self):
-        self.compile(self.definition('why-oop') +
+        self.compile(self.definition('why-oop', containing='#include') +
                      'int main() { const Attempts login; login.try_use(); }', valid=False)
 
     def test_account_validates_before_changing_balance(self):
@@ -91,7 +95,7 @@ int main() {
 ''')
 
     def test_returned_reference_aliases_but_value_declaration_copies(self):
-        self.compile(self.definition('this', 3) + r'''
+        self.compile(self.definition('this', containing=('#include', 'return *this;')) + r'''
 #include <cassert>
 int main() {
     Point original;
