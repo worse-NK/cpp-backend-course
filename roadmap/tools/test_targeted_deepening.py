@@ -149,8 +149,13 @@ int main() {
         for number, ref in refs.items():
             data = station(number)
             section = next(s for s in data['theory'] if s['id'] == ref)
-            self.assertTrue(any('Разбор по шагам:' in b.get('html', '')
-                                for b in section['blocks']))
+            # The editorial pass replaces the former repeated heading with
+            # a concrete retrieval question and an answer the reader reveals.
+            # Keep checking the learning element, not its old stock phrase.
+            checks=[b for b in section['blocks'] if b['type']=='self-check']
+            self.assertTrue(checks,ref)
+            self.assertTrue(all(b['prompt'].strip() and b['answer'].strip()
+                                for b in checks),ref)
             prefixes = {
                 6: ['Два работника пула заняты', 'В фиксированном пуле каждый',
                     'Очередь ограниченного пула полна.', 'Родитель получил timeout'],

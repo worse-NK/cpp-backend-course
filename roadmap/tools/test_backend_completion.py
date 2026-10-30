@@ -148,18 +148,16 @@ int main() {
         self.assertEqual(len(b'{"value": 42}'), 13)
 
     def test_every_module_has_new_reasoning_questions(self):
-        # Locate the October 2 workbook by its stable first prompt, not the
-        # tail: later interview-bank questions may be appended freely.
-        starts = {
-            6: "В vector<std::thread> уже два joinable-потока.",
-            7: "Рабочее HTTP/2-соединение уже установлено к адресу A.",
-        }
+        # The October 2 workbook occupies authored positions 50..65 in both
+        # banks. Positions are retained when wording or the transfer example
+        # is revised; the former first prompt is not a permanent identifier.
+        starts = {6: 50, 7: 50}
         for n in (6, 7):
             data = station(n)
             all_questions = data["quizzes"]["advanced"]
-            start = next(i for i, q in enumerate(all_questions)
-                         if q["q"].startswith(starts[n]))
+            start = starts[n]
             questions = all_questions[start:start + 16]
+            self.assertEqual(len(questions), 16)
             for module in data["substations"]:
                 # The October 2 workbook predates the new introductory access
                 # chapter. Its separate questions/coverage are guarded by

@@ -89,4 +89,11 @@ def with_checkpoints(data: dict, directory: Path | None = None) -> dict:
         resolved[module] = questions
         versions[module] = hashlib.sha256(json.dumps(
             questions, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:12]
-    return dict(data, checkpoints=resolved, checkpointVersion=versions)
+    # Optional training uses both complete banks.  Authored positions stay
+    # stable, but a result for a former question must not label its replacement
+    # as already attempted.  This is build metadata, not a new progress store.
+    training = {kind: data['quizzes'].get(kind, []) for kind in ('basic', 'advanced')}
+    training_version = hashlib.sha256(json.dumps(
+        training, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:12]
+    return dict(data, checkpoints=resolved, checkpointVersion=versions,
+                trainingVersion=training_version)

@@ -134,6 +134,15 @@ assert(env.api.trainingEntries({},'', 'all').length === 0, 'An empty bank must b
 assert(env.api.trainingBatches([],5).length === 0 && env.api.trainingBatches(entries,0).flat().length === 4, 'Empty/invalid batch sizes must not cause an endless loop');
 assert(env.api.trainingResultKey([]) === '', 'An empty attempt must not create a score key');
 assert(env.api.trainingResultKey(entries.slice(0,2)) !== env.api.trainingResultKey(entries.slice(1,3)), 'Results for different authored sets must not collide by question text');
+const legacyTrainingKey=env.api.trainingResultKey(entries.slice(0,2));
+data.trainingVersion='version-a';
+const trainingVersionA=env.api.trainingResultKey(entries.slice(0,2));
+data.trainingVersion='version-b';
+assert(env.api.trainingResultKey(entries.slice(0,2)) !== trainingVersionA && trainingVersionA !== legacyTrainingKey,
+    'Changed questions must not reuse a legacy or previous-bank attempt');
+assert(env.api.trainingResultKey(entries.slice(0,2)).startsWith('station-training:v1:version-b:'),
+    'Versioned attempts must remain in the existing training result namespace');
+delete data.trainingVersion;
 assert(JSON.stringify(demo) === before, 'Training helpers mutated source questions');
 const settings=env.api.trainingSettings(new Params('module=a&kind=advanced&size=5&set=2'),modules);
 assert(JSON.stringify(settings) === JSON.stringify({module:'a',kind:'advanced',size:5,batch:1}), 'Direct URL must select the requested scope and set');

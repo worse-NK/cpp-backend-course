@@ -8,6 +8,7 @@ ROADMAP_BOOST_INCLUDE, ROADMAP_PROTOC, ROADMAP_PROTO_LIBDIR.
 import json
 import os
 from pathlib import Path
+import re
 import socket
 import subprocess
 import tempfile
@@ -228,7 +229,11 @@ int main(){
                 questions=[q for qs in data['quizzes'].values() for q in qs if ref in q['theoryRefs']]
                 self.assertGreaterEqual(len(questions),2,ref)
                 theory=next(s for s in data['theory'] if s['id']==ref)
-                self.assertTrue(any('Первоисточник' in b.get('html','') for b in theory['blocks']),ref)
+                self.assertTrue(any(
+                    b['type'] == 'note'
+                    and re.search(r'Первоисточник|Источники и границы|Основани[ея]', b.get('html',''))
+                    and '<a href=' in b.get('html','')
+                    for b in theory['blocks']), ref)
 
 
 @unittest.skipUnless(os.environ.get('ROADMAP_BOOST_INCLUDE'), 'set ROADMAP_BOOST_INCLUDE')

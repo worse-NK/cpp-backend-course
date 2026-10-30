@@ -213,7 +213,18 @@ class NetworkFoundations(unittest.TestCase):
                         parts = urlsplit(link)
                         if parts.scheme or parts.netloc:
                             self.assertEqual(parts.scheme, "https")
-                            self.assertIn(parts.hostname, PRIMARY_DOMAINS)
+                            if parts.hostname == 'github.com':
+                                # Version-pinned upstream OpenSSH documentation,
+                                # not arbitrary GitHub content.
+                                self.assertEqual(parts.path, '/openssh/openssh-portable/blob/V_9_6_P1/sshd_config.5')
+                            elif parts.hostname == 'www.gnu.org':
+                                self.assertEqual(parts.path, '/software/inetutils/manual/html_node/traceroute-invocation.html')
+                            elif parts.hostname == 'man.archlinux.org':
+                                # The packaged upstream traceroute(8) manual,
+                                # not a general distribution tutorial.
+                                self.assertEqual(parts.path, '/man/traceroute.8.en')
+                            else:
+                                self.assertIn(parts.hostname, PRIMARY_DOMAINS)
                             sources.append(link)
                         elif not link.startswith("#"):
                             self.assertTrue((ROOT / parts.path).is_file(), link)

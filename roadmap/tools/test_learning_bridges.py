@@ -143,7 +143,11 @@ class LearningBridges(unittest.TestCase):
         ]:
             data = station(n)
             section = next(s for s in data['theory'] if s['id'] == ref)
-            self.assertTrue(any('Считаем и объясняем:' in b.get('html', '') for b in section['blocks']))
+            # Readable editions may replace the old literal heading. Keep the
+            # teaching contract: a revealable reasoning check, questions in
+            # each bank, and the dedicated application task below.
+            self.assertTrue(any(b['type'] == 'self-check' and b['prompt'].strip()
+                                and b['answer'].strip() for b in section['blocks']))
             for kind in ('basic', 'advanced', 'interview'):
                 self.assertTrue(any(ref in q['theoryRefs'] for q in data['quizzes'][kind]))
             task = next(t for t in data['tasks'] if t['title'] == title)

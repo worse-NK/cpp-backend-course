@@ -111,39 +111,72 @@ print('PASS: keyboard focus retained, accessible completion state, collapsed pro
 const progressHelper = script.slice(script.indexOf('function loadStationProgress('), script.indexOf('\nconst Icon'));
 const loadProgress = new Function('localStorage', progressHelper + ';return loadStationProgress;')({
     getItem: key => JSON.stringify(key === 'cpp_station7_progress_v1'
-        ? {'station-final:architecture-20261025:v1:basic':{score:23,total:25},'station-final:network-foundation-20261021:v1:basic':{score:2,total:25},'station-final:v3:basic':{score:1,total:25}}
-        : {'station-final:netlab-20261021:v1:basic':{score:21,total:25},'station-final:network-foundation-20261021:v1:basic':{score:2,total:25}})
+        ? {'station-final:editorial-20261029:v1:basic':{score:23,total:25},'station-final:architecture-20261025:v1:basic':{score:2,total:25},'station-final:v3:basic':{score:1,total:25}}
+        : {'station-final:editorial-20261029:v1:basic':{score:21,total:25},'station-final:netlab-20261021:v1:basic':{score:2,total:25}})
 });
 assert(loadProgress('cpp_station7_progress_v1',101).quiz.score === 23, 'Networking home score must match current assessment epoch');
 assert(loadProgress('cpp_station7_netlab_progress_v1',25).quiz.score === 21, '7Б home score must use its own assessment key');
 const trafficProgress = new Function('localStorage', progressHelper + ';return loadStationProgress;')({
-    getItem: () => JSON.stringify({'sec:learning-route':true,'station-final:traffic-20261026:v1:basic':{score:24,total:25},'station-final:netlab-20261021:v1:basic':{score:1,total:25}})
+    getItem: () => JSON.stringify({'sec:learning-route':true,'station-final:editorial-20261029:v1:basic':{score:24,total:25},'station-final:traffic-20261026:v1:basic':{score:1,total:25}})
 });
 assert(trafficProgress('cpp_station7_traffic_progress_v1',25).quiz.score === 24, '7В must not reuse the 7Б exam score');
 assert(trafficProgress('cpp_station7_traffic_progress_v1',25).secDone === 1, '7В theory progress must survive score loading');
 const stationApp = ByteArray.toString(GLib.file_get_contents('roadmap/assets/station-app.js')[1]);
 assert(stationApp.includes('station-final:netlab-20261021:v1:'), 'New station must save the key read by home');
 print('PASS: networking and 7Б assessment keys are isolated and match home progress');
-for (const key of ['cpp_station7_progress_v1','cpp_station8_progress_v1','cpp_station9_progress_v1','cpp_station10_progress_v1']) {
-    const current = new Function('localStorage', progressHelper + ';return loadStationProgress;')({
-        getItem: () => JSON.stringify({'sec:old-section':true, 'station-final:architecture-20261025:v1:basic':{score:22,total:25}, 'station-final:database-split:v1:basic':{score:1,total:25}, 'station-final:v3:basic':{score:2,total:25}})
-    });
-    assert(current(key, 101).quiz.score === 22 && current(key,101).secDone === 1, 'Current architecture score and theory marks must coexist: '+key);
-    const oldOnly = new Function('localStorage', progressHelper + ';return loadStationProgress;')({
-        getItem: () => JSON.stringify({'station-final:database-split:v1:basic':{score:25,total:25}, 'station-final:v3:basic':{score:25,total:25}})
-    });
-    assert(!oldOnly(key,101).quiz, 'Old exam score must not masquerade as new architecture assessment: '+key);
+const stationKeyHelper = stationApp.slice(stationApp.indexOf('    function quizStoreKey('), stationApp.indexOf('    var quizResults ='));
+const stationQuizKey = meta => new Function('meta', stationKeyHelper + ';return quizStoreKey;')(meta)('basic');
+for (const [key,id,number,epoch] of [
+    ['cpp_station2_progress_v1','station2',2,'v1'],
+    ['cpp_station3_progress_v1','station3',3,'v2'],
+    ['cpp_station4_progress_v1','station4',4,'v1'],
+    ['cpp_station5_progress_v1','station5',5,'v1'],
+    ['cpp_station5_linux_progress_v1','station5-linux',5,'v1'],
+    ['cpp_station6_progress_v1','station6',6,'v1'],
+    ['cpp_station7_progress_v1','station7',7,'v1'],
+    ['cpp_station7_netlab_progress_v1','station7-netlab',7,'v1'],
+    ['cpp_station7_traffic_progress_v1','station7-traffic',7,'v1'],
+    ['cpp_station8_progress_v1','station8',8,'v1'],
+    ['cpp_station9_sql_progress_v1','station9-sql',9,'v1'],
+    ['cpp_station9_progress_v1','station9',9,'v1'],
+    ['cpp_station10_progress_v1','station10',10,'v1']
+]) {
+    const currentKey = 'station-final:editorial-20261029:' + epoch + ':basic';
+    assert(stationQuizKey({id,number}) === currentKey, 'Home and station must agree on the editorial score key: ' + key);
+    const oldStore = {'sec:existing-section':true, 'sec:unread-section':false,
+        'station-final:coverage:v1:basic':{score:25,total:25},
+        'station-final:systems-depth-20261025:v1:basic':{score:25,total:25},
+        'station-final:architecture-20261025:v1:basic':{score:25,total:25},
+        'station-final:netlab-20261021:v1:basic':{score:25,total:25},
+        'station-final:traffic-20261026:v1:basic':{score:25,total:25},
+        'station-final:database-split:v1:basic':{score:25,total:25},
+        'station-final:v3:basic':{score:25,total:25},
+        'station-final:v2:basic':{score:25,total:25},
+        'quiz:module:basic':{score:5,total:5}, quiz:{score:25,total:25}};
+    const otherEpoch = number === 3 ? 'v1' : 'v2';
+    oldStore['station-final:editorial-20261029:'+otherEpoch+':basic'] = {score:25,total:25};
+    const before = JSON.stringify(oldStore);
+    const loadOld = new Function('localStorage', progressHelper + ';return loadStationProgress;')({getItem: () => JSON.stringify(oldStore)});
+    const oldProgress = loadOld(key,40);
+    assert(!oldProgress.quiz, 'Old scores must not complete the editorial assessment: ' + key);
+    assert(oldProgress.secDone === 1 && oldProgress.totalSections === 40, 'Editorial reset must retain theory progress: ' + key);
+    assert(JSON.stringify(oldStore) === before, 'Loading editorial progress must not alter saved records');
+    for (const legacy of [{quizAdvanced:{score:19,total:20}}, {'quiz:module:advanced':{score:4,total:5}}]) {
+        const legacyStore = Object.assign({}, oldStore, legacy);
+        const raw = JSON.stringify(legacyStore);
+        const loadLegacy = new Function('localStorage', progressHelper + ';return loadStationProgress;')({getItem: () => raw});
+        const legacyProgress = loadLegacy(key,40);
+        assert(legacyProgress.quizAdvanced === null, 'Home must not show an old advanced-bank result after editing: ' + key);
+        assert(legacyProgress.secDone === 1, 'Ignoring a stale advanced score must retain theory marks: ' + key);
+        assert(JSON.stringify(legacyStore) === raw, 'Ignoring a stale advanced score must not delete the saved record');
+    }
+    const currentStore = Object.assign({},oldStore, {[currentKey]:{score:21,total:25}});
+    const loadCurrent = new Function('localStorage', progressHelper + ';return loadStationProgress;')({getItem: () => JSON.stringify(currentStore)});
+    assert(loadCurrent(key,40).quiz.score === 21 && loadCurrent(key,40).secDone === 1, 'Home must show the editorial score and retain theory marks: ' + key);
 }
-for (const key of ['cpp_station3_progress_v1','cpp_station5_progress_v1','cpp_station5_linux_progress_v1','cpp_station6_progress_v1','cpp_station9_sql_progress_v1']) {
-    const current = new Function('localStorage', progressHelper + ';return loadStationProgress;')({
-        getItem: () => JSON.stringify({'sec:old-section':true,'station-final:systems-depth-20261025:v1:basic':{score:24,total:25},'station-final:coverage:v1:basic':{score:1,total:25},'station-final:database-split:v1:basic':{score:2,total:25},'station-final:v3:basic':{score:3,total:25}})
-    });
-    assert(current(key,40).quiz.score === 24 && current(key,40).secDone === 1, 'Systems-depth score must match current station and preserve theory marks: '+key);
-    const oldOnly = new Function('localStorage', progressHelper + ';return loadStationProgress;')({
-        getItem: () => JSON.stringify({'station-final:coverage:v1:basic':{score:25,total:25},'station-final:database-split:v1:basic':{score:25,total:25},'station-final:v3:basic':{score:25,total:25}})
-    });
-    assert(!oldOnly(key,40).quiz,'Old scores must not stand in for expanded systems assessment: '+key);
+const untouchedCpp = new Function('localStorage', progressHelper + ';return loadStationProgress;')({getItem: () => JSON.stringify({'sec:existing-section':true,'station-final:coverage:v1:basic':{score:23,total:25},'station-final:editorial-20261029:v1:basic':{score:1,total:25},'station-final:systems-depth-20261025:v1:basic':{score:2,total:25}})});
+for (const key of ['cpp_station0_progress_v1','cpp_station1_progress_v1']) {
+    assert(untouchedCpp(key,25).quiz.score === 23 && untouchedCpp(key,25).secDone === 1, 'Unchanged C++ station must retain its existing score epoch: ' + key);
 }
-const untouchedCpp = new Function('localStorage', progressHelper + ';return loadStationProgress;')({getItem: () => JSON.stringify({'station-final:coverage:v1:basic':{score:23,total:25},'station-final:systems-depth-20261025:v1:basic':{score:1,total:25}})});
-assert(untouchedCpp('cpp_station2_progress_v1',25).quiz.score === 23, 'Unchanged C++ station must retain its existing score epoch');
+print('PASS: editorial score versions agree with home, ignore stale scores and preserve section progress');
 print('PASS: architecture and systems exam epochs isolated; prior theory marks retained; unchanged stations unaffected');

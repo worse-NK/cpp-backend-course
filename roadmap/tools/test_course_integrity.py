@@ -5,6 +5,8 @@ from pathlib import Path
 import unittest
 from urllib.parse import urlsplit, unquote, parse_qs
 
+from test_linux_systems import Fragment
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -56,6 +58,22 @@ class CourseIntegrity(unittest.TestCase):
             if "readingOrder" in data:
                 with self.subTest(station=data["meta"]["id"]):
                     self.assertCountEqual(data["readingOrder"], [s["id"] for s in data["theory"]])
+
+    def test_theory_and_revealed_answers_have_self_contained_html(self):
+        # Template syntax belongs in escaped text, not accidental HTML tags.
+        # Structural validity is useful, but does not establish prose quality.
+        for data in self.data:
+            for section in data['theory']:
+                for index, block in enumerate(section['blocks']):
+                    for field in ('html', 'prompt', 'answer'):
+                        if not isinstance(block.get(field), str):
+                            continue
+                        with self.subTest(station=data['meta']['id'],
+                                          section=section['id'], block=index,
+                                          field=field):
+                            fragment=Fragment(block[field])
+                            self.assertEqual(fragment.errors, [])
+                            self.assertEqual(fragment.stack, [])
 
     def test_recent_interview_topics_are_accessible(self):
         for number, refs in {

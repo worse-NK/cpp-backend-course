@@ -349,7 +349,7 @@ def validate_station_sources() -> tuple[int, int, int, int, int]:
                         f"{section_where}.blocks[{block_index}]: expected an object"
                     )
                 html = block.get("html", "")
-                if isinstance(html, str) and "Первичные источники " in html:
+                if isinstance(html, str) and re.search(r"Первичные источники\b", html):
                     source_coverage.add(substation)
                     source_note_count += 1
                 if isinstance(html, str) and "Контрольная точка " in html:

@@ -125,7 +125,7 @@
   }
 
   // Stable, balanced station-wide selection. Source banks remain untouched.
-  function finalQuestions(bank, modules, limit, preferCoverage, priorityRefs, moduleBudgets) {
+  function finalQuestions(bank, modules, limit, preferCoverage, priorityRefs, moduleBudgets, checkpoints) {
     // Editorial exclusions from the final exam only: these remain in chapter
     // checkpoints and source banks, but repeat a skill already tested here.
     var repeatedStems = [
@@ -144,7 +144,18 @@
       "Почему condition_variable::wait требует unique_lock, а не lock_guard?",
       "Что сама по себе даёт ограниченная очередь задач при перегрузке?"
     ];
-    function eligible(q) { return repeatedStems.indexOf(q.q) < 0; }
+    // Reserve authored chapter checks before filling the final, not after it.
+    // Filtering an already filled selection could silently turn 25 into 24.
+    var chapterStems = new Set();
+    Object.keys(checkpoints || {}).forEach(function (id) {
+      checkpoints[id].forEach(function (q) {
+        chapterStems.add(q.q.replace(/\s+/g, " ").trim().toLocaleLowerCase("ru"));
+      });
+    });
+    function eligible(q) {
+      return repeatedStems.indexOf(q.q) < 0 &&
+        !chapterStems.has(q.q.replace(/\s+/g, " ").trim().toLocaleLowerCase("ru"));
+    }
     var buckets = modules.map(function (module) {
       var basic = bank.basic.filter(function (q) { return q.substation === module.id && eligible(q); });
       var advanced = bank.advanced.filter(function (q) { return q.substation === module.id && eligible(q); });
@@ -255,7 +266,8 @@
   }
 
   function trainingResultKey(entries) {
-    return entries.length ? "station-training:v1:" + entries.map(function (entry) { return entry.id; }).join("|") : "";
+    var version = data.trainingVersion ? data.trainingVersion + ":" : "";
+    return entries.length ? "station-training:v1:" + version + entries.map(function (entry) { return entry.id; }).join("|") : "";
   }
 
   // Keep the original task data (including hints and solutions) intact.
@@ -1048,7 +1060,7 @@
     var activeTasks = tasks.filter(isPracticeTask);
     var analysisTasks = tasks.filter(function (task) { return !isPracticeTask(task); });
     var priorityRefs = assessmentPriorityRefs(meta.id);
-    var activeQuizzes = { basic: excludeCheckpointQuestions(finalQuestions(quizzes, substations, 25, meta.number <= 4, priorityRefs, assessmentFinalBudgets(meta.id)), data.checkpoints), interview: quizzes.interview || [] };
+    var activeQuizzes = { basic: excludeCheckpointQuestions(finalQuestions(quizzes, substations, 25, meta.number <= 4, priorityRefs, assessmentFinalBudgets(meta.id), data.checkpoints), data.checkpoints), interview: quizzes.interview || [] };
     var checkpointQuestions = chapterQuestions(quizzes, activeSubstationId, assessmentCheckpointRefs(meta.id), data.checkpoints);
     var checkpointKey = "checkpoint:v3:" + activeSubstationId + ":" + ((data.checkpointVersion || {})[activeSubstationId] || "unversioned");
     var workedSections = theory.filter(function (section) { return /(?:-final-workbook|clock-worked-example)$/.test(section.id); });
@@ -1056,6 +1068,8 @@
     var doneActiveSections = activeTheory.filter(function (item) { return store["sec:" + item.id]; }).length;
 
     function quizStoreKey(kind) {
+      if (meta.id === "station3" && (kind === "basic" || kind === "interview")) return "station-final:editorial-20261029:v2:" + kind;
+      if (["station2", "station4", "station5", "station5-linux", "station6", "station7", "station7-netlab", "station7-traffic", "station8", "station9-sql", "station9", "station10"].indexOf(meta.id) >= 0 && (kind === "basic" || kind === "interview")) return "station-final:editorial-20261029:v1:" + kind;
       if (["station3", "station5", "station5-linux", "station6", "station9-sql"].indexOf(meta.id) >= 0) return "station-final:systems-depth-20261025:v1:" + kind;
       if (["station7", "station8", "station9", "station10"].indexOf(meta.id) >= 0) return "station-final:architecture-20261025:v1:" + kind;
       if (meta.id === "station7-netlab") return "station-final:netlab-20261021:v1:" + kind;

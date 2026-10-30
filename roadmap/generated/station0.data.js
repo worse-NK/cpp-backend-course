@@ -3705,5 +3705,6 @@ window.STATION_DATA = {
     "construction-invariants": "aefd6f90f1be",
     "lifecycle-value": "bdfbc3a1631c",
     "class-design": "fb7570f9788f"
-  }
+  },
+  "trainingVersion": "9d1803e55b29"
 };

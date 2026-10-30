@@ -75,6 +75,22 @@ class Checkpoints(unittest.TestCase):
             self.assertEqual(before["checkpointVersion"][identifier] == after["checkpointVersion"][identifier],
                              identifier != module)
 
+    def test_training_version_follows_banks_not_theory_or_user_progress(self):
+        source = load_json(ROOT / 'content/station0.json')
+        original = copy.deepcopy(source)
+        before = with_checkpoints(source)
+        self.assertEqual(source, original)
+        self.assertEqual(len(before['trainingVersion']), 12)
+        self.assertEqual(before['trainingVersion'], with_checkpoints(source)['trainingVersion'])
+        prose = copy.deepcopy(source)
+        prose['theory'][0]['lead'] += ' Редактура вводного предложения.'
+        self.assertEqual(before['trainingVersion'], with_checkpoints(prose)['trainingVersion'])
+        for kind in ('basic', 'advanced'):
+            changed = copy.deepcopy(source)
+            changed['quizzes'][kind][0]['why'] += ' Уточнение объяснения ответа.'
+            self.assertNotEqual(before['trainingVersion'], with_checkpoints(changed)['trainingVersion'])
+        self.assertEqual(source['meta']['storeKey'], before['meta']['storeKey'])
+
     @unittest.skipUnless(shutil.which("g++"), "C++ compiler unavailable")
     def test_all_assembled_station0_programs_compile(self):
         data = with_checkpoints(load_json(ROOT / "content/station0.json"))

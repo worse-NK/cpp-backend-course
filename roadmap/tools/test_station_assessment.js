@@ -13,6 +13,14 @@ const finalBudgets = new Function(helper + ';return assessmentFinalBudgets;')();
 const checkpointRefs = new Function(helper + ';return assessmentCheckpointRefs;')();
 const training = new Function(helper + ';return trainingEntries;')();
 const batches = new Function(helper + ';return trainingBatches;')();
+// A reserved chapter question must not leave a hole in a completed final.
+const refillBank = {basic:Array.from({length:30}, (_,i)=>({q:'Question '+i,substation:'one',theoryRefs:['topic-'+i]})),advanced:[]};
+const refillBefore = JSON.stringify(refillBank);
+const reservedChecks = {one:refillBank.basic.slice(0,5).map(q=>Object.assign({},q,{q:'  '+q.q.toUpperCase()+'  '}))};
+const refilled = select(refillBank,[{id:'one'}],25,true,[],null,reservedChecks);
+assert(refilled.length === 25, 'Reserve checkpoints before selection so the final keeps 25 questions');
+assert(refilled.every(q=>!refillBank.basic.slice(0,5).includes(q)), 'Normalized checkpoint copies must not enter the final');
+assert(JSON.stringify(refillBank) === refillBefore, 'Reserving checkpoints must not mutate source banks');
 const appSelection = source.slice(source.indexOf('    var priorityRefs = assessmentPriorityRefs(meta.id);'), source.indexOf('    var workedSections ='));
 function appAssessment(data, moduleId) {
     return new Function('data', 'meta', 'quizzes', 'substations', 'activeSubstationId', helper + appSelection + ';return {quizzes:activeQuizzes,checkpoint:checkpointQuestions};')(
@@ -20,6 +28,70 @@ function appAssessment(data, moduleId) {
 }
 const keyHelper = source.slice(source.indexOf('    function quizStoreKey('), source.indexOf('    var quizResults ='));
 function quizKey(meta, kind) { return new Function('meta', keyHelper + ';return quizStoreKey;')(meta)(kind); }
+const resultHelper = source.slice(source.indexOf('    var quizResults ='), source.indexOf('    function updateStore('));
+function savedResults(meta, store) { return new Function('meta', 'store', keyHelper + resultHelper + ';return quizResults;')(meta, store); }
+const storeUpdateHelper = source.slice(source.indexOf('    function updateStore('), source.indexOf('    function openPage('));
+const editorialCases = [
+    [{id:'station2',number:2}, 'basic', 'v1', ['station-final:coverage:v1:basic', 'station-final:editorial-20261029:v2:basic']],
+    [{id:'station2',number:2}, 'interview', 'v1', ['station-final:v2:interview', 'station-final:editorial-20261029:v2:interview']],
+    [{id:'station3',number:3}, 'basic', 'v2', ['station-final:editorial-20261029:v1:basic', 'station-final:systems-depth-20261025:v1:basic', 'station-final:coverage:v1:basic', 'station-final:v3:basic']],
+    [{id:'station3',number:3}, 'interview', 'v2', ['station-final:editorial-20261029:v1:interview', 'station-final:systems-depth-20261025:v1:interview', 'station-final:audit-20261015:v1:interview', 'station-final:v2:interview']],
+    [{id:'station4',number:4}, 'basic', 'v1', ['station-final:coverage:v1:basic', 'station-final:v3:basic', 'station-final:editorial-20261029:v2:basic']],
+    [{id:'station4',number:4}, 'interview', 'v1', ['station-final:v2:interview', 'station-final:editorial-20261029:v2:interview']],
+    ...['station5','station5-linux','station6'].flatMap(id => ['basic','interview'].map(kind => [
+        {id,number:parseInt(id.slice(7),10)}, kind, 'v1', ['station-final:systems-depth-20261025:v1:'+kind, 'station-final:editorial-20261029:v2:'+kind]
+    ])),
+    ...[['station7','architecture-20261025'], ['station7-netlab','netlab-20261021'], ['station7-traffic','traffic-20261026'], ['station8','architecture-20261025'], ['station9-sql','systems-depth-20261025'], ['station9','architecture-20261025'], ['station10','architecture-20261025']].flatMap(([id,oldEpoch]) => ['basic','interview'].map(kind => [
+        {id,number:parseInt(id.slice(7),10)}, kind, 'v1', ['station-final:'+oldEpoch+':v1:'+kind, 'station-final:editorial-20261029:v2:'+kind]
+    ]))
+];
+editorialCases.forEach(([meta,kind,epoch,oldKeys]) => {
+    const currentKey = 'station-final:editorial-20261029:' + epoch + ':' + kind;
+    assert(quizKey(meta,kind) === currentKey, 'Wrong editorial score epoch: ' + meta.id + '/' + kind);
+    const store = {'sec:existing-section':true, 'sec:unread-section':false};
+    oldKeys.forEach(key => { store[key] = {score:25,total:25}; });
+    const before = JSON.stringify(store);
+    assert(!savedResults(meta,store)[kind], 'Old score must not complete the revised assessment: ' + meta.id + '/' + kind);
+    assert(JSON.stringify(store) === before && store['sec:existing-section'], 'Reading revised scores must preserve theory progress and old records');
+    let nextState, persisted;
+    const score = {score:20,total:25};
+    const update = new Function('store', 'setStore', 'persist', storeUpdateHelper + ';return updateStore;')(
+        store, value => { nextState = value; }, value => { persisted = value; });
+    update({[currentKey]:score});
+    assert(nextState === persisted && nextState[currentKey] === score, 'Saving must persist the new score epoch: ' + meta.id + '/' + kind);
+    assert(nextState['sec:existing-section'] && nextState['sec:unread-section'] === false && oldKeys.every(key => nextState[key] === store[key]), 'Saving the new score must retain section marks and old records');
+    assert(JSON.stringify(store) === before, 'Saving must not mutate the previous progress state');
+    assert(savedResults(meta,nextState)[kind] === score, 'Current editorial score must be loaded: ' + meta.id + '/' + kind);
+});
+const unchangedScoreCases = [
+    [{id:'station2',number:2}, 'advanced', 'station-final:v2:advanced'],
+    [{id:'station3',number:3}, 'advanced', 'station-final:systems-depth-20261025:v1:advanced'],
+    [{id:'station4',number:4}, 'advanced', 'station-final:v2:advanced'],
+    ...[0,1].flatMap(number => [
+        [{id:'station'+number,number}, 'basic', 'station-final:coverage:v1:basic'],
+        [{id:'station'+number,number}, 'advanced', 'station-final:v2:advanced'],
+        [{id:'station'+number,number}, 'interview', number === 1 ? 'station-final:interview-gaps:v1:interview' : 'station-final:v2:interview']
+    ]),
+    ...['station5','station5-linux','station6'].map(id => [
+        {id,number:parseInt(id.slice(7),10)}, 'advanced', 'station-final:systems-depth-20261025:v1:advanced'
+    ]),
+    ...['station9-sql'].flatMap(id => ['advanced'].map(kind => [
+        {id,number:parseInt(id.slice(7),10)}, kind, 'station-final:systems-depth-20261025:v1:'+kind
+    ])),
+    ...[7,10].flatMap(number => ['advanced'].map(kind => [
+        {id:'station'+number,number}, kind, 'station-final:architecture-20261025:v1:'+kind
+    ])),
+    [{id:'station8',number:8}, 'advanced', 'station-final:architecture-20261025:v1:advanced'],
+    [{id:'station9',number:9}, 'advanced', 'station-final:architecture-20261025:v1:advanced'],
+    ...[['station7-netlab','netlab-20261021'],['station7-traffic','traffic-20261026']].flatMap(([id,epoch]) => ['advanced'].map(kind => [
+        {id,number:7}, kind, 'station-final:'+epoch+':v1:'+kind
+    ]))
+];
+unchangedScoreCases.forEach(([meta,kind,key]) => {
+    assert(quizKey(meta,kind) === key, 'Unrelated score epoch must stay unchanged: ' + meta.id + '/' + kind);
+    const store = {'sec:existing-section':true, [key]:{score:12,total:15}, ['station-final:editorial-20261029:v2:'+kind]:{score:1,total:15}};
+    assert(savedResults(meta,store)[kind] === store[key] && store['sec:existing-section'], 'Unrelated saved score and theory progress must survive: ' + meta.id + '/' + kind);
+});
 const architectureRefs = {
     station7: ['linux-packet-to-handler', 'server-queues-two-bottlenecks', 'load-balancing-connections-requests'],
     station8: ['request-execution-workbook', 'architecture-boundaries', 'dependency-fanout-workbook', 'replica-state-workbook'],
@@ -83,7 +155,7 @@ for (const i of [0,1,2,3,4,5,'5-linux',6,7,'7-netlab','7-traffic',8,9,'9-sql',10
     const priorities = priorityRefs(data.meta.id);
     const budgets = finalBudgets(data.meta.id);
     const shortPriorities = checkpointRefs(data.meta.id);
-    const questions = select(data.quizzes, data.substations, 25, data.meta.number <= 4, priorities, budgets);
+    const questions = select(data.quizzes, data.substations, 25, data.meta.number <= 4, priorities, budgets, data.checkpoints);
     const inApp = appAssessment(data, data.substations[0].id);
     assert(JSON.stringify(inApp.quizzes.basic) === JSON.stringify(questions), 'App final selection differs from tested helper: ' + data.meta.id);
     assert(inApp.quizzes.interview === data.quizzes.interview, 'The app must expose the full interview bank: ' + data.meta.id);
@@ -120,7 +192,7 @@ for (const i of [0,1,2,3,4,5,'5-linux',6,7,'7-netlab','7-traffic',8,9,'9-sql',10
         });
     });
     assert(JSON.stringify(data.quizzes) === before, 'Bank mutated');
-    assert(JSON.stringify(select(data.quizzes, data.substations, 25, data.meta.number <= 4, priorities, budgets)) === JSON.stringify(questions), 'Final test selection must be stable');
+    assert(JSON.stringify(select(data.quizzes, data.substations, 25, data.meta.number <= 4, priorities, budgets, data.checkpoints)) === JSON.stringify(questions), 'Final test selection must be stable');
     if (architectureRefs[data.meta.id]) {
         const refs = architectureRefs[data.meta.id];
         const checkpoints = data.substations.flatMap(module => chapter(data.quizzes, module.id, priorities, data.checkpoints));
@@ -137,8 +209,11 @@ for (const i of [0,1,2,3,4,5,'5-linux',6,7,'7-netlab','7-traffic',8,9,'9-sql',10
         });
         data.tasks.filter(concernsArchitecture).forEach(task =>
             assert(practice(task) === (task.level === 'Практика'), 'Architecture exercise routed to the wrong destination: ' + task.title));
-        ['basic', 'advanced', 'interview'].forEach(kind =>
-            assert(quizKey(data.meta, kind) === 'station-final:architecture-20261025:v1:' + kind, 'Changed assessment must not reuse old scores: ' + data.meta.id + '/' + kind));
+        ['basic', 'advanced', 'interview'].forEach(kind => {
+            const editorial = ['station7','station8','station9','station10'].includes(data.meta.id) && (kind === 'basic' || kind === 'interview');
+            const epoch = editorial ? 'editorial-20261029:v1' : 'architecture-20261025:v1';
+            assert(quizKey(data.meta, kind) === 'station-final:' + epoch + ':' + kind, 'Changed assessment must not reuse old scores: ' + data.meta.id + '/' + kind);
+        });
     }
     if (systemsRefs[data.meta.id]) {
         const refs = systemsRefs[data.meta.id];
@@ -158,8 +233,11 @@ for (const i of [0,1,2,3,4,5,'5-linux',6,7,'7-netlab','7-traffic',8,9,'9-sql',10
         const newTasks = data.tasks.filter(concernsSystems);
         assert(newTasks.length > 0, 'Missing systems-depth laboratory: ' + data.meta.id);
         newTasks.forEach(task => assert(task.level === 'Практика' && practice(task), 'New laboratory must remain in practice: ' + task.title));
-        ['basic', 'advanced', 'interview'].forEach(kind =>
-            assert(quizKey(data.meta, kind) === 'station-final:systems-depth-20261025:v1:' + kind, 'Changed systems assessment must not reuse old scores: ' + data.meta.id + '/' + kind));
+        ['basic', 'advanced', 'interview'].forEach(kind => {
+            const editorial = ['station3','station5','station5-linux','station6','station9-sql'].includes(data.meta.id) && (kind === 'basic' || kind === 'interview');
+            const epoch = editorial ? 'editorial-20261029:' + (data.meta.id === 'station3' ? 'v2' : 'v1') : 'systems-depth-20261025:v1';
+            assert(quizKey(data.meta, kind) === 'station-final:' + epoch + ':' + kind, 'Changed systems assessment must not reuse old scores: ' + data.meta.id + '/' + kind);
+        });
     }
     if (data.meta.number <= 4) {
         const addedTopics = ['valid-states-factories', 'smart-ptr-deep', 'nvi-interface-evolution', 'templates-class', 'external-effects-guarantees'];
@@ -209,12 +287,20 @@ assert(source.includes('station-final:v3:'), 'Changed final selection must not r
 [
     [{id:'station0',number:0}, 'basic', 'station-final:coverage:v1:basic'],
     [{id:'station0',number:0}, 'interview', 'station-final:v2:interview'],
+    [{id:'station1',number:1}, 'basic', 'station-final:coverage:v1:basic'],
     [{id:'station1',number:1}, 'interview', 'station-final:interview-gaps:v1:interview'],
+    [{id:'station2',number:2}, 'advanced', 'station-final:v2:advanced'],
+    [{id:'station3',number:3}, 'advanced', 'station-final:systems-depth-20261025:v1:advanced'],
+    [{id:'station4-extra',number:4}, 'basic', 'station-final:coverage:v1:basic'],
+    [{id:'station4-extra',number:4}, 'interview', 'station-final:v2:interview'],
+    [{id:'station2-extra',number:2}, 'basic', 'station-final:coverage:v1:basic'],
+    [{id:'station2-extra',number:2}, 'interview', 'station-final:v2:interview'],
+    [{id:'station3-extra',number:3}, 'basic', 'station-final:coverage:v1:basic'],
     [{id:'station5-extra',number:5}, 'basic', 'station-final:v3:basic'],
-    [{id:'station7-netlab',number:7}, 'basic', 'station-final:netlab-20261021:v1:basic'],
-    [{id:'station7-netlab',number:7}, 'interview', 'station-final:netlab-20261021:v1:interview'],
-    [{id:'station7-traffic',number:7}, 'basic', 'station-final:traffic-20261026:v1:basic'],
-    [{id:'station7-traffic',number:7}, 'interview', 'station-final:traffic-20261026:v1:interview'],
+    [{id:'station7-netlab',number:7}, 'basic', 'station-final:editorial-20261029:v1:basic'],
+    [{id:'station7-netlab',number:7}, 'interview', 'station-final:editorial-20261029:v1:interview'],
+    [{id:'station7-traffic',number:7}, 'basic', 'station-final:editorial-20261029:v1:basic'],
+    [{id:'station7-traffic',number:7}, 'interview', 'station-final:editorial-20261029:v1:interview'],
     [{id:'station9-extra',number:9}, 'basic', 'station-final:database-split:v1:basic'],
     [{id:'station9-extra',number:9}, 'interview', 'station-final:audit-20261015:v1:interview']
 ].forEach(([meta,kind,expected]) => assert(quizKey(meta,kind) === expected, 'Unrelated assessment score key changed: ' + meta.id + '/' + kind));

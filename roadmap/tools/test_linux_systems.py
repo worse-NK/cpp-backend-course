@@ -43,6 +43,7 @@ PRIMARY_HOSTS = {
     "man7.org", "docs.kernel.org", "kernel.org", "www.kernel.org",
     "isocpp.github.io", "www.freedesktop.org", "www.gnu.org", "gnu.org",
     "pubs.opengroup.org", "en.cppreference.com", "strace.io",
+    "timsong-cpp.github.io",  # Versioned HTML of the openly available C++ draft.
 }
 
 

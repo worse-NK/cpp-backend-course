@@ -129,12 +129,12 @@ int main() {
             (0, "object-model", 0, "7 5"),
             (0, "lifecycle-value", 0, "XBA"),
             (1, "lifetime-raii", 0, "RGM"),
-            (1, "borrowing-const", 0, "9"),
+            (1, "borrowing-const", 0, "7 9"),  # saved value versus live reference
             (1, "ownership", 0, "0 1"),
             (1, "value-semantics", 0, "MC"),
             (1, "value-semantics", 1, "4 5 4"),
             (2, "subobjects-lifecycle", 0, "BMDdmb"),
-            (2, "virtual-dispatch", 0, "D1"),
+            (2, "virtual-dispatch", 0, "B1"),  # qualification suppresses virtual dispatch
             (2, "virtual-dispatch", 1, "BD"),
             (2, "interfaces-ownership", 1, "1 2"),
             (3, "templates-generic", 2, "LR"),

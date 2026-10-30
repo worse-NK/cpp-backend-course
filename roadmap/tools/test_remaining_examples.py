@@ -36,6 +36,13 @@ int main() {
         self.assertEqual(len(matches), 1, "Expected exactly one override-signature example")
         return matches[0]
 
+    def smart_owner_example(self, marker):
+        section = next(s for s in station(1)["theory"] if s["id"] == "smart-ptr-deep")
+        matches = [b["code"] for b in section["blocks"]
+                   if b["type"] == "code" and marker in b["code"]]
+        self.assertEqual(len(matches), 1, f"Expected exactly one smart-owner example containing {marker!r}")
+        return matches[0]
+
     def cpp(self, source, expected=None, valid=True, flags=(), expected_exit=0):
         with tempfile.TemporaryDirectory(prefix="roadmap-remaining-") as directory:
             binary = str(Path(directory) / "example")
@@ -52,8 +59,6 @@ int main() {
     def test_theory_outputs(self):
         cases = [
             (0, "full-example", 0, "1 0 7 5"),
-            (1, "smart-ptr-deep", 1, "2 1 destroy 1 0"),
-            (1, "smart-ptr-deep", 2, ""),
             (2, "virtual-edge-cases", 0, "Bi Dd Bi"),
             (2, "slicing", 0, "BD 1 7"),
             (2, "polymorphic-copy", 0, "7 8"),
@@ -69,12 +74,19 @@ int main() {
         for number, section, index, output in cases:
             with self.subTest(number=number, section=section, index=index):
                 self.cpp(code(number, section, index), output)
+        for marker, output in [
+            ("std::weak_ptr<Item> weak;", "2 1 destroy 1 0"),
+            ("struct Session : std::enable_shared_from_this<Session>", ""),
+        ]:
+            with self.subTest(section="smart-ptr-deep", marker=marker):
+                self.cpp(self.smart_owner_example(marker), output)
         this_section = next(s for s in station(0)["theory"] if s["id"] == "this")
         chaining = [b["code"] for b in this_section["blocks"]
-                    if b["type"] == "code" and "Point copy = a.setX(9)" in b["code"]]
+                    if b["type"] == "code" and "#include" in b["code"]
+                    and "Point copy = a.setX(9)" in b["code"]]
         self.assertEqual(len(chaining), 1)
         self.cpp(chaining[0], "4 7 9 10")
-        self.cpp(code(1, "smart-ptr-deep", 0))
+        self.cpp(self.smart_owner_example("struct FileCloser {"))
         self.cpp(self.override_example())
 
     def test_return_paths(self):
@@ -105,7 +117,7 @@ int main() {
     def test_smart_owner_precondition(self):
         clone = station(2)["quizzes"]["interview"][11]["q"].split("\n\n", 1)[1]
         self.cpp(clone, "8 8")
-        self.cpp(code(1, "smart-ptr-deep", 2).replace(
+        self.cpp(self.smart_owner_example("struct Session : std::enable_shared_from_this<Session>").replace(
             "auto first = std::make_shared<Session>();\n    auto second = first->self();\n    return first.use_count() == 2 ? 0 : 1;",
             "Session local;\n    try { local.self(); } catch (const std::bad_weak_ptr&) { return 0; }\n    return 1;"), "")
 
@@ -301,8 +313,11 @@ int main() {
                 self.cpp(code(3, "non-owning-vocabulary", index), output)
 
     def test_meminfo_parser_boundaries(self):
-        parser = code(4, "practical", 1)
-        self.cpp(parser + "\n" + code(4, "practical", 2), "1024 256")
+        blocks = [b["code"] for s in station(4)["theory"] if s["id"] == "practical"
+                  for b in s["blocks"] if b["type"] == "code"]
+        parser = next(value for value in blocks if "parseMeminfo(std::istream& input)" in value)
+        main = next(value for value in blocks if "const auto mem = parseMeminfo(input);" in value)
+        self.cpp(parser + "\n" + main, "1024 256")
         self.cpp(parser + r"""
 #include <cassert>
 #include <limits>
