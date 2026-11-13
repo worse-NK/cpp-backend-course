@@ -121,30 +121,29 @@ get('labPlay').onclick();location.hash='';listeners.hashchange();assert(timers.s
 const app=read('roadmap/assets/station-app.js');
 const flaskSource=app.slice(app.indexOf('  function LabFlask('),app.indexOf('  function LabBlock('));
 const blockSource=flaskSource+app.slice(app.indexOf('  function LabBlock('),app.indexOf('  function SubstationNav('));
-const navSource=flaskSource+app.slice(app.indexOf('  function backendLabEntry('),app.indexOf('  function PracticeLinks('))
-  +app.slice(app.indexOf('  function SubstationNav('),app.indexOf('  function Theory('));
+const mapTest=new Function(read('roadmap/tools/test_map_harness.js')+';return {mapFixture,mapEnvironment,mapNodes};')();
 const h=(type,props,...children)=>typeof type==='function'?type(Object.assign({},props,{children:children.flat(Infinity)})):{type,props:props||{},children:children.flat(Infinity)};
 const walk=n=>n&&typeof n==='object'?[n,...(n.children||[]).flatMap(walk)]:[];
 win.matchMedia=()=>({matches:true});let entries=0;
 for(const item of win.COURSE_LABS)for(const entry of item.entries){
-  const station=JSON.parse(read('roadmap/content/'+entry.station+'.json'));
+  const station=mapTest.mapFixture(entry.station);
   const section=station.theory.find(s=>s.id===entry.section),block=section.blocks.find(b=>b.type==='lab'&&b.lab===item.id);
   const makeBlock=new Function('h','meta','window',blockSource+';return LabBlock;')(h,station.meta,win);
   const href=win.courseLabHref(item.id,entry.scenario,entry.station,entry.section);
   const cardTree=makeBlock({block,section});
   assert(walk(cardTree).some(n=>n.type==='a'&&n.props.href===href),'Theory lab card '+entry.station);
   assert(walk(cardTree).some(n=>n.type==='svg'&&n.props.className==='lab-flask'&&n.props['aria-hidden']==='true'&&n.props.focusable==='false'),'Theory lab icon is decorative '+entry.station);
-  const makeNav=new Function('h','meta','theory','window','useState','isWorkbook',navSource+';return SubstationNav;')(
-    h,station.meta,station.theory,win,initial=>[typeof initial==='function'?initial():initial,()=>{}],s=>/(?:-final-workbook|clock-worked-example)$/.test(s.id));
-  const tree=makeNav({items:station.substations,active:section.substation,selected:section.id,view:'theory',store:{}});
-  assert(walk(tree).some(n=>n.type==='a'&&n.props.className==='contents-lab-link'&&n.props.href===href),'Contents entry '+entry.station+'/'+entry.section);
-  assert(walk(tree).some(n=>n.type==='a'&&n.props.className==='contents-all-labs'&&n.props.href==='visual_labs.html'),'Catalog retains native navigation '+entry.station);
-  assert(walk(tree).some(n=>n.type==='svg'&&n.props.className==='lab-flask'&&n.props['aria-hidden']==='true'&&n.props.focusable==='false'),'Contents lab icon is decorative '+entry.station);
-  let hook=0;
-  const searchNav=new Function('h','meta','theory','window','useState','isWorkbook',navSource+';return SubstationNav;')(
-    h,station.meta,station.theory,win,initial=>[hook++===1?entry.title.toLocaleUpperCase('ru'):typeof initial==='function'?initial():initial,()=>{}],()=>false);
-  const searchTree=searchNav({items:station.substations,active:'another-substation',selected:null,view:'theory',store:{}});
-  assert(walk(searchTree).some(n=>n.type==='a'&&n.props.className==='contents-lab-link'&&n.props.href===href),'Find laboratory by title in course contents '+entry.station+'/'+entry.section);
+  const mapEnv=mapTest.mapEnvironment(station,{active:section.substation,selected:section.id});
+  mapEnv.render(); const tree=mapEnv.open(section.substation);
+  assert(walk(tree).some(n=>n.type==='a'&&n.props.className==='map-lab-link'&&n.props.href===href),'Contents entry '+entry.station+'/'+entry.section);
+  assert(walk(tree).some(n=>n.type==='a'&&n.props.href==='visual_labs.html'),'Catalog retains native navigation '+entry.station);
+  const icon=walk(tree).find(n=>typeof n.type==='function'&&n.type.name==='LabFlask');
+  const iconTree=icon&&icon.type(icon.props);
+  assert(iconTree&&iconTree.type==='svg'&&iconTree.props.className==='lab-flask'&&iconTree.props['aria-hidden']==='true'&&iconTree.props.focusable==='false','Contents lab icon is decorative '+entry.station);
+  mapEnv.chapter(section.substation).props.onClick(); mapEnv.render();
+  const searchTree=mapEnv.setSearch(entry.title.toLocaleUpperCase('ru'));
+  assert(walk(searchTree).some(n=>n.type==='a'&&n.props.className==='map-lab-link'&&n.props.href===href),'Find laboratory by title even with all map branches closed '+entry.station+'/'+entry.section);
+  mapEnv.dispose();
   entries++;
 }
 const lifetimeScript=read('roadmap/object_lifetime_demo.html').match(/<script>\n([\s\S]*?)<\/script>/)[1];

@@ -63,7 +63,7 @@ function environment(data, hash, options = {}) {
     const win = {
         STATION_DATA:data, COURSE_LABS:[], location:{hash:hash || '', protocol:'file:'},
         scrollTo:settings => scrolls.push({id:'window', settings}),
-        matchMedia:() => ({matches:!!options.reducedMotion}),
+        matchMedia:() => ({matches:!!options.reducedMotion,addEventListener() {},removeEventListener() {}}),
         requestAnimationFrame:callback => { animationFrames.push(callback); return animationFrames.length; },
         addEventListener:(name, fn) => { (listeners[name] ||= new Set()).add(fn); },
         removeEventListener:(name, fn) => { if (listeners[name]) listeners[name].delete(fn); }

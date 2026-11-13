@@ -525,100 +525,255 @@
       h("small", null, "Нужен свой Linux-терминал · команды не исполняются в браузере · возвращайся к этапам по мере прохождения станций 8–10"));
   }
 
+  // Course station map. Shared by every station; routes and learner storage
+  // remain owned by App, while chapter expansion is local interface state.
+  function stationMapIcon(name) {
+    var shapes = {
+      check: [h("path", { key: "check", d: "m5 12 4 4L19 6" })],
+      flag: [h("path", { key: "flag", d: "M5 21V3m0 1c5-4 9 4 14 0v10c-5 4-9-4-14 0" })],
+      quiz: [h("path", { key: "quiz", d: "M8 4H5v16h14V4h-3M9 3h6v4H9zM8 12l2 2 5-5M8 17h7" })],
+      chevron: [h("path", { key: "chevron", d: "m7 10 5 5 5-5" })]
+    };
+    return h("svg", { viewBox: "0 0 24 24", width: 22, height: 22, fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true, focusable: "false" }, shapes[name] || shapes.check);
+  }
+
+  function stationMapLink(href, attrs, action) {
+    var children = Array.prototype.slice.call(arguments, 3);
+    var attributes = Object.assign({}, attrs, { href: href });
+    attributes.onClick = function (event) {
+      if (event && (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button > 0)) return;
+      if (event) event.preventDefault();
+      action();
+    };
+    return h.apply(null, ["a", attributes].concat(children));
+  }
+
+  function stationMapSections(entry) {
+    var sections = theory.filter(function (section) { return section.substation === entry.id && !isWorkbook(section); });
+    if (data.readingOrder) sections.sort(function (a, b) { return data.readingOrder.indexOf(a.id) - data.readingOrder.indexOf(b.id); });
+    return sections;
+  }
+
+  function stationMapLabEntries(section) {
+    return section.blocks.filter(function (block) { return block.type === "lab"; }).map(function (block) {
+      var lab = (window.COURSE_LABS || []).find(function (item) { return item.id === block.lab; });
+      var entry = lab && lab.entries.find(function (item) { return item.station === meta.id && item.section === section.id && item.scenario === block.scenario; });
+      return entry ? { lab: lab, entry: entry } : null;
+    }).filter(Boolean);
+  }
+
+  function stationMapMatches(section, query) {
+    if (section.title.toLocaleLowerCase("ru").includes(query)) return true;
+    var chapter = substations.find(function (item) { return item.id === section.substation; });
+    if (chapter && (chapter.label + " " + chapter.title + " " + chapter.subtitle).toLocaleLowerCase("ru").includes(query)) return true;
+    return stationMapLabEntries(section).some(function (item) { return (item.entry.title + " " + item.entry.description).toLocaleLowerCase("ru").includes(query); });
+  }
+
+  function stationMapNeedsPageScroll(height, viewportHeight) {
+    return Number.isFinite(height) && Number.isFinite(viewportHeight)
+      && height > 0 && viewportHeight > 0 && height + 32 > viewportHeight;
+  }
+
+  function stationMapStickyTop(previousTop, scrollDelta, height, viewportHeight) {
+    if (!Number.isFinite(height) || !Number.isFinite(viewportHeight) || height <= 0 || viewportHeight <= 0) return 16;
+    var lowestTop = Math.min(16, viewportHeight - height - 16);
+    var top = Number.isFinite(previousTop) ? previousTop : 16;
+    var delta = Number.isFinite(scrollDelta) ? scrollDelta : 0;
+    return Math.max(lowestTop, Math.min(16, top - delta));
+  }
+
+  function stationMapChapterState(entry, props) {
+    var sections = stationMapSections(entry);
+    var done = sections.filter(function (section) { return Boolean(props.store["sec:" + section.id]); }).length;
+    return { sections: sections, done: done, complete: done === sections.length,
+      current: entry.id === props.active && (props.view === "theory" || props.view === "checkpoint") && !theory.some(function (section) { return section.id === props.selected && isWorkbook(section); }) };
+  }
+
+  function stationMapLessons(entry, props, expanded) {
+    var attributes = { id: "map-branch-" + entry.id, className: "map-lessons", "aria-label": "Разделы: " + entry.title };
+    if (expanded === false) return h("nav", Object.assign({}, attributes, { hidden: true }));
+    var sections = stationMapSections(entry);
+    var checkpointKey = "checkpoint:v3:" + entry.id + ":" + ((data.checkpointVersion || {})[entry.id] || "unversioned");
+    var score = props.store[checkpointKey];
+    var checkpointDone = Boolean(score && score.total > 0 && score.score === score.total);
+    var questionCount = (data.checkpoints[entry.id] || []).length;
+    return h("nav", attributes,
+      sections.map(function (section, index) {
+        var current = props.view === "theory" && entry.id === props.active && section.id === (props.selected || sections[0].id);
+        var done = Boolean(props.store["sec:" + section.id]);
+        return h("div", { key: section.id, className: "map-lesson-entry" }, stationMapLink("#section=" + encodeURIComponent(section.id), {
+          className: "map-lesson" + (current ? " is-current" : "") + (done ? " is-complete" : ""),
+          "data-map-section": section.id, "aria-current": current ? "page" : undefined
+        }, function () { props.onNavigate(section.id); },
+          h("span", { className: "map-lesson-dot", "aria-hidden": true }, done ? stationMapIcon("check") : null),
+          h("span", { className: "map-lesson-title" }, section.title, done ? h("span", { className: "map-sr" }, " — изучено") : null)),
+          stationMapLabEntries(section).map(function (item) {
+            if (!window.courseLabHref) return null;
+            var sameTab = meta.id === "station15" && item.lab.id === "security";
+            return h("a", { key: item.lab.id + ":" + item.entry.scenario, className: "map-lab-link", href: window.courseLabHref(item.lab.id, item.entry.scenario, meta.id, section.id), target: sameTab ? undefined : "_blank", rel: sameTab ? undefined : "noopener noreferrer" }, h(LabFlask), h("span", null, item.entry.title), sameTab ? null : h("span", { className: "map-sr" }, " — в новой вкладке"));
+          }));
+      }),
+      stationMapLink("#view=checkpoint&module=" + encodeURIComponent(entry.id), {
+        className: "map-lesson map-checkpoint" + (props.view === "checkpoint" && props.active === entry.id ? " is-current" : "") + (checkpointDone ? " is-complete" : ""),
+        "data-map-checkpoint": entry.id, "aria-current": props.view === "checkpoint" && props.active === entry.id ? "page" : undefined
+      }, function () { props.onCheckpoint(entry.id); },
+        h("span", { className: "map-lesson-dot", "aria-hidden": true }, stationMapIcon(checkpointDone ? "check" : "quiz")),
+        h("span", { className: "map-lesson-title" }, "Закрепление", h("small", { className: "map-lesson-meta" }, score ? "Результат: " + score.score + " из " + score.total : questionCount + " заданий по этой главе"))));
+  }
+
+  function stationMapChapter(entry, index, props, overview, disclosure) {
+    var state = stationMapChapterState(entry, props);
+    var attributes = {
+      key: entry.id, className: (overview ? "map-overview-stop" : "map-chapter-link") + (state.complete ? " is-complete" : "") + (state.current ? " is-current" : ""),
+      "data-map-module": entry.id, "aria-current": state.current ? "location" : undefined
+    };
+    var children = [
+      h("span", { className: "map-marker", "aria-hidden": true }, state.complete ? stationMapIcon("check") : String(index + 1).padStart(2, "0")),
+      h("span", { className: "map-chapter-copy" },
+        h("span", { className: "map-chapter-index" }, entry.label),
+        h("strong", { className: overview ? "map-overview-title" : "map-chapter-title" }, entry.title),
+        h("span", { className: "map-chapter-progress" }, state.complete ? "Все " + state.sections.length + " разделов изучены" : state.done + " из " + state.sections.length + " изучено"))
+    ];
+    if (disclosure) {
+      attributes.className += " map-chapter-toggle";
+      attributes.type = "button";
+      attributes["aria-expanded"] = disclosure.expanded;
+      attributes["aria-controls"] = "map-branch-" + entry.id;
+      attributes.onClick = disclosure.onToggle;
+      children.push(h("span", { className: "map-chapter-chevron", "aria-hidden": true }, stationMapIcon("chevron")));
+      return h.apply(null, ["button", attributes].concat(children));
+    }
+    return stationMapLink.apply(null, ["#section=" + encodeURIComponent(state.sections[0].id), attributes, function () { props.onChoose(entry.id); }].concat(children));
+  }
+
   function SubstationNav(props) {
     var contentsState = useState(function () { return window.matchMedia("(min-width: 1100px)").matches; });
     var searchState = useState("");
-    function navigation(href, attributes) {
-      var children = Array.prototype.slice.call(arguments, 2);
-      var attrs = Object.assign({}, attributes);
-      var action = attrs.onClick;
-      attrs.href = href;
-      if (Object.prototype.hasOwnProperty.call(attrs, "aria-pressed")) {
-        if (attrs["aria-pressed"]) attrs["aria-current"] = "location";
-        delete attrs["aria-pressed"];
+    var expandedState = useState("");
+    var overflowState = useState(false);
+    var railRef = React.useRef(null);
+    var expansionAnchor = React.useRef(null);
+    var stickyGeometry = React.useRef({ top: 16, scrollY: null });
+    var variant = "trail";
+    React.useEffect(function () {
+      if (variant !== "trail") return;
+      var media = window.matchMedia("(min-width: 1100px)");
+      function followWidth(event) { contentsState[1](event.matches); }
+      media.addEventListener("change", followWidth);
+      return function () { media.removeEventListener("change", followWidth); };
+    }, [variant]);
+    React.useEffect(function () {
+      if (variant === "trail") expandedState[1](function (previous) { return previous ? props.active : ""; });
+    }, [props.active, variant]);
+    React.useEffect(function () {
+      if (variant !== "trail" || !railRef.current) return;
+      var body = railRef.current.querySelector(".map-rail-body");
+      if (!body) return;
+      var frame = null;
+      function measure() {
+        frame = null;
+        var wide = window.matchMedia("(min-width: 1100px)").matches;
+        var height = railRef.current.getBoundingClientRect().height;
+        var scrollY = Number.isFinite(window.scrollY) ? window.scrollY : 0;
+        var previous = stickyGeometry.current;
+        var delta = previous.scrollY === null ? 0 : scrollY - previous.scrollY;
+        var nextTop = wide ? stationMapStickyTop(previous.top, delta, height, window.innerHeight) : 16;
+        if (wide && expansionAnchor.current) {
+          var anchor = expansionAnchor.current;
+          var button = railRef.current.querySelector('[data-map-module="' + anchor.id + '"]');
+          if (button) {
+            var wantedTop = anchor.top - (scrollY - anchor.scrollY);
+            nextTop = stationMapStickyTop(previous.top + wantedTop - button.getBoundingClientRect().top, 0, height, window.innerHeight);
+          }
+        }
+        expansionAnchor.current = null;
+        stickyGeometry.current = { top: nextTop, scrollY: scrollY };
+        railRef.current.style.setProperty("--map-sticky-top", nextTop + "px");
+        overflowState[1](wide && stationMapNeedsPageScroll(height, window.innerHeight));
       }
-      attrs.onClick = function (event) {
-        if (event && (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button > 0)) return;
-        if (event) event.preventDefault();
-        action();
+      function schedule() {
+        if (frame !== null) return;
+        if (typeof window.requestAnimationFrame === "function") frame = window.requestAnimationFrame(measure);
+        else measure();
+      }
+      var observer = typeof window.ResizeObserver === "function" ? new window.ResizeObserver(schedule) : null;
+      if (observer) observer.observe(body);
+      window.addEventListener("resize", schedule);
+      window.addEventListener("scroll", schedule, { passive: true });
+      schedule();
+      return function () {
+        if (observer) observer.disconnect();
+        window.removeEventListener("resize", schedule);
+        window.removeEventListener("scroll", schedule);
+        if (frame !== null && typeof window.cancelAnimationFrame === "function") window.cancelAnimationFrame(frame);
       };
-      return h.apply(null, ["a", attrs].concat(children));
-    }
+    }, [variant, expandedState[0], contentsState[0]]);
+    var totalDone = theory.filter(function (section) { return props.store["sec:" + section.id]; }).length;
+    var active = props.items.find(function (entry) { return entry.id === props.active; }) || props.items[0];
     var query = searchState[0].trim().toLocaleLowerCase("ru");
-    function sectionMatches(section) {
-      if (section.title.toLocaleLowerCase("ru").includes(query)) return true;
-      return section.blocks.some(function (block) {
-        if (block.type !== "lab") return false;
-        var lab = (window.COURSE_LABS || []).find(function (item) { return item.id === block.lab; });
-        var entry = lab && lab.entries.find(function (item) { return item.station === meta.id && item.section === section.id && item.scenario === block.scenario; });
-        return entry && (entry.title + " " + entry.description).toLocaleLowerCase("ru").includes(query);
-      });
+    var matches = query ? theory.filter(function (section) { return stationMapMatches(section, query); }) : [];
+    var atFinish = ["final", "quiz", "interview", "tasks", "analysis", "training"].includes(props.view) || theory.some(function (section) { return section.id === props.selected && isWorkbook(section); });
+    function closePopup(event) {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.currentTarget.open = false;
+      event.currentTarget.querySelector("summary").focus();
     }
-    var visibleItems = props.items.filter(function (entry) {
-      return !query || (entry.label + " " + entry.title).toLocaleLowerCase("ru").includes(query) || theory.some(function (section) {
-        return section.substation === entry.id && sectionMatches(section);
-      });
-    });
-    var stationRouteHints = {
-      station0: "Начни с устройства объекта и правил допустимого состояния. Затем разбери создание, уничтожение и выбор доступных пользователю операций.",
-      station1: "Сначала выясни, кто удерживает объект живым и освобождает ресурс. Затем разбери доступ без владения, копирование и перемещение.",
-      station2: "Начни с отношений между базовым и производным классами. Затем проследи создание их частей, выбор вызываемого метода и безопасное уничтожение.",
-      station3: "Выбирай контейнер под данные и операции. После этого переходи к алгоритмам, шаблонам и типам для представления значений и диапазонов.",
-      station4: "Сначала определи смысл отказа. Затем проследи исключение, проверь состояние после ошибки и выбери, где её обрабатывать.",
-      station5: "Проследи путь от исходного файла до работающего процесса. Затем разбери CMake, повторяемость сборки и поиск причин сбоев.",
-      station6: "Для первого прохода используй маршрут из начала 6.1: к формальным блокам 6.2 и 6.4 лучше вернуться после mutex, ожиданий и future."
-    };
-    return h("details", { className: "substation-shell", open: contentsState[0], onToggle: function (event) { contentsState[1](event.currentTarget.open); }, "aria-label": "Оглавление станции" },
-      h("summary", { className: "contents-toggle" }, "Оглавление станции"),
-      h("a", { className: "course-home", href: "cpp_backend_roadmap.html" }, "← C++ и backend"),
-      meta.number === 9 ? h("a", { className: "course-home", href: meta.id === "station9-sql" ? "cpp_station9_databases.html" : "cpp_station9_sql.html" }, meta.id === "station9-sql" ? "Далее: 9B · PostgreSQL →" : "← 9A · SQL с нуля") : null,
+    return h("details", { ref: railRef, className: "substation-shell station-map map-layout-" + variant + (variant === "trail" && expandedState[0] ? " has-open-chapter" : "") + (variant === "trail" && overflowState[0] ? " map-overflows-viewport" : ""), open: contentsState[0], onToggle: function (event) {
+      if (variant === "trail" && window.matchMedia("(min-width: 1100px)").matches && !event.currentTarget.open) { event.currentTarget.open = true; return; }
+      contentsState[1](event.currentTarget.open);
+    }, "aria-label": "Карта станции " + stationDisplayNumber() },
+      h("summary", { className: "contents-toggle" }, "Карта станции"),
+      h("div", { className: "map-rail-body" },
+      h("a", { className: "map-course-home", href: "cpp_backend_roadmap.html" }, "← Все станции курса"),
+      h("div", { className: "map-heading" }, h("span", { className: "map-station-number" }, "Учебный маршрут"), h("h2", null, "Станция " + stationDisplayNumber()), h("p", { className: "map-progress-label", role: "status" }, totalDone + " из " + theory.length + " разделов изучено")),
+      h("div", { className: "map-progress-track", "aria-hidden": true }, h("span", { style: { width: (totalDone / theory.length * 100) + "%" } })),
+      h("div", { className: "map-legend", "aria-label": "Обозначения карты" },
+        h("span", null, h("i", { className: "is-complete", "aria-hidden": true }), "Изучено"),
+        h("span", null, h("i", { className: "is-current", "aria-hidden": true }), "Сейчас"),
+        h("span", null, h("i", { className: "is-upcoming", "aria-hidden": true }), "Не изучено")),
       meta.number === 9 ? h("a", { className: "sql-trainer-entry", href: "sql_trainer.html", target: "_blank", rel: "noopener" },
         h("span", { className: "sql-trainer-icon", "aria-hidden": true }, "SQL"),
         h("span", null, h("strong", null, "SQL-тренажёр"), h("small", null, "Запросы на практике")),
         h("span", { className: "sql-trainer-arrow", "aria-hidden": true }, "↗"),
-        h("span", { className: "sql-trainer-sr" }, " — в новой вкладке")) : null,
-      h("div", { className: "substation-heading" },
-        h("div", null, h("span", null, meta.logo), h("h2", null, "Содержание")),
-        h("p", null, stationRouteHints[meta.id] || "Проходи последовательно: каждая следующая использует модель предыдущей.")),
-      h("label", { className: "contents-search" }, h("span", null, "Найти раздел"),
-        h("input", { type: "search", value: searchState[0], placeholder: meta.id === "station15" ? "Например, права доступа…" : "Например, конструктор", onChange: function (event) { searchState[1](event.target.value); } })),
-      query ? h("p", { className: "search-result-count", role: "status" }, visibleItems.length ? "Подстанций найдено: " + visibleItems.length : "Совпадений нет. Попробуйте другое название.") : null,
-      h("div", { className: "substation-grid" }, visibleItems.map(function (entry) {
-        var moduleSections = theory.filter(function (section) { return section.substation === entry.id && !isWorkbook(section); });
-        var completed = moduleSections.filter(function (section) { return props.store["sec:" + section.id]; }).length;
-        var isActive = entry.id === props.active;
-        return h("div", { key: entry.id }, navigation("#section=" + encodeURIComponent(moduleSections[0].id), {
-          className: "substation-card" + (isActive ? " active" : ""),
-          key: entry.id,
-          "aria-pressed": isActive,
-          onClick: function () { props.onChoose(entry.id); }
-        },
-        h("span", { className: "substation-number" }, entry.label),
-        h("span", { className: "substation-title" }, entry.title),
-        h("span", { className: "substation-subtitle" }, entry.subtitle),
-        h("span", { className: "substation-progress" }, completed + "/" + moduleSections.length + " отмечено")),
-        (isActive || query) ? h("nav", { className: "contents-sections", "aria-label": entry.title }, moduleSections.filter(function (section) {
-          return !query || (entry.label + " " + entry.title).toLocaleLowerCase("ru").includes(query) || sectionMatches(section);
-        }).map(function (section) {
-          var current = props.view === "theory" && isActive && section.id === (props.selected || moduleSections[0].id);
-          return h("div", { key: section.id, className: "contents-section-with-labs" }, navigation("#section=" + encodeURIComponent(section.id), { "aria-current": current ? "page" : undefined,
-            onClick: function () { props.onNavigate(section.id); } },
-            props.store["sec:" + section.id] ? "✓ " : "", section.title),
-            section.blocks.filter(function (block) { return block.type === "lab"; }).map(function (block) {
-              var lab = (window.COURSE_LABS || []).find(function (item) { return item.id === block.lab; });
-              var entry = lab && lab.entries.find(function (entry) { return entry.station === meta.id && entry.section === section.id && entry.scenario === block.scenario; });
-              return entry && window.courseLabHref ? h("a", { key: block.lab, className: "contents-lab-link", href: window.courseLabHref(lab.id, entry.scenario, meta.id, section.id), target: meta.id === "station15" && lab.id === "security" ? undefined : "_blank", rel: "noopener noreferrer" }, h(LabFlask), h("span", null, entry.title, meta.id === "station15" && lab.id === "security" ? "" : " ↗")) : null;
+        h("span", { className: "map-sr" }, " — в новой вкладке")) : null,
+      h("details", { className: "map-search-panel", onKeyDown: closePopup }, h("summary", null, "Найти раздел"),
+        h("div", { className: "map-search-body" },
+        h("label", { className: "map-search" }, h("span", { className: "map-sr" }, "Название раздела"), h("input", { type: "search", name: "map-section-search", autoComplete: "off", spellCheck: false, value: searchState[0], placeholder: "Название темы или лаборатории…", onChange: function (event) { searchState[1](event.target.value); } })),
+        query ? h("div", { className: "map-search-results" }, h("p", { role: "status" }, matches.length ? "Найдено: " + matches.length : "Совпадений нет. Попробуй другое слово."), matches.map(function (section) {
+          return h("div", { key: section.id }, stationMapLink("#section=" + encodeURIComponent(section.id), {}, function () { props.onNavigate(section.id); searchState[1](""); }, section.title),
+            stationMapLabEntries(section).map(function (item) {
+              if (!window.courseLabHref) return null;
+              var sameTab = meta.id === "station15" && item.lab.id === "security";
+              return h("a", { key: item.lab.id + ":" + item.entry.scenario, className: "map-lab-link", href: window.courseLabHref(item.lab.id, item.entry.scenario, meta.id, section.id), target: sameTab ? undefined : "_blank", rel: sameTab ? undefined : "noopener noreferrer" }, h(LabFlask), h("span", null, item.entry.title));
             }));
-        }), navigation("#view=checkpoint&module=" + encodeURIComponent(entry.id), { className: "contents-checkpoint", "aria-current": isActive && props.view === "checkpoint" ? "page" : undefined, onClick: function () { props.onCheckpoint(entry.id); } }, "Закрепление подглавы")) : null);
+        })) : null)),
+      h("div", { className: "map-stages" }, props.items.map(function (entry, index) {
+        var state = stationMapChapterState(entry, props);
+        var expanded = expandedState[0] === entry.id;
+        var disclosure = { expanded: expanded, onToggle: function (event) {
+          expansionAnchor.current = null;
+          if (!expanded && window.matchMedia("(min-width: 1100px)").matches && event && event.currentTarget) {
+            expansionAnchor.current = { id: entry.id, top: event.currentTarget.getBoundingClientRect().top, scrollY: Number.isFinite(window.scrollY) ? window.scrollY : 0 };
+          }
+          expandedState[1](function (previous) { return previous === entry.id ? "" : entry.id; });
+        } };
+        return h("div", { key: entry.id, className: "map-chapter" + (state.current ? " is-current" : "") + (state.complete ? " is-complete" : "") + (expanded ? " is-expanded" : ""), style: { "--map-order": index } },
+          stationMapChapter(entry, index, props, false, disclosure), stationMapLessons(entry, props, expanded));
       })),
-      h("nav", { className: "contents-ending", "aria-label": "Завершение станции" },
-        navigation("#view=final", { className: "contents-finale", "aria-current": props.view === "final" ? "page" : undefined, onClick: function () { props.onPage("final"); } }, "Завершение станции"),
-        props.analysisCount ? navigation("#view=analysis", { className: "contents-analysis", "aria-current": props.view === "analysis" ? "page" : undefined, onClick: function () { props.onPage("analysis"); } }, "Вопросы с разбором · " + props.analysisCount) : null),
-      ["station8", "station9", "station10"].indexOf(meta.id) >= 0 ? h("a", { href: "service_workshop.html#" + ({station8:"local", station9:"database", station10:"vm"}[meta.id]), className: "contents-all-labs", target: "_blank", rel: "noopener noreferrer" }, "Свой сервер · сквозной практикум ↗") : null,
-      backendLabEntry(meta.id) ? h("a", { href: backendLabEntry(meta.id).file + "#section=" + backendLabEntry(meta.id).section, className: "contents-all-labs", target: "_blank", rel: "noopener noreferrer" }, "Лаборатория станции · подготовка ↗") : null,
-      h("a", { href: "visual_labs.html", className: "contents-all-labs" }, h(LabFlask), h("span", null, "Все визуальные лаборатории →")),
-      h("a", { href: "glossary.html", className: "contents-all-labs", target: "_blank", rel: "noopener" }, "Глоссарий терминов ↗"));
+      stationMapLink("#view=final", { className: "map-finish" + (atFinish ? " is-current" : ""), "aria-current": props.view === "final" ? "page" : undefined }, function () { props.onPage("final"); },
+        h("span", { className: "map-marker", "aria-hidden": true }, stationMapIcon("flag")),
+        h("span", null, h("strong", null, "Завершение станции"), h("small", null, "Разбор задачи, тест, интервью и практика"))),
+      h("details", { className: "map-references", onKeyDown: closePopup }, h("summary", null, "Лаборатории и справочники"),
+        h("nav", { "aria-label": "Материалы рядом" },
+          meta.number === 9 ? h("a", { href: meta.id === "station9-sql" ? "cpp_station9_databases.html" : "cpp_station9_sql.html" }, meta.id === "station9-sql" ? "9B · PostgreSQL" : "9A · SQL с нуля") : null,
+          ["station8", "station9", "station10"].indexOf(meta.id) >= 0 ? h("a", { href: "service_workshop.html#" + ({ station8: "local", station9: "database", station10: "vm" }[meta.id]), target: "_blank", rel: "noopener noreferrer" }, h(LabFlask), "Свой сервер · сквозной практикум") : null,
+          backendLabEntry(meta.id) ? h("a", { href: backendLabEntry(meta.id).file + "#section=" + backendLabEntry(meta.id).section, target: "_blank", rel: "noopener noreferrer" }, h(LabFlask), "Лаборатория станции · подготовка") : null,
+          h("a", { href: "visual_labs.html", target: "_blank", rel: "noopener" }, h(LabFlask), "Визуальные лаборатории", h("span", { className: "map-sr" }, " — в новой вкладке")),
+          h("a", { href: "glossary.html", target: "_blank", rel: "noopener" }, "Глоссарий терминов", h("span", { className: "map-sr" }, " — в новой вкладке")),
+          h("a", { href: "sources.html#" + meta.id, target: "_blank", rel: "noopener" }, "Источники станции", h("span", { className: "map-sr" }, " — в новой вкладке"))))));
   }
+
 
   function Theory(props) {
     var state = useState(function () {
@@ -1321,7 +1476,7 @@
         h("button", { className: "secondary", onClick: function () { openPage(tab === "quiz" ? "interview" : "tasks"); } }, tab === "quiz" ? "Далее: интервью-тренажёр →" : "Далее: практика →")) : null,
       tab === "checkpoint" ? h("section", { className: "station-checkpoint" },
         h("h2", null, "Закрепление: " + (activeSubstation ? activeSubstation.title : meta.title)),
-        h("p", { className: "notes" }, "Пять заданий по текущей подглаве. Они не повторяются в итоговом тесте станции."),
+        h("p", { className: "notes" }, "Заданий по текущей подглаве: " + checkpointQuestions.length + ". Они не повторяются в итоговом тесте станции."),
         checkpointQuestions.length ? h(Quiz, { key: checkpointKey, backLabel: "← Вернуться к подглаве", kind: "checkpoint", questions: checkpointQuestions,
           onBack: function () { var last = activeTheory[activeTheory.length - 1]; if (last) navigateSection(last.id); }, onSave: function (score, total) { var change = {}; change[checkpointKey] = { score: score, total: total }; updateStore(change); } }) : h("p", null, "Не удалось загрузить задания. Обнови страницу или вернись к содержанию станции."), h("div", { className: "section-actions" }, h("button", { className: "secondary", onClick: continueChapter }, "Далее по учебнику →"))) : null,
       tab === "final" ? h("section", { className: "station-finale" },

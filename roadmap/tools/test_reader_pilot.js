@@ -144,15 +144,18 @@ restored.preserved(); restored.dispose();
 // Pilot contents use real links so modified clicks keep native browser
 // behavior. An ordinary primary click still delegates to the real route API.
 const links = environment(loadStation('station15'), '#section=' + first.id), clicks = [];
-const contents = links.mount(links.api.SubstationNav, {items:data.substations, active:firstModule.id,
+const contentsOwner = links.mount(links.api.SubstationNav, {items:data.substations, active:firstModule.id,
     selected:first.id, view:'theory', store:links.stored(), analysisCount:2,
     onChoose:id => clicks.push(['chapter', id]), onNavigate:id => clicks.push(['section', id]),
-    onCheckpoint:id => clicks.push(['checkpoint', id]), onPage:id => clicks.push(['page', id])}).render();
-const chapterLink = withClass(contents, 'substation-card')[0];
-assert(chapterLink.type === 'a' && chapterLink.props.href === '#section=' + first.id &&
+    onCheckpoint:id => clicks.push(['checkpoint', id]), onPage:id => clicks.push(['page', id])});
+let contents = contentsOwner.render();
+const chapterLink = withClass(contents, 'map-chapter-toggle')[0];
+assert(chapterLink.type === 'button' && chapterLink.props['aria-expanded'] === false &&
        chapterLink.props['aria-current'] && !('aria-pressed' in chapterLink.props),
-       'Chapter link has a real destination and link-appropriate current state');
-const sectionLink = nodes(withClass(contents, 'contents-sections')[0]).find(node =>
+       'Current chapter is a native independent disclosure, not an article navigation action');
+chapterLink.props.onClick(); contents = contentsOwner.render();
+assert(!clicks.length, 'Opening a map chapter leaves the article route unchanged');
+const sectionLink = nodes(withClass(contents, 'map-lessons').find(node => !node.props.hidden)).find(node =>
     node.type === 'a' && node.props.href === '#section=' + first.id);
 assert(sectionLink && sectionLink.props['aria-current'] === 'page', 'Current section is a semantic deep link');
 for (const modifiers of [{metaKey:true}, {ctrlKey:true}, {shiftKey:true}, {altKey:true}, {button:1}, {defaultPrevented:true}]) {
@@ -164,8 +167,8 @@ let prevented = false;
 sectionLink.props.onClick({button:0, preventDefault:() => { prevented = true; }});
 assert(prevented && JSON.stringify(clicks) === JSON.stringify([['section', first.id]]),
        'Unmodified primary click uses the existing section navigation callback exactly once');
-assert(withClass(contents, 'contents-checkpoint')[0].type === 'a' &&
-       withClass(contents, 'contents-checkpoint')[0].props.href === '#view=checkpoint&module=' + firstModule.id,
+assert(withClass(contents, 'map-checkpoint')[0].type === 'a' &&
+       withClass(contents, 'map-checkpoint')[0].props.href === '#view=checkpoint&module=' + firstModule.id,
        'Checkpoint contents action has its exact deep-link URL');
 links.dispose();
 
@@ -184,11 +187,14 @@ for (const id of ['station15', 'station0']) {
         const pilot = id === 'station15' && block.lab === 'security';
         assert(pilot ? link.props.target !== '_blank' : link.props.target === '_blank',
                'Only station15 security labs switch to in-tab navigation');
-        const nav = e.mount(e.api.SubstationNav, {items:fixture.substations, active:section.substation,
+        const navOwner = e.mount(e.api.SubstationNav, {items:fixture.substations, active:section.substation,
             selected:section.id, view:'theory', store:e.stored(), analysisCount:0,
-            onChoose:() => {}, onNavigate:() => {}, onCheckpoint:() => {}, onPage:() => {}}).render();
+            onChoose:() => {}, onNavigate:() => {}, onCheckpoint:() => {}, onPage:() => {}});
+        let nav = navOwner.render();
+        nodes(nav).find(node => node.props['data-map-module'] === section.substation).props.onClick();
+        nav = navOwner.render();
         const sidebarLink = nodes(nav).find(node => node.type === 'a' &&
-            classes(node).includes('contents-lab-link') && node.props.href === expected);
+            classes(node).includes('map-lab-link') && node.props.href === expected);
         assert(sidebarLink && (pilot ? sidebarLink.props.target !== '_blank' : sidebarLink.props.target === '_blank'),
                'Contents entry uses the same pilot navigation rule');
         ++labEntries;
@@ -262,12 +268,16 @@ for (const id of allIds) {
            id + ': keyboard-focusable reading surface');
     assert(!e.scrolls.length && !e.focuses.length, id + ': initial deep link leaves browser position alone');
     expectPosition(view, module, 'Теория');
-    const rail = e.mount(e.api.SubstationNav, e.nav().props).render();
+    const railOwner = e.mount(e.api.SubstationNav, e.nav().props);
+    let rail = railOwner.render();
+    const chapter = nodes(rail).find(node => node.props['data-map-module'] === module.id);
+    assert(chapter.type === 'button' && chapter.props['aria-expanded'] === false,
+           id + ': chapter starts as a native closed disclosure');
+    const historyBeforeDisclosure = e.historyCalls.length;
+    chapter.props.onClick(); rail = railOwner.render();
+    assert(e.historyCalls.length === historyBeforeDisclosure, id + ': opening a chapter does not create article history');
     const target = nodes(rail).find(node => node.type === 'a' && node.props.href === '#section=' + ordinary[1].id);
     assert(target && typeof target.props.onClick === 'function', id + ': second lesson has its native sidebar URL');
-    const chapter = withClass(rail, 'substation-card')[0];
-    assert(chapter.type === 'a' && chapter.props.href === '#section=' + ordinary[0].id,
-           id + ': chapter navigation uses real links');
     const ending = nodes(rail).find(node => node.type === 'a' && node.props.href === '#view=final');
     assert(ending, id + ': station completion has one discoverable native URL');
     for (const modifier of [{ctrlKey:true}, {metaKey:true}, {shiftKey:true}, {altKey:true}, {button:1}, {defaultPrevented:true}]) {

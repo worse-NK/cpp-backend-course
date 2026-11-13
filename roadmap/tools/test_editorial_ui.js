@@ -39,10 +39,10 @@ assert(typeof fakeWindow.CourseCode.element === 'function', 'Load the actual sha
 const fragments = source.slice(source.indexOf('  function backendLabEntry('), source.indexOf('  function PracticeLinks('))
     + source.slice(source.indexOf('  function LabFlask('), source.indexOf('  function LabBlock('))
     + source.slice(source.indexOf('  function codeElement('), source.indexOf('  function splitQuestion('))
-    + source.slice(source.indexOf('  function SubstationNav('), source.indexOf('  function QuizPicker('));
+    + source.slice(source.indexOf('  function Theory('), source.indexOf('  function QuizPicker('));
 const components = new Function('React', 'window', 'document', 'navigator', 'localStorage',
     'var h=React.createElement, useState=React.useState, data=window.STATION_DATA, meta=data.meta, theory=data.theory, noteLabels={tip:"СОВЕТ",key:"ГЛАВНОЕ"}; function isWorkbook(s){return /(?:-final-workbook|clock-worked-example)$/.test(s.id);}'
-    + fragments + ';return {CodeBlock,Theory,SubstationNav};')(
+    + fragments + ';return {CodeBlock,Theory};')(
         globalThis.React, fakeWindow, globalThis.document, globalThis.navigator, globalThis.localStorage);
 function find(node, predicate) {
     if (!node || typeof node !== 'object') return null;
@@ -76,36 +76,36 @@ effects.forEach(effect => effect());
 assert(JSON.parse(writes.cpp_course_last_read_v1).section === 'paragraph', 'Last reading position must be stored');
 assert(Object.keys(writes).length === 1, 'Reading must not mark the lesson completed');
 const data = fakeWindow.STATION_DATA;
-const nav = components.SubstationNav({ items: data.substations, active: data.substations[0].id, view: 'theory', store: {}, onChoose: () => {}, onNavigate: () => {} });
+const mapApi = new Function(read('roadmap/tools/test_map_harness.js') + ';return {mapFixture,mapEnvironment,mapNodes,mapText};')();
+const mapEnv = mapApi.mapEnvironment(mapApi.mapFixture('station0'), {wide:false});
+let nav = mapEnv.render();
 assert(nav.type === 'details' && nav.props.open === false, 'Small-screen contents must start collapsed');
-assert(find(nav, n => n.props['aria-current'] === 'page'), 'Current section must be accessible');
-const endingGroup = find(nav, n => n.props.className === 'contents-ending');
-assert(endingGroup && endingGroup.type === 'nav' && endingGroup.props['aria-label'] === 'Завершение станции', 'Final activities must follow the chapters in their labelled navigation group');
-assert(!find({children:nav.children.filter(child => child !== endingGroup)}, n => n.props && n.props.className === 'contents-finale'), 'No duplicate permanent finale entry outside the lower ending group');
-let destination = '';
-const endingNav = components.SubstationNav({ items: data.substations, active: data.substations[0].id, view: 'final', store: {}, onPage: page => { destination = page; } });
-const ending = find(endingNav, n => n.props.className === 'contents-ending');
-assert(ending.children.filter(Boolean).length === 1 && ending.children[0].type === 'a' && ending.children[0].props.href === '#view=final', 'Without analysis tasks finale must have a single native sidebar link');
-assert(ending.children[0].children.includes('Завершение станции'), 'Finale entry must use the page name');
-assert(ending.children[0].props['aria-current'] === 'page', 'Finale must indicate the current page');
-ending.children[0].props.onClick();
-assert(destination === 'final', 'Finale entry must open the overview, not a quiz');
-const analysisNav = components.SubstationNav({ items: data.substations, active: data.substations[0].id, view: 'analysis', store: {}, analysisCount: 8, onPage: page => { destination = page; } });
-const analysis = find(analysisNav, n => n.props.className === 'contents-analysis');
-assert(analysis && analysis.type === 'a' && analysis.props.href === '#view=analysis' && analysis.props['aria-current'] === 'page', 'Open-answer analysis must be discoverable through its exact native link in ending contents');
-analysis.props.onClick();
-assert(destination === 'analysis', 'Analysis entry must lead directly to open answers');
+assert(find(nav, n => n.props['aria-current'] === 'location'), 'Current chapter remains accessible while its list is collapsed');
+const initialLinks = mapApi.mapNodes(nav).filter(n => n.type === 'a' && n.props.href === '#view=final');
+assert(initialLinks.length === 1, 'Map has one station-ending destination, not scattered assessment buttons');
+mapEnv.props.view = 'final'; nav = mapEnv.render();
+const ending = find(nav, n => (n.props.className || '').split(' ').includes('map-finish'));
+assert(ending.type === 'a' && ending.props.href === '#view=final', 'Finale keeps its exact native URL');
+assert(mapApi.mapText(ending).includes('Завершение станции') && ending.props['aria-current'] === 'page', 'Finale has a clear label and current-page state');
+ending.props.onClick();
+assert(mapEnv.actions.at(-1)[1] === 'final', 'Finale entry opens the overview, not a quiz');
+mapEnv.props.view = 'analysis'; nav = mapEnv.render();
+assert(find(nav, n => (n.props.className || '').split(' ').includes('map-finish') && n.props.className.includes('is-current')), 'Analysis stays inside the clearly highlighted station-ending scope');
+assert(!mapApi.mapNodes(nav).some(n => n.type === 'a' && /#view=(quiz|interview|analysis)/.test(n.props.href)), 'Assessment choices live in the completion hub instead of competing sidebar buttons');
 const selfCheck = components.Theory({ sections: [{id:'check', title:'Проверка', blocks:[{type:'self-check',prompt:'Объясни правило',answer:'<p>Разбор правила</p>'}]}], store:{} });
 const reveal = find(selfCheck, n => n.type === 'details');
 assert(reveal && !reveal.props.open, 'Self-check answer must be closed initially');
 assert(find(reveal, n => n.type === 'summary' && n.children.includes('Сверить с разбором')), 'Self-check must have a native keyboard-accessible reveal');
-assert(find(nav, n => n.props.className === 'contents-checkpoint'), 'Chapter checkpoint must appear in the contents');
+mapEnv.open(mapEnv.props.active); nav = mapEnv.tree;
+assert(find(nav, n => (n.props.className || '').split(' ').includes('map-checkpoint')), 'Expanded chapter exposes its exact checkpoint');
 const lastPage = components.Theory({ sections: [section], store: {}, onNavigate: () => {}, onComplete: () => {} });
 assert(find(lastPage, n => n.type === 'button' && n.children.includes('Далее: закрепление подглавы →')), 'Last theory page must lead to checkpoint');
 data.meta.number = 9;
 const sqlPage = components.Theory({ sections: [{id:'sql-null-basics', substation:'queries', title:'NULL', blocks:[]}], store:{} });
 const sqlLink = find(sqlPage, n => n.type === 'a' && n.props.href === 'sql_trainer.html#null');
 assert(sqlLink && sqlLink.props.target === '_blank', 'SQL lessons must link to matching exercise without replacing reading');
-const sqlNav = components.SubstationNav({items:data.substations, active:data.substations[0].id, view:'theory', store:{}});
+const sqlMap = mapApi.mapEnvironment(mapApi.mapFixture('station9-sql'));
+const sqlNav = sqlMap.render();
 assert(find(sqlNav, n => n.type === 'a' && n.props.href === 'sql_trainer.html'), 'Database contents must provide persistent trainer access');
+mapEnv.dispose(); sqlMap.dispose();
 print('PASS: code fallback, keyboard access, source styling, reading position, progress isolation, mobile contents, SQL links');

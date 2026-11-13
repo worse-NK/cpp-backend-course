@@ -105,6 +105,7 @@ class LabReadability(unittest.TestCase):
         cls.theme = (ROOT / "assets/course-theme.css").read_text()
         cls.surfaces = (ROOT / "assets/course-dark-surfaces.css").read_text()
         cls.reader = (ROOT / "assets/course-dark-reader.css").read_text()
+        cls.station_map = (ROOT / "assets/station-map.css").read_text()
         cls.app = (ROOT / "assets/station-app.js").read_text()
         cls.tokens = dict(re.findall(r"(--course-[\w-]+):\s*(#[0-9a-fA-F]{6})\s*;", cls.theme))
         cls.rules = style_rules(cls.surfaces)
@@ -276,10 +277,18 @@ class LabReadability(unittest.TestCase):
                 self.assertNotIn("hidden", links[0].attrs)
 
     def test_finale_remains_native_navigation_with_a_prominent_hook(self):
-        for needle in ('"contents-finale"', '"#view=final"', "contents-all-labs", "lab-flask"):
+        for needle in ('stationMapLink("#view=final"', 'className: "map-finish"',
+                       '"Завершение станции"', 'href: "visual_labs.html"', "lab-flask"):
             self.assertTrue(needle in self.app, "station-app.js missing " + needle)
-        for needle in ("contents-finale", "contents-finale:hover", "contents-finale[aria-current"):
-            self.assertTrue(needle in self.reader, "course-dark-reader.css missing " + needle)
+        for needle in (".map-finish strong", ".map-finish .map-marker",
+                       ".map-finish:hover strong", ".map-finish.is-current .map-marker"):
+            self.assertTrue(needle in self.station_map, "station-map.css missing " + needle)
+        rules = dict(style_rules(self.station_map))
+        title = rules["body.course-map .map-finish strong"]
+        self.assertGreaterEqual(float(title["font-size"].removesuffix("px")), 16)
+        self.assertGreaterEqual(contrast(title["color"], self.tokens["--course-paper"]), 4.5)
+        marker = rules["body.course-map .map-finish .map-marker"]
+        self.assertGreaterEqual(contrast(marker["color"], marker["background"]), 4.5)
 
 
 if __name__ == "__main__":

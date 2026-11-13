@@ -40,7 +40,7 @@ PAGES = (
 )
 ASSETS = (
     'home.css', 'station.css', 'station-app.js', 'cheatsheet.css', 'cheatsheet.js',
-    'course-ui.css', 'course-reader.css',
+    'course-ui.css', 'course-reader.css', 'station-map.css',
     'course-theme.css', 'course-dark-surfaces.css', 'course-dark-reader.css', 'course-code.js', 'course-code.css',
     'database-intro.css', 'database-route.js', 'sql-lab-core.js', 'sql-lab.css',
     'sql-lab.js', 'visual-lab-models.js', 'visual-labs.css', 'visual-labs.js',

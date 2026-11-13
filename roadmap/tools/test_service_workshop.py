@@ -710,41 +710,33 @@ class WorkshopPublication(unittest.TestCase):
     def test_shared_station_entries_exist_only_for_api_postgres_and_production(self):
         harness = r'''
 const GLib = imports.gi.GLib, ByteArray = imports.byteArray;
-const source = ByteArray.toString(GLib.file_get_contents(ARGV[0])[1]);
-const start=source.indexOf('  function ServiceWorkshopEntry('), end=source.indexOf('  function Theory(');
-if(start<0 || end<=start) throw new Error('shared workshop components missing');
-const fragment=source.slice(source.indexOf('  function LabFlask('),source.indexOf('  function LabBlock('))+
-  source.slice(source.indexOf('  function backendLabEntry('),source.indexOf('  function PracticeLinks('))+source.slice(start,end);
+GLib.chdir(ARGV[0]);
+const harness = ByteArray.toString(GLib.file_get_contents('roadmap/tools/test_map_harness.js')[1]);
+const {mapFixtureIds,mapFixture,mapEnvironment,mapNodes} = new Function(harness +
+  '; return {mapFixtureIds,mapFixture,mapEnvironment,mapNodes};')();
 function check(value,message) {if(!value) throw new Error(message);}
-function nodes(node) {return !node || typeof node!=='object' ? [] : [node,...(node.children||[]).flatMap(nodes)];}
-const React={createElement:(type,props,...children)=>typeof type==='function'?type(props||{}):({type,props:props||{},children:children.flat(Infinity)}),
-  useState:initial=>[typeof initial==='function'?initial():initial,()=>{}]};
 const expected={station8:'local',station9:'database',station10:'vm'};
-const ids=['station0','station1','station2','station3','station4','station5','station5-linux','station6',
-  'station7','station7-netlab','station7-traffic','station8','station9-sql','station9','station10',
-  'station11','station12','station13','station14'];
+const ids=mapFixtureIds();
+check(ids.length===21,'all 21 production station fixtures are checked');
 for(const id of ids) {
-  const meta={id,number:id.startsWith('station9')?9:0,logo:id};
-  const window={matchMedia:()=>({matches:true}),COURSE_LABS:[]};
-  const components=new Function('React','window','meta',
-    'var h=React.createElement,useState=React.useState,theory=[]; function isWorkbook(){return false;}'+
-    fragment+';return {ServiceWorkshopEntry,SubstationNav};')(React,window,meta);
-  const card=components.ServiceWorkshopEntry();
-  const nav=components.SubstationNav({items:[],store:{},active:'',view:'theory'});
-  const targets=nodes(nav).filter(n=>n.type==='a' && (n.props.href||'').startsWith('service_workshop.html'));
+  const env=mapEnvironment(mapFixture(id));
+  const card=env.api.ServiceWorkshopEntry();
+  const nav=env.render();
+  const targets=mapNodes(nav).filter(n=>n.type==='a' && (n.props.href||'').startsWith('service_workshop.html'));
   if(expected[id]) {
     const href='service_workshop.html#'+expected[id];
-    const cardLinks=nodes(card).filter(n=>n.type==='a');
+    const cardLinks=mapNodes(card).filter(n=>n.type==='a');
     check(cardLinks.length===1 && cardLinks[0].props.href===href,'correct workshop card target for '+id);
     check(targets.length===1 && targets[0].props.href===href,'correct sidebar workshop target for '+id);
     check(cardLinks[0].props.rel.includes('noopener') && targets[0].props.rel.includes('noopener'),'safe new tab for '+id);
   } else {
     check(card===null && targets.length===0,'no workshop entry in unrelated station '+id);
   }
+  env.dispose();
 }
 print('PASS: shared card/sidebar only in 8, 9B and 10; 9A and other stations unaffected');
 '''
-        result = run(["gjs", "-c", harness, ROOT / "assets/station-app.js"], timeout=10)
+        result = run(["gjs", "-c", harness, ROOT.parent], timeout=15)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_publication_includes_only_allowlisted_workshop_sources(self):

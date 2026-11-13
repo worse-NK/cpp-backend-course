@@ -15,7 +15,8 @@ function text(value) {
 
 const source = read('roadmap/assets/station-app.js');
 const helper = source.slice(source.indexOf('  function assessmentPriorityRefs('), source.indexOf('  function VisualBlock('));
-const sidebar = source.slice(source.indexOf('  function SubstationNav('), source.indexOf('  function Theory('));
+const sidebar = source.slice(source.indexOf('  // Course station map.'), source.indexOf('  function Theory('));
+const mapTest = new Function(read('roadmap/tools/test_map_harness.js') + ';return {mapEnvironment};')();
 const app = source.slice(source.indexOf('  function App()'), source.indexOf('\n  ReactDOM.createRoot(root)'));
 const workbook = source.slice(source.indexOf('  function isWorkbook('), source.indexOf('\n  var pageParams'));
 const stationNumber = source.slice(source.indexOf('  function stationDisplayNumber('), source.indexOf('  function CodeBlock('));
@@ -69,7 +70,7 @@ for (const [number, file, labSection, workedId] of cases) {
     const React = {
         createElement: (type, props, ...children) => ({type, props: props || {}, children: children.flat(Infinity)}),
         useState: initial => [typeof initial === 'function' ? initial() : initial, value => writes.push(value)],
-        useEffect: () => {}
+        useEffect: () => {}, useRef: () => ({current:null})
     };
     const window = {matchMedia: () => ({matches: true}), COURSE_LABS: []};
     const history = {replaceState: (_state, _title, url) => urls.push(url)};
@@ -107,23 +108,24 @@ for (const [number, file, labSection, workedId] of cases) {
     assert(data.tasks.some(api.isPracticeTask), id + ': no real practice task selected');
 
     let sidebarPage = null, selectedTheory = null;
-    const sidebarTree = nodes(api.SubstationNav({
-        items: data.substations, active: labPage.substation, selected: labSection,
-        view: 'theory', store: {}, analysisCount: data.tasks.filter(t => !api.isPracticeTask(t)).length,
-        onChoose: () => {}, onNavigate: value => { selectedTheory=value; },
-        onCheckpoint: () => {}, onPage: value => { sidebarPage=value; }
-    }));
+    const mapEnv = mapTest.mapEnvironment(data, {active:labPage.substation,selected:labSection});
+    mapEnv.props.onNavigate = value => { selectedTheory=value; };
+    mapEnv.props.onPage = value => { sidebarPage=value; };
+    mapEnv.render();
+    const sidebarTree = nodes(mapEnv.open(labPage.substation));
     assert(sidebarTree.some(n => n.type === 'a' && n.props.href === expectedHref), id + ': missing sidebar preparation link');
     const tocLab = sidebarTree.find(n => n.type === 'a' && text(n).trim() === labPage.title);
     assert(tocLab, id + ': lab theory page absent from its active subchapter TOC');
     assert(tocLab.props.href === '#section=' + labSection, id + ': TOC has its exact native link');
     tocLab.props.onClick();
     assert(selectedTheory === labSection, id + ': TOC lab click opens the wrong section');
-    const ending = sidebarTree.find(n => n.type === 'a' && text(n).trim() === 'Завершение станции');
+    const ending = sidebarTree.find(n => n.type === 'a' && String(n.props.className || '').split(' ').includes('map-finish'));
     assert(ending, id + ': no single station-ending entry in sidebar');
+    assert(text(ending).includes('Завершение станции'), id + ': completion map node has its clear page name');
     assert(ending.props.href === '#view=final', id + ': ending entry has its exact native link');
     ending.props.onClick();
     assert(sidebarPage === 'final', id + ': ending entry routes elsewhere');
+    mapEnv.dispose();
 
     const tree = nodes(api.App());
     const grid = tree.find(n => n.props.className === 'finale-grid');

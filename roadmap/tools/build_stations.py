@@ -467,7 +467,7 @@ def html_for(data: dict) -> str:
                      "vendor/highlightjs/dockerfile.min.js", "vendor/highlightjs/nginx.min.js", "assets/course-code.js")
     )
     html = f"""<!doctype html>
-<html lang="ru">
+<html lang="ru" class="course-dark map-trail-root">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -479,7 +479,7 @@ def html_for(data: dict) -> str:
 {extra_css}
 {reader_css}
 </head>
-<body{' class="course-reader"' if reader_pilot else ''}>
+<body{' class="course-reader course-dark course-map map-trail"' if reader_pilot else ''}>
   <div id="root"><div class="fatal">Загрузка станции…</div></div>
   <noscript><div class="fatal">Для интерактивной станции нужен JavaScript.</div></noscript>
 {'<script src="assets/database-route.js"></script>' if meta['number'] == 9 else ''}
@@ -498,7 +498,7 @@ def html_for(data: dict) -> str:
     html = decorate_html(html, surfaces=False)
     last_styles = "\n".join(
         f'<link rel="stylesheet" href="assets/{name}?v={hashlib.sha256((ROADMAP / "assets" / name).read_bytes()).hexdigest()[:12]}">'
-        for name in ("course-code.css", "course-dark-reader.css")
+        for name in ("course-code.css", "course-dark-reader.css", "station-map.css")
     )
     return html.replace("</head>", last_styles + "\n</head>")
 
