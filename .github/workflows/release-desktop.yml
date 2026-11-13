@@ -1,0 +1,82 @@
+name: Course release
+
+on:
+  push:
+    tags:
+      - 'desktop-v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag matching desktop-course/app/package.json, for example desktop-v1.1.1'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: course-release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    outputs:
+      tag: ${{ steps.identity.outputs.tag }}
+      version: ${{ steps.identity.outputs.version }}
+      source-sha: ${{ steps.identity.outputs.source_sha }}
+    steps:
+      - name: Check out the exact source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Validate release identity
+        id: identity
+        env:
+          REQUESTED_RELEASE_TAG: ${{ inputs.tag }}
+        run: python3 tools/publish_release.py metadata
+      - name: Check build inputs and package code
+        run: python3 tools/course.py check
+      - name: Build browser distributions and Debian package
+        run: |
+          python3 tools/course.py web
+          python3 tools/course.py local
+          python3 tools/course.py deb
+      - name: Prepare the reviewed release files
+        env:
+          RELEASE_TAG: ${{ steps.identity.outputs.tag }}
+          SOURCE_SHA: ${{ steps.identity.outputs.source_sha }}
+        run: python3 tools/publish_release.py prepare --tag "$RELEASE_TAG" --sha "$SOURCE_SHA"
+      - name: Preserve the exact files for the publication job
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: course-release-${{ steps.identity.outputs.version }}
+          path: build/release-assets/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the same source used by the build
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.build.outputs.source-sha }}
+          persist-credentials: false
+      - name: Obtain this run's checked build artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: course-release-${{ needs.build.outputs.version }}
+          path: build/release-assets/
+      - name: Publish only after all uploaded hashes match
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.build.outputs.tag }}
+          SOURCE_SHA: ${{ needs.build.outputs.source-sha }}
+        run: python3 tools/publish_release.py publish --repository "$GITHUB_REPOSITORY" --tag "$RELEASE_TAG" --sha "$SOURCE_SHA"

@@ -1,0 +1,10 @@
+{
+  "name": "cpp-backend-course-desktop",
+  "productName": "C++ Backend",
+  "desktopName": "cpp-backend-course-desktop.desktop",
+  "version": "1.1.1",
+  "description": "Самостоятельный офлайн-учебник C++ и backend-разработки",
+  "main": "main.cjs",
+  "private": true,
+  "license": "UNLICENSED"
+}

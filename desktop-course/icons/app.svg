@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 512 512" fill="none">
+  <title>C++ Backend — учебник</title>
+  <desc>Книга с кодовыми скобками и двумя знаками плюс на тёмно-синем фоне.</desc>
+  <defs>
+    <linearGradient id="tile" x1="74" y1="38" x2="426" y2="484" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2b414f"/>
+      <stop offset="1" stop-color="#18252f"/>
+    </linearGradient>
+    <linearGradient id="cover" x1="145" y1="103" x2="374" y2="371" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#b9ddec"/>
+      <stop offset="1" stop-color="#89b8ce"/>
+    </linearGradient>
+    <linearGradient id="spine" x1="118" y1="180" x2="160" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#719aaf"/>
+      <stop offset="1" stop-color="#98c6db"/>
+    </linearGradient>
+  </defs>
+  <rect x="24" y="24" width="464" height="464" rx="110" fill="url(#tile)"/>
+  <rect x="25" y="25" width="462" height="462" rx="109" stroke="#5a7587" stroke-opacity=".35" stroke-width="2"/>
+  <path d="M137 123c0-15 12-27 27-27h193c19 0 34 15 34 34v258c0 22-18 40-40 40H162c-26 0-46-20-46-46V139c0-9 9-16 21-16Z" fill="#0f1d27" fill-opacity=".35"/>
+  <path d="M120 357h255v42c0 14-11 25-25 25H155c-19 0-35-16-35-35v-32Z" fill="#6b96ad"/>
+  <path d="M150 346h217v59H150c-16 0-29-13-29-29s13-30 29-30Z" fill="#e4edf2"/>
+  <path d="M155 389h205" stroke="#b6ccd7" stroke-width="5" stroke-linecap="round"/>
+  <path d="M155 377h205" stroke="#c8d9e2" stroke-width="5" stroke-linecap="round"/>
+  <path d="M155 99h196c19 0 35 16 35 35v235H155c-19 0-35 8-35 23V134c0-19 16-35 35-35Z" fill="url(#cover)"/>
+  <path d="M155 99v270c-19 0-35 8-35 23V134c0-19 16-35 35-35Z" fill="url(#spine)"/>
+  <path d="M168 114v239" stroke="#e4edf2" stroke-opacity=".3" stroke-width="3"/>
+  <path d="m226 187-43 42 43 42m54-84 43 42-43 42" stroke="#203440" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M261 310h28m-14-14v28m31-14h28m-14-14v28" stroke="#203440" stroke-width="10" stroke-linecap="round"/>
+</svg>

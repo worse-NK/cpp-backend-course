@@ -1,0 +1,33 @@
+#!/bin/sh
+set -eu
+
+if [ "$(id -u)" -eq 0 ]; then
+    printf '%s\n' 'Запускай учебник от обычного пользователя, без sudo.' >&2
+    exit 1
+fi
+
+case "$#" in
+    0) ;;
+    1)
+        case "$1" in
+            --version)
+                printf '%s\n' 'C++ Backend @COURSE_VERSION@ (Electron @ELECTRON_VERSION@)'
+                exit 0
+                ;;
+            --help)
+                printf '%s\n' 'cpp-backend-course-desktop — открыть локальный учебник.' \
+                    'Браузер, локальный сервер и интернет для чтения не нужны.'
+                exit 0
+                ;;
+            *) printf '%s\n' 'Параметр не поддерживается. Используй --help или запусти без параметров.' >&2; exit 2 ;;
+        esac
+        ;;
+    *) printf '%s\n' 'Запускай учебник без параметров.' >&2; exit 2 ;;
+esac
+
+# An environment inherited from a developer shell must not turn the launcher
+# into a general Node executable or add JavaScript before the app starts.
+unset ELECTRON_RUN_AS_NODE NODE_OPTIONS NODE_PATH ELECTRON_NO_ASAR \
+    ELECTRON_DISABLE_SECURITY_WARNINGS ELECTRON_EXTRA_LAUNCH_ARGS
+
+exec /opt/cpp-backend-course-desktop/course-backend

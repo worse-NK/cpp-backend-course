@@ -1,0 +1,31 @@
+{
+  "format": 1,
+  "reactVersion": "18.3.1",
+  "fontSource": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap",
+  "notes": "Unmodified upstream assets. Font URLs are frozen in google-fonts-original.css (Inter v20, JetBrains Mono v24). Build is offline and verifies every SHA256. Licenses accompany each family.",
+  "files": {
+    "react/react.production.min.js": "d949f1c3687aedadcedac85261865f29b17cd273997e7f6b2bfc53b2f9d4c4dd",
+    "react/react-dom.production.min.js": "35f4f974f4b2bcd44da73963347f8952e341f83909e4498227d4e26b98f66f0d",
+    "react/LICENSE-react": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+    "react/LICENSE-react-dom": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+    "fonts/google-fonts-original.css": "b5b16995279bef0ef3e7e2c2b47603371d90e86fbd7f5fd23fc1648f87e41457",
+    "fonts/font-0.ttf": "1b08e7fc267a5c7e1d614100f604b83e7e8a0be241f0f288faa2b3ac93a683ba",
+    "fonts/font-1.ttf": "8c883f63b2c4157d997319f2c8bc6995ed4357ef371940d31ca159004a4aae63",
+    "fonts/font-2.ttf": "e7a1aaf7eda9f2fad4131725fa556265ec75ca7b2d756260173a040363e8d4f7",
+    "fonts/font-3.ttf": "b37284b5701b6b168dfc770aa1a4ac492106422fd3ba76bc7641e37434e8019c",
+    "fonts/font-4.ttf": "eec66af7f2337bd34fe6e801cf92ededcb57a20c0d7bc40a61d4eefcbe3dd40c",
+    "fonts/font-5.ttf": "44ce4a84f20d60f24539bd0cef11f79c29e38609e0f8adf18551c9794a5d9dc3",
+    "fonts/font-6.ttf": "3386a05f6ece969e4537de6be894170d20558e82f7d56c8c5d332972ef172160",
+    "fonts/font-7.ttf": "a1d92abc6b02a87faed23d98067ab1027e8e95242fd7c9978a072ea383b89d1a",
+    "fonts/LICENSE-Inter": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57",
+    "fonts/LICENSE-JetBrainsMono": "b2fe5e8987594e9ffd1d2ca52a2f5d73eb8335243893c5d6254b5ad69269591d"
+  },
+  "sources": {
+    "react/react.production.min.js": "https://unpkg.com/react@18.3.1/umd/react.production.min.js",
+    "react/react-dom.production.min.js": "https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js",
+    "react/LICENSE-react": "https://unpkg.com/react@18.3.1/LICENSE",
+    "react/LICENSE-react-dom": "https://unpkg.com/react-dom@18.3.1/LICENSE",
+    "fonts/LICENSE-Inter": "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/OFL.txt",
+    "fonts/LICENSE-JetBrainsMono": "https://raw.githubusercontent.com/google/fonts/main/ofl/jetbrainsmono/OFL.txt"
+  }
+}

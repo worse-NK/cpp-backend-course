@@ -1,0 +1,45 @@
+/* App-only affordances. Existing lesson and lab CSS is not overridden. */
+.desktop-course-footer { display:flex; flex-wrap:wrap; justify-content:center; gap:1rem; margin:2.5rem auto 0;
+  padding:1rem 1.25rem max(1rem,env(safe-area-inset-bottom)); max-width:80rem;
+  font: .875rem/1.5 var(--course-sans,system-ui,sans-serif); }
+.desktop-course-footer a { color:var(--course-muted,#b1c1cc); text-underline-offset:.22em; }
+.desktop-course-footer a:hover { color:var(--course-ink,#e4edf2); }
+.desktop-course-footer a:focus-visible { outline:3px solid var(--course-focus,#c4e7f7); outline-offset:5px; }
+body.desktop-progress { margin:0; font:17px/1.75 var(--course-sans,system-ui,sans-serif); }
+.desktop-progress main { width:min(100% - 3rem,54rem); margin:0 auto; padding:2rem 0 4rem; }
+.desktop-progress nav { display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:3rem; }
+.desktop-progress a { color:var(--course-accent); text-underline-offset:.22em; }
+.desktop-progress h1 { font-size:clamp(2rem,5vw,3rem); line-height:1.18; margin:0 0 1.2rem; text-wrap:balance; }
+.desktop-progress h2 { font-size:1.45rem; line-height:1.35; margin:0 0 1rem; }
+.desktop-progress .desktop-lead { font-size:1.15rem; color:var(--course-muted); }
+.desktop-progress p { margin:.8rem 0; max-width:70ch; }
+.desktop-progress section { margin-top:2.5rem; padding-top:2rem; border-top:1px solid var(--course-line); }
+.desktop-progress .desktop-actions { display:flex; align-items:center; flex-wrap:wrap; gap:.8rem; margin-top:1.2rem; }
+.desktop-progress button, .desktop-progress .desktop-button { display:inline-flex; justify-content:center; align-items:center;
+  flex:0 1 auto; max-width:100%; min-height:44px; padding:.65rem 1rem; border:1px solid var(--course-line);
+  border-radius:7px; background:var(--course-surface); color:var(--course-ink); font:inherit; line-height:1.4;
+  text-decoration:none; cursor:pointer; overflow-wrap:anywhere; }
+.desktop-progress button:hover, .desktop-progress .desktop-button:hover { background:var(--course-surface-raised); border-color:var(--course-accent); }
+.desktop-progress button.primary { background:var(--course-accent); color:#18252f; border-color:var(--course-accent); font-weight:650; }
+.desktop-progress button.primary:hover { background:var(--course-focus); }
+.desktop-progress button:disabled { opacity:.7; cursor:wait; }
+.desktop-progress a:focus-visible, .desktop-progress button:focus-visible, .desktop-progress summary:focus-visible,
+.desktop-progress input:focus-visible { outline:3px solid var(--course-focus); outline-offset:5px; }
+.desktop-progress .desktop-note { font-size:.95rem; color:var(--course-muted); }
+.desktop-progress .desktop-status { padding:1rem 1.2rem; border-left:3px solid var(--course-success); background:var(--course-surface); }
+.desktop-progress .desktop-status p { margin:.3rem 0; }
+.desktop-progress .desktop-status[data-error="true"] { border-color:var(--course-warning); }
+.desktop-progress .desktop-message { min-height:1.75em; color:var(--course-muted); overflow-wrap:anywhere; }
+.desktop-progress code { padding:.1em .3em; border-radius:3px; background:var(--course-code); overflow-wrap:anywhere; }
+.desktop-progress details { margin:1.2rem 0; }
+.desktop-progress summary { cursor:pointer; color:var(--course-accent); }
+.desktop-progress ol { padding-left:1.5rem; }
+.desktop-progress li { margin:.6rem 0; }
+.desktop-progress label { display:block; margin:1rem 0 .4rem; }
+.desktop-progress input[type="file"] { max-width:100%; font:inherit; font-size:.95rem; padding:.6rem; border:1px solid var(--course-line); border-radius:6px; }
+.desktop-progress textarea { width:100%; box-sizing:border-box; padding:.8rem; background:var(--course-surface); color:var(--course-ink); border:1px solid var(--course-line); border-radius:6px; font: .85rem/1.6 var(--course-mono,monospace); }
+.desktop-progress .desktop-preview { padding:1rem; border:1px solid var(--course-line); border-radius:6px; margin-top:1rem; }
+.desktop-progress .desktop-skip { position:absolute; top:.5rem; left:1rem; transform:translateY(-200%); padding:.5rem 1rem; background:var(--course-surface); z-index:5; }
+.desktop-progress .desktop-skip:focus { transform:none; }
+.desktop-progress [hidden] { display:none!important; }
+@media(max-width:560px) { .desktop-progress main { width:calc(100% - 2rem); padding-top:1.25rem; } .desktop-progress nav { margin-bottom:2rem; } }

@@ -1,5 +1,7 @@
 """Public source inventory and non-destructive repository sync regressions."""
 from pathlib import Path
+import hashlib
+import json
 import shutil
 import subprocess
 import tempfile
@@ -51,13 +53,39 @@ class RepositoryInventory(unittest.TestCase):
                      'roadmap/tools/test_repository_sync.py'):
             self.assertTrue(name in self.files, 'Missing repository source: ' + name)
             self.assertIsInstance(self.files[name], bytes)
-        self.assertIn('Редактирование и сборка', self.files['README.md'].decode('utf-8'))
+        self.assertIn('tools/course.py', self.files['README.md'].decode('utf-8'))
+        self.assertIn('docs/BUILDING.md', self.files['README.md'].decode('utf-8'))
+
+    def test_desktop_build_inputs_and_pinned_vendor_assets_are_complete(self):
+        for name in repository.DESKTOP_SOURCES:
+            target = 'desktop-course/' + name
+            self.assertIn(target, self.files)
+            self.assertEqual(self.files[target], (publication.ROOT.parent / target).read_bytes())
+        for size in repository.ICON_SIZES:
+            self.assertTrue(self.files[f'desktop-course/icons/app-{size}.png'].startswith(b'\x89PNG'))
+        lock = json.loads(self.files['desktop-course/vendor/ORIGIN.json'])
+        for name, expected in lock['files'].items():
+            with self.subTest(vendor=name):
+                self.assertEqual(hashlib.sha256(self.files['desktop-course/vendor/' + name]).hexdigest(), expected)
+        self.assertNotIn('desktop-course/icons/contact-sheet.png', self.files)
+        self.assertFalse(any(name.startswith(('desktop-course/release/', 'desktop-course/.toolchain/'))
+                             for name in self.files))
+
+    def test_repository_docs_and_entrypoints_are_not_web_distribution_docs(self):
+        for name in repository.PROJECT_SOURCES:
+            self.assertIn(name, self.files)
+            self.assertEqual(self.files[name], (publication.ROOT.parent / name).read_bytes())
+        public_files, _ = publication.collect()
+        self.assertEqual(public_files['README.md'], publication.PUBLIC_README.encode())
+        self.assertEqual(self.files['README.md'], (publication.ROOT.parent / 'README.md').read_bytes())
+        self.assertNotEqual(self.files['README.md'], public_files['README.md'])
 
     def test_private_reports_and_generated_caches_are_excluded(self):
         for name in self.files:
             parts = Path(name).parts
             self.assertFalse(set(parts) & {'.git', '.aws', '.codex', '.agents',
-                                          '__pycache__', 'node_modules'})
+                                          '__pycache__', 'node_modules', '.toolchain',
+                                          'release', 'backups', 'userData'})
             self.assertNotIn('REVIEW', name)
             self.assertNotIn('CHECKLIST', name)
             self.assertNotIn('PLAN.md', name)
@@ -116,6 +144,119 @@ class RepositoryInventory(unittest.TestCase):
             self.assertEqual(result.returncode, 1,
                              'Reviewed captures ignored by Git: ' + result.stdout.decode())
             self.assertEqual(result.stdout, b'')
+
+
+class RepositorySourceSafety(unittest.TestCase):
+    def fixture(self, project):
+        names = {'desktop-course/' + name for name in repository.DESKTOP_SOURCES}
+        names.update(f'desktop-course/icons/app-{size}.png' for size in repository.ICON_SIZES)
+        for name in names:
+            path = project / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b'public source fixture\n')
+        files = {'react/react.production.min.js': b'/* pinned fixture */\n',
+                 'react/LICENSE-react': b'Fixture license\n',
+                 'fonts/font-0.ttf': b'font-fixture'}
+        for name, data in files.items():
+            path = project / 'desktop-course/vendor' / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+        lock = project / 'desktop-course/vendor/ORIGIN.json'
+        lock.write_text(json.dumps({'format': 1, 'files': {
+            name: hashlib.sha256(data).hexdigest() for name, data in files.items()
+        }}))
+        return lock, files
+
+    def test_source_reader_rejects_unsafe_paths_and_missing_inputs(self):
+        with tempfile.TemporaryDirectory(prefix='course-project-sources-') as work:
+            project = Path(work)
+            for name in ('../private.txt', '/etc/passwd', '.git/config',
+                         'a/../private.txt', 'a\\private.txt', './readme.txt', ''):
+                with self.subTest(name=name), self.assertRaises(ValueError):
+                    repository.project_source_bytes(project, name)
+            with self.assertRaisesRegex(ValueError, 'Required repository source is missing'):
+                repository.project_source_bytes(project, 'README.md')
+
+    def test_pinned_sources_exclude_neighboring_runtime_and_private_files(self):
+        with tempfile.TemporaryDirectory(prefix='course-desktop-sources-') as work:
+            project = Path(work)
+            self.fixture(project)
+            for name in ('release/personal.json', 'release/backups/profile.tar.gz',
+                         '.toolchain/electron', 'app/.env', 'vendor/credentials.json',
+                         'icons/contact-sheet.png'):
+                path = project / 'desktop-course' / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b'not a public source')
+            files = repository.collect_desktop_sources(project)
+            self.assertEqual(set(files),
+                {'desktop-course/' + name for name in repository.DESKTOP_SOURCES}
+                | {f'desktop-course/icons/app-{size}.png' for size in repository.ICON_SIZES}
+                | {'desktop-course/vendor/' + name for name in (
+                    'ORIGIN.json', 'react/react.production.min.js', 'react/LICENSE-react', 'fonts/font-0.ttf')})
+
+    def test_vendor_hash_mismatch_is_rejected(self):
+        with tempfile.TemporaryDirectory(prefix='course-desktop-vendor-hash-') as work:
+            project = Path(work)
+            self.fixture(project)
+            (project / 'desktop-course/vendor/react/react.production.min.js').write_bytes(b'changed')
+            with self.assertRaisesRegex(ValueError, 'Desktop vendor hash mismatch'):
+                repository.collect_desktop_sources(project)
+
+    def test_vendor_lock_cannot_select_private_files_or_traversal_paths(self):
+        for name in ('../app/main.cjs', '/etc/passwd', 'react/../private.js',
+                     'fonts/.env', 'fonts/credentials.json', 'other/file.js',
+                     'react\\private.js', './react/file.js'):
+            with self.subTest(name=name), tempfile.TemporaryDirectory(prefix='course-vendor-path-') as work:
+                project = Path(work)
+                lock, _ = self.fixture(project)
+                value = json.loads(lock.read_text())
+                value['files'][name] = '0' * 64
+                lock.write_text(json.dumps(value))
+                with self.assertRaisesRegex(ValueError, 'Unsafe desktop vendor entry'):
+                    repository.collect_desktop_sources(project)
+
+    def test_vendor_lock_format_and_digest_are_validated(self):
+        for value in ([], {'format': 2, 'files': {}}, {'format': 1, 'files': {}},
+                      {'format': 1, 'files': []},
+                      {'format': 1, 'files': {'react/file.js': 'not-a-sha256'}}):
+            with self.subTest(value=value), tempfile.TemporaryDirectory(prefix='course-vendor-format-') as work:
+                project = Path(work)
+                lock, _ = self.fixture(project)
+                lock.write_text(json.dumps(value))
+                with self.assertRaises(ValueError):
+                    repository.collect_desktop_sources(project)
+
+    def test_source_reader_refuses_file_parent_and_lock_symlinks(self):
+        for target in ('desktop-course/app/main.cjs', 'desktop-course/vendor/ORIGIN.json',
+                       'desktop-course/vendor/react'):
+            with self.subTest(target=target), tempfile.TemporaryDirectory(prefix='course-source-link-') as work:
+                project = Path(work)
+                self.fixture(project)
+                path = project / target
+                moved = project / ('outside-' + path.name)
+                path.rename(moved)
+                try:
+                    path.symlink_to(moved, target_is_directory=moved.is_dir())
+                except (NotImplementedError, OSError) as error:
+                    self.skipTest('symlinks unavailable: ' + str(error))
+                with self.assertRaisesRegex(ValueError, 'Symlink'):
+                    repository.collect_desktop_sources(project)
+
+    def test_source_privacy_gate_keeps_header_only_tests_but_rejects_material(self):
+        harmless = {'test.py': b'header = "-----BEGIN ' + b'OPENSSH PRIVATE KEY-----"\n'}
+        repository.check_repository_source_privacy(harmless)
+        for data in ((b'ghp_' + b'A' * 36),
+                     (b'github_pat_' + b'A' * 50),
+                     (b'AKIA' + b'A' * 16),
+                     (b'-----BEGIN ' + b'PRIVATE KEY-----\n' + b'A' * 128
+                      + b'\n-----END ' + b'PRIVATE KEY-----'),
+                     (b'-----BEGIN ' + b'PRIVATE KEY-----\\n' + b'A' * 128
+                      + b'\\n-----END ' + b'PRIVATE KEY-----'),
+                     b'SQLite format 3\0private fixture'):
+            with self.subTest(length=len(data)), self.assertRaisesRegex(ValueError, 'Potential credential or private database'):
+                repository.check_repository_source_privacy({'fixture.txt': data})
+        with self.assertRaisesRegex(ValueError, 'Potential private workspace path'):
+            repository.check_repository_source_privacy({'fixture.txt': str(publication.ROOT.parent).encode()})
 
 
 @unittest.skipUnless(shutil.which('git'), 'requires Git')

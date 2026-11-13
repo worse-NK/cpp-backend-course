@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru" class="course-dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#18252f">
+  <title>Прогресс и приложение — C++ Backend</title>
+  <link rel="icon" type="image/png" href="icons/app-256.png">
+  <link rel="stylesheet" href="roadmap/assets/course-theme.css">
+  <link rel="stylesheet" href="desktop.css">
+  <script defer src="progress-core.js"></script>
+  <script defer src="progress-ui.js"></script>
+</head>
+<body class="course-dark desktop-progress">
+  <a class="desktop-skip" href="#main">К содержанию страницы</a>
+  <main id="main">
+    <nav aria-label="Навигация">
+      <a href="roadmap/cpp_backend_roadmap.html">← К программе курса</a>
+      <a id="progress-return" href="roadmap/cpp_backend_roadmap.html" hidden>К открытой главе</a>
+    </nav>
+    <h1>Твой курс и прогресс</h1>
+    <p class="desktop-lead">Учебник уже установлен на компьютере. Здесь можно сохранить свои отметки и результаты в файл, перенести их из прежней версии или восстановить из резервной копии.</p>
+    <div class="desktop-status" id="app-status" role="status" aria-live="polite">
+      <strong>Учебник работает локально</strong>
+      <p id="app-version">Главы, тесты и встроенные лаборатории открываются из файлов приложения — без браузера и без подключения к серверу.</p>
+    </div>
+    <section aria-labelledby="backup-heading" id="backup">
+      <h2 id="backup-heading">Сохранить прогресс</h2>
+      <p>Отметки изученных разделов, записанные результаты тестов, размер текста и SQL-черновики сохраняются в профиле этого приложения. Закрытие окна и обычное обновление программы не должны их удалять. Резервный файл поможет перенести данные на другой компьютер или восстановить их, если профиль будет повреждён.</p>
+      <div class="desktop-actions"><button class="primary" id="progress-export" type="button">Сохранить прогресс в файл</button></div>
+      <p class="desktop-message" id="export-message" role="status" aria-live="polite"></p>
+      <p class="desktop-note">Незавершённая попытка теста остаётся только в открытом окне, как и в браузерной версии. Заверши её перед закрытием приложения. Резервная копия содержит только данные курса, не настройки и историю твоего обычного браузера.</p>
+    </section>
+    <section aria-labelledby="import-heading" id="restore">
+      <h2 id="import-heading">Восстановить или перенести данные</h2>
+      <p>Выбери ранее сохранённый JSON-файл (текстовый файл с данными прогресса). Сначала приложение проверит его, затем попросит подтверждение. Перед заменой будет предложено сохранить нынешний прогресс.</p>
+      <label for="progress-file">Резервная копия курса</label>
+      <input id="progress-file" name="progress-file" type="file" accept="application/json,.json">
+      <div id="import-preview" class="desktop-preview" aria-live="polite" hidden></div>
+      <div class="desktop-actions"><button id="progress-import" type="button" hidden>Сохранить текущую копию и восстановить выбранную</button></div>
+      <p class="desktop-message" id="import-message" role="status" aria-live="polite"></p>
+      <p class="desktop-note">Восстановление заменяет одноимённые записи из файла; остальные отметки остаются. Перед ним закрой другие окна курса, чтобы они не записали старое состояние поверх восстановленного. После восстановления открой нужную главу заново.</p>
+      <details>
+        <summary>Как перенести прогресс из сайта или прежней PWA?</summary>
+        <p>У сайта, прежней локальной PWA и нового приложения разные профили. Приложение не читает чужие данные автоматически. Если в прежней версии есть экспорт, сначала сохрани файл там, а затем загрузи его здесь.</p>
+        <p>Для старых страниц без кнопки экспорта есть закладка. Она читает только ключи этого учебника и скачивает резервный файл: ничего не отправляет в интернет и не меняет отметки.</p>
+        <ol>
+          <li>Перетащи ссылку <a id="legacy-export" href="#" draggable="true">«Сохранить старый прогресс»</a> на панель закладок своего прежнего браузера. Здесь запускать её не нужно.</li>
+          <li>В том же профиле браузера открой старый курс на <code>worse-nk.github.io/cpp-backend-course/</code>, прежний HTML-файл станции или локальную PWA на <code>127.0.0.1:47653</code>. Нажми добавленную закладку и сохрани файл.</li>
+          <li>Вернись в приложение и выбери этот файл выше.</li>
+        </ol>
+        <p class="desktop-note">Если браузер не позволяет перетащить ссылку между приложениями, нажми кнопку ниже и создай в нём закладку вручную, вставив скопированный адрес. Это исполняемый адрес <code>javascript:</code>: используй только подготовленный здесь код. При запрете таких закладок политиками браузера данные не меняются.</p>
+        <div class="desktop-actions"><button id="legacy-copy" type="button">Скопировать адрес закладки экспорта</button></div>
+        <label for="legacy-address" id="legacy-label" hidden>Адрес закладки — выдели и скопируй его целиком</label>
+        <textarea id="legacy-address" name="legacy-address" rows="5" readonly spellcheck="false" hidden></textarea>
+        <p class="desktop-message" id="legacy-message" role="status" aria-live="polite"></p>
+        <p class="desktop-note">Для <code>file://</code> браузер может хранить прогресс каждой страницы отдельно. Тогда повтори экспорт на нужных станциях и загрузи файлы по очереди. Не удаляй старые данные браузера до проверки переноса.</p>
+      </details>
+    </section>
+    <section aria-labelledby="app-heading">
+      <h2 id="app-heading">Что входит в приложение</h2>
+      <p>Все главы, тесты, модели и SQL-тренажёр уже в установочном пакете. Ничего дополнительно скачивать для их открытия не нужно. Программа содержит собственный движок Chromium — часть, которая отображает страницы и выполняет их JavaScript. Поэтому установленный Chrome или Firefox не требуется.</p>
+      <p>Практикумы с компилятором C++, Docker, Kubernetes, PostgreSQL или анализом настоящего сетевого трафика выполняются отдельно по инструкции. Программа не устанавливает эти инструменты и не запускает команды из примеров. Для внешних статей и загрузки инструментов нужен интернет; внешняя ссылка по твоему выбору откроется в обычном браузере.</p>
+      <p class="desktop-note">Обновление устанавливается новым <code>.deb</code>; постоянное подключение к сети и фоновое автообновление не требуются. Удаление приложения не означает удаление профиля с прогрессом.</p>
+    </section>
+  </main>
+</body>
+</html>

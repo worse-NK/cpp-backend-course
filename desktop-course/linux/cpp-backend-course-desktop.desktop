@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=C++ Backend
+Name[ru]=C++ и backend — учебник
+Comment=Теория, тесты и интерактивные лаборатории без интернета
+Exec=cpp-backend-course-desktop
+Icon=cpp-backend-course-desktop
+Terminal=false
+Categories=Education;
+StartupWMClass=cpp-backend-course-desktop
+StartupNotify=true
