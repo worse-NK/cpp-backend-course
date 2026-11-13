@@ -1,0 +1,12 @@
+{
+  "scope": "training-policy-not-applied",
+  "runtime_user": "root",
+  "docker_socket": true,
+  "runtime_owns_schema": true,
+  "runtime_can_assume_migration": true,
+  "secrets_in_image": true,
+  "untrusted_ci_has_release_secrets": true,
+  "dependency_pin": "floating-tag",
+  "rotation_checks": ["new-key-accepted"],
+  "release_evidence": ["version-label"]
+}

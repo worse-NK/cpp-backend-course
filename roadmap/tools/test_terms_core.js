@@ -19,6 +19,8 @@ assert(!model.scan('public').some(m=>m.id==='undefined-behavior'),'UB must not m
 assert(model.scan('NRVO')[0].id==='nrvo','RVO must not capture NRVO');
 assert(model.scan('std::move')[0].id==='move','Escape punctuation in names');
 assert(model.scan('stdXXmove').length===0,'Dots must not become regex wildcards');
+assert(model.scan('strict aliasing')[0].id==='strict-aliasing','Typed access must not open the shared_ptr-aliasing definition');
+assert(model.scan('Aliasing shared_ptr')[0].id==='aliasing','Shared ownership aliasing must keep its own meaning');
 const unknown=model.scan('Инвариант (этот комментарий не является определением)')[0];
 assert(unknown.definitionEnd===unknown.end,'Never remove arbitrary parentheses');
 const unrelated=model.scan('NULL (запрет отсутствующего значения)')[0];

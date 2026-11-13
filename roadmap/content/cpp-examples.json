@@ -1,0 +1,741 @@
+{
+  "version": 1,
+  "examples": [
+    {
+      "id": "signed-size",
+      "exampleId": "s3-signed-size",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "false true\nreject\n20\nreject\n",
+          "requires": {
+            "__cpp_lib_integer_comparison_functions": 202002
+          }
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "false true\nreject\n20\nreject\n",
+          "requires": {
+            "__cpp_lib_integer_comparison_functions": 202002
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/expr.arith.conv",
+        "https://timsong-cpp.github.io/cppwp/n4861/utility.intcmp",
+        "https://timsong-cpp.github.io/cppwp/n4861/container.requirements.general"
+      ]
+    },
+    {
+      "id": "checked-narrowing",
+      "exampleId": "s3-checked-narrowing",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "2500000000\nfalse 7\ntrue 42\n",
+          "requires": {
+            "__cpp_lib_integer_comparison_functions": 202002
+          }
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "2500000000\nfalse 7\ntrue 42\n",
+          "requires": {
+            "__cpp_lib_integer_comparison_functions": 202002
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/expr.arith.conv",
+        "https://timsong-cpp.github.io/cppwp/n4861/conv.integral",
+        "https://timsong-cpp.github.io/cppwp/n4861/dcl.init.list",
+        "https://timsong-cpp.github.io/cppwp/n4861/utility.intcmp"
+      ]
+    },
+    {
+      "id": "adl-call",
+      "exampleId": "s3-adl-call",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "job\nint\n"
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "job\nint\n"
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/basic.lookup.argdep",
+        "https://timsong-cpp.github.io/cppwp/n4861/basic.lookup.unqual"
+      ]
+    },
+    {
+      "id": "adl-swap",
+      "exampleId": "s3-adl-swap",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "custom\n2 1\n4 3\n"
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "custom\n2 1\n4 3\n"
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/basic.lookup.argdep",
+        "https://timsong-cpp.github.io/cppwp/n4861/namespace.memdef",
+        "https://timsong-cpp.github.io/cppwp/n4861/utility.swap"
+      ]
+    },
+    {
+      "id": "pack-fold",
+      "exampleId": "s3-pack-fold",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "0 9\n7 ready\n",
+          "requires": {
+            "__cpp_fold_expressions": 201603,
+            "__cpp_concepts": 201907,
+            "__cpp_lib_concepts": 202002
+          }
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "0 9\n7 ready\n",
+          "requires": {
+            "__cpp_fold_expressions": 201603,
+            "__cpp_concepts": 201907,
+            "__cpp_lib_concepts": 202002
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/temp.variadic",
+        "https://timsong-cpp.github.io/cppwp/n4861/expr.prim.fold",
+        "https://timsong-cpp.github.io/cppwp/n4861/expr.comma"
+      ]
+    },
+    {
+      "id": "template-specialization",
+      "exampleId": "s3-template-specialization",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "value pointer void pointer\noverload template template\n"
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "value pointer void pointer\noverload template template\n"
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/temp.class.spec",
+        "https://timsong-cpp.github.io/cppwp/n4861/temp.expl.spec",
+        "https://timsong-cpp.github.io/cppwp/n4861/temp.over"
+      ]
+    },
+    {
+      "id": "chrono-units",
+      "exampleId": "s3-chrono-units",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "2500 ms\n1 2\n1500\n",
+          "requires": {
+            "__cpp_lib_chrono": 201611,
+            "__cpp_lib_chrono_udls": 201304
+          }
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "2500 ms\n1 2\n1500\n",
+          "requires": {
+            "__cpp_lib_chrono": 201611,
+            "__cpp_lib_chrono_udls": 201304
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/time.duration",
+        "https://timsong-cpp.github.io/cppwp/n4861/time.duration.cast",
+        "https://timsong-cpp.github.io/cppwp/n4861/time.duration.literals"
+      ]
+    },
+    {
+      "id": "chrono-deadline",
+      "exampleId": "s3-chrono-deadline",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "70 10 0\n",
+          "requires": {
+            "__cpp_lib_chrono": 201611,
+            "__cpp_lib_chrono_udls": 201304
+          }
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "70 10 0\n",
+          "requires": {
+            "__cpp_lib_chrono": 201611,
+            "__cpp_lib_chrono_udls": 201304
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/time.clock.steady",
+        "https://timsong-cpp.github.io/cppwp/n4861/time.point",
+        "https://timsong-cpp.github.io/cppwp/n4861/time.point.nonmember"
+      ]
+    },
+    {
+      "id": "object-bytes-roundtrip",
+      "exampleId": "s1-object-bytes-roundtrip",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "7 42 42\n"
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "7 42 42\n"
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/basic.types#2",
+        "https://timsong-cpp.github.io/cppwp/n4861/basic.lval#11"
+      ]
+    },
+    {
+      "id": "trivially-copyable-record",
+      "exampleId": "s1-trivially-copyable-record",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "3 1 9\n"
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "3 1 9\n"
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/basic.types#3",
+        "https://timsong-cpp.github.io/cppwp/n4861/class.prop#1"
+      ]
+    },
+    {
+      "id": "bit-cast-byte-pair",
+      "exampleId": "s1-bit-cast-byte-pair",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "3 9 7\n",
+          "requires": {
+            "__cpp_lib_bit_cast": 201806
+          }
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "3 9 7\n",
+          "requires": {
+            "__cpp_lib_bit_cast": 201806
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/bit.cast",
+        "https://timsong-cpp.github.io/cppwp/n4950/bit.cast",
+        "https://timsong-cpp.github.io/cppwp/n4861/basic.fundamental#7"
+      ]
+    },
+    {
+      "id": "global-one-tu-order",
+      "exampleId": "s5-global-one-tu-order",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "create first\ncreate second\nuse first\nuse second\ndestroy second\ndestroy first\n"
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "create first\ncreate second\nuse first\nuse second\ndestroy second\ndestroy first\n"
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/basic.start.dynamic",
+        "https://timsong-cpp.github.io/cppwp/n4861/basic.start.term"
+      ]
+    },
+    {
+      "id": "constinit-dynamic-rejected",
+      "exampleId": "s5-constinit-dynamic-rejected",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "compile-fail"
+        },
+        {
+          "standard": "23",
+          "mode": "compile-fail"
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/dcl.constinit",
+        "https://timsong-cpp.github.io/cppwp/n4861/expr.const"
+      ]
+    },
+    {
+      "id": "implicit-move-reference",
+      "exampleId": "s1-implicit-move-reference",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "compile-fail"
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "9\n",
+          "requires": {
+            "__cpp_implicit_move": 202207
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/class.copy.elision",
+        "https://timsong-cpp.github.io/cppwp/n4950/expr.prim.id.unqual"
+      ]
+    },
+    {
+      "id": "range-for-temporary",
+      "exampleId": "s1-range-for-temporary23",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "source-only",
+          "reason": "В C++20 чтение списка через ссылку rows() после уничтожения временного Batch было бы неопределённым поведением. Не запускаем."
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "10 20 30 \n",
+          "requires": {
+            "__cpp_range_based_for": 202211
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/class.temporary",
+        "https://timsong-cpp.github.io/cppwp/n4950/class.temporary",
+        "https://timsong-cpp.github.io/cppwp/n4950/stmt.ranged"
+      ]
+    },
+    {
+      "id": "range-for-named-owner",
+      "exampleId": "s1-range-for-named-owner",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "10 20 30 \n"
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "10 20 30 \n"
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/stmt.ranged",
+        "https://timsong-cpp.github.io/cppwp/n4950/stmt.ranged"
+      ]
+    },
+    {
+      "id": "ranges-pairs-owned-result",
+      "exampleId": "s3-ranges-zip-enumerate-to",
+      "checks": [
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "cpu 21\ndisk 41\n0:42\n1:82\n",
+          "requires": {
+            "__cpp_lib_ranges_zip": 202110,
+            "__cpp_lib_ranges_enumerate": 202302,
+            "__cpp_lib_ranges_to_container": 202202
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/range.zip",
+        "https://timsong-cpp.github.io/cppwp/n4950/range.enumerate",
+        "https://timsong-cpp.github.io/cppwp/n4950/range.utility.conv.to"
+      ]
+    },
+    {
+      "id": "explicit-object-access",
+      "exampleId": "s3-explicit-object-access",
+      "checks": [
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "9 5\n",
+          "requires": {
+            "__cpp_explicit_this_parameter": 202110
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/dcl.fct",
+        "https://timsong-cpp.github.io/cppwp/n4950/class.mfct.non.static"
+      ]
+    },
+    {
+      "id": "if-consteval",
+      "exampleId": "s3-if-consteval",
+      "checks": [
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdin": "7\n",
+          "stdout": "42 14\n",
+          "requires": {
+            "__cpp_if_consteval": 202106
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/stmt.if",
+        "https://timsong-cpp.github.io/cppwp/n4950/expr.const"
+      ]
+    },
+    {
+      "id": "move-only-callable",
+      "exampleId": "s3-move-only-callable",
+      "checks": [
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "0 12 8\n",
+          "requires": {
+            "__cpp_lib_move_only_function": 202110
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/func.wrap.move",
+        "https://timsong-cpp.github.io/cppwp/n4950/unique.ptr"
+      ]
+    },
+    {
+      "id": "format-message",
+      "exampleId": "s3-format-message",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "task parse: id=0007\n",
+          "requires": {
+            "__cpp_lib_format": 201907
+          }
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "task parse: id=0007\n",
+          "requires": {
+            "__cpp_lib_format": 201907
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/format",
+        "https://timsong-cpp.github.io/cppwp/n4950/format"
+      ]
+    },
+    {
+      "id": "print-message",
+      "exampleId": "s3-print-message",
+      "checks": [
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "task parse: id=0007\n",
+          "requires": {
+            "__cpp_lib_print": 202207
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/print.fun"
+      ]
+    },
+    {
+      "id": "expected-chain",
+      "exampleId": "s4-expected-chain",
+      "checks": [
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "8080: port 8080\n<empty>: port 8080\n70000: error port range\n80x: error trailing\n",
+          "requires": {
+            "__cpp_lib_expected": 202211
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/expected.object.monadic"
+      ]
+    },
+    {
+      "id": "optional-chain",
+      "exampleId": "s4-optional-chain",
+      "checks": [
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "Hello, Ada\nHello, guest\nHello, guest\ncaught callback\n",
+          "requires": {
+            "__cpp_lib_optional": 202110
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/optional.monadic"
+      ]
+    },
+    {
+      "id": "library-feature-probe",
+      "exampleId": "s5-library-feature-probe",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run"
+        },
+        {
+          "standard": "23",
+          "mode": "run"
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/version.syn"
+      ]
+    },
+    {
+      "id": "stacktrace-capture",
+      "exampleId": "s5-stacktrace-capture",
+      "checks": [
+        {
+          "standard": "23",
+          "mode": "run",
+          "requires": {
+            "__cpp_lib_stacktrace": 202011
+          },
+          "linkFlags": [
+            "-lstdc++exp"
+          ]
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/stacktrace",
+        "https://gcc.gnu.org/onlinedocs/libstdc++/manual/using.html"
+      ]
+    },
+    {
+      "id": "move-only-task-queue",
+      "exampleId": "s6-move-only-task-queue",
+      "checks": [
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "source empty\njob 42\ncall 1\ncall 2\n",
+          "requires": {
+            "__cpp_lib_move_only_function": 202110
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/func.wrap.move"
+      ]
+    },
+    {
+      "id": "coroutine-lifecycle",
+      "exampleId": "s6-coroutine-lifecycle",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "created\nbegin weekly\ncaller\nend weekly\ndone true\nagain false\ncaught boom\n",
+          "requires": {
+            "__cpp_impl_coroutine": 201902,
+            "__cpp_lib_coroutine": 201902
+          }
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "created\nbegin weekly\ncaller\nend weekly\ndone true\nagain false\ncaught boom\n",
+          "requires": {
+            "__cpp_impl_coroutine": 201902,
+            "__cpp_lib_coroutine": 201902
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4861/dcl.fct.def.coroutine",
+        "https://timsong-cpp.github.io/cppwp/n4950/coroutine.handle.resumption"
+      ]
+    },
+    {
+      "id": "generator-sequence",
+      "exampleId": "s6-generator-sequence",
+      "checks": [
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "created\nproduce 10\nvalue 10\nproduce 11\nvalue 11\nproduce 12\nvalue 12\n",
+          "requires": {
+            "__cpp_lib_generator": 202207,
+            "__cpp_impl_coroutine": 201902
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/coro.generator"
+      ]
+    },
+    {
+      "id": "endian-frame",
+      "exampleId": "s7-endian-frame",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "frame checks passed\n"
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "frame checks passed\n",
+          "requires": {
+            "__cpp_lib_byteswap": 202110
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/bit.byteswap",
+        "https://timsong-cpp.github.io/cppwp/n4950/bit.endian",
+        "https://timsong-cpp.github.io/cppwp/n4861/basic.types"
+      ]
+    },
+    {
+      "id": "expected-http",
+      "exampleId": "s8-expected-http",
+      "checks": [
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "[42] -> 200 accepted\n[] -> 400 missing_id\n[12x] -> 400 invalid_id\n[0] -> 422 id_outside_policy\n[1001] -> 422 id_outside_policy\n[4294967296] -> 400 id_overflow\n",
+          "requires": {
+            "__cpp_lib_expected": 202211
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/expected.object.monadic",
+        "https://www.rfc-editor.org/rfc/rfc9110.html#section-15.5.1",
+        "https://www.rfc-editor.org/rfc/rfc9110.html#section-15.5.21"
+      ]
+    },
+    {
+      "id": "endian-regression",
+      "exampleId": "s15-endian-regression",
+      "includeDirs": [
+        "examples/cpp23"
+      ],
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "endian regression passed\n"
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "endian regression passed\n",
+          "requires": {
+            "__cpp_lib_byteswap": 202110
+          }
+        }
+      ],
+      "sources": [
+        "https://timsong-cpp.github.io/cppwp/n4950/bit.byteswap",
+        "https://timsong-cpp.github.io/cppwp/n4861/basic.types"
+      ]
+    },
+    {
+      "id": "resolver-candidates",
+      "exampleId": "s7-resolver-candidates",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run"
+        },
+        {
+          "standard": "23",
+          "mode": "run"
+        }
+      ],
+      "sources": [
+        "https://man7.org/linux/man-pages/man3/getaddrinfo.3.html",
+        "https://man7.org/linux/man-pages/man5/nsswitch.conf.5.html"
+      ]
+    },
+    {
+      "id": "history-checker",
+      "exampleId": "s16-history-checker",
+      "checks": [
+        {
+          "standard": "20",
+          "mode": "run",
+          "stdout": "fresh: yes\nstale: no\noverlap: yes\nnew_then_old: no\nall checks passed\n"
+        },
+        {
+          "standard": "23",
+          "mode": "run",
+          "stdout": "fresh: yes\nstale: no\noverlap: yes\nnew_then_old: no\nall checks passed\n"
+        }
+      ],
+      "sources": [
+        "https://cs.brown.edu/~mph/HerlihyW90/p463-herlihy.pdf"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+services:
+  api:
+    build: .
+    environment:
+      COURSE_ROLE: api
+      COURSE_LAB_ID: "${COURSE_LAB_ID:?Run python3 lab.py init first}"
+      COURSE_BIND: 0.0.0.0
+      COURSE_PORT: "8080"
+      COURSE_WORKER_URL: http://worker:8080
+      COURSE_OTLP_URL: http://collector:4318/v1/traces
+    ports: ["127.0.0.1:18140:8080"]
+    labels: &owned
+      org.cpp-course.station: "14"
+      org.cpp-course.run: "${COURSE_LAB_ID:?Run python3 lab.py init first}"
+    stop_grace_period: 15s
+    depends_on: [worker, collector]
+  worker:
+    build: .
+    environment:
+      COURSE_ROLE: worker
+      COURSE_LAB_ID: "${COURSE_LAB_ID:?Run python3 lab.py init first}"
+      COURSE_BIND: 0.0.0.0
+      COURSE_PORT: "8080"
+      COURSE_OTLP_URL: http://collector:4318/v1/traces
+    labels: *owned
+    stop_grace_period: 15s
+  collector:
+    image: otel/opentelemetry-collector-contrib:0.164.0
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes: ["./collector.yaml:/etc/otelcol/config.yaml:ro"]
+    labels: *owned
+    depends_on: [jaeger]
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.22.0
+    ports: ["127.0.0.1:16614:16686"]
+    labels: *owned
+  prometheus:
+    image: prom/prometheus:v3.15.1
+    command: ["--config.file=/etc/prometheus/prometheus.yaml", "--storage.tsdb.retention.time=2h"]
+    ports: ["127.0.0.1:19014:9090"]
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
+      - ./alerts.yaml:/etc/prometheus/alerts.yaml:ro
+      - prometheus-data:/prometheus
+    labels: *owned
+  grafana:
+    image: grafana/grafana:13.3.0
+    environment:
+      GF_SECURITY_ADMIN_USER: course
+      GF_SECURITY_ADMIN_PASSWORD: "${COURSE_GRAFANA_PASSWORD:?Run python3 lab.py init first}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+    ports: ["127.0.0.1:13014:3000"]
+    volumes:
+      - ./datasource.yaml:/etc/grafana/provisioning/datasources/course.yaml:ro
+      - ./dashboards.yaml:/etc/grafana/provisioning/dashboards/course.yaml:ro
+      - ./dashboard.json:/var/lib/grafana/dashboards/course.json:ro
+      - grafana-data:/var/lib/grafana
+    labels: *owned
+    depends_on: [prometheus]
+volumes:
+  prometheus-data:
+    labels:
+      org.cpp-course.station: "14"
+      org.cpp-course.run: "${COURSE_LAB_ID}"
+  grafana-data:
+    labels:
+      org.cpp-course.station: "14"
+      org.cpp-course.run: "${COURSE_LAB_ID}"
+networks:
+  default:
+    labels:
+      org.cpp-course.station: "14"
+      org.cpp-course.run: "${COURSE_LAB_ID}"

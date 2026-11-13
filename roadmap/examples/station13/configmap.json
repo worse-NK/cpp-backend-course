@@ -1,0 +1,11 @@
+{
+  "apiVersion": "v1",
+  "kind": "ConfigMap",
+  "metadata": {
+    "name": "course-api-config",
+    "namespace": "course13"
+  },
+  "data": {
+    "APP_VERSION": "v1"
+  }
+}

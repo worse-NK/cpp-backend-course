@@ -5,7 +5,7 @@
     "storeKey": "cpp_station8_progress_v1",
     "logo": "СТАНЦИЯ 08",
     "title": "REST API и C++-сервис",
-    "subtitle": "От первого контракта между клиентом и сервером до безопасного API: HTTP, валидация, C++-обработчики, конкурентные изменения, повторы, авторизация и развитие интерфейса. Сквозной пример — менеджер задач без базы данных.",
+    "subtitle": "Напишем сервер для списка дел: клиент создаёт, читает и меняет задачи. Разберём, какие запросы принимать, что отвечать при ошибках и как не потерять изменения двух пользователей. Сначала храним данные в памяти, без базы данных.",
     "sourceFile": "cpp_station8_rest_api.html"
   },
   "substations": [
@@ -910,11 +910,11 @@
       "id": "validation-pipeline",
       "substation": "validation-errors",
       "title": "Проверка входа: от дешёвого ограничения к изменению состояния",
-      "lead": "Не пропустим неверные данные к изменению задачи. У каждой проверки есть своё место до дорогой работы и до изменения состояния.",
+      "lead": "Клиент прислал новую задачу. Прежде чем сохранить её, проверим размер запроса, формат данных и допустимость названия. Разберём, какие ошибки нужно обнаружить до изменения списка.",
       "blocks": [
         {
           "type": "text",
-          "html": "Представь запрос на создание: тело слишком велико, затем внутри мог бы оказаться повреждённый JSON, затем — пустой title. Не нужно доходить до изменения хранилища, чтобы отклонить такой запрос. Сначала ограничиваем получение данных по размеру и времени, проверяем тип содержимого, разбираем формат, проверяем обязательные поля и допустимые значения. Удостоверение вызывающего и проверка его прав тоже входят в этот путь: до них нельзя раскрывать защищённые данные или запускать дорогую работу. Это схема границ, а не требование всегда выполнять все проверки в одном неизменном порядке."
+          "html": "Клиент присылает данные новой задачи. Прежде чем сохранять её, серверу нужно ответить на несколько вопросов: не слишком ли велик запрос, можно ли разобрать его как JSON, есть ли название и не пустое ли оно? Ошибку нужно обнаружить до изменения хранилища. Поэтому ограничиваем получение данных по размеру и времени, проверяем тип содержимого, разбираем формат, затем проверяем обязательные поля и допустимые значения. Установление личности пользователя и проверка его прав тоже входят в обработку: до них нельзя раскрывать защищённые данные или запускать дорогую работу. Это перечень необходимых проверок, а не требование всегда выполнять их в одном неизменном порядке."
         },
         {
           "type": "diagram",
@@ -1085,6 +1085,97 @@
           "type": "note",
           "kind": "tip",
           "html": "Первоисточник: <a href=\"https://www.rfc-editor.org/rfc/rfc9110.html#section-15.6.1\" target=\"_blank\" rel=\"noreferrer\">HTTP: 500</a>."
+        }
+      ]
+    },
+    {
+      "id": "expected-input-http-cpp23",
+      "substation": "validation-errors",
+      "title": "C++23: от входной строки к ответу API через expected",
+      "lead": "Пользователь ввёл номер задачи. Разделим три действия сервера: прочитать число, проверить допустимость номера и объяснить клиенту отказ. Затем выразим тот же путь средствами C++23.",
+      "blocks": [
+        {
+          "type": "text",
+          "html": "<p>На странице списка дел пользователь вводит номер задачи. Вместо <code>42</code> он может отправить пустую строку, <code>12x</code> или число, которое не помещается в выбранный тип. Серверу нужно отличить эти случаи и ответить понятной причиной, не пытаясь искать или менять задачу по неверному номеру.</p><p>Разберём только обработку одного текстового поля, уже извлечённого из запроса. Учебное правило: допустимы десятичные цифры без знака и пробелов; номер находится в диапазоне 1–1000. Диапазон — наше условие, не ограничение C++, HTTP или базы данных. Этот отдельный пример не открывает сокет, не проверяет пользователя и не обращается к <code>Storage</code>.</p>"
+        },
+        {
+          "type": "text",
+          "html": "<h3>Сначала назовём разные причины отказа</h3><p><code>std::expected&lt;T, E&gt;</code> из C++23 хранит либо успешное значение <code>T</code>, либо описанную нами ошибку <code>E</code>. Здесь <code>T</code> меняется по мере проверки, а причины отказа перечислены в <code>Problem</code>. <code>std::unexpected(problem)</code> явно создаёт результат с ошибкой, а не обычное возвращаемое значение.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "Типы для этого упражнения",
+          "code": "enum class Problem { missing, malformed, numeric_overflow, outside_policy };\nstruct TaskId { std::uint32_t value; };\nstruct Reply { int status; std::string_view code; };",
+          "standard": "23"
+        },
+        {
+          "type": "text",
+          "html": "<p><code>parse_number</code> превращает строку в число типа <code>uint32_t</code>. Пустой вход даёт missing; любой символ кроме цифры — malformed; слишком большое число — numeric_overflow. <code>std::from_chars</code> возвращает позицию остановки и код ошибки. Проверяем оба: успешное чтение префикса <code>12</code> ещё не означало бы, что вся строка <code>12x</code> годится. Предварительный проход по цифрам делает наш запрет знака и пробелов явным.</p><p>Затем <code>validate_id</code> проверяет правило 1–1000. Ноль прекрасно представим как целое число, но не разрешён в этой задаче. Поэтому ошибка вне диапазона отличается от ошибки чтения. Тип <code>TaskId</code> даёт имя уже проверенному числу; в нашем маленьком примере он остаётся простой структурой, а не защищённым от любого неправильного создания классом.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "Один шаг умеет отказать, следующий получает только успешное число",
+          "code": "std::expected<TaskId, Problem> validate_id(std::uint32_t value) {\n    if (value == 0 || value > 1000)\n        return std::unexpected(Problem::outside_policy);\n    return TaskId{value};\n}",
+          "standard": "23"
+        },
+        {
+          "type": "text",
+          "html": "<h3>Прозрачный вариант: обычные проверки if</h3><p>Проверка <code>if (!number)</code> спрашивает, хранится ли ошибка. Только после успешной проверки можно обращаться к значению через <code>*number</code>. При отказе выбираем внешний ответ из <code>number.error()</code>. Так же поступаем с результатом проверки диапазона. Здесь виден весь порядок: неверный вход не попадает на следующий шаг.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "Тот же путь без цепочки вызовов",
+          "code": "Reply explicit_reply(std::string_view text) {\n    const auto number = parse_number(text);\n    if (!number) return error_reply(number.error());\n    const auto id = validate_id(*number);\n    if (!id) return error_reply(id.error());\n    return {200, \"accepted\"};\n}",
+          "standard": "23"
+        },
+        {
+          "type": "text",
+          "html": "<p>Теперь примем явную политику ответа: пустое поле, неверная запись числа и числовое переполнение дают 400 с разными кодами; корректно записанное число вне разрешённого диапазона — 422. Код 422 подходит для понятного по синтаксису содержимого, смысл которого обработать нельзя. Но RFC не назначает каждой нашей C++-ошибке единственный обязательный статус: это договор данного API, который нужно одинаково описать клиенту и реализовать.</p><p>Значение <code>{200, \"accepted\"}</code> здесь означает только успех демонстрационной проверки входа. Это не 202 Accepted, не доказательство существования задачи и не право её читать. В настоящем обработчике дальше идут поиск, проверка прав и сама операция; только их результат определяет окончательный HTTP-ответ.</p>"
+        },
+        {
+          "type": "text",
+          "html": "<h3>Цепочка C++23: что происходит, а что не происходит</h3><p><code>and_then(validate_id)</code> вызывает следующий шаг только при наличии числа. Он нужен, когда следующий шаг сам возвращает <code>expected</code> и тоже способен отказать. При исходной ошибке функция не вызывается, ошибка передаётся дальше. В этом примере тип ошибки у обоих шагов — один и тот же <code>Problem</code>.</p><p><code>transform</code> преобразует уже успешный <code>TaskId</code> в <code>Reply</code>. Переданная лямбда возвращает обычное значение, не ещё один expected. Если ранее возникла ошибка, лямбда не выполняется. В конце снова явным <code>if</code> превращаем внутреннюю причину в выбранный ответ клиенту. Это более компактная запись тех же ветвей, а не другой порядок проверок.</p>"
+        },
+        {
+          "type": "code",
+          "caption": "Сначала разбираем строку, затем проверяем число, затем строим успешный результат",
+          "code": "Reply composed_reply(std::string_view text) {\n    const auto result = parse_number(text)\n        .and_then(validate_id)\n        .transform([](TaskId) { return Reply{200, \"accepted\"}; });\n    if (!result) return error_reply(result.error());\n    return *result;\n}",
+          "standard": "23"
+        },
+        {
+          "type": "code",
+          "caption": "Полная программа: оба способа обработки должны дать одинаковые ответы; examples/cpp23/s8-expected-http.cpp",
+          "code": "// C++23. No socket, database, HTTP framework or user files are involved.\n#include <charconv>\n#include <cstdint>\n#include <expected>\n#include <iostream>\n#include <stdexcept>\n#include <string_view>\n#include <system_error>\n#include <version>\n\n#if !defined(__cpp_lib_expected) || __cpp_lib_expected < 202211L\n#error \"This example needs std::expected with monadic operations (202211L)\"\n#endif\n\nenum class Problem { missing, malformed, numeric_overflow, outside_policy };\nstruct TaskId { std::uint32_t value; };\nstruct Reply { int status; std::string_view code; };\n\nstd::expected<std::uint32_t, Problem> parse_number(std::string_view text) {\n    if (text.empty()) return std::unexpected(Problem::missing);\n    // The exercise accepts decimal digits only: no sign or whitespace.\n    for (char ch : text)\n        if (ch < '0' || ch > '9') return std::unexpected(Problem::malformed);\n    std::uint32_t value{};\n    const auto [end, ec] = std::from_chars(text.data(), text.data() + text.size(), value);\n    if (ec == std::errc::result_out_of_range)\n        return std::unexpected(Problem::numeric_overflow);\n    if (ec != std::errc{} || end != text.data() + text.size())\n        return std::unexpected(Problem::malformed);\n    return value;\n}\n\nstd::expected<TaskId, Problem> validate_id(std::uint32_t value) {\n    // Chosen policy of this exercise, not an HTTP or PostgreSQL requirement.\n    if (value == 0 || value > 1000) return std::unexpected(Problem::outside_policy);\n    return TaskId{value};\n}\n\nReply error_reply(Problem problem) {\n    switch (problem) {\n    case Problem::missing: return {400, \"missing_id\"};\n    case Problem::malformed: return {400, \"invalid_id\"};\n    case Problem::numeric_overflow: return {400, \"id_overflow\"};\n    case Problem::outside_policy: return {422, \"id_outside_policy\"};\n    }\n    throw std::logic_error(\"unknown Problem\");\n}\n\nReply explicit_reply(std::string_view text) {\n    const auto number = parse_number(text);\n    if (!number) return error_reply(number.error());\n    const auto id = validate_id(*number);\n    if (!id) return error_reply(id.error());\n    return {200, \"accepted\"};\n}\n\nReply composed_reply(std::string_view text) {\n    const auto result = parse_number(text)\n        .and_then(validate_id)\n        .transform([](TaskId) { return Reply{200, \"accepted\"}; });\n    if (!result) return error_reply(result.error());\n    return *result;\n}\n\nint main() {\n    struct Case { std::string_view input; int status; std::string_view code; };\n    const Case cases[]{{\"42\", 200, \"accepted\"}, {\"\", 400, \"missing_id\"},\n        {\"12x\", 400, \"invalid_id\"}, {\"0\", 422, \"id_outside_policy\"},\n        {\"1001\", 422, \"id_outside_policy\"}, {\"4294967296\", 400, \"id_overflow\"}};\n    for (const auto& item : cases) {\n        const auto first = explicit_reply(item.input);\n        const auto second = composed_reply(item.input);\n        if (first.status != item.status || first.code != item.code ||\n            second.status != first.status || second.code != first.code)\n            throw std::runtime_error(\"reply contract failed\");\n        std::cout << '[' << item.input << \"] -> \" << first.status << ' ' << first.code << '\\n';\n    }\n    for (const auto invalid : {\"-1\", \"+7\", \" 7\", \"7 \", \"1.0\"})\n        if (composed_reply(invalid).status != 400)\n            throw std::runtime_error(\"invalid syntax accepted\");\n    if (composed_reply(\"1000\").status != 200)\n        throw std::runtime_error(\"upper boundary rejected\");\n}",
+          "standard": "23",
+          "exampleId": "s8-expected-http"
+        },
+        {
+          "type": "code",
+          "caption": "Ожидаемый вывод",
+          "code": "[42] -> 200 accepted\n[] -> 400 missing_id\n[12x] -> 400 invalid_id\n[0] -> 422 id_outside_policy\n[1001] -> 422 id_outside_policy\n[4294967296] -> 400 id_overflow"
+        },
+        {
+          "type": "text",
+          "html": "<p>Проследи три разных пути. Для <code>12x</code> отказ возникает ещё до числового преобразования; диапазон не проверяется. Для <code>0</code> разбор успешен, но validate_id возвращает отказ. Для <code>42</code> успешны оба шага, поэтому выполняется transform. Программа сравнивает обе реализации на этих входах и дополнительно проверяет знак, пробелы, дробную запись и верхнюю границу 1000.</p><p>Скачать <a href=\"examples/cpp23/s8-expected-http.cpp\">s8-expected-http.cpp</a> можно отдельно; команда <code>g++ -std=c++23 s8-expected-http.cpp -o expected-http</code> не требует HTTP-библиотеки. Для and_then и transform нужна библиотека с <code>__cpp_lib_expected &gt;= 202211L</code>. Поддержка базового expected с более ранним значением макроса недостаточна. Необязательная цель <code>course_expected_http</code> в CMake сервисного практикума запускает именно это упражнение, не меняя сервер.</p>"
+        },
+        {
+          "type": "text",
+          "html": "<h3>Где не следует механически заменять тип результата</h3><p><code>optional&lt;Task&gt;</code> в существующем интерфейсе хранилища по-прежнему может честно обозначать «задачи нет». Менять его только ради новой версии языка незачем. Expected полезен там, где вызывающему коду действительно нужны разные обычные причины отказа и дальнейшее решение по ним. Названные ошибки не должны скрывать неожиданный дефект под видом неверного запроса.</p><p>Expected также не ловит любое исключение. Если функция внутри and_then или transform бросит, исключение не станет автоматически значением Problem; отсутствие исключений должно следовать из операций, а не из одного типа результата. Пределы размера запроса, время выполнения, права доступа и откат изменений тоже задаются отдельно.</p>"
+        },
+        {
+          "type": "self-check",
+          "prompt": "На вход пришла строка 4294967296. Должен ли validate_id сообщить, что число больше 1000?",
+          "answer": "Нет. Это число не помещается в uint32_t: parse_number вернёт numeric_overflow, а validate_id вообще не вызовется. Сначала нужен корректный результат предыдущего шага; только затем проверяется правило диапазона."
+        },
+        {
+          "type": "self-check",
+          "prompt": "Если and_then вызывает функцию, которая бросает std::runtime_error, получим ли мы автоматически unexpected(Problem::malformed)?",
+          "answer": "Нет. and_then не назначает исключению такой смысл и не перехватывает его автоматически. Ожидаемый отказ нужно явно вернуть как unexpected; неожиданные исключения обрабатываются на подходящей границе, как разобрано в предыдущем разделе."
+        },
+        {
+          "type": "note",
+          "kind": "tip",
+          "html": "Основание: открытый проект <a href=\"https://timsong-cpp.github.io/cppwp/n4950/expected.object.monadic\">C++23 N4950: and_then и transform</a>, <a href=\"https://timsong-cpp.github.io/cppwp/n4950/expected.object.obs\">доступ к значению и ошибке</a>, <a href=\"https://timsong-cpp.github.io/cppwp/n4950/charconv.from.chars\">from_chars</a>. Значения HTTP-статусов: <a href=\"https://www.rfc-editor.org/rfc/rfc9110.html#section-15.5.1\">RFC 9110 §15.5.1: 400</a> и <a href=\"https://www.rfc-editor.org/rfc/rfc9110.html#section-15.5.21\">§15.5.21: 422</a>. Выбор конкретного отображения и диапазон 1–1000 — условия упражнения, не требования к каждому сервису."
         },
         {
           "type": "note",
@@ -1898,7 +1989,7 @@
       "id": "retry-uncertainty",
       "substation": "consistency-retries",
       "title": "Тайм-аут: клиент не знает, произошло ли действие",
-      "lead": "Тайм-аут описывает ожидание клиента, а не тайную историю сервера. Разберём, почему один и тот же симптом допускает разные исходы.",
+      "lead": "Клиент нажал «создать задачу», но не получил ответа вовремя. Это ещё не значит, что задача не появилась. Разберём, почему повтор запроса иногда помогает, а иногда создаёт дубликат.",
       "blocks": [
         {
           "type": "text",
@@ -2041,6 +2132,10 @@
           "type": "lab",
           "lab": "network",
           "scenario": "retry"
+        },
+        {
+          "type": "text",
+          "html": "<p><b>Если действие затрагивает несколько серверов.</b> Ключ повтора помогает различить попытки одной команды, но не объединяет независимые эффекты. В <a href=\"cpp_station16_distributed_systems.html#section=unknown-outcome\">станции 16</a> разберём потерянный ответ и известный результат, а затем — <a href=\"cpp_station16_distributed_systems.html#section=workflow-recovery\">восстановление оплаты</a>. Этот переход нужен после основ API, транзакций и сообщений, не вместо текущего объяснения.</p>"
         }
       ]
     },
@@ -2314,6 +2409,11 @@
           "type": "note",
           "kind": "tip",
           "html": "Первоисточник: <a href=\"https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/\" target=\"_blank\" rel=\"noreferrer\">OWASP API Security: Broken Object Level Authorization</a>."
+        },
+        {
+          "type": "lab",
+          "lab": "security",
+          "scenario": "access"
         }
       ]
     },
@@ -4729,11 +4829,11 @@
       "id": "project-review",
       "substation": "api-project",
       "title": "Проект: защити договор Task API",
-      "lead": "Соберём проверяемый проектный договор и честно отделим реализованный минимум от расширений. Затем защитим одно действие и один отказ.",
+      "lead": "Составим план расширения нашего сервера: добавить список задач, редактирование, удаление и проверку доступа. Для каждой возможности определим ожидаемое поведение и способ его проверить, не выдавая план за уже работающий код.",
       "blocks": [
         {
           "type": "text",
-          "html": "В коротком сервере уже реализованы создание и чтение в одном процессе. Следующий учебный проект расширяет договор: список страниц, изменение и удаление, затем действия от имени проверенного пользователя. Эти возможности нужно реализовывать и проверять отдельно; таблица ниже не означает, что они уже есть в программе 8.4. В README полезно явно различить «работает сейчас», «проверено такими сценариями» и «запланировано». Самодельные пароли и криптография для такого шага не требуются."
+          "html": "Короткий сервер уже умеет создавать и читать задачи в одном процессе. Теперь спланируем следующие возможности: выдавать список задач порциями, менять и удалять задачу, выполнять действия только от имени пользователя, чья личность проверена. Их нужно реализовывать и проверять отдельно; таблица ниже не означает, что они уже есть в программе 8.4. В README полезно явно различить «работает сейчас», «проверено такими сценариями» и «запланировано». Самостоятельно разрабатывать хранение паролей или криптографические алгоритмы для этого проекта не требуется."
         },
         {
           "type": "code",
@@ -6995,6 +7095,38 @@
         "theoryRefs": [
           "observations"
         ]
+      },
+      {
+        "substation": "validation-errors",
+        "level": "hard",
+        "q": "В C++23-упражнении число 500 допустимо и expected содержит TaskId. Что это доказывает для реального API?",
+        "options": [
+          "Пользователь вправе изменить задачу 500",
+          "Задача 500 уже найдена в хранилище",
+          "Обработчик завершил транзакцию задачи",
+          "Текст прошёл разбор и правило диапазона"
+        ],
+        "answer": 3,
+        "why": "Учебные parse_number и validate_id не обращаются к Storage и не проверяют полномочия. TaskId здесь свидетельствует только о выполненных шагах. Поиск, разрешение операции и её эффект требуют собственных проверок.",
+        "theoryRefs": [
+          "expected-input-http-cpp23"
+        ]
+      },
+      {
+        "substation": "validation-errors",
+        "level": "hard",
+        "q": "В C++23-цепочке callback внутри and_then бросает std::runtime_error. Сам expected автоматически сделает что?",
+        "options": [
+          "Запишет malformed в канал ошибки",
+          "Передаст исключение наружу, не превратив его в Problem",
+          "Вернёт успешный объект с пустым полем",
+          "Назначит ответ HTTP 500 и запишет журнал"
+        ],
+        "answer": 1,
+        "why": "And_then вызывает функцию при наличии значения; произвольное исключение не получает автоматически тип E. HTTP-отображение и граница перехвата задаются отдельно. Expected сам по себе не обещает noexcept для переданных операций.",
+        "theoryRefs": [
+          "expected-input-http-cpp23"
+        ]
       }
     ],
     "interview": [
@@ -7833,6 +7965,22 @@
         "theoryRefs": [
           "replica-state-workbook",
           "conditional-update"
+        ]
+      },
+      {
+        "substation": "validation-errors",
+        "level": "hard",
+        "q": "В API есть optional<Task> для отсутствующей задачи и C++23 expected<TaskId, Problem> для проверки входа. Какое решение обосновано?",
+        "options": [
+          "Перевести оба типа в expected с одинаковыми причинами",
+          "Считать пустой optional ошибкой разбора номера",
+          "Оставить разные типы под разные договоры результата",
+          "Всегда выбрасывать исключение вместо пустого optional"
+        ],
+        "answer": 2,
+        "why": "Optional достаточен, если договор действительно различает только наличие и отсутствие. Expected нужен, когда обычные причины отказа влияют на решение вызывающего кода. Ни новый стандарт, ни единообразие синтаксиса не требуют переписывать корректный интерфейс Storage.",
+        "theoryRefs": [
+          "expected-input-http-cpp23"
         ]
       }
     ]

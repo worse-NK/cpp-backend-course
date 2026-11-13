@@ -1,0 +1,19 @@
+{
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "NetworkPolicy",
+  "metadata": {
+    "name": "course-api-deny-ingress",
+    "namespace": "course13"
+  },
+  "spec": {
+    "podSelector": {
+      "matchLabels": {
+        "app": "course-api"
+      }
+    },
+    "policyTypes": [
+      "Ingress"
+    ],
+    "ingress": []
+  }
+}

@@ -1,0 +1,1336 @@
+/* Reader pilot. Loaded only by station 15; every override stays opt-in. */
+body.course-reader {
+  --blue: var(--course-accent, #185c65);
+  --blue-deep: var(--course-accent, #185c65);
+  --ink: var(--course-ink, #24333b);
+  --mute: var(--course-muted, #52636b);
+  --mute-soft: var(--course-muted, #52636b);
+  --paper: var(--course-paper, #f7f9fa);
+  --line: var(--course-line, #dce4e7);
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--course-sans, system-ui, sans-serif);
+  font-size: 18px;
+  line-height: 1.75;
+  -webkit-tap-highlight-color: #185c6518;
+}
+
+body.course-reader .page,
+body.course-reader .page-wide {
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  column-gap: 64px;
+  align-items: start;
+  width: 100%;
+  max-width: 1210px;
+  margin: 0 auto;
+  padding: 32px 32px 64px;
+}
+
+body.course-reader .reader-skip {
+  position: absolute;
+  z-index: 30;
+  top: 12px;
+  left: 24px;
+  max-width: calc(100vw - 48px);
+  padding: 12px 16px;
+  border: 1px solid var(--blue);
+  border-radius: 6px;
+  color: var(--blue-deep);
+  background: var(--course-surface, #fff);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.6;
+  text-decoration: none;
+  transform: translateY(calc(-100% - 24px));
+}
+
+body.course-reader .reader-skip:focus-visible {
+  transform: none;
+}
+
+body.course-reader .reader-header,
+body.course-reader .reader-content,
+body.course-reader .page > .footer-row,
+body.course-reader .page > footer {
+  grid-column: 2;
+  min-width: 0;
+}
+
+body.course-reader .reader-header {
+  grid-row: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  padding: 0 0 24px;
+  margin: 0 0 32px;
+  border-bottom: 1px solid var(--line);
+}
+
+body.course-reader .reader-brand {
+  color: var(--blue-deep);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+body.course-reader .reader-brand:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+body.course-reader .reader-course-title {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -.015em;
+  text-wrap: balance;
+}
+
+body.course-reader .reader-header .reading-progress {
+  margin: 0;
+  color: var(--mute);
+  font-size: 13px;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+
+body.course-reader .reader-header details {
+  position: relative;
+  min-width: 0;
+  color: var(--mute);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+body.course-reader .reader-header summary {
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+body.course-reader .reader-header .reading-settings {
+  margin: 12px 0 0;
+  font-size: 14px;
+}
+
+body.course-reader .reading-settings button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--mute);
+  font-size: 14px;
+}
+
+body.course-reader .reading-settings button[aria-pressed="true"] {
+  border-color: #a9c2c6;
+  color: var(--blue-deep);
+  background: var(--course-surface, #fff);
+}
+
+body.course-reader .reader-header .file-warning {
+  flex-basis: 100%;
+  margin: 0;
+  padding: 8px 12px;
+  border: 0;
+  border-left: 2px solid #a58b58;
+  border-radius: 0;
+  background: transparent;
+  color: #645838;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+body.course-reader .reader-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0 0 24px;
+  color: var(--mute);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+body.course-reader .reader-breadcrumb a {
+  text-decoration: none;
+}
+
+body.course-reader .reader-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+body.course-reader .reader-content .reading-breadcrumbs {
+  display: none;
+}
+
+/* Contents is a quiet reference rail, not a second hero. */
+body.course-reader .page > .substation-shell {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  position: sticky;
+  top: 24px;
+  bottom: auto;
+  left: auto;
+  width: 270px;
+  max-height: calc(100dvh - 48px);
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #bdcbd0 transparent;
+  margin: 0;
+  padding: 8px 24px 24px 8px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+body.course-reader .contents-toggle {
+  margin: 0;
+  padding: 8px 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+body.course-reader .course-home {
+  margin: 16px 0 24px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+body.course-reader .substation-heading {
+  margin: 0 0 16px;
+}
+
+body.course-reader .substation-heading span {
+  color: var(--mute);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.6;
+}
+
+body.course-reader .substation-heading h2 {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+body.course-reader .contents-search {
+  margin: 0 0 24px;
+  color: var(--mute);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+body.course-reader .contents-search input {
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: var(--ink);
+  background: var(--course-surface, #fff);
+  font-size: 14px;
+}
+
+body.course-reader .search-result-count {
+  font-size: 13px;
+}
+
+body.course-reader .substation-card {
+  gap: 0;
+  padding: 12px;
+  margin: 4px 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--ink);
+  background: transparent;
+  box-shadow: none;
+  text-decoration: none;
+  transform: none;
+}
+
+body.course-reader .substation-card:hover {
+  background: #edf2f3;
+}
+
+body.course-reader .substation-card.active {
+  border-color: #d4e3e5;
+  color: var(--blue-deep);
+  background: var(--course-accent-soft, #edf4f4);
+}
+
+body.course-reader .substation-number,
+body.course-reader .substation-card.active .substation-number {
+  margin: 0 0 4px;
+  color: var(--mute);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+body.course-reader .substation-title {
+  color: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+body.course-reader .substation-progress {
+  margin: 8px 0 0;
+  padding: 0;
+  color: var(--mute);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+
+body.course-reader .contents-sections {
+  margin: 8px 0 20px 12px;
+  border-left-color: var(--line);
+}
+
+body.course-reader .contents-sections :is(button, a:not(.contents-lab-link)),
+body.course-reader .contents-ending :is(button, a) {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 0;
+  border-left: 2px solid transparent;
+  color: var(--mute);
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+body.course-reader .contents-sections :is(button, a:not(.contents-lab-link)):hover,
+body.course-reader .contents-ending :is(button, a):hover {
+  color: var(--ink);
+  background: #edf2f3;
+}
+
+body.course-reader .contents-sections :is(button, a:not(.contents-lab-link))[aria-current],
+body.course-reader .contents-ending :is(button, a)[aria-current] {
+  border-left-color: var(--blue);
+  color: var(--blue-deep);
+  background: var(--course-accent-soft, #edf4f4);
+  font-weight: 600;
+}
+
+body.course-reader .contents-sections a.contents-lab-link {
+  margin: 4px 8px 12px 12px;
+  padding: 10px 12px;
+  border-color: #c9dddf;
+  border-radius: 6px;
+  color: var(--blue-deep);
+  background: var(--course-accent-soft, #edf4f4);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+body.course-reader .contents-ending {
+  margin-top: 24px;
+  padding-top: 16px;
+}
+
+body.course-reader .contents-ending .contents-analysis {
+  padding-left: 12px;
+  font-size: 13px;
+}
+
+body.course-reader .contents-sections .contents-checkpoint {
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+  font-weight: 600;
+}
+
+body.course-reader .contents-all-labs {
+  margin: 16px 12px 0;
+  color: var(--blue-deep);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* The prose stays open; panels mark a change in the reader's task. */
+body.course-reader .reader-content {
+  grid-row: 2;
+  max-width: 70ch;
+}
+
+body.course-reader .reader-return {
+  margin: 0 0 32px;
+  padding: 20px 24px;
+  border: 1px solid #c5dadd;
+  border-radius: 6px;
+  background: var(--course-accent-soft, #edf4f4);
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+body.course-reader .reader-return > strong {
+  display: block;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+body.course-reader .reader-return > p {
+  margin: 8px 0 16px;
+  color: var(--mute);
+}
+
+body.course-reader .reader-return-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+body.course-reader .reader-return-actions button {
+  flex: none;
+}
+
+body.course-reader .reader-content .card {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.course-reader .reader-content :is(h2, h3, h4) {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -.015em;
+  text-wrap: balance;
+  scroll-margin-top: 24px;
+}
+
+body.course-reader .reader-content h2,
+body.course-reader .section-title {
+  margin: 0 0 24px;
+  font-size: 32px;
+  line-height: 1.25;
+}
+
+body.course-reader .reader-content h3 {
+  margin: 32px 0 16px;
+  font-size: 23px;
+  line-height: 1.4;
+}
+
+body.course-reader .reader-content h4 {
+  margin: 24px 0 12px;
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+body.course-reader .kicker,
+body.course-reader .note-label,
+body.course-reader .self-check-title,
+body.course-reader .solution-label,
+body.course-reader .notes-label {
+  margin-bottom: 8px;
+  color: var(--mute);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.7;
+}
+
+body.course-reader .section-lead {
+  margin: 0 0 32px;
+  color: var(--mute);
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+body.course-reader .theory-text {
+  margin: 0 0 24px;
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1.8;
+  overflow-wrap: break-word;
+}
+
+body.course-reader .theory-text :is(p, ul, ol) {
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+body.course-reader .theory-text li + li {
+  margin-top: 8px;
+}
+
+body.course-reader .theory-text :is(b, strong),
+body.course-reader .note-text :is(b, strong) {
+  font-weight: 600;
+}
+
+body.course-reader .theory-text a,
+body.course-reader .note-text a,
+body.course-reader .notes a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+body.course-reader .theory-text code,
+body.course-reader .note-text code,
+body.course-reader .self-check code {
+  padding: .1em .3em;
+  border-radius: 4px;
+  color: #28434c;
+  background: #eaf0f2;
+  font-size: .88em;
+  overflow-wrap: anywhere;
+}
+
+body.course-reader .code-wrap {
+  min-width: 0;
+  margin: 32px 0;
+}
+
+body.course-reader .code-toolbar {
+  align-items: center;
+  gap: 12px 24px;
+  margin-bottom: 12px;
+}
+
+body.course-reader .code-caption {
+  color: var(--mute);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+/* A version describes the listing, not the learner's global reading mode. */
+body.course-reader .code-standard {
+  display: inline-block;
+  margin-inline-start: 10px;
+  padding: 1px 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--ink);
+  font-family: var(--course-mono, ui-monospace, monospace);
+  font-size: 12px;
+  line-height: 1.8;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+body.course-reader .copy-code {
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+body.course-reader :is(.code-block, .question-code, .solution-code, .assembly-solution pre) {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 24px;
+  border-radius: 10px;
+  color: #eaf0f3;
+  background: var(--course-code, #202c35);
+  font-family: var(--course-mono, ui-monospace, monospace);
+  font-size: 14.5px;
+  line-height: 1.8;
+  tab-size: 4;
+  scrollbar-width: thin;
+  scrollbar-color: #6a7b87 var(--course-code, #202c35);
+}
+
+body.course-reader .code-block,
+body.course-reader .solution-code {
+  white-space: pre;
+}
+
+body.course-reader .question-code {
+  margin-bottom: 24px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+body.course-reader .output-wrap .code-block {
+  border: 1px solid #d5e3dc;
+  border-left: 3px solid #7a9d8a;
+  color: #304b3f;
+  background: #f0f6f2;
+}
+
+body.course-reader .copy-status {
+  font-size: 13px;
+}
+
+body.course-reader .theory-text :is(table, .table-scroll),
+body.course-reader .note-text table {
+  max-width: 100%;
+}
+
+body.course-reader .theory-text table,
+body.course-reader .note-text table {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+body.course-reader .theory-text :is(th, td),
+body.course-reader .note-text :is(th, td) {
+  padding: 12px 16px;
+}
+
+body.course-reader .theory-text th,
+body.course-reader .note-text th {
+  background: #edf2f3;
+}
+
+body.course-reader .theory-text .table-scroll {
+  margin: 32px 0;
+  border-radius: 6px;
+  background: var(--course-surface, #fff);
+}
+
+body.course-reader .note {
+  margin: 32px 0;
+  padding: 20px 24px;
+  border-left-width: 3px;
+  border-radius: 0 6px 6px 0;
+}
+
+body.course-reader .note.key {
+  border-left-color: #7b9da5;
+  background: #eef4f5;
+}
+
+body.course-reader .note.tip {
+  border-left-color: #7e9d8a;
+  background: #f0f5f1;
+}
+
+body.course-reader .note.warn {
+  border-left-color: #a38b57;
+  background: #f7f3e9;
+}
+
+body.course-reader .note-text {
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+body.course-reader .note.source-note {
+  padding: 24px 0 0;
+  border-top: 1px solid var(--line);
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+body.course-reader .source-note .note-text {
+  color: var(--mute);
+  font-size: 15px;
+}
+
+body.course-reader .self-check {
+  display: block;
+  margin: 32px 0;
+  padding: 24px;
+  border: 1px solid #d0e0e2;
+  border-radius: 10px;
+  color: var(--ink);
+  background: var(--course-surface, #fff);
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+body.course-reader .self-check > p {
+  margin: 12px 0 16px;
+}
+
+body.course-reader .self-check summary {
+  padding: 10px 0;
+  color: var(--blue-deep);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+body.course-reader .self-check-answer {
+  margin-top: 12px;
+  padding-top: 20px;
+  font-size: 16px;
+  line-height: 1.85;
+}
+
+body.course-reader .self-check-answer > :last-child {
+  margin-bottom: 0;
+}
+
+body.course-reader .course-lab-entry {
+  margin: 32px 0;
+  padding: 24px;
+  border: 1px solid #bed3d7;
+  border-radius: 10px;
+  background: var(--course-accent-soft, #edf4f4);
+}
+
+body.course-reader .course-lab-entry .course-lab-eyebrow {
+  color: var(--blue-deep);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.6;
+}
+
+body.course-reader .course-lab-entry h3 {
+  margin: 12px 0;
+  color: var(--ink);
+  font-size: 23px;
+  line-height: 1.4;
+}
+
+body.course-reader .course-lab-entry p {
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+body.course-reader .course-lab-entry a {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--blue);
+  border-radius: 6px;
+  color: #fff;
+  background: var(--blue);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+body.course-reader .course-lab-entry a:hover {
+  border-color: #104b53;
+  background: #104b53;
+}
+
+body.course-reader .course-lab-entry small {
+  margin-top: 12px;
+  color: var(--mute);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+body.course-reader :is(.diagram, .network-visual) {
+  margin: 32px 0;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f0f4f5;
+  box-shadow: none;
+}
+
+body.course-reader :is(.diagram-title, .visual-head figcaption) {
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+
+body.course-reader :is(.diagram-item, .visual-item) {
+  border-color: var(--line);
+  border-radius: 6px;
+  background: var(--course-surface, #fff);
+  box-shadow: none;
+}
+
+body.course-reader :is(.diagram-item strong, .visual-item strong) {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+body.course-reader :is(.diagram-item p, .visual-item-text, .visual-caption, .diagram-caption) {
+  color: var(--mute);
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+body.course-reader .section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+body.course-reader .section-actions > :is(.primary, .secondary) {
+  flex: 0 0 auto;
+  width: fit-content;
+  min-width: 0;
+  max-width: 100%;
+  align-self: flex-start;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+body.course-reader :is(.primary, .secondary, .solution-button, .ghost, .quiz-back, .hint-button) {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 550;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+body.course-reader .primary {
+  min-width: 0;
+  background: var(--blue);
+}
+
+body.course-reader .primary:hover {
+  background: #104b53;
+}
+
+body.course-reader .primary.done {
+  background: #32684d;
+}
+
+body.course-reader :is(.secondary, .ghost, .quiz-back) {
+  border: 1px solid #bdced3;
+  color: var(--blue-deep);
+  background: transparent;
+}
+
+body.course-reader :is(.secondary, .ghost, .quiz-back):hover {
+  border-color: #8baeb5;
+  background: #edf3f4;
+}
+
+body.course-reader .reader-content > .ghost {
+  width: auto;
+  margin: 0 0 24px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+/* Answering is visually distinct from reading, without reducing text size. */
+body.course-reader .station-checkpoint,
+body.course-reader .station-training {
+  min-width: 0;
+}
+
+body.course-reader .question {
+  margin: 24px 0;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+body.course-reader .level-tag {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+body.course-reader .counter {
+  color: var(--mute);
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+body.course-reader .quiz-progress {
+  height: 4px;
+  margin: 16px 0 24px;
+}
+
+body.course-reader .options {
+  gap: 12px;
+}
+
+body.course-reader .option {
+  gap: 16px;
+  min-height: 56px;
+  padding: 16px;
+  border: 1px solid #cdd9de;
+  border-radius: 6px;
+  color: var(--ink);
+  background: var(--course-surface, #fff);
+}
+
+body.course-reader .option:not(:disabled):hover {
+  border-color: #769da6;
+  background: #f0f6f7;
+}
+
+body.course-reader .option-text {
+  min-width: 0;
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+body.course-reader .option-mark {
+  flex-basis: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: var(--blue-deep);
+  background: #eaf1f3;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+body.course-reader .option.correct {
+  border-color: #6b9d80;
+  background: #eef6f1;
+}
+
+body.course-reader .option.wrong {
+  border-color: #b5847b;
+  background: #faf0ed;
+}
+
+body.course-reader .option.dim {
+  opacity: .72;
+}
+
+body.course-reader .correct .option-mark {
+  color: #fff;
+  background: #32684d;
+}
+
+body.course-reader .wrong .option-mark {
+  color: #fff;
+  background: #994b3c;
+}
+
+body.course-reader .explanation {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top-style: solid;
+}
+
+body.course-reader .explanation-label {
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body.course-reader .explanation p,
+body.course-reader .notes,
+body.course-reader .task-brief,
+body.course-reader .task-solution-text,
+body.course-reader .task-preparation p,
+body.course-reader .hint-text {
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+body.course-reader .quiz-theory-refs {
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: #edf3f4;
+}
+
+body.course-reader .quiz-theory-label,
+body.course-reader .quiz-theory-refs a {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+body.course-reader .finale-grid {
+  gap: 24px;
+}
+
+body.course-reader .finale-item {
+  padding: 24px;
+  border-radius: 10px;
+  background: var(--course-surface, #fff);
+}
+
+body.course-reader .finale-item h3 {
+  margin: 8px 0 16px;
+}
+
+body.course-reader .finale-item p,
+body.course-reader .analysis-entry p,
+body.course-reader .assessment-extra p,
+body.course-reader .training-entry p {
+  margin: 0 0 16px;
+  color: var(--mute);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+body.course-reader .analysis-entry {
+  padding: 20px;
+  border-left-color: #86a7ae;
+  border-radius: 0 6px 6px 0;
+  background: #eef4f5;
+}
+
+body.course-reader .analysis-entry h4 {
+  margin-top: 0;
+}
+
+body.course-reader .training-filters {
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+body.course-reader .training-filters label:first-child {
+  grid-column: 1 / -1;
+}
+
+body.course-reader .training-filters label,
+body.course-reader .training-filters select {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+body.course-reader .training-batches {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+body.course-reader .training-batch {
+  padding: 20px 40px 20px 20px;
+  border-radius: 6px;
+  background: var(--course-surface, #fff);
+}
+
+body.course-reader .training-batch-number,
+body.course-reader .training-batch-result,
+body.course-reader .training-attempt-heading > span {
+  font-size: 14px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body.course-reader .training-batch strong,
+body.course-reader .training-summary,
+body.course-reader .training-review,
+body.course-reader .training-review > summary,
+body.course-reader .training-review-item {
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+body.course-reader .training-review-item h3 {
+  font-size: 19px;
+}
+
+body.course-reader .task-level,
+body.course-reader .try-note,
+body.course-reader .check-item > span:last-child {
+  font-size: 15px;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+body.course-reader .assembly-context,
+body.course-reader .assembly button code {
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+body.course-reader .assembly-placeholder {
+  font-size: 15px;
+}
+
+body.course-reader .page > .footer-row,
+body.course-reader .reader-content > .footer-row {
+  margin-top: 48px;
+}
+
+body.course-reader .reset {
+  min-height: 44px;
+  border-radius: 6px;
+  color: var(--mute);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+body.course-reader footer {
+  margin-top: 24px;
+  color: var(--mute);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+body.course-reader .reading-large .theory-text {
+  font-size: 21px;
+}
+
+body.course-reader .reading-large .section-lead {
+  font-size: 22px;
+}
+
+body.course-reader .reading-large .note-text {
+  font-size: 19px;
+}
+
+body.course-reader .reading-large .code-block {
+  font-size: 16px;
+}
+
+body.course-reader :is(a, button, summary, input, select, textarea):focus-visible {
+  outline: 3px solid #367c88;
+  outline-offset: 4px;
+}
+
+body.course-reader .reader-content:focus {
+  outline: 0;
+}
+
+body.course-reader .reader-content:focus-visible {
+  outline: 0;
+  box-shadow: 0 -3px 0 #367c88;
+}
+
+body.course-reader .fade-in {
+  animation: none;
+}
+
+@media (max-width: 1099px) {
+  body.course-reader .page,
+  body.course-reader .page-wide {
+    display: block;
+    max-width: 824px;
+    padding: 24px 32px 64px;
+  }
+
+  body.course-reader .reader-header {
+    margin-bottom: 24px;
+  }
+
+  body.course-reader .page > .substation-shell {
+    position: static;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    margin: 0 0 32px;
+    padding: 8px 16px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--course-surface, #fff);
+  }
+
+  body.course-reader .substation-shell[open] {
+    padding-bottom: 24px;
+  }
+
+  body.course-reader .reader-content {
+    max-width: none;
+  }
+}
+
+@media (max-width: 600px) {
+  body.course-reader {
+    font-size: 16px;
+  }
+
+  body.course-reader .page,
+  body.course-reader .page-wide {
+    padding: 16px max(20px, env(safe-area-inset-right)) 48px max(20px, env(safe-area-inset-left));
+  }
+
+  body.course-reader .reader-header {
+    gap: 12px 16px;
+    padding-bottom: 16px;
+  }
+
+  body.course-reader .reader-course-title {
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  body.course-reader .reader-breadcrumb {
+    margin-bottom: 24px;
+    font-size: 13px;
+  }
+
+  body.course-reader .reader-return {
+    padding: 20px;
+  }
+
+  body.course-reader .reader-return-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  body.course-reader .reader-return-actions button {
+    width: 100%;
+    text-align: left;
+  }
+
+  body.course-reader .reader-content h2,
+  body.course-reader .section-title {
+    font-size: 27px;
+    line-height: 1.35;
+  }
+
+  body.course-reader .reader-content h3 {
+    font-size: 22px;
+  }
+
+  body.course-reader .section-lead {
+    font-size: 18px;
+    line-height: 1.75;
+  }
+
+  body.course-reader .theory-text {
+    font-size: 16px;
+    line-height: 1.85;
+  }
+
+  body.course-reader .code-toolbar {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  body.course-reader .code-caption {
+    font-size: 14px;
+  }
+
+  body.course-reader :is(.code-block, .question-code, .solution-code, .assembly-solution pre) {
+    padding: 16px;
+    font-size: 14px;
+  }
+
+  body.course-reader :is(.note, .self-check, .course-lab-entry, .diagram, .network-visual, .finale-item) {
+    padding: 20px;
+  }
+
+  body.course-reader .note.source-note {
+    padding: 24px 0 0;
+  }
+
+  body.course-reader .self-check {
+    font-size: 16px;
+  }
+
+  body.course-reader .section-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 32px;
+  }
+
+  body.course-reader .section-actions :is(.primary, .secondary) {
+    flex: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  body.course-reader .question {
+    font-size: 21px;
+  }
+
+  body.course-reader .option {
+    gap: 12px;
+    padding: 16px 12px;
+  }
+
+  body.course-reader .training-batches,
+  body.course-reader .training-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.course-reader .training-filters label:first-child {
+    grid-column: auto;
+  }
+
+  body.course-reader .reading-large .theory-text {
+    font-size: 19px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.course-reader *,
+  body.course-reader *::before,
+  body.course-reader *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  body.course-reader {
+    color: #111;
+    background: #fff;
+    font-size: 11pt;
+  }
+
+  body.course-reader .page,
+  body.course-reader .page-wide {
+    display: block;
+    max-width: none;
+    padding: 0;
+  }
+
+  body.course-reader .reader-header,
+  body.course-reader .reader-skip,
+  body.course-reader .reader-return,
+  body.course-reader .reader-breadcrumb,
+  body.course-reader .substation-shell,
+  body.course-reader .reader-content > .ghost,
+  body.course-reader .course-lab-entry a {
+    display: none !important;
+  }
+
+  body.course-reader .reader-content {
+    max-width: none;
+  }
+
+  body.course-reader .theory-text,
+  body.course-reader .section-lead {
+    font-size: 11pt;
+  }
+
+  body.course-reader :is(.code-block, .question-code, .solution-code, .assembly-solution pre) {
+    color: #111;
+    background: #f5f5f5;
+    font-size: 9pt;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  body.course-reader .theory-text .table-scroll,
+  body.course-reader .theory-text .table-scroll table {
+    min-width: 0;
+    overflow: visible;
+  }
+}

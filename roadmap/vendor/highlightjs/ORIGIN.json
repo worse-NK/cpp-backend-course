@@ -1,0 +1,34 @@
+{
+  "name": "Highlight.js",
+  "version": "11.12.0",
+  "license": "BSD-3-Clause",
+  "purpose": "Local syntax highlighting for the course and the Studio preview; no automatic language detection or code execution.",
+  "files": {
+    "highlight.min.js": {
+      "url": "https://raw.githubusercontent.com/highlightjs/cdn-release/11.12.0/build/highlight.min.js",
+      "sha256": "8ab71eb09c51f501e5e25157d9cff100e46cc29bcbfc744d0b746d451fca7f53"
+    },
+    "LICENSE": {
+      "url": "https://raw.githubusercontent.com/highlightjs/highlight.js/11.12.0/LICENSE",
+      "sha256": "6c081431591d9df696c82dc598fe1423765b8a299b200ed00b281afd0f64c490"
+    },
+    "http.min.js": {
+      "url": "https://raw.githubusercontent.com/highlightjs/cdn-release/11.12.0/build/languages/http.min.js",
+      "sha256": "b09b4afc1ce71f37f4434baccae5800e0812c6eb1db2cb8978fe9e4d668f45a6"
+    },
+    "cmake.min.js": {
+      "url": "https://raw.githubusercontent.com/highlightjs/cdn-release/11.12.0/build/languages/cmake.min.js",
+      "sha256": "0cd6dc22b0b99dc53a4288ae30f760dab4da12ddde570f617be30a396b5b97ec"
+    },
+    "dockerfile.min.js": {
+      "url": "https://raw.githubusercontent.com/highlightjs/cdn-release/11.12.0/build/languages/dockerfile.min.js",
+      "sha256": "d96f73b077d654d776795097cf49afae5dce3ce453106af022eae013ad2ec8b1"
+    },
+    "nginx.min.js": {
+      "url": "https://raw.githubusercontent.com/highlightjs/cdn-release/11.12.0/build/languages/nginx.min.js",
+      "sha256": "8c53cc63ce0cf4ec0ad80b77273de23dec6974ab069d46d14d5c75febe880e1f"
+    }
+  },
+  "modified": false,
+  "documentation": "https://highlightjs.readthedocs.io/en/latest/api.html"
+}

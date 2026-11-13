@@ -1,0 +1,24 @@
+/* Calm syntax colours on the shared dark code surface. No layout mutation. */
+body.course-dark code.hljs {
+  color: #dfeef5;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  tab-size: 4;
+}
+body.course-dark .hljs :is(.hljs-keyword, .hljs-selector-tag) { color: #d5b1ea; font-weight: 600; }
+body.course-dark .hljs :is(.hljs-type, .hljs-built_in, .hljs-title.class_) { color: #a1d6e2; }
+body.course-dark .hljs :is(.hljs-string, .hljs-regexp, .hljs-addition) { color: #c9d89c; }
+body.course-dark .hljs :is(.hljs-number, .hljs-literal, .hljs-symbol, .hljs-attr, .hljs-variable) { color: #e3b68c; }
+body.course-dark .hljs :is(.hljs-comment, .hljs-quote) { color: #a6b6c1; font-style: normal; }
+body.course-dark .hljs :is(.hljs-title.function_, .hljs-section),
+body.course-dark .hljs .hljs-function .hljs-title { color: #e5d091; }
+body.course-dark .hljs :is(.hljs-meta, .hljs-meta .hljs-keyword, .hljs-name, .hljs-selector-class) { color: #9cc6ec; }
+body.course-dark .hljs .hljs-meta .hljs-string { color: #c9d89c; }
+body.course-dark .hljs :is(.hljs-subst, .hljs-params) { color: #dfeef5; }
+body.course-dark .hljs .hljs-deletion { color: #edb2b2; }
+@media print {
+  body.course-dark code.hljs,
+  body.course-dark code.hljs span { color: inherit !important; background: transparent !important; font-weight: inherit; }
+}

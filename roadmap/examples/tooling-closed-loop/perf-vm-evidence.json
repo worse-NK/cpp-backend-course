@@ -1,0 +1,22 @@
+{
+  "kind": "perf-acceptance",
+  "environment": "offline QEMU/TCG, x86_64 Linux6.8",
+  "events": "software only; no hardware cycles claim",
+  "cases": [
+    {
+      "mode": "cpu",
+      "stdout": "mode=cpu requests=4 checksum=4718361256356321440 wall_ms=94.5366 cpu_ms=93.741\n",
+      "perf_stat": "187.92;msec;task-clock;187924023;100.00;0.942;CPUs utilized\n0;;context-switches;187924023;100.00;0.000;/sec\n129;;page-faults;187924023;100.00;686.448;/sec\n"
+    },
+    {
+      "mode": "wait",
+      "stdout": "mode=wait requests=4 checksum=15542552651318516316 wall_ms=87.6636 cpu_ms=5.733\n",
+      "perf_stat": "121.37;msec;task-clock;121368298;100.00;0.560;CPUs utilized\n7;;context-switches;121368298;100.00;57.676;/sec\n132;;page-faults;121368298;100.00;1.088;K/sec\n"
+    }
+  ],
+  "status": "PASS",
+  "record_stdout": "mode=cpu requests=8 checksum=11310648149100946093 wall_ms=280.821 cpu_ms=280.612\n",
+  "record_stderr": "[ perf record: Woken up 1 times to write data ]\n[ perf record: Captured and wrote 0.003 MB /tmp/course-perf.data (17 samples) ]\n",
+  "report": "# To display the perf.data header info, please use --header/--header-only options.\n#\n#\n# Total Lost Samples: 0\n#\n# Samples: 17  of event 'cpu-clock:u'\n# Event count (approx.): 346938771\n#\n# Overhead  Symbol                                IPC   [IPC Coverage]\n# ........  ....................................  ....................\n#\n    82.35%  [.] mix(unsigned long, unsigned int)  -      -            \n            |\n            ---0x77daa414c1ca\n               __libc_start_main\n               _start\n\n     5.88%  [.] __cpu_indicator_init              -      -            \n            |\n            ---0x77daa45ba71f\n               0x77daa45ba824\n               0x77daa45d45a0\n\n     5.88%  [.] 0x000000000000f42f                -      -            \n            |\n            ---0x77daa45d76f2\n               0x77daa45d3f46\n               0x77daa45d575e\n               0x77daa45d4548\n\n     5.88%  [.] 0x0000000000060eb2                -      -            \n            |\n            ---0x77daa4184328\n               0x77daa418535c\n               0x77daa418c6c5\n               vsnprintf\n               0x77daa4442285\n               std::ostreambuf_iterator<char, std::char_traits<char> > std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::_M_insert_float<double>(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, char, double) const\n               std::ostream& std::ostream::_M_insert<double>(double)\n               main\n               0x77daa414c1ca\n               __libc_start_main\n               _start\n\n\n\n#\n# (Cannot load tips.txt file, please install perf!)\n#\n",
+  "data_bytes": 9982
+}

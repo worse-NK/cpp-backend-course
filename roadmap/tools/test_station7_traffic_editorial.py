@@ -22,11 +22,14 @@ class TrafficEditorialTests(unittest.TestCase):
 
     def test_schema_progress_and_sections(self):
         validate(self.data, SOURCE)
-        self.assertEqual(len(self.sections), 25)
+        self.assertEqual(len(self.sections), 26)
         self.assertEqual(self.data['meta']['storeKey'], 'cpp_station7_traffic_progress_v1')
 
     def test_code_and_visuals_are_preserved(self):
-        payloads = [(s['id'], b) for s in self.data['theory'] for b in s['blocks']
+        self.assertIn('traffic-real-tcp-evidence', self.sections)
+        original = [s for s in self.data['theory'] if s['id'] != 'traffic-real-tcp-evidence']
+        self.assertEqual(len(original), 25)
+        payloads = [(s['id'], b) for s in original for b in s['blocks']
                     if b['type'] not in ('text', 'note', 'self-check')]
         digest = hashlib.sha256(json.dumps(payloads, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
         self.assertEqual(digest, 'a0762211ad4dc3802d130dd9bed963f077520d5093085674020ee770e5ad3df4')

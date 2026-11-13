@@ -1,0 +1,20 @@
+groups:
+  - name: course-station14
+    rules:
+      - alert: CourseApiScrapeFailed
+        expr: up{job="course-api"} == 0
+        for: 15s
+        labels:
+          severity: warning
+        annotations:
+          summary: Prometheus cannot scrape the course API
+      - alert: CourseApiErrorRatio
+        expr: >-
+          (sum(rate(course_requests_total{job="course-api",outcome="error"}[1m]))
+          / sum(rate(course_requests_total{job="course-api"}[1m])) > 0.10)
+          and (sum(rate(course_requests_total{job="course-api"}[1m])) > 0.5)
+        for: 15s
+        labels:
+          severity: warning
+        annotations:
+          summary: Error ratio exceeds the explicitly chosen lab threshold

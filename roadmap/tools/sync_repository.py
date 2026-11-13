@@ -21,6 +21,7 @@ def collect_repository_files() -> dict[str, bytes]:
     check_release(files, stations)
     sources = {
         "content/cheatsheet.json", "content/glossary.json", "content/visual-labs.json",
+        "content/cpp-examples.json",
         "content/service-workshop/route.json", "assets/sql-lab-worker.js",
         "vendor/sqljs/sql-asm.js", "vendor/sqljs/README.md",
     }
@@ -46,8 +47,11 @@ def collect_repository_files() -> dict[str, bytes]:
                    for path in (ROOT / "tools").glob(pattern))
     sources.update("tools/" + name for name in (
         "checkpoint_data.py", "export_final_selection.js", "audit_question_choices.py",
-        "validate_materials.py", "netlab_vm_guest.py", "netlab_vm_init.sh",
+        "validate_materials.py", "cpp_examples.py", "course_theme.py", "netlab_vm_guest.py", "netlab_vm_init.sh",
         "run_netlab_vm.py", "sync_repository.py"))
+    sources.update("tools/" + name for name in (
+        "run_gap_network_vm.py", "gap_network_vm_init.sh", "tooling_perf_vm_guest.py",
+        "prepare_tooling_perf_vm.py"))
     files.update({"roadmap/" + name: source_bytes(name) for name in sorted(sources)})
     files[".gitignore"] = (ROOT.parent / ".gitignore").read_bytes()
     return files

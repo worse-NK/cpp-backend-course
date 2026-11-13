@@ -5,6 +5,7 @@ import html
 import json
 import re
 from pathlib import Path
+from course_theme import decorate_html
 from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -75,7 +76,7 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
             parts.append(f'<li><a href="{html.escape(url, quote=True)}">{html.escape(label)}</a></li>')
         parts.append('</ul>')
     parts.append('</section></main></html>\n')
-    return '\n'.join(parts)
+    return decorate_html('\n'.join(parts), page='sources')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

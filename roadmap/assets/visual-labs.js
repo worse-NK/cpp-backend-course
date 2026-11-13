@@ -6,12 +6,24 @@
   const esc=value=>String(value??"—").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const modeNames={unique:"Передать unique_ptr",shared:"shared_ptr и weak_ptr",cycle:"Сильный цикл","weak-cycle":"Слабая обратная связь",growth:"Буфер заполнен",reserved:"Есть запас",erase:"Удалить элемент",header:"Изменён заголовок",source:"Изменён .cpp",readme:"Изменён README",separate:"Раздельные load/store",mutex:"Один mutex на всю операцию",rmw:"Один fetch_add",fragmented:"Порции 1 + 2 + 1 + 3",combined:"Все байты сразу",oversize:"Недопустимая длина",retry:"Повтор без ключа",dedup:"Повтор с ключом",version:"Устаревший If-Match",left:"LEFT JOIN · условие в ON",where:"Условие перенесли в WHERE","count-star":"Заменили COUNT на COUNT(*)",inner:"INNER JOIN",commit:"A фиксирует место",rollback:"A откатывается",rc:"Снимки Read Committed",rr:"Снимок Repeatable Read",bounded:"Приём с ограничением",drain:"Закрыть приём на 7-м такте"};
   Object.assign(modeNames,{routed:"Маршрут без NAT",snat:"SNAT и обратный ответ",filtered:"Drop в forward",pmtu6:"IPv6 · MTU и PTB"});
+  Object.assign(modeNames,{cxx20:"Временный · C++20",cxx23:"Временный · C++23",named:"Именованный · обе версии",parameter:"Ссылка на параметр · C++23","run-task":"Выполнить задачу","discard-task":"Удалить без выполнения"});
   let lab=null,mode="",context=null,model=null,cursor=0,timer=null,parameters={rate:8,workers:4,queue:8};
   function stationName(id){return id==="station7-netlab"?"7Б":id==="station9-sql"?"9A":id==="station9"?"9B":id.replace("station","");}
   function entryHref(item,e){return window.courseLabHref(item.id,e.scenario,e.station,e.section);}
+  function introduction(item,scenario){
+    const intro=item.introduction;
+    if(!intro)return "";
+    const variant=item.scenarioNotes&&item.scenarioNotes[scenario];
+    return '<section class="lab-primer" id="labIntroduction" aria-labelledby="labIntroductionHeading">'+
+      '<h2 id="labIntroductionHeading">Что будем разбирать</h2>'+
+      '<div class="lab-primer-copy">'+intro.paragraphs.map(text=>'<p>'+esc(text)+'</p>').join("")+'</div>'+
+      (variant?'<p class="lab-primer-scenario" id="labScenarioNote">'+esc(variant)+'</p>':"")+
+      '<div class="lab-primer-instructions"><p><strong>Что выясняем.</strong> '+esc(intro.goal)+'</p>'+
+      '<p><strong>С чего начать.</strong> '+esc(intro.action)+'</p></div></section>';
+  }
   function catalogPage(){
     stop();lab=null;model=null;document.title="Визуальные лаборатории · C++ / Backend";$("catalogLink").hidden=true;$("returnLink").href="cpp_backend_roadmap.html";$("returnLink").textContent="← К программе курса";
-    root.innerHTML='<section class="lab-hero catalog-intro"><div class="lab-kicker">Связать правила в один эксперимент</div><h1>Визуальные лаборатории</h1><p>Здесь можно проследить изменение состояния, поменять условие и объяснить результат. Начинай с лаборатории, на которую привела теория: каждая опирается на конкретные разделы курса.</p></section><div class="catalog-grid">'+catalog.map((item,i)=>'<article class="catalog-card"><div class="catalog-number"><span>'+String(i+1).padStart(2,"0")+'</span><small>Станции '+[...new Set(item.entries.map(e=>stationName(e.station)))].join(", ")+'</small></div><h2>'+esc(item.title)+'</h2><p>'+esc(item.summary)+'</p><a class="catalog-open" href="'+esc(window.courseLabHref(item.id,item.scenarios[0]))+'">Открыть лабораторию →</a><div class="catalog-theory"><a href="'+esc(item.entries[0].file+'#section='+item.entries[0].section)+'">Сначала прочитать теорию ↗</a></div></article>').join("")+'</div>';
+    root.innerHTML='<section class="lab-hero catalog-intro"><div class="lab-kicker">Связать правила в один эксперимент</div><h1>Визуальные лаборатории</h1><p>Здесь собраны пошаговые разборы работы программ: когда освобождаются данные, как сообщение доходит до получателя и почему запрос возвращает именно такой результат. Выбирай лабораторию из изучаемого раздела курса; затем меняй одно условие и сравнивай шаги.</p></section><div class="catalog-grid">'+catalog.map((item,i)=>'<article class="catalog-card"><div class="catalog-number"><span>'+String(i+1).padStart(2,"0")+'</span><small>Станции '+[...new Set(item.entries.map(e=>stationName(e.station)))].join(", ")+'</small></div><h2>'+esc(item.title)+'</h2><p>'+esc(item.summary)+'</p><a class="catalog-open" href="'+esc(window.courseLabHref(item.id,item.scenarios[0]))+'">Открыть лабораторию →</a><div class="catalog-theory"><a href="'+esc(item.entries[0].file+'#section='+item.entries[0].section)+'">Сначала прочитать теорию ↗</a></div></article>').join("")+'</div>';
   }
   function readRoute(){
     const focusedMode=document.activeElement&&document.activeElement.dataset.mode;
@@ -40,6 +52,7 @@
     document.title=lab.title+" · Лаборатория C++ / Backend";
     root.innerHTML='<section class="lab-hero"><div class="lab-kicker">Лаборатория '+String(catalog.indexOf(lab)+1).padStart(2,"0")+' · C++ / Backend</div><h1>'+esc(lab.title)+'</h1><p>'+esc(lab.summary)+'</p></section>'+
       '<nav class="lab-modes" aria-label="Варианты эксперимента">'+allowedModes().map(id=>'<button class="lab-mode" data-mode="'+id+'" aria-pressed="'+(id===mode)+'">'+esc(modeNames[id]||id)+'</button>').join("")+'</nav>'+
+      introduction(lab,mode)+
       '<div class="lab-tools" id="labTools" '+(lab.id!=="overload"&&!model.scheduler?'hidden':'')+'></div>'+
       '<div class="lab-workspace"><div class="lab-column"><section class="lab-panel lab-code"><div class="lab-panel-head"><h2>Код и договор</h2><span class="lab-meta">'+esc(lab.id==="sql"||lab.id==="transactions"?"SQL":"СЦЕНАРИЙ")+'</span></div><div class="lab-code-body" id="labCode" tabindex="0" aria-label="Код и текущая строка"></div><div class="lab-code-footer"><span>'+esc(model.language)+'</span>'+(model.program?'<button id="openProgram">Полная программа ↗</button>':'')+'</div></section>'+
       '<section class="lab-panel"><div class="lab-panel-head"><h2>Журнал модели</h2><span class="lab-meta">Наблюдения, не stdout</span></div><div class="lab-journal" id="labJournal"></div></section></div>'+
@@ -92,6 +105,16 @@
   function edge(d,label,x,y,kind="strong"){return '<path d="'+d+'" class="edge '+kind+'" marker-end="url(#labArrow)"/>'+(label?'<text class="edge-label" x="'+x+'" y="'+y+'">'+esc(label)+'</text>':"");}
   function table(title,headers,rows){return '<div class="lab-table-wrap"><table class="lab-table"><caption>'+esc(title)+'</caption><thead><tr>'+headers.map(h=>'<th scope="col">'+esc(h)+'</th>').join("")+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(v=>'<td'+(v===null?' class="null"':'')+'>'+esc(v===null?"NULL":v)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>';}
   const scenes={
+    temporaries(s){
+      const owner=s.owner==="alive"?"Жив":s.owner==="destroyed"?"Уничтожен":"Ещё не создан";
+      const borrow={waiting:"Ещё не получена",valid:"Доступ действителен",dangling:"Висячая ссылка — не использовать",ended:"Обход завершён"}[s.borrow];
+      const label=s.mode==="parameter"?"Параметр values":s.mode==="named"?"Переменная batch":"Временный Batch";
+      return '<div class="lifetime-version">'+esc(modeNames[s.mode])+'</div><div class="lifetime-cards"><section data-lifetime-owner="'+esc(s.owner)+'"><h3>'+esc(label)+'</h3><strong>'+esc(owner)+'</strong><p>Содержит список <code>1, 2, 3</code></p></section><div class="lifetime-borrow '+(s.borrow==="dangling"?'invalid':'')+'"><h3>Ссылка на список</h3><strong>'+esc(borrow)+'</strong><p>Не содержит своей копии чисел</p></div></div><ol class="lifetime-timeline" aria-label="Границы времени жизни">'+["Создание владельца","Получение ссылки","Подготовка обхода","Чтение элементов","Выход из цикла"].map((label,i)=>'<li'+(s.phase===i+1?' aria-current="step"':'')+' class="'+(s.phase>i+1?'passed':s.phase===i+1?'current':'future')+'">'+esc(label)+'</li>').join("")+'</ol><div class="lifetime-verdict '+(s.borrow==="dangling"?'invalid':'')+'">'+(s.iteration==="blocked"?'Обход остановлен: нельзя читать уничтоженный список.':s.values.length?'Прочитано из живого списка: '+s.values.join(", "):'До чтения элементов')+'</div><p class="lab-scene-caption">'+(s.mode==="parameter"?'Параметр по значению не сохраняется для вызывающего цикла.':s.mode==="cxx20"?'В этом выражении C++20 не продлевает жизнь Batch через вызов rows().':s.mode==="named"?'Владелец явно назван и охватывает цикл в обеих редакциях.':'Для этого временного Batch действует продление из C++23.')+' Это схема правил языка, не запуск программы браузером.</p>';
+    },
+    taskownership(s){
+      const actors=[["sender","Отправитель","Локальный unique_ptr"],["queue","Очередь","Лямбда внутри обёртки"],["worker","Исполнитель","Локальная job"]];
+      return '<div class="task-owner-route">'+actors.map(([id,name,detail])=>'<section'+(s.owner===id?' aria-current="step"':'')+'><h3>'+esc(name)+'</h3><p>'+esc(detail)+'</p><strong>'+(s.owner===id?'Владеет Payload':id==="sender"&&s.stage>1?'unique_ptr пуст':id==="queue"&&s.stage>2?'Очередь пуста':'Не владеет')+'</strong></section>').join("")+'</div><div class="task-payload '+(s.alive?'alive':'')+'"><h3>Данные Payload · 42</h3><strong>'+(s.alive?'Объект жив':s.stage===0?'Ещё не создан':'Объект уничтожен')+'</strong><p>Число вызовов команды: <b>'+s.ran+'</b></p></div><p class="lab-scene-caption">Стрелка чтения схемы — слева направо. Меняется владелец одних данных, а не их адрес или количество копий. Роли показаны в одном потоке; состояния очереди не являются обещанием потокобезопасности.</p>';
+    },
     packetpath(s){
       const bad=s.status==="dropped"||s.status==="too-big";
       const actor=(id,title,details)=>'<section class="packet-node '+(s.focus===id?'active':'')+'" data-packet-node="'+id+'"'+(s.focus===id?' aria-current="step"':'')+'><h3>'+esc(title)+'</h3>'+details.map(([name,value])=>'<p><span>'+esc(name)+'</span><code>'+esc(value)+'</code></p>').join("")+'</section>';

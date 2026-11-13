@@ -1,0 +1,22 @@
+{
+  "apiVersion": "v1",
+  "kind": "Service",
+  "metadata": {
+    "name": "course-api",
+    "namespace": "course13"
+  },
+  "spec": {
+    "type": "ClusterIP",
+    "selector": {
+      "app": "course-api"
+    },
+    "ports": [
+      {
+        "name": "http",
+        "port": 80,
+        "targetPort": "http",
+        "protocol": "TCP"
+      }
+    ]
+  }
+}

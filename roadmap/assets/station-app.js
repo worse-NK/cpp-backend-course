@@ -37,9 +37,9 @@
     checkpoint: "ЗАКРЕПЛЕНИЕ ПОДГЛАВЫ"
   };
 
-  function loadStore() {
+  function loadStore(fallback) {
     try { return JSON.parse(localStorage.getItem(meta.storeKey)) || {}; }
-    catch (_) { return {}; }
+    catch (_) { return fallback || {}; }
   }
 
   function persist(store) {
@@ -49,6 +49,21 @@
 
   function scrollTop() {
     if (typeof window.scrollTo === "function") window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  }
+
+  function codeElement(source, attributes, language) {
+    return window.CourseCode && typeof window.CourseCode.element === "function"
+      ? window.CourseCode.element(h, source, attributes, language || "cpp")
+      : h("code", attributes, source);
+  }
+
+  function codeLanguage(source, caption) {
+    return window.CourseCode && typeof window.CourseCode.languageFor === "function"
+      ? window.CourseCode.languageFor(source, caption, meta.id) : "cpp";
+  }
+
+  function stationDisplayNumber() {
+    return { "station5-linux": "5Б", "station7-netlab": "7Б", "station7-traffic": "7В", "station9-sql": "9A", station9: "9B" }[meta.id] || String(meta.number);
   }
 
   function CodeBlock(props) {
@@ -70,11 +85,14 @@
         status[1]("Скопировано");
       }, selectCode);
     }
-    return h("div", { className: "code-wrap" + (isOutput ? " output-wrap" : "") },
+    var standardLabels = { "20": "C++20", "23": "C++23", "20/23": "C++20 / C++23" };
+    var standardLabel = standardLabels[props.block.standard];
+    return h("div", { className: "code-wrap" + (isOutput ? " output-wrap" : ""), "data-example-id": props.block.exampleId || undefined },
       h("div", { className: "code-toolbar" },
-        h("div", { className: "code-caption" }, props.block.caption || "Фрагмент кода"),
+        h("div", { className: "code-caption" }, props.block.caption || "Фрагмент кода",
+          standardLabel && !isOutput ? h("span", { className: "code-standard", title: props.block.standard === "20/23" ? "Пример предназначен для обеих редакций языка; это не отметка о запуске на вашем компиляторе." : "Редакция языка для этого примера; доступность библиотеки проверяется отдельно." }, standardLabel) : null),
         h("button", { className: "copy-code", onClick: copy, type: "button" }, "Копировать")),
-      h("pre", { className: "code-block", tabIndex: 0, "aria-label": props.block.caption || "Фрагмент кода" }, h("code", { ref: codeRef }, props.block.code)),
+      h("pre", { className: "code-block", tabIndex: 0, "aria-label": props.block.caption || "Фрагмент кода" }, codeElement(props.block.code, { ref: codeRef }, isOutput ? "plaintext" : codeLanguage(props.block.code, props.block.caption))),
       h("span", { className: "copy-status", role: "status" }, status[0]));
   }
 
@@ -92,23 +110,52 @@
   // These references are editorial priorities, not a second question bank.
   function assessmentPriorityRefs(stationId) {
     var refs = {
-      station3: ["request-memory-arena"],
-      station5: ["loader-before-main"],
+      station1: ["object-representation-access", "representation-copy-bit-cast"],
+      station3: ["request-memory-arena", "templates-class", "numeric-sizes-conversions", "numeric-intermediate-narrowing",
+        "lookup-adl", "adl-customization", "parameter-packs-fold", "template-specialization-choices",
+        "chrono-types-units", "chrono-deadline-clock"],
+      station5: ["loader-before-main", "global-initialization-order", "global-lifetime-workbook",
+        "conan-target-lock-workbook", "gdb-core-regression", "perf-cpu-wait-workbook"],
       "station5-linux": ["linux-mapped-generations", "linux-cpu-quota-workbook"],
       station6: ["shared-state-architecture"],
-      "station9-sql": ["sql-join-multiplication", "sql-window-peers"],
+      "station9-sql": ["sql-join-multiplication", "sql-window-peers", "sql-relationship-design"],
       station7: ["private-public-addresses", "dhcp-network-config",
-        "linux-packet-to-handler", "server-queues-two-bottlenecks", "load-balancing-connections-requests"],
+        "linux-packet-to-handler", "server-queues-two-bottlenecks", "load-balancing-connections-requests",
+        "linux-name-resolution-path", "split-dns-debug-workbook", "bounded-asio-server-contract", "bounded-asio-server-lab"],
+      "station7-netlab": ["netlab-tcp-loss-slow-reader"],
+      "station7-traffic": ["traffic-real-tcp-evidence"],
       station8: ["request-execution-workbook", "architecture-boundaries",
         "dependency-fanout-workbook", "replica-state-workbook"],
       station9: ["write-lifecycle", "replication-path", "replication-failover",
-        "cache-race", "cache-pressure", "outbox-transaction", "outbox-delivery"],
+        "cache-race", "cache-pressure", "outbox-transaction", "outbox-delivery",
+        "schema-history-boundaries", "physical-join-workbook", "query-memory-spill-lab", "postgres-recovery-real-lab"],
+      station16: ["failure-model", "unknown-outcome", "operation-histories", "consistency-contracts", "partitions-cap",
+        "quorum-intersections", "raft-log-commit", "raft-elections-reads", "logical-physical-clocks", "leases-fencing",
+        "sharding-key-design", "shard-migration", "workflow-state-machine", "workflow-recovery",
+        "compensation-not-rollback", "coordination-choices", "atomic-commit-boundaries", "distributed-final-workbook"],
       station10: ["request-budget-architecture", "proxy-release-timeline"]
     };
     return (refs[stationId] || []).slice();
   }
 
+  // Optional specializations stay in training/interview, not the mandatory
+  // station final. Match exact section IDs, never a neighbouring track number.
+  function assessmentOptionalRefs(stationId) {
+    return ({
+      "station5-linux": ["linux-unix-sockets", "linux-unix-descriptor-transfer"],
+      "station7-netlab": ["netlab-vlan-boundaries", "netlab-stp-loop-recovery",
+        "netlab-ospf-route-convergence", "netlab-bgp-policy-choice"]
+    }[stationId] || []).slice();
+  }
+
   function assessmentFinalBudgets(stationId) {
+    // PostgreSQL keeps two checks for each topic group, with one extra slot
+    // for the new real recovery experiment alongside replication guarantees.
+    if (stationId === "station9") return {
+      storage: 2, transactions: 2, "concurrent-update": 2, isolation: 2,
+      indexes: 2, "cpp-storage": 2, pool: 2, evolution: 2, design: 2,
+      replication: 3, cache: 2, delivery: 2
+    };
     // 5Б keeps its complete original bank reachable. The extra memory case
     // needs the last slot more than strace, which remains in its checkpoint.
     // Exact IDs leave the C++ build station and all other tracks unchanged.
@@ -125,7 +172,7 @@
   }
 
   // Stable, balanced station-wide selection. Source banks remain untouched.
-  function finalQuestions(bank, modules, limit, preferCoverage, priorityRefs, moduleBudgets, checkpoints) {
+  function finalQuestions(bank, modules, limit, preferCoverage, priorityRefs, moduleBudgets, checkpoints, optionalRefs) {
     // Editorial exclusions from the final exam only: these remain in chapter
     // checkpoints and source banks, but repeat a skill already tested here.
     var repeatedStems = [
@@ -154,6 +201,7 @@
     });
     function eligible(q) {
       return repeatedStems.indexOf(q.q) < 0 &&
+        !(q.theoryRefs || []).some(function (ref) { return (optionalRefs || []).indexOf(ref) >= 0; }) &&
         !chapterStems.has(q.q.replace(/\s+/g, " ").trim().toLocaleLowerCase("ru"));
     }
     var buckets = modules.map(function (module) {
@@ -287,6 +335,18 @@
       "План эксперимента: очередь при перегрузке и восстановлении", "PostgreSQL: конкурентное место и восстановление", "SQL: отчёт без потерянных пользователей", "PostgreSQL: сравни планы на ста тысячах строк", "SQL с нуля: 14 упражнений в браузере"].indexOf(task.title) >= 0;
   }
 
+  function backendLabEntry(stationId) {
+    var labs = {
+      station11: { file: "cpp_station11_messaging.html", section: "messaging-local-lab", title: "Kafka и RabbitMQ" },
+      station12: { file: "cpp_station12_redis.html", section: "redis-lab-guide", title: "Redis и C++" },
+      station13: { file: "cpp_station13_kubernetes.html", section: "lab-route", title: "Kubernetes и C++" },
+      station14: { file: "cpp_station14_observability.html", section: "lab-map", title: "Метрики и трассировки" },
+      station15: { file: "cpp_station15_security.html", section: "security-lab-map", title: "Безопасность: условия, причины и проверки" },
+      station16: { file: "cpp_station16_distributed_systems.html", section: "distributed-observation-lab", title: "Истории операций и восстановление заказа" }
+    };
+    return labs[stationId] || null;
+  }
+
   function PracticeLinks() {
     var catalog = {
       10: [["Google Test · официальный primer", "https://google.github.io/googletest/primer.html", "После задач учебника перенеси проверки Gate в TEST и добавь fixture. Локально нужны CMake, компилятор и Google Test. Проверь, что неверное ожидание даёт неуспешный CTest и в Debug, и в Release."]],
@@ -302,6 +362,8 @@
       8: [["Full Stack Open · Phonebook backend, упражнения 3.1–3.6", "https://fullstackopen.com/en/part3/node_js_and_express/#exercises-3-1-3-6", "Оригинальный практикум использует JavaScript, Node.js и Express. Для нашего курса это адаптация требований на C++: реализуй HTTP API телефонной книги на серверной библиотеке станции 8, а не переписывай команды npm. Понадобятся JSON, маршрутизация, валидация и локальные запросы через curl или HTTP-клиент. Критерий нашей адаптации: чтение списка и записи, создание и удаление, понятные ошибки и проверка дубликатов. Случайные ID из вводного примера не переноси как гарантию уникальности — выбери явный договор. Автоматическая проверка курса для C++-версии не обещается."]]
     };
     var entries = catalog[meta.number] || [];
+    var backendLab = backendLabEntry(meta.id);
+    if (backendLab) entries = [["Лаборатория курса · " + backendLab.title, backendLab.file + "#section=" + backendLab.section, "Открой подготовку в учебной главе: карта компонентов, полный набор скачиваемых файлов, версии, ограниченные опыты и критерии результата. Затем выбери конкретную лабораторную ниже. Чтение доступно без запуска; самостоятельный опыт требует отдельного локального окружения."]];
     if (meta.id === "station5-linux") entries = [["Linux man-pages · программы из pipe(2)", "https://man7.org/linux/man-pages/man2/pipe.2.html", "После итогового разбора воспроизведи пример канала из раздела EXAMPLES в отдельном учебном каталоге Linux. Затем измени передачу одного байта на поток из нескольких порций и объясни, какие закрытия нужны для EOF. Это адаптация практики по контракту API, не онлайн-проверка. Не запускай упражнения от root и не направляй сигналы чужим процессам."]];
     if (meta.id === "station7-netlab") entries = [["iproute2 · network namespaces", "https://man7.org/linux/man-pages/man8/ip-netns.8.html", "Сопоставь официальный пример с четырьмя узлами учебного стенда. Настройки разрешены только внутри одноразовой VM; для разбора без запуска составь карту интерфейсов, маршрутов и времени жизни namespace. Не переноси физические интерфейсы и не повторяй из внешних примеров массовую очистку или kill."]];
     if (meta.id === "station7-traffic") entries = [["Wireshark · Follow Stream и TCP Analysis", "https://www.wireshark.org/docs/wsug_html_chunked/ChapterAdvanced.html", "Открой учебные PCAP из станции, восстанови HTTP-обмен и составь отчёт: наблюдение, гипотеза, недостающая проверка. Затем сравни свои выводы с официальным описанием анализа TCP. Это работа с файлами, а не захват чужого трафика; устанавливать Wireshark для чтения готового разбора не обязательно."]];
@@ -310,11 +372,11 @@
       h("p", { className: "section-lead" }, "Здесь нужно самостоятельно построить решение, а не выбрать готовый ответ."),
       ["station8", "station9", "station10"].indexOf(meta.id) >= 0 ? h(ServiceWorkshopEntry) : null,
       entries.length ? h("div", null,
-        h("p", { className: "notes" }, meta.id === "station7-traffic" ? "Ниже — справочник Wireshark для сверки действий. Сами шесть лабораторных находятся в разделе «Задачи учебника»: у них есть условия, подготовка и критерии. Они не отправляются на LeetCode и не оцениваются внешней платформой." : "Внешняя практика: LeetCode, открытые курсы и лабораторные. У каждой задачи указаны границы и способ работы. Материалы преимущественно на английском; часть требует локального компилятора, а платформы могут попросить вход."),
+        h("p", { className: "notes" }, backendLab ? "Практика этой станции — собственный локальный стенд, а не отправка тестового ответа. Подготовка и разбор ожидаемых наблюдений находятся в учебнике; исходники и команды предназначены для отдельного учебного окружения." : meta.id === "station7-traffic" ? "Ниже — справочник Wireshark для сверки действий. Сами шесть лабораторных находятся в разделе «Задачи учебника»: у них есть условия, подготовка и критерии. Они не отправляются на LeetCode и не оцениваются внешней платформой." : "Внешняя практика: LeetCode, открытые курсы и лабораторные. У каждой задачи указаны границы и способ работы. Материалы преимущественно на английском; часть требует локального компилятора, а платформы могут попросить вход."),
         entries.map(function (entry) { return h("article", { className: "finale-item", key: entry[1] },
-          h("h3", null, h("a", { href: entry[1].indexOf("https://") === 0 ? entry[1] : "https://leetcode.com/problems/" + entry[1] + "/", target: "_blank", rel: "noopener noreferrer" }, entry[0] + " ↗")), h("p", null, entry[2])); }))
+          h("h3", null, h("a", { href: entry[1].indexOf("https://") === 0 || (backendLab && entry[1] === backendLab.file + "#section=" + backendLab.section) ? entry[1] : "https://leetcode.com/problems/" + entry[1] + "/", target: "_blank", rel: "noopener noreferrer" }, entry[0] + " ↗")), h("p", null, entry[2])); }))
         : h("p", { className: "notes" }, "Для этой станции подходящая подборка LeetCode пока не добавлена: алгоритмическая задача не заменяет проверку владения, исключений, сборки или серверного протокола. Учебный проект станции описан на главной странице курса."),
-      h("p", { className: "notes" }, meta.id === "station7-traffic" ? "Результат лабораторной — таблица наблюдений или короткий отчёт с фильтрами, расчётами и границами вывода. Автоматической оценки файла здесь нет; сверь результат с критериями и разбором, не выдавая чтение таблицы за выполненный захват." : "После решения объясни инвариант, граничные случаи и ограничения своего подхода. Успешная отправка — проверка тестов платформы, а не всей теории станции."));
+      h("p", { className: "notes" }, backendLab ? "Сохрани условия, версии, команды, наблюдения до/после отказа и проверку восстановления. Не выдавай ожидаемый результат из текста за самостоятельно выполненный опыт. Офлайн-модели и проверка конфигурации не заменяют запуск брокера, базы или кластера." : meta.id === "station7-traffic" ? "Результат лабораторной — таблица наблюдений или короткий отчёт с фильтрами, расчётами и границами вывода. Автоматической оценки файла здесь нет; сверь результат с критериями и разбором, не выдавая чтение таблицы за выполненный захват." : "После решения объясни инвариант, граничные случаи и ограничения своего подхода. Успешная отправка — проверка тестов платформы, а не всей теории станции."));
   }
 
   function VisualBlock(props) {
@@ -432,6 +494,11 @@
       block.caption ? h("p", { className: "visual-caption" }, block.caption) : null);
   }
 
+  function LabFlask() {
+    return h("svg", { className: "lab-flask", viewBox: "0 0 24 24", width: 24, height: 24, "aria-hidden": "true", focusable: "false", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" },
+      h("path", { d: "M9 3h6M10 3v6l-5.2 8.5A2.3 2.3 0 0 0 6.8 21h10.4a2.3 2.3 0 0 0 2-3.5L14 9V3M8 15h8" }));
+  }
+
   function LabBlock(props) {
     var catalog = window.COURSE_LABS || [];
     var lab = catalog.find(function (item) { return item.id === props.block.lab; });
@@ -439,11 +506,12 @@
       return entry.station === meta.id && entry.section === props.section.id && entry.scenario === props.block.scenario;
     });
     if (!entry || !window.courseLabHref) return null;
+    var sameTab = meta.id === "station15" && lab.id === "security";
     return h("aside", { className: "course-lab-entry", "aria-label": entry.title },
       h("span", { className: "course-lab-eyebrow" }, "ВИЗУАЛЬНЫЙ ЭКСПЕРИМЕНТ"),
       h("h3", null, entry.title), h("p", null, entry.description),
-      h("a", { href: window.courseLabHref(lab.id, entry.scenario, meta.id, props.section.id), target: "_blank", rel: "noopener noreferrer" }, "Открыть лабораторию ↗"),
-      h("small", null, "В новой вкладке · возврат к этому разделу внутри лаборатории"));
+      h("a", { href: window.courseLabHref(lab.id, entry.scenario, meta.id, props.section.id), target: sameTab ? undefined : "_blank", rel: sameTab ? undefined : "noopener noreferrer" }, h(LabFlask), sameTab ? "Открыть лабораторию" : "Открыть лабораторию ↗"),
+      h("small", null, sameTab ? "После опыта можно вернуться к этому разделу и закрепить тему." : "В новой вкладке · возврат к этому разделу внутри лаборатории"));
   }
 
   function ServiceWorkshopEntry() {
@@ -458,8 +526,24 @@
   }
 
   function SubstationNav(props) {
-    var contentsState = useState(function () { return window.matchMedia("(min-width: 1001px)").matches; });
+    var contentsState = useState(function () { return window.matchMedia("(min-width: 1100px)").matches; });
     var searchState = useState("");
+    function navigation(href, attributes) {
+      var children = Array.prototype.slice.call(arguments, 2);
+      var attrs = Object.assign({}, attributes);
+      var action = attrs.onClick;
+      attrs.href = href;
+      if (Object.prototype.hasOwnProperty.call(attrs, "aria-pressed")) {
+        if (attrs["aria-pressed"]) attrs["aria-current"] = "location";
+        delete attrs["aria-pressed"];
+      }
+      attrs.onClick = function (event) {
+        if (event && (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button > 0)) return;
+        if (event) event.preventDefault();
+        action();
+      };
+      return h.apply(null, ["a", attrs].concat(children));
+    }
     var query = searchState[0].trim().toLocaleLowerCase("ru");
     function sectionMatches(section) {
       if (section.title.toLocaleLowerCase("ru").includes(query)) return true;
@@ -497,13 +581,13 @@
         h("div", null, h("span", null, meta.logo), h("h2", null, "Содержание")),
         h("p", null, stationRouteHints[meta.id] || "Проходи последовательно: каждая следующая использует модель предыдущей.")),
       h("label", { className: "contents-search" }, h("span", null, "Найти раздел"),
-        h("input", { type: "search", value: searchState[0], placeholder: "Например, конструктор", onChange: function (event) { searchState[1](event.target.value); } })),
+        h("input", { type: "search", value: searchState[0], placeholder: meta.id === "station15" ? "Например, права доступа…" : "Например, конструктор", onChange: function (event) { searchState[1](event.target.value); } })),
       query ? h("p", { className: "search-result-count", role: "status" }, visibleItems.length ? "Подстанций найдено: " + visibleItems.length : "Совпадений нет. Попробуйте другое название.") : null,
       h("div", { className: "substation-grid" }, visibleItems.map(function (entry) {
         var moduleSections = theory.filter(function (section) { return section.substation === entry.id && !isWorkbook(section); });
         var completed = moduleSections.filter(function (section) { return props.store["sec:" + section.id]; }).length;
         var isActive = entry.id === props.active;
-        return h("div", { key: entry.id }, h("button", {
+        return h("div", { key: entry.id }, navigation("#section=" + encodeURIComponent(moduleSections[0].id), {
           className: "substation-card" + (isActive ? " active" : ""),
           key: entry.id,
           "aria-pressed": isActive,
@@ -517,21 +601,22 @@
           return !query || (entry.label + " " + entry.title).toLocaleLowerCase("ru").includes(query) || sectionMatches(section);
         }).map(function (section) {
           var current = props.view === "theory" && isActive && section.id === (props.selected || moduleSections[0].id);
-          return h("div", { key: section.id, className: "contents-section-with-labs" }, h("button", { "aria-current": current ? "page" : undefined,
+          return h("div", { key: section.id, className: "contents-section-with-labs" }, navigation("#section=" + encodeURIComponent(section.id), { "aria-current": current ? "page" : undefined,
             onClick: function () { props.onNavigate(section.id); } },
             props.store["sec:" + section.id] ? "✓ " : "", section.title),
             section.blocks.filter(function (block) { return block.type === "lab"; }).map(function (block) {
               var lab = (window.COURSE_LABS || []).find(function (item) { return item.id === block.lab; });
               var entry = lab && lab.entries.find(function (entry) { return entry.station === meta.id && entry.section === section.id && entry.scenario === block.scenario; });
-              return entry && window.courseLabHref ? h("a", { key: block.lab, className: "contents-lab-link", href: window.courseLabHref(lab.id, entry.scenario, meta.id, section.id), target: "_blank", rel: "noopener noreferrer" }, entry.title, " ↗") : null;
+              return entry && window.courseLabHref ? h("a", { key: block.lab, className: "contents-lab-link", href: window.courseLabHref(lab.id, entry.scenario, meta.id, section.id), target: meta.id === "station15" && lab.id === "security" ? undefined : "_blank", rel: "noopener noreferrer" }, h(LabFlask), h("span", null, entry.title, meta.id === "station15" && lab.id === "security" ? "" : " ↗")) : null;
             }));
-        }), h("button", { className: "contents-checkpoint", "aria-current": isActive && props.view === "checkpoint" ? "page" : undefined, onClick: function () { props.onCheckpoint(entry.id); } }, "Закрепление подглавы")) : null);
+        }), navigation("#view=checkpoint&module=" + encodeURIComponent(entry.id), { className: "contents-checkpoint", "aria-current": isActive && props.view === "checkpoint" ? "page" : undefined, onClick: function () { props.onCheckpoint(entry.id); } }, "Закрепление подглавы")) : null);
       })),
       h("nav", { className: "contents-ending", "aria-label": "Завершение станции" },
-        h("button", { "aria-current": props.view === "final" ? "page" : undefined, onClick: function () { props.onPage("final"); } }, "Завершение станции"),
-        props.analysisCount ? h("button", { className: "contents-analysis", "aria-current": props.view === "analysis" ? "page" : undefined, onClick: function () { props.onPage("analysis"); } }, "Вопросы с разбором · " + props.analysisCount) : null),
+        navigation("#view=final", { className: "contents-finale", "aria-current": props.view === "final" ? "page" : undefined, onClick: function () { props.onPage("final"); } }, "Завершение станции"),
+        props.analysisCount ? navigation("#view=analysis", { className: "contents-analysis", "aria-current": props.view === "analysis" ? "page" : undefined, onClick: function () { props.onPage("analysis"); } }, "Вопросы с разбором · " + props.analysisCount) : null),
       ["station8", "station9", "station10"].indexOf(meta.id) >= 0 ? h("a", { href: "service_workshop.html#" + ({station8:"local", station9:"database", station10:"vm"}[meta.id]), className: "contents-all-labs", target: "_blank", rel: "noopener noreferrer" }, "Свой сервер · сквозной практикум ↗") : null,
-      h("a", { href: "visual_labs.html", className: "contents-all-labs" }, "Все визуальные лаборатории →"),
+      backendLabEntry(meta.id) ? h("a", { href: backendLabEntry(meta.id).file + "#section=" + backendLabEntry(meta.id).section, className: "contents-all-labs", target: "_blank", rel: "noopener noreferrer" }, "Лаборатория станции · подготовка ↗") : null,
+      h("a", { href: "visual_labs.html", className: "contents-all-labs" }, h(LabFlask), h("span", null, "Все визуальные лаборатории →")),
       h("a", { href: "glossary.html", className: "contents-all-labs", target: "_blank", rel: "noopener" }, "Глоссарий терминов ↗"));
   }
 
@@ -549,10 +634,6 @@
         localStorage.setItem("cpp_course_last_read_v1", JSON.stringify({ file: meta.sourceFile, section: section.id, title: section.title, station: meta.number }));
       } catch (_) { /* Reading remains available without storage. */ }
     }, [section.id]);
-    var routeIndex = props.readingOrder ? props.readingOrder.indexOf(section.id) : -1;
-    var nextRouteId = routeIndex >= 0 ? props.readingOrder[routeIndex + 1] : null;
-    var nextRouteSection = nextRouteId ? theory.find(function (item) { return item.id === nextRouteId; }) : null;
-
     function openSection(index) {
       props.onNavigate(sections[index].id);
     }
@@ -573,7 +654,7 @@
           h("a", { href: "cpp_backend_roadmap.html" }, "Курс"), h("span", { "aria-hidden": true }, "/"),
           h("span", null, "Станция " + (meta.id === "station5-linux" ? "5Б" : meta.id === "station7-netlab" ? "7Б" : meta.id === "station7-traffic" ? "7В" : meta.number === 9 ? (meta.id === "station9-sql" ? "9A" : "9B") : meta.number)), h("span", { "aria-hidden": true }, "/"),
           h("span", { "aria-current": "location" }, "Теория")),
-        h("div", { className: "kicker" }, routeIndex >= 0 ? "ПЕРВОЕ ЧТЕНИЕ · ШАГ " + (routeIndex + 1) + " / " + props.readingOrder.length : "РАЗДЕЛ " + (active + 1) + " / " + sections.length),
+        h("div", { className: "kicker" }, "РАЗДЕЛ " + (active + 1) + " / " + sections.length),
         h("h2", { className: "section-title" }, section.title),
         h("p", { className: "section-lead" }, section.lead),
         meta.number === 9 && ["tables", "queries", "aggregation", "composition", "windows", "backend-sql"].indexOf(section.substation) >= 0 && section.id !== "sql-trainer" ? h("p", { className: "sql-practice-link" },
@@ -711,13 +792,13 @@
       h("p", { className: "notes" }, "Серый код уже готов. Нажимай на фрагменты в нужном порядке, чтобы заполнить выделенное место. Чтобы убрать фрагмент, нажми на него в собранной строке. Проверяется заданный фрагмент, а не произвольная программа."),
       /\bassert\(/.test(question.after + question.before) ? h("p", { className: "notes" }, "В готовом примере assert проверяет условие в скобках: если оно ложно, программа останавливается с ошибкой. Эти проверки уже написаны, собирать их не нужно.") : null,
       h("div", { className: "assembly-workspace", "aria-label": "Собираемый код" },
-        question.before ? h("pre", { className: "assembly-context" }, h("code", null, question.before)) : null,
+        question.before ? h("pre", { className: "assembly-context" }, codeElement(question.before, null, "cpp")) : null,
         h("div", { className: "assembly-answer", "aria-label": "Выбранные фрагменты" },
           !chosen.length ? h("span", { className: "assembly-placeholder" }, "Здесь появится твой код") : null,
           chosen.map(function (index, position) { return h("button", { type: "button", key: index, disabled: props.locked,
             "aria-label": "Убрать фрагмент " + (position + 1) + ": " + question.tokens[index],
             onClick: function () { setChosen(chosen.filter(function (_, i) { return i !== position; })); } }, h("code", null, question.tokens[index])); })),
-        question.after ? h("pre", { className: "assembly-context" }, h("code", null, question.after)) : null),
+        question.after ? h("pre", { className: "assembly-context" }, codeElement(question.after, null, "cpp")) : null),
       h("div", { className: "assembly-pool", role: "group", "aria-label": "Доступные фрагменты кода" },
         question.tokenOrder.map(function (index) { return h("button", { type: "button", key: index,
           disabled: props.locked || chosen.indexOf(index) >= 0,
@@ -728,7 +809,7 @@
         h("button", { className: "ghost", disabled: props.locked || !chosen.length, onClick: function () { setChosen([]); } }, "Очистить"),
         h("button", { className: "primary", disabled: props.locked || !chosen.length, onClick: function () { props.onCheck(assemblyCorrect(question, chosen)); } }, "Проверить код")),
       props.locked ? h("div", { className: "assembly-solution" }, h("span", { className: "kicker" }, "ВАРИАНТ ПО УСЛОВИЮ"),
-        h("pre", null, h("code", null, question.before + assembledText(question, question.answer) + question.after))) : null);
+        h("pre", null, codeElement(question.before + assembledText(question, question.answer) + question.after, null, "cpp"))) : null);
   }
 
   function Quiz(props) {
@@ -776,7 +857,7 @@
           h("span", { className: "counter" }, (idx + 1) + " / " + questions.length)),
         h("div", { className: "quiz-progress" }, h("div", { style: { width: ((idx + 1) / questions.length * 100) + "%" } })),
         h("h2", { className: "question" }, parsed.stem),
-        parsed.code ? h("pre", { className: "question-code" }, h("code", null, parsed.code)) : null,
+        parsed.code ? h("pre", { className: "question-code" }, codeElement(parsed.code, null, codeLanguage(parsed.code))) : null,
         current.type === "assemble" ? h(AssemblyAnswer, { key: idx, question: current, locked: locked, onCheck: function (isCorrect) {
           if (locked) return;
           setSelected(isCorrect);
@@ -882,7 +963,7 @@
           var question = entry.question, parsed = splitQuestion(question.q);
           return h("article", { className: "training-review-item", key: entry.id },
             h("h3", null, (index + 1) + ". " + parsed.stem),
-            parsed.code ? h("pre", { className: "question-code" }, h("code", null, parsed.code)) : null,
+            parsed.code ? h("pre", { className: "question-code" }, codeElement(parsed.code, null, codeLanguage(parsed.code))) : null,
             h("p", { className: "training-review-answer" }, h("strong", null, "Верный ответ: "), question.options[question.answer]),
             h("p", null, question.why),
             h("ul", null, (question.theoryRefs || []).map(function (id) {
@@ -953,7 +1034,7 @@
           laterModules.map(function (module) { return module.label + " · " + module.title; }).join("; "),
           ". Затем вернись сюда; это не проверка знаний только текущей подстанции.") : null,
         h("p", { className: "task-brief" }, task.brief),
-        task.code ? h("pre", { className: "question-code" }, h("code", null, task.code)) : null,
+        task.code ? h("pre", { className: "question-code" }, codeElement(task.code, null, codeLanguage(task.code))) : null,
         h("details", { className: "task-preparation quiz-theory-refs" },
           h("summary", null, "Что прочитать перед заданием"),
           h("p", null, "Здесь разобраны правила и примеры, на которые опирается задание. Ссылки откроются в новой вкладке — условие останется перед тобой."),
@@ -987,7 +1068,7 @@
         !solutionShown ? h("button", { className: "solution-button", onClick: function () { setSolutionShown(true); } }, "Показать решение") : h("div", null,
           h("div", { className: "solution-label" }, "РЕШЕНИЕ"),
           task.solutionFormat === "code"
-            ? h("pre", { className: "solution-code" }, h("code", null, task.solution))
+            ? h("pre", { className: "solution-code" }, codeElement(task.solution, null, codeLanguage(task.solution)))
             : h("div", { className: "task-solution-text" }, task.solution.split(/\n\s*\n/).map(function (paragraph, index) {
                 return h("p", { key: index }, paragraph);
               })),
@@ -997,6 +1078,8 @@
   }
 
   function App() {
+    // One reader layout and native section history for every station.
+    var readerPilot = true;
     var textSizeState = useState(function () {
       try { return localStorage.getItem("cpp_course_text_size_v1") === "large"; } catch (_) { return false; }
     });
@@ -1004,8 +1087,6 @@
       textSizeState[1](value);
       try { localStorage.setItem("cpp_course_text_size_v1", value ? "large" : "normal"); } catch (_) {}
     }
-    var routeModeState = useState(function () { return loadStore().readingRoute !== false; });
-    var routeMode = routeModeState[0], setRouteMode = routeModeState[1];
     var sectionState = useState(requestedSection ? requestedSection.id : "");
     var selectedSectionId = sectionState[0], setSelectedSectionId = sectionState[1];
     var tabState = useState(requestedView);
@@ -1020,9 +1101,38 @@
         ? saved : (substations[0] ? substations[0].id : "");
     });
     var activeSubstationId = substationState[0], setActiveSubstationId = substationState[1];
+    var focusState = useState(0);
+    var focusRequest = focusState[0], setFocusRequest = focusState[1];
+    function focusReading() {
+      if (readerPilot) setFocusRequest(function (value) { return value + 1; });
+      else scrollTop();
+    }
+    React.useEffect(function () {
+      if (!readerPilot || !focusRequest) return;
+      var cancelled = false;
+      function focusContent() {
+        if (cancelled) return;
+        var content = document.getElementById("lesson-content");
+        if (!content) return;
+        if (typeof content.focus === "function") content.focus({ preventScroll: true });
+        if (typeof content.scrollIntoView === "function") content.scrollIntoView({ block: "start", behavior: "auto" });
+      }
+      var frame = typeof window.requestAnimationFrame === "function" ? window.requestAnimationFrame(focusContent) : null;
+      if (frame === null) focusContent();
+      return function () {
+        cancelled = true;
+        if (frame !== null && typeof window.cancelAnimationFrame === "function") window.cancelAnimationFrame(frame);
+      };
+    }, [focusRequest]);
     // Links from the embedded trainer navigate this existing document by hash.
     // React state must follow that navigation as well as initial page loading.
     React.useEffect(function () {
+      // Give the first reading page a real URL before adding history entries.
+      // Back must restore a lesson, not an empty fragment with stale React state.
+      if (readerPilot && !requestedSection && requestedView === "theory") {
+        var first = theory.find(function (item) { return item.substation === activeSubstationId && !isWorkbook(item); });
+        if (first) { try { history.replaceState(null, "", "#section=" + encodeURIComponent(first.id)); } catch (_) {} }
+      }
       function followHash() {
         var params = new URLSearchParams(window.location.hash.slice(1));
         var section = theory.find(function (item) { return item.id === params.get("section"); });
@@ -1031,19 +1141,23 @@
           if (["checkpoint", "final", "quiz", "interview", "tasks", "analysis", "training"].indexOf(view) < 0) return;
           setTab(view);
           var moduleId = params.get("module");
-          if (view === "checkpoint" && substations.some(function (item) { return item.id === moduleId; })) setActiveSubstationId(moduleId);
-          scrollTop();
+          if (view === "checkpoint" && substations.some(function (item) { return item.id === moduleId; })) {
+            setActiveSubstationId(moduleId);
+            if (readerPilot) setSelectedSectionId("");
+          }
+          if (!readerPilot) scrollTop();
           return;
         }
         setTab("theory");
         setSelectedSectionId(section.id);
         setActiveSubstationId(section.substation || "");
         setStore(function (previous) {
-          var next = Object.assign({}, previous, { activeSubstation: section.substation || "" });
+          var next = Object.assign({}, loadStore(previous), { activeSubstation: section.substation || "" });
           persist(next);
           return next;
         });
-        scrollTop();
+        // On browser Back/Forward, leave viewport restoration to the browser.
+        if (!readerPilot) scrollTop();
       }
       window.addEventListener("hashchange", followHash);
       window.addEventListener("popstate", followHash);
@@ -1052,15 +1166,27 @@
         window.removeEventListener("popstate", followHash);
       };
     }, []);
+    // Keep progress shared by other course windows without changing the current
+    // route or remounting a Quiz: its unfinished attempt belongs to this window.
+    React.useEffect(function () {
+      function syncProgress(event) {
+        if (event.key !== meta.storeKey && event.key !== null) return;
+        try { if (event.storageArea && event.storageArea !== localStorage) return; }
+        catch (_) { return; }
+        setStore(loadStore());
+      }
+      window.addEventListener("storage", syncProgress);
+      return function () { window.removeEventListener("storage", syncProgress); };
+    }, []);
     var hasSubstations = substations.length > 0;
     var activeSubstation = substations.find(function (item) { return item.id === activeSubstationId; });
     var selectedWorkbook = theory.find(function (item) { return item.id === selectedSectionId && isWorkbook(item); });
     var activeTheory = selectedWorkbook ? [selectedWorkbook] : theory.filter(function (item) { return (!hasSubstations || item.substation === activeSubstationId) && !isWorkbook(item); });
-    if (routeMode && data.readingOrder && !selectedWorkbook) activeTheory.sort(function (a, b) { return data.readingOrder.indexOf(a.id) - data.readingOrder.indexOf(b.id); });
+    if (data.readingOrder && !selectedWorkbook) activeTheory.sort(function (a, b) { return data.readingOrder.indexOf(a.id) - data.readingOrder.indexOf(b.id); });
     var activeTasks = tasks.filter(isPracticeTask);
     var analysisTasks = tasks.filter(function (task) { return !isPracticeTask(task); });
     var priorityRefs = assessmentPriorityRefs(meta.id);
-    var activeQuizzes = { basic: excludeCheckpointQuestions(finalQuestions(quizzes, substations, 25, meta.number <= 4, priorityRefs, assessmentFinalBudgets(meta.id), data.checkpoints), data.checkpoints), interview: quizzes.interview || [] };
+    var activeQuizzes = { basic: excludeCheckpointQuestions(finalQuestions(quizzes, substations, 25, meta.number <= 4, priorityRefs, assessmentFinalBudgets(meta.id), data.checkpoints, assessmentOptionalRefs(meta.id)), data.checkpoints), interview: quizzes.interview || [] };
     var checkpointQuestions = chapterQuestions(quizzes, activeSubstationId, assessmentCheckpointRefs(meta.id), data.checkpoints);
     var checkpointKey = "checkpoint:v3:" + activeSubstationId + ":" + ((data.checkpointVersion || {})[activeSubstationId] || "unversioned");
     var workedSections = theory.filter(function (section) { return /(?:-final-workbook|clock-worked-example)$/.test(section.id); });
@@ -1068,7 +1194,8 @@
     var doneActiveSections = activeTheory.filter(function (item) { return store["sec:" + item.id]; }).length;
 
     function quizStoreKey(kind) {
-      if (meta.id === "station3" && (kind === "basic" || kind === "interview")) return "station-final:editorial-20261029:v2:" + kind;
+      if ((["station5", "station7", "station7-netlab", "station7-traffic", "station9-sql", "station9", "station11", "station15", "station16"].indexOf(meta.id) >= 0 && (kind === "basic" || kind === "interview")) || (meta.id === "station5-linux" && kind === "interview")) return "station-final:deepening-20261105:v1:" + kind;
+      if (["station1", "station3", "station5"].indexOf(meta.id) >= 0 && (kind === "basic" || kind === "interview")) return "station-final:foundations-20261105:v1:" + kind;
       if (["station2", "station4", "station5", "station5-linux", "station6", "station7", "station7-netlab", "station7-traffic", "station8", "station9-sql", "station9", "station10"].indexOf(meta.id) >= 0 && (kind === "basic" || kind === "interview")) return "station-final:editorial-20261029:v1:" + kind;
       if (["station3", "station5", "station5-linux", "station6", "station9-sql"].indexOf(meta.id) >= 0) return "station-final:systems-depth-20261025:v1:" + kind;
       if (["station7", "station8", "station9", "station10"].indexOf(meta.id) >= 0) return "station-final:architecture-20261025:v1:" + kind;
@@ -1089,7 +1216,9 @@
     };
 
     function updateStore(changes) {
-      var next = Object.assign({}, store, changes);
+      // React state in this window may be older than a theory window's mark or
+      // an explicit reset. Merge only this action into the latest saved record.
+      var next = Object.assign({}, loadStore(store), changes);
       setStore(next);
       persist(next);
     }
@@ -1098,8 +1227,8 @@
       var id = moduleId || activeSubstationId;
       setTab(view);
       if (moduleId) { setSelectedSectionId(""); setActiveSubstationId(moduleId); updateStore({ activeSubstation: moduleId }); }
-      try { history.replaceState(null, "", "#view=" + view + (view === "checkpoint" ? "&module=" + encodeURIComponent(id) : "")); } catch (_) {}
-      scrollTop();
+      writeRoute("#view=" + view + (view === "checkpoint" ? "&module=" + encodeURIComponent(id) : ""));
+      focusReading();
     }
     function chooseSubstation(id) {
       var first = theory.find(function (item) { return item.substation === id && !isWorkbook(item); });
@@ -1115,15 +1244,61 @@
       var section = theory.find(function (item) { return item.id === id; });
       if (!section) return;
       setTab("theory");
-      try { history.replaceState(null, "", "#section=" + encodeURIComponent(id)); } catch (_) {}
+      writeRoute("#section=" + encodeURIComponent(id));
       setActiveSubstationId(section.substation || "");
       setSelectedSectionId(section.id);
       updateStore({ activeSubstation: section.substation || "" });
-      scrollTop();
+      focusReading();
     }
 
-    return h("main", { className: "page" + (hasSubstations ? " page-wide" : "") + (textSizeState[0] ? " reading-large" : "") },
-      h("header", { className: "hero" },
+    function writeRoute(hash) {
+      try {
+        if (readerPilot && typeof history.pushState === "function") {
+          if (window.location.hash !== hash) history.pushState(null, "", hash);
+        } else history.replaceState(null, "", hash);
+      } catch (_) { /* Reading still works when browser history is unavailable. */ }
+    }
+    var currentReaderSection = theory.find(function (item) { return item.id === selectedSectionId; }) || activeTheory[0];
+    var returningFromLab = readerPilot && tab === "theory" && currentReaderSection &&
+      new URLSearchParams(window.location.hash.slice(1)).get("fromLab") === "security" &&
+      currentReaderSection.blocks.some(function (block) { return block.type === "lab" && block.lab === "security"; });
+    var viewNames = { theory: "Теория", checkpoint: "Закрепление", final: "Завершение станции", quiz: "Итоговый тест", interview: "Интервью", tasks: "Практика", analysis: "Вопросы с разбором", training: "Тренировка" };
+    function readingSurface() {
+      var children = Array.prototype.slice.call(arguments);
+      if (!readerPilot) return children;
+      return h.apply(null, ["div", { id: "lesson-content", className: "reader-content", tabIndex: -1 },
+        h("nav", { className: "reader-breadcrumb", "aria-label": "Положение в учебнике" },
+          h("a", { href: "cpp_backend_roadmap.html" }, "Курс"),
+          h("span", { "aria-hidden": true }, "/"),
+          h("span", null, (tab === "theory" || tab === "checkpoint") && activeSubstation ? activeSubstation.label + " · " + activeSubstation.title : "Станция " + stationDisplayNumber()),
+          h("span", { "aria-hidden": true }, "/"),
+          h("span", { "aria-current": "page" }, viewNames[tab] || "Теория")),
+        returningFromLab ? h("aside", { className: "reader-return", "aria-label": "Возврат из лаборатории" },
+          h("strong", null, "Из опыта — обратно к объяснению"),
+          h("p", null, "Ты вернулся в ту же подглаву. Продолжи чтение или проверь понимание в пяти заданиях. Переход из лаборатории не отмечает тему изученной."),
+          h("div", { className: "reader-return-actions" },
+            h("button", { className: "secondary", onClick: function () {
+              try { history.replaceState(null, "", "#section=" + encodeURIComponent(currentReaderSection.id)); } catch (_) {}
+              focusReading();
+            } }, "Продолжить чтение"),
+            h("button", { className: "primary", onClick: function () { openPage("checkpoint", currentReaderSection.substation); } }, "Закрепить тему"))) : null
+      ].concat(children));
+    }
+
+    return h("main", { className: "page" + (hasSubstations ? " page-wide" : "") + (textSizeState[0] ? " reading-large" : "") + (readerPilot ? " reader-page" : "") },
+      readerPilot ? h("a", { className: "reader-skip", href: "#lesson-content", onClick: function (event) {
+        if (event) event.preventDefault();
+        focusReading();
+      } }, "Перейти к материалу") : null,
+      readerPilot ? h("header", { className: "reader-header" },
+        h("a", { className: "reader-brand", href: "cpp_backend_roadmap.html" }, "C++ и backend"),
+        h("p", { className: "reading-progress" }, "Изучено " + doneSections + " из " + theory.length + " разделов"),
+        h("h1", { className: "reader-course-title" }, meta.title),
+        h("details", { className: "reader-options" }, h("summary", null, "Вид текста"),
+          h("div", { className: "reading-settings", role: "group", "aria-label": "Размер текста" },
+            h("button", { type: "button", "aria-pressed": !textSizeState[0], onClick: function () { setLargeText(false); } }, "Обычный"),
+            h("button", { type: "button", "aria-pressed": textSizeState[0], onClick: function () { setLargeText(true); } }, "Крупнее")),
+          location.protocol === "file:" ? h("p", { className: "file-warning" }, "Локальная версия. Для надёжной загрузки React и сохранения прогресса можно открыть курс через локальный HTTP-сервер.") : null)) : h("header", { className: "hero" },
         h("div", { className: "logo" }, meta.logo),
         h("h1", null, meta.title),
         h("p", { className: "hero-sub" }, meta.subtitle),
@@ -1134,11 +1309,9 @@
         location.protocol === "file:" ? h("div", { className: "file-warning" }, "Страница открыта как файл. Для надёжной загрузки React и сохранения прогресса запусти roadmap через локальный HTTP-сервер.") : null,
         h("p", { className: "reading-progress" }, "Изученные разделы: " + doneSections + " / " + theory.length)),
       hasSubstations ? h(SubstationNav, { items: substations, active: activeSubstationId, selected: selectedSectionId, view: tab, store: store, analysisCount: analysisTasks.length, onChoose: chooseSubstation, onNavigate: navigateSection, onCheckpoint: function (id) { openPage("checkpoint", id); }, onPage: openPage }) : null,
+      readingSurface(
       (tab === "quiz" || tab === "interview" || tab === "tasks" || tab === "training" || tab === "analysis" || (tab === "theory" && selectedWorkbook)) ? h("button", { className: "ghost", onClick: function () { openPage("final"); } }, "← Завершение станции") : null,
-      tab === "theory" && data.readingOrder ? h("div", { className: "section-actions", "aria-label": "Порядок чтения" },
-        h("button", { className: "secondary reading-mode", "aria-pressed": routeMode, onClick: function () { setRouteMode(true); updateStore({ readingRoute: true }); } }, "Первое чтение"),
-        h("button", { className: "secondary reading-mode", "aria-pressed": !routeMode, onClick: function () { setRouteMode(false); updateStore({ readingRoute: false }); } }, "По темам")) : null,
-      tab === "theory" ? h(Theory, { key: (activeSubstationId || "all") + ":" + selectedSectionId, sections: activeTheory, initialSectionId: selectedSectionId, readingOrder: routeMode ? data.readingOrder : null, onNavigate: navigateSection, onComplete: function () { if (selectedWorkbook) openPage("quiz"); else openPage("checkpoint", activeSubstationId); }, store: store, toggleSection: function (id) { var change = {}; change["sec:" + id] = !store["sec:" + id]; updateStore(change); } }) : null,
+      tab === "theory" ? h(Theory, { key: (activeSubstationId || "all") + ":" + selectedSectionId, sections: activeTheory, initialSectionId: selectedSectionId, onNavigate: navigateSection, onComplete: function () { if (selectedWorkbook) openPage("quiz"); else openPage("checkpoint", activeSubstationId); }, store: store, toggleSection: function (id) { var change = {}; change["sec:" + id] = !store["sec:" + id]; updateStore(change); } }) : null,
       (tab === "quiz" || tab === "interview") ? h("section", null,
         h("h2", null, tab === "quiz" ? "Итоговый тест по станции" : "Интервью-тренажёр"),
         tab === "quiz" && analysisTasks.length ? h("div", { className: "assessment-extra" }, h("p", null, "Дополнительно — вопросы с самостоятельным ответом и разбором: " + analysisTasks.length + ". Попробуй ответить самостоятельно, потом открой подсказки и решение."), h("button", { className: "secondary", onClick: function () { openPage("analysis"); } }, "Открыть вопросы с разбором →")) : null,
@@ -1169,7 +1342,7 @@
       } }) : null,
       tab === "tasks" ? h("section", null, h(PracticeLinks), activeTasks.length ? h("div", null, h("h3", null, "Задачи учебника"), h(Tasks, { key: "station-practice", tasks: activeTasks })) : null) : null,
       h("div", { className: "footer-row" }, h("button", { className: "reset", onClick: function () { if (confirm("Сбросить прогресс этой станции?")) { var cleared = meta.id === "station9-sql" ? { migratedFromDatabases: true } : {}; try { localStorage.setItem(meta.storeKey, JSON.stringify(cleared)); } catch (_) {} setStore(cleared); } } }, "Сбросить прогресс")),
-      h("footer", null, h("a", { href: "cpp_backend_roadmap.html" }, "← К программе курса"), " · ", h("a", { href: "sources.html#" + meta.id }, "Источники станции")));
+      h("footer", null, h("a", { href: "cpp_backend_roadmap.html" }, "← К программе курса"), " · ", h("a", { href: "sources.html#" + meta.id }, "Источники станции"))));
   }
 
   ReactDOM.createRoot(root).render(h(App));

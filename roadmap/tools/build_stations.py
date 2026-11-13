@@ -109,6 +109,7 @@ def validate(data: dict, path: Path) -> None:
     if not isinstance(theory, list) or not theory:
         raise ValueError(f"{path}: theory must be a non-empty list")
     ids: list[str] = []
+    example_ids: set[str] = set()
     for section_index, raw_section in enumerate(theory, 1):
         where = f"{path}: theory section #{section_index}"
         if not isinstance(raw_section, dict):
@@ -162,12 +163,23 @@ def validate(data: dict, path: Path) -> None:
                 require_text(block["prompt"], f"{block_where}.prompt")
                 require_text(block["answer"], f"{block_where}.answer")
             elif block_type == "code":
-                allowed = ({"type", "code"}, {"type", "caption", "code"})
-                if set(raw_block) not in allowed:
+                if (not {"type", "code"} <= set(raw_block)
+                        or not set(raw_block) <= {"type", "code", "caption", "exampleId", "standard"}):
                     raise ValueError(f"{block_where}: invalid code block keys")
                 require_text(raw_block["code"], f"{block_where}.code")
                 if "caption" in raw_block:
                     require_text(raw_block["caption"], f"{block_where}.caption")
+                if "standard" in raw_block and (not isinstance(raw_block["standard"], str) or raw_block["standard"] not in {"20", "23", "20/23"}):
+                    raise ValueError(f"{block_where}.standard: expected '20', '23' or '20/23'")
+                if "exampleId" in raw_block:
+                    example_id = require_text(raw_block["exampleId"], f"{block_where}.exampleId")
+                    if not ID_PATTERN.fullmatch(example_id):
+                        raise ValueError(f"{block_where}.exampleId: expected a lowercase identifier")
+                    if example_id in example_ids:
+                        raise ValueError(f"{block_where}.exampleId: duplicate listing identifier")
+                    example_ids.add(example_id)
+                    if "standard" not in raw_block:
+                        raise ValueError(f"{block_where}: identified examples must declare standard")
             elif block_type == "note":
                 block = require_keys(raw_block, {"type", "kind", "html"}, block_where)
                 if block["kind"] not in {"tip", "warn", "key"}:
@@ -431,6 +443,7 @@ def validate(data: dict, path: Path) -> None:
 
 def html_for(data: dict) -> str:
     from build_glossary import catalog_version
+    from course_theme import decorate_html
     if "checkpoints" not in data:
         from checkpoint_data import with_checkpoints
         data = with_checkpoints(data)
@@ -442,26 +455,37 @@ def html_for(data: dict) -> str:
     title = meta["title"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     extra_css = '<link rel="stylesheet" href="assets/database-intro.css">' if meta["number"] == 9 else ""
     label = {"station5-linux": "5Б", "station7-netlab": "7Б", "station7-traffic": "7В"}.get(meta["id"], str(meta["number"]))
-    return f"""<!doctype html>
+    reader_pilot = True
+    font_links = ""
+    reader_css = "\n".join(
+        f'  <link rel="stylesheet" href="assets/{name}?v={hashlib.sha256((ROADMAP / "assets" / name).read_bytes()).hexdigest()[:12]}">'
+        for name in ("course-ui.css", "course-reader.css")
+    ) if reader_pilot else ""
+    code_scripts = "\n".join(
+        f'  <script src="{name}?v={hashlib.sha256((ROADMAP / name).read_bytes()).hexdigest()[:12]}"></script>'
+        for name in ("vendor/highlightjs/highlight.min.js", "vendor/highlightjs/http.min.js", "vendor/highlightjs/cmake.min.js",
+                     "vendor/highlightjs/dockerfile.min.js", "vendor/highlightjs/nginx.min.js", "assets/course-code.js")
+    )
+    html = f"""<!doctype html>
 <html lang="ru">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Интерактивная станция {label} курса по backend-разработке на C++">
   <title>{title}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+{font_links}
   <link rel="stylesheet" href="assets/station.css?v={hashlib.sha256((ROADMAP / 'assets/station.css').read_bytes()).hexdigest()[:12]}">
   <link rel="stylesheet" href="assets/terms.css?v=20261021">
 {extra_css}
+{reader_css}
 </head>
-<body>
+<body{' class="course-reader"' if reader_pilot else ''}>
   <div id="root"><div class="fatal">Загрузка станции…</div></div>
   <noscript><div class="fatal">Для интерактивной станции нужен JavaScript.</div></noscript>
 {'<script src="assets/database-route.js"></script>' if meta['number'] == 9 else ''}
   <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+{code_scripts}
   <script src="generated/{meta['id']}.data.js?v={data_version}"></script>
   <script src="generated/visual-labs.data.js"></script>
   <script src="generated/terms.data.js?v={catalog_version()}" defer></script>
@@ -471,6 +495,12 @@ def html_for(data: dict) -> str:
 </body>
 </html>
 """
+    html = decorate_html(html, surfaces=False)
+    last_styles = "\n".join(
+        f'<link rel="stylesheet" href="assets/{name}?v={hashlib.sha256((ROADMAP / "assets" / name).read_bytes()).hexdigest()[:12]}">'
+        for name in ("course-code.css", "course-dark-reader.css")
+    )
+    return html.replace("</head>", last_styles + "\n</head>")
 
 
 def main() -> None:

@@ -115,7 +115,7 @@ class LinuxStationContent(unittest.TestCase):
 
     def test_station_schema_and_six_group_reading_route(self):
         validate(self.data, SOURCE)
-        self.assertEqual(len(self.sections), 28)
+        self.assertEqual(len(self.sections), 30)
         self.assertEqual(tuple(group["id"] for group in self.data["substations"]),
                          GROUPS)
         route = self.data.get("readingOrder", list(self.sections))

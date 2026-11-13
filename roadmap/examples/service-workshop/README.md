@@ -137,3 +137,60 @@ COURSE_DOMAIN=tasks.example.org ACME_EMAIL=admin@example.org docker compose -f c
 [Caddy HTTPS](https://caddyserver.com/docs/automatic-https),
 [Caddy request body limit](https://caddyserver.com/docs/caddyfile/directives/request_body),
 [CMake CLI](https://cmake.org/cmake/help/latest/manual/cmake.1.html).
+
+
+Выбор C++20 или C++23 для локальной CMake-сборки
+------------------------------------------------
+По умолчанию проект остаётся на C++20. Для сравнения режимов используйте
+разные каталоги сборки; команды выполняются в каталоге этого проекта:
+
+    cmake -S . -B build-cxx20 -DCOURSE_CXX_STANDARD=20
+    cmake --build build-cxx20
+    cmake -S . -B build-cxx23 -DCOURSE_CXX_STANDARD=23
+    cmake --build build-cxx23
+
+COURSE_CXX_STANDARD допускает только 20 или 23. CMake требует выбранный
+стандарт без перехода на более ранний и отключает расширения языка. Уже
+существующие build-каталоги, настройки lab.py и контейнерные образы команды
+выше не меняют. В каждый новый каталог отдельно передавайте нужные флаги
+необязательных адаптеров из инструкции выше и установите указанные зависимости.
+
+Для отдельного компилятора добавьте при ПЕРВОЙ настройке нового build-каталога:
+
+    -DCMAKE_CXX_COMPILER=/absolute/path/to/g++
+
+Не подменяйте компилятор в старом CMake cache. Сам режим -std=c++23 не обновляет
+стандартную библиотеку и не доказывает поддержку всех возможностей C++23.
+Текущие базовые исходники сохраняют требования C++20; поддержку нужных функций
+и совместимость зависимостей проверяют для конкретной сборки. Это не перевод
+Docker-образов или внешних SDK на другую версию.
+
+После сборки проверьте зарегистрированные тесты отдельно в каждом режиме:
+
+    ctest --test-dir build-cxx20 --output-on-failure
+    ctest --test-dir build-cxx23 --output-on-failure
+
+Необязательное упражнение C++23 не изменяет Storage, HTTP-маршруты и запущенный
+сервер. Оно собирает отдельную программу examples/cpp23/s8-expected-http.cpp.
+Запускайте из полного репозитория курса, чтобы соседний файл существовал:
+
+    cmake -S . -B build-expected -DCOURSE_CXX_STANDARD=23 -DCOURSE_BUILD_CPP23_EXAMPLES=ON
+    cmake --build build-expected --target course_expected_http
+    ctest --test-dir build-expected -R course_expected_http_contract --output-on-failure
+
+Для этого упражнения нужна библиотека с __cpp_lib_expected >= 202211L
+(не только базовый expected, но и and_then/transform). Компилятор выбирается
+флагом CMAKE_CXX_COMPILER при первом configure, как показано выше. Настройка
+всего workshop по-прежнему требует его закреплённых HTTP/JSON-зависимостей;
+чтобы проверить только упражнение без скачивания SDK, достаточно прямой сборки
+из корня репозитория:
+
+    g++ -std=c++23 roadmap/examples/cpp23/s8-expected-http.cpp -o expected-http
+    ./expected-http
+
+Вывод содержит шесть строк с кодами 200/400/422; сами запросы в сеть не уходят.
+
+Основание выбора режима CMake 3.24:
+https://cmake.org/cmake/help/v3.24/prop_tgt/CXX_STANDARD.html
+https://cmake.org/cmake/help/v3.24/prop_tgt/CXX_STANDARD_REQUIRED.html
+https://cmake.org/cmake/help/v3.24/variable/CMAKE_CXX_COMPILER.html

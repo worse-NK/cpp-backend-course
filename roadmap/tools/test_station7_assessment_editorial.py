@@ -3,6 +3,7 @@
 Arithmetic/state examples are teaching models, not real network measurements.
 No capture, network configuration, or remote connection is performed here.
 """
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -26,7 +27,12 @@ class NetworkAssessmentEditorial(unittest.TestCase):
     def test_schema_and_question_identity_counts(self):
         validate(self.data,self.path)
         self.assertEqual([len(self.data['quizzes'][k]) for k in
-                          ('basic','advanced','interview')],[53,83,63])
+                          ('basic','advanced','interview')],[57,89,66])
+        prefix = {bank: self.data['quizzes'][bank][:count] for bank, count in
+                  (('basic',53),('advanced',83),('interview',63))}
+        self.assertEqual(hashlib.sha256(json.dumps(prefix,ensure_ascii=False,
+                         sort_keys=True).encode()).hexdigest(),
+                         'd97c2f15f5adae8ac84d433bddc99d7a35da48dc89ed00c27e2272d732a838f2')
         self.assertEqual(self.data['meta']['storeKey'],'cpp_station7_progress_v1')
 
     def test_no_dominant_shortest_or_longest_answer_shortcut(self):
@@ -92,8 +98,12 @@ class NetworkAssessmentEditorial(unittest.TestCase):
     def test_checkpoint_count_and_refs(self):
         plan=json.loads((ROOT/'content/checkpoints/station7.json').read_text())
         self.assertEqual(len(plan['modules']),9)
+        expected_counts={'request-journey':5,'network-layers':6,'remote-access':6,
+                         'transport':5,'posix-sockets':5,'event-loop':5,'asio':7,
+                         'http-tls':5,'production-networking':5}
+        self.assertEqual({k:len(v) for k,v in plan['modules'].items()},expected_counts)
         for module,questions in plan['modules'].items():
-            self.assertEqual(len(questions),5)
+            self.assertEqual(len(questions),expected_counts[module])
             for entry in questions:
                 q=self.question(entry['bank'],entry['index']) if 'bank' in entry else entry
                 self.assertEqual(q['substation'],module)

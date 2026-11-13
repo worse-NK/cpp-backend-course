@@ -17,7 +17,7 @@ window.STATION_DATA = {
       "blocks": [
         {
           "type": "text",
-          "html": "Функция должна загрузить новую настройку. Она открыла файл, прочитала часть текста — и обнаружила ошибку. Что увидит вызывающий код? Останется ли прежняя настройка? Закроется ли файл? Это три разных вопроса, и ответ «бросим исключение» ещё не отвечает на все три."
+          "html": "Программе нужно обновить настройку. Она открыла файл, прочитала часть текста — и обнаружила ошибку. Как программа сообщит об ошибке? Сохранится ли прежняя настройка? Закроется ли файл? В этой главе научимся отвечать на все три вопроса: сообщение об ошибке — лишь часть решения."
         },
         {
           "type": "text",
@@ -68,7 +68,7 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "key",
-          "html": "Основная версия курса — C++20. Примеры со стандартным <code>std::expected</code> отдельно помечены <b>C++23</b>: одной смены флага недостаточно, если установленная стандартная библиотека ещё не реализует этот тип."
+          "html": "Общая основа курса — C++20/23. Базовые примеры этого раздела работают в обоих режимах, а примеры со стандартным <code>std::expected</code> отдельно помечены <b>C++23</b>: одной смены флага недостаточно, если установленная стандартная библиотека ещё не реализует этот тип."
         },
         {
           "type": "note",
@@ -166,6 +166,7 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "C++23: определение parseInt с заголовками; две последние строки нужно поместить внутрь вызывающей функции, определив use и handle",
+          "standard": "23",
           "code": "#include <charconv>\n#include <expected>\n#include <string_view>\n#include <system_error>\n\nenum class ParseError { invalid, out_of_range };\n\nstd::expected<int, ParseError> parseInt(std::string_view s) {\n    if (s.empty()) return std::unexpected(ParseError::invalid);\n    int value{};\n    const char* end = s.data() + s.size();\n    auto [ptr, ec] = std::from_chars(s.data(), end, value);\n    if (ec == std::errc::result_out_of_range)\n        return std::unexpected(ParseError::out_of_range);\n    if (ec != std::errc{} || ptr != end)\n        return std::unexpected(ParseError::invalid);\n    return value;\n}\n\nauto r = parseInt(\"42\");\nif (r) use(*r); else handle(r.error());"
         },
         {
@@ -223,6 +224,7 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Сопоставление объявлений, не единая программа: User, Config, Path и типы ошибок определяет приложение; expected требует C++23",
+          "standard": "23",
           "code": "std::optional<User> findCached(UserId id);\n// отсутствие — единственный ожидаемый отрицательный исход\n\nstd::expected<Config, ParseError> parseConfig(std::string_view text);\n// вызывающему нужна структурированная причина\n\nConfig loadRequiredConfig(const Path& path);\n// API может бросить: без конфигурации операция не продолжается\n\nstd::error_code removeFile(const Path& path) noexcept;\n// пример явного error channel для системного слоя"
         },
         {
@@ -857,7 +859,7 @@ window.STATION_DATA = {
       "id": "constructor-transaction",
       "substation": "exception-mechanics",
       "title": "Ошибка создания объекта: когда выполняется catch конструктора",
-      "lead": "Создаём объект из двух ресурсов. Второй не удалось получить. Посмотрим, что очистит язык, а что вообще ещё не успело стать готовым объектом.",
+      "lead": "При создании Session нужно подготовить два поля. Первое уже создано, а конструктор второго сообщил об ошибке. Проследим, какие деструкторы вызовутся и в какой момент управление дойдёт до обработчика.",
       "blocks": [
         {
           "type": "text",
@@ -961,7 +963,7 @@ window.STATION_DATA = {
       "id": "exception-cost-and-array",
       "substation": "exception-mechanics",
       "title": "Исключение: массив объектов и цена механизма",
-      "lead": "Сначала применим знакомую границу готового объекта к массиву. Затем отдельно разберём стоимость реализации — язык не задаёт время работы throw.",
+      "lead": "Первые элементы массива уже созданы, а конструктор следующего сообщил об ошибке. Кто теперь уничтожит созданные элементы? После этого разбора отдельно обсудим стоимость механизма исключений: стандарт не задаёт время выполнения throw.",
       "blocks": [
         {
           "type": "text",
@@ -1969,6 +1971,7 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Определение функции parse_int · C++23 · main добавим ниже",
+          "standard": "23",
           "code": "#include <charconv>\n#include <expected>\n#include <string_view>\n#include <system_error>\nenum class ParseError { empty, invalid, out_of_range, trailing };\nstd::expected<int, ParseError> parse_int(std::string_view text) {\n    if (text.empty()) return std::unexpected(ParseError::empty);\n    int value = 0;\n    const char* end = text.data() + text.size();\n    auto [ptr, ec] = std::from_chars(text.data(), end, value);\n    if (ec == std::errc::invalid_argument)\n        return std::unexpected(ParseError::invalid);\n    if (ec == std::errc::result_out_of_range)\n        return std::unexpected(ParseError::out_of_range);\n    if (ptr != end) return std::unexpected(ParseError::trailing);\n    return value;\n}"
         },
         {
@@ -2027,12 +2030,155 @@ window.STATION_DATA = {
         {
           "type": "note",
           "kind": "tip",
-          "html": "Основная версия учебника — C++20, где стандартного <code>std::expected</code> нет. Здесь показано расширение C++23. Поддержка выбранной редакции языка и полнота реализации библиотеки — разные проверки: старшая версия компилятора не означает наличие всех перечисленных методов. Явные ветки позволяют изучить смысл без зависимости от сокращённых цепочек."
+          "html": "Общая основа курса — C++20/23; базовые примеры работают в обоих режимах. Стандартный <code>std::expected</code> здесь требует C++23: в библиотеке C++20 его нет. Поддержка выбранной редакции языка и полнота реализации библиотеки — разные проверки: старшая версия компилятора не означает наличие всех перечисленных методов. Явные ветки позволяют изучить смысл без зависимости от сокращённых цепочек."
         },
         {
           "type": "note",
           "kind": "tip",
           "html": "<strong>Первичные источники 4.4.</strong> Открытый проект C++23 N4950: <a href=\"https://timsong-cpp.github.io/cppwp/n4950/expected.general\" target=\"_blank\" rel=\"noopener noreferrer\">expected.general</a> задаёт альтернативы результата; <a href=\"https://timsong-cpp.github.io/cppwp/n4950/expected.object.cons\" target=\"_blank\" rel=\"noopener noreferrer\">expected.object.cons</a> — создание и возможные исключения; <a href=\"https://timsong-cpp.github.io/cppwp/n4950/expected.object.obs\" target=\"_blank\" rel=\"noopener noreferrer\">expected.object.obs</a> — проверки, предусловия доступа и bad_expected_access; <a href=\"https://timsong-cpp.github.io/cppwp/n4950/expected.object.monadic\" target=\"_blank\" rel=\"noopener noreferrer\">expected.object.monadic</a> — вызов функций в сокращённых операциях. <a href=\"https://timsong-cpp.github.io/cppwp/n4861/charconv.from.chars\" target=\"_blank\" rel=\"noopener noreferrer\">N4861, charconv.from.chars</a> подтверждает формат целочисленного преобразования и ec/ptr. N4861 и N4950 — открытые проекты, не публикации ISO; правило C++23 не приписывается C++20."
+        }
+      ]
+    },
+    {
+      "id": "expected-chain-steps",
+      "substation": "value-errors",
+      "title": "C++23: цепочка разбора, проверки и преобразования expected",
+      "lead": "Программа читает номер порта из настройки: сначала нужны цифры, затем допустимый диапазон, затем готовый тип Port. Соберём эти шаги и отдельно зададим, когда разрешено значение по умолчанию.",
+      "blocks": [
+        {
+          "type": "text",
+          "html": "Сервис должен слушать порт, номер которого записан строкой. Для нашего примера допустимы числа от 1 до 65535: нулевой порт намеренно не входит в договор этой настройки. Строку <code>8080</code> нужно превратить в <code>Port{8080}</code>, строку <code>70000</code> — отвергнуть по диапазону, а <code>80x</code> — отвергнуть ещё при разборе текста. Если настройка пуста, вызывающий код разрешает порт 8080 по умолчанию. Это правила учебной программы, не универсальная политика сетевого API."
+        },
+        {
+          "type": "text",
+          "html": "В предыдущем разделе мы выбирали ветки вручную. Здесь сохраним ту же последовательность, а стандартные методы сократят повторяющийся код. Такие операции называют <b>монадическими</b>: в этом разделе достаточно понимать их как соединение шагов с учётом состояния результата. Никакой новой команды для броска или перехвата исключений за этим названием нет."
+        },
+        {
+          "type": "diagram",
+          "mode": "flow",
+          "title": "Три шага успешного пути",
+          "items": [
+            {
+              "title": "Разобрать строку",
+              "html": "parse_int возвращает <code>expected&lt;int, ParseError&gt;</code>. Ошибка текста завершает этот путь."
+            },
+            {
+              "title": "Проверить диапазон",
+              "html": "and_then передаёт число в check_port. Этот шаг тоже может вернуть ошибку."
+            },
+            {
+              "title": "Создать Port",
+              "html": "transform преобразует уже проверенное число в значение другого типа."
+            }
+          ],
+          "caption": "При первой ошибке следующие функции успешного пути не вызываются. Обработка причины задаётся отдельно."
+        },
+        {
+          "type": "text",
+          "html": "<code>and_then(f)</code> нужен, если следующий шаг сам возвращает <code>expected</code>. При успехе вызывается <code>f(value)</code>; при ошибке функция пропускается, а причина передаётся дальше. В рассматриваемой цепочке тип ошибки у результата <code>f</code> должен остаться <code>ParseError</code>. <code>transform(f)</code> нужен, если <code>f</code> возвращает обычное значение: библиотека сама обернёт новый тип в успешный <code>expected</code>. Если вернуть из <code>transform</code> ещё один expected, получится вложенный результат, а не автоматическое слияние двух шагов."
+        },
+        {
+          "type": "code",
+          "caption": "Полная программа · C++23: четыре метода expected на одной настройке",
+          "exampleId": "s4-expected-chain",
+          "standard": "23",
+          "code": "#include <charconv>\n#include <expected>\n#include <iostream>\n#include <string>\n#include <string_view>\n#include <system_error>\n\n#if !defined(__cpp_lib_expected) || __cpp_lib_expected < 202211L\n#error \"This example requires C++23 expected monadic operations\"\n#endif\n\nenum class ParseError { empty, invalid, integer_range, trailing, port_range };\nstruct Port { unsigned value; };\n\nstd::expected<int, ParseError> parse_int(std::string_view text) {\n    if (text.empty()) return std::unexpected(ParseError::empty);\n    int value = 0;\n    const auto end = text.data() + text.size();\n    const auto [ptr, ec] = std::from_chars(text.data(), end, value);\n    if (ec == std::errc::invalid_argument)\n        return std::unexpected(ParseError::invalid);\n    if (ec == std::errc::result_out_of_range)\n        return std::unexpected(ParseError::integer_range);\n    if (ptr != end) return std::unexpected(ParseError::trailing);\n    return value;\n}\n\nstd::expected<int, ParseError> check_port(int value) {\n    if (value < 1 || value > 65535)\n        return std::unexpected(ParseError::port_range);\n    return value;\n}\n\nstd::expected<Port, ParseError> parse_port(std::string_view text) {\n    return parse_int(text)\n        .and_then(check_port)\n        .transform([](int value) { return Port{static_cast<unsigned>(value)}; });\n}\n\nstd::string explain(ParseError error) {\n    switch (error) {\n    case ParseError::empty: return \"empty\";\n    case ParseError::invalid: return \"invalid\";\n    case ParseError::integer_range: return \"integer range\";\n    case ParseError::trailing: return \"trailing\";\n    case ParseError::port_range: return \"port range\";\n    }\n    return \"unknown\";\n}\n\nvoid show(std::string_view text) {\n    auto result = parse_port(text)\n        .or_else([](ParseError error) -> std::expected<Port, ParseError> {\n            if (error == ParseError::empty) return Port{8080};\n            return std::unexpected(error);\n        })\n        .transform_error(explain);\n\n    std::cout << (text.empty() ? \"<empty>\" : text) << \": \";\n    if (result) std::cout << \"port \" << result->value << '\\n';\n    else std::cout << \"error \" << result.error() << '\\n';\n}\n\nint main() {\n    show(\"8080\");\n    show(\"\");\n    show(\"70000\");\n    show(\"80x\");\n}"
+        },
+        {
+          "type": "text",
+          "html": "<code>parse_int</code> сначала проверяет пустоту, затем результат <code>from_chars</code> и оставшийся хвост. При <code>80x</code> возникает <code>trailing</code>, поэтому <code>check_port</code> не вызывается. При <code>70000</code> строка успешно превращается в int; уже <code>check_port</code> возвращает <code>port_range</code>. Преобразование в unsigned выполняется только после проверки 1..65535, поэтому отрицательный ввод нельзя незаметно принять за большой положительный порт."
+        },
+        {
+          "type": "text",
+          "html": "В <code>show</code> есть отдельный ошибочный путь. <code>or_else(f)</code> вызывает <code>f(error)</code> только при ошибке. Функция должна вернуть новый expected с тем же успешным типом <code>Port</code>; тип причины может измениться. Мы восстанавливаем только явно разрешённый случай <code>empty</code>. Для остальных причин возвращаем <code>unexpected(error)</code>: <code>or_else</code> не обязан превращать каждый отказ в успех."
+        },
+        {
+          "type": "text",
+          "html": "Затем <code>transform_error(explain)</code> заменяет перечисление причины на строку. Для успешного результата <code>explain</code> вообще не вызывается; для ошибки меняется только её представление, а не смысл «операция не выполнена». В результате переменная <code>result</code> имеет тип <code>expected&lt;Port, std::string&gt;</code>. Отличие от <code>or_else</code>: <code>transform_error</code> возвращает саму новую причину, а не expected."
+        },
+        {
+          "type": "code",
+          "caption": "Ожидаемый вывод полной программы",
+          "code": "8080: port 8080\n<empty>: port 8080\n70000: error port range\n80x: error trailing"
+        },
+        {
+          "type": "note",
+          "kind": "warn",
+          "html": "Эти методы проверяют состояние expected, но не ставят <code>try/catch</code> вокруг пользовательской функции. Если <code>check_port</code>, преобразование или создание строки причины бросит исключение, оно пойдёт к обычному обработчику. Цепочка также не отменяет уже выполненные внешние действия. <code>or_else</code> не является перехватом исключения."
+        },
+        {
+          "type": "text",
+          "html": "Методы имеют перегрузки для lvalue и rvalue. От временного результата следующему шагу можно передать значение перемещением; у именованного результата без <code>std::move</code> действует lvalue-перегрузка. Это важно для <code>unique_ptr</code> и тяжёлых ошибок: короткая запись не отменяет требований к копированию и перемещению. Сначала выбирай корректный договор владения, затем сокращай ветки."
+        },
+        {
+          "type": "self-check",
+          "prompt": "check_port возвращает <code>expected&lt;int, ParseError&gt;</code>. Что изменится, если вызвать его через transform вместо and_then?",
+          "answer": "Успешное преобразование получит значение типа <code>expected&lt;int, ParseError&gt;</code> внутри внешнего expected: получится вложенный результат. Для следующего шага, который сам сообщает успех или ошибку через expected, здесь нужен and_then. transform подходит для обычного Port из уже проверенного int."
+        },
+        {
+          "type": "self-check",
+          "prompt": "parse_port получил ошибку port_range. Выполнится ли создание Port в transform? Сработает ли наш порт 8080 по умолчанию?",
+          "answer": "Преобразование успешного числа пропускается. or_else вызывается, но восстанавливает только empty, поэтому port_range остаётся ошибкой и затем превращается в строку. Такой результат следует из написанной функции восстановления, не из встроенной политики expected."
+        },
+        {
+          "type": "note",
+          "kind": "tip",
+          "html": "Основание: открытый проект C++23 N4950, <a href=\"https://timsong-cpp.github.io/cppwp/n4950/expected.object.monadic\">expected.object.monadic</a>. В нём заданы ветвления, требования к возвращаемым типам и передача аргументов для четырёх методов. Для цепочек проверяем <code>__cpp_lib_expected &gt;= 202211L</code>; наличия базового expected с меньшим значением макроса недостаточно. Это библиотечное расширение C++23, не часть C++20."
+        }
+      ]
+    },
+    {
+      "id": "optional-chain-steps",
+      "substation": "value-errors",
+      "title": "C++23: optional в цепочке, когда причина отсутствия не нужна",
+      "lead": "На странице нужно показать приветствие по имени, а при отсутствии подходящего имени — «гость». Здесь достаточно двух исходов; разберём, чем такая цепочка отличается от expected.",
+      "blocks": [
+        {
+          "type": "text",
+          "html": "Пользователь может не указать имя. По условиям примера пустая строка тоже не подходит для приветствия, но объяснять причину посетителю не нужно: в обоих случаях показываем <code>Hello, guest</code>. Если имя есть, создаём приветствие с ним. Для этой задачи <code>optional</code> выражает нужные два состояния без отдельного типа ошибки."
+        },
+        {
+          "type": "text",
+          "html": "В C++23 у <code>optional</code> появились <code>and_then</code>, <code>transform</code> и <code>or_else</code>. Первые два работают при наличии значения: <code>and_then</code> ожидает функцию, возвращающую optional, а <code>transform</code> — обычное новое значение. <code>or_else</code> срабатывает при пустом optional; её функция не получает причину, потому что хранить её здесь негде. Она должна вернуть optional того же типа. Метода <code>transform_error</code> у optional нет."
+        },
+        {
+          "type": "code",
+          "caption": "Полная программа · C++23: имя, приветствие и исключение из преобразования",
+          "exampleId": "s4-optional-chain",
+          "standard": "23",
+          "code": "#include <iostream>\n#include <optional>\n#include <stdexcept>\n#include <string>\n#include <utility>\n\n#if !defined(__cpp_lib_optional) || __cpp_lib_optional < 202110L\n#error \"This example requires C++23 optional monadic operations\"\n#endif\n\nstd::optional<std::string> greeting(std::optional<std::string> name) {\n    return std::move(name)\n        .and_then([](std::string value) -> std::optional<std::string> {\n            if (value.empty()) return std::nullopt;\n            return value;\n        })\n        .transform([](const std::string& value) { return \"Hello, \" + value; })\n        .or_else([] { return std::optional<std::string>{\"Hello, guest\"}; });\n}\n\nint main() {\n    std::cout << *greeting(std::string{\"Ada\"}) << '\\n';\n    std::cout << *greeting(std::string{}) << '\\n';\n    std::cout << *greeting(std::nullopt) << '\\n';\n\n    try {\n        auto result = std::optional<int>{1}.transform([](int) -> int {\n            throw std::runtime_error(\"callback\");\n        });\n        (void)result;\n    } catch (const std::runtime_error& error) {\n        std::cout << \"caught \" << error.what() << '\\n';\n    }\n}"
+        },
+        {
+          "type": "text",
+          "html": "Сначала <code>std::move(name)</code> разрешает забрать принадлежащую optional строку. В <code>and_then</code> пустая строка превращается в <code>nullopt</code>, а непустая остаётся значением. Если исходный optional уже пуст, эта функция не вызывается. <code>transform</code> добавляет приветствие только к существующему имени. Наконец, <code>or_else</code> создаёт запасное приветствие для двух пустых путей."
+        },
+        {
+          "type": "text",
+          "html": "Вызовы <code>*greeting(...)</code> в main допустимы благодаря договору нашей функции: при обычном возврате завершающий <code>or_else</code> даёт значение и для пустого входа. Это не общее свойство произвольной цепочки optional. Если запасная функция вернёт <code>nullopt</code>, перед разыменованием снова понадобится проверка состояния."
+        },
+        {
+          "type": "code",
+          "caption": "Ожидаемый вывод",
+          "code": "Hello, Ada\nHello, guest\nHello, guest\ncaught callback"
+        },
+        {
+          "type": "text",
+          "html": "Последняя часть специально бросает <code>runtime_error</code> внутри <code>transform</code>. Исключение ловит внешний <code>catch</code>, а не optional. Ни пустой результат, ни запасное значение не возникают автоматически. Аналогично выделение памяти для приветствия может бросить: optional не обещает небросающую функцию."
+        },
+        {
+          "type": "note",
+          "kind": "key",
+          "html": "Если отсутствие и сбой требуют разных реакций, не прячь оба исхода в пустом optional ради короткой цепочки. Например, «настройка не задана» и «прочитать настройку не удалось» могут требовать expected или отдельного канала исключений. Выбор типа результата идёт раньше выбора удобного метода."
+        },
+        {
+          "type": "self-check",
+          "prompt": "Можно ли в optional::or_else написать лямбду с параметром ParseError, чтобы выбрать сообщение об ошибке?",
+          "answer": "Нет. Пустой optional не хранит ParseError, а or_else вызывает функцию без аргументов. Если причина влияет на восстановление или сообщение, её нужно сохранить другим интерфейсом — например, <code>expected&lt;T, E&gt;</code>."
+        },
+        {
+          "type": "note",
+          "kind": "tip",
+          "html": "Основание: открытый проект C++23 N4950, <a href=\"https://timsong-cpp.github.io/cppwp/n4950/optional.monadic\">optional.monadic</a>. Методы определены через вызов пользовательской функции только в нужном состоянии. Для этого дополнения нужен <code>__cpp_lib_optional &gt;= 202110L</code>; сам optional был доступен и до C++23."
         },
         {
           "type": "note",
@@ -2522,6 +2668,38 @@ window.STATION_DATA = {
       "substation": "system-boundaries"
     }
   ],
+  "readingOrder": [
+    "learning-route",
+    "why-errors",
+    "exceptions-vs-codes",
+    "error-contracts",
+    "failure-taxonomy",
+    "channel-decision",
+    "exceptions-basics",
+    "exception-types",
+    "raii-exceptions",
+    "exception-timeline",
+    "exception-object-matching",
+    "catch-rethrow-context",
+    "constructor-transaction",
+    "exception-cost-and-array",
+    "construction-cleanup",
+    "exception-safety",
+    "noexcept",
+    "strong-guarantee-example",
+    "transactional-updates",
+    "noexcept-deep",
+    "external-effects-guarantees",
+    "practical",
+    "expected-composition",
+    "expected-chain-steps",
+    "optional-chain-steps",
+    "error-boundaries",
+    "retry-idempotency",
+    "context-and-logging",
+    "reload-final-workbook",
+    "summary"
+  ],
   "quizzes": {
     "basic": [
       {
@@ -2854,6 +3032,36 @@ window.STATION_DATA = {
         "substation": "exception-safety",
         "theoryRefs": [
           "external-effects-guarantees"
+        ]
+      },
+      {
+        "substation": "value-errors",
+        "level": "medium",
+        "q": "C++23: parse() возвращает expected<int,E>, а check(int) — expected<int,E>. Как продолжить проверку только при успехе, не создавая вложенный expected?",
+        "options": [
+          "parse().transform(check)",
+          "parse().and_then(check)",
+          "parse().transform_error(check)"
+        ],
+        "answer": 1,
+        "why": "and_then ожидает следующий expected с тем же типом ошибки; при исходной ошибке check не вызывается. transform обернул бы возвращённый expected как обычное успешное значение.",
+        "theoryRefs": [
+          "expected-chain-steps"
+        ]
+      },
+      {
+        "substation": "value-errors",
+        "level": "medium",
+        "q": "C++23: optional<int> x пуст, f имеет сигнатуру int(int), а fallback возвращает optional<int>. Какие пользовательские функции вызываются в x.transform(f).or_else(fallback)?",
+        "options": [
+          "Только fallback, без аргументов",
+          "Сначала f, затем fallback с нулём",
+          "Ни одна: цепочка всегда пропускается"
+        ],
+        "answer": 0,
+        "why": "transform пропускает f для пустого optional. or_else затем вызывает функцию без аргументов и использует возвращённый optional. Причина ошибки в исходном optional не хранится.",
+        "theoryRefs": [
+          "optional-chain-steps"
         ]
       }
     ],
@@ -3222,6 +3430,37 @@ window.STATION_DATA = {
         "theoryRefs": [
           "exception-cost-and-array"
         ]
+      },
+      {
+        "substation": "value-errors",
+        "level": "hard",
+        "q": "C++23: expected<Port,E> содержит ошибку. transform_error возвращает string, а or_else мог бы вернуть expected<Port,G>. Чем различаются роли этих методов?",
+        "options": [
+          "Оба обязаны восстановить успешный Port",
+          "Первый меняет причину; второй может восстановить значение",
+          "Первый ловит исключение; второй запрещает его бросать"
+        ],
+        "answer": 1,
+        "why": "transform_error сохраняет ошибочное состояние, преобразовав его причину. or_else возвращает полноценный expected с тем же успешным типом и потому может оставить ошибку или восстановить значение по договору приложения.",
+        "theoryRefs": [
+          "expected-chain-steps"
+        ]
+      },
+      {
+        "substation": "value-errors",
+        "level": "hard",
+        "q": "C++23: у expected есть значение, но вызываемая transform лямбда бросает runtime_error. Что делает сам transform с этим исключением?",
+        "options": [
+          "Переводит результат в исходный тип ошибки E",
+          "Вызывает ближайшую or_else в цепочке",
+          "Не перехватывает его как обычную ошибку expected"
+        ],
+        "answer": 2,
+        "why": "Монадические методы не добавляют универсальный catch. Исключение из вызванной функции распространяется обычным путём; or_else рассматривает состояние expected, а не перехватывает исключение.",
+        "theoryRefs": [
+          "expected-chain-steps",
+          "optional-chain-steps"
+        ]
       }
     ],
     "interview": [
@@ -3449,6 +3688,21 @@ window.STATION_DATA = {
         "why": "В худшем случае попытки перемножаются: 3 × 3 × 3. Поэтому общую политику повторов и срок выполнения нужно согласовывать между слоями. Это расчёт для описанного последовательного протокола, не универсальная оценка любой системы.",
         "theoryRefs": [
           "retry-idempotency"
+        ]
+      },
+      {
+        "substation": "value-errors",
+        "level": "hard",
+        "q": "C++23: настройка порта отсутствует либо содержит 70000. Договор разрешает запасной порт только при отсутствии. Как выразить восстановление в цепочке expected?",
+        "options": [
+          "Проверить причину в or_else и оставить остальные ошибки",
+          "Вызвать value_or(8080) для каждого ошибочного результата",
+          "Заменить expected на optional и забыть все причины"
+        ],
+        "answer": 0,
+        "why": "or_else получает причину и позволяет восстановить только выбранный случай. Безусловный fallback стирает различие отсутствия настройки и неверного значения; выбор типа результата должен сохранять нужную для политики информацию.",
+        "theoryRefs": [
+          "expected-chain-steps"
         ]
       }
     ]
@@ -3982,6 +4236,36 @@ window.STATION_DATA = {
           "expected-composition"
         ],
         "substation": "value-errors"
+      },
+      {
+        "substation": "value-errors",
+        "level": "medium",
+        "q": "C++23: parse_int(\"80x\") вернул trailing. Что происходит с and_then(check_port) и transform, создающим Port?",
+        "options": [
+          "Обе функции пропускаются",
+          "Выполняется только check_port",
+          "Обе функции получают число 80"
+        ],
+        "answer": 0,
+        "why": "Успешный путь прекращается на ошибке разбора; причина передаётся дальше. and_then и transform не вызывают свои функции в этом состоянии.",
+        "theoryRefs": [
+          "expected-chain-steps"
+        ]
+      },
+      {
+        "substation": "value-errors",
+        "level": "medium",
+        "q": "C++23: пустой optional прошёл через or_else, но запасная функция тоже вернула nullopt. Что теперь допустимо?",
+        "options": [
+          "Сразу разыменовать запасное значение",
+          "Сначала проверить оставшийся пустым результат",
+          "Вызвать error() и прочитать причину"
+        ],
+        "answer": 1,
+        "why": "or_else использует возвращённый optional и не гарантирует заполнения. Для * требуется наличие значения; причины ошибки в optional нет.",
+        "theoryRefs": [
+          "optional-chain-steps"
+        ]
       }
     ],
     "system-boundaries": [
@@ -4072,8 +4356,8 @@ window.STATION_DATA = {
     "error-contracts": "e5e842dc77c9",
     "exception-mechanics": "d2b0e7bc6560",
     "exception-safety": "a7572678fc6f",
-    "value-errors": "a98ce30853ab",
+    "value-errors": "69088fa30a6a",
     "system-boundaries": "7520cfc40b34"
   },
-  "trainingVersion": "7a003bbd5eae"
+  "trainingVersion": "2a033266e090"
 };

@@ -1,0 +1,225 @@
+{
+  "scope": "Real packets, synthetic application payload, isolated offline QEMU guest",
+  "kernel_sha256": "cd5fcfd260b91782637b7b4e221a48e656358f6eef549602540e62380b6f2f2c",
+  "initrd_sha256": "fd1c2cb2b7f326d3e212cbd876b5ff127ac90f1a3739c161ebaa8fc0c00f2c60",
+  "scenarios": [
+    {
+      "kind": "scenario",
+      "name": "baseline",
+      "client": {
+        "kind": "pull-client",
+        "sent": 262144,
+        "sha256": "2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9",
+        "total_retrans": 0,
+        "elapsed_ms": 187.275
+      },
+      "server": [
+        {
+          "kind": "pull-server",
+          "received": 262144,
+          "sha256": "2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9"
+        }
+      ],
+      "capture": [
+        {
+          "kind": "real-capture",
+          "packets": 214,
+          "zero_windows": 0,
+          "socket_packets": 222,
+          "socket_drops": 0,
+          "window_seconds": 4,
+          "repeated_exact_ranges": 0,
+          "file": "baseline.pcap",
+          "sha256": "7b2d73d79ca16ef08b354e4d6a353da7c34d864a3341f13cbe895a5fe511bbc3",
+          "bytes": 279764
+        }
+      ],
+      "qdisc": [
+        {
+          "kind": "noqueue",
+          "handle": "0:",
+          "root": true,
+          "refcnt": 2,
+          "options": {},
+          "bytes": 0,
+          "packets": 0,
+          "drops": 0,
+          "overlimits": 0,
+          "requeues": 0,
+          "backlog": 0,
+          "qlen": 0
+        }
+      ]
+    },
+    {
+      "kind": "scenario",
+      "name": "delay",
+      "client": {
+        "kind": "pull-client",
+        "sent": 262144,
+        "sha256": "2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9",
+        "total_retrans": 0,
+        "elapsed_ms": 135.803
+      },
+      "server": [
+        {
+          "kind": "pull-server",
+          "received": 262144,
+          "sha256": "2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9"
+        }
+      ],
+      "capture": [
+        {
+          "kind": "real-capture",
+          "packets": 275,
+          "zero_windows": 0,
+          "socket_packets": 276,
+          "socket_drops": 0,
+          "window_seconds": 4,
+          "repeated_exact_ranges": 0,
+          "file": "delay.pcap",
+          "sha256": "ab70de574693a208c9c5d539a4524802001944417ea41ac330bd6f02a1df3ac3",
+          "bytes": 284766
+        }
+      ],
+      "qdisc": [
+        {
+          "kind": "netem",
+          "handle": "8001:",
+          "root": true,
+          "refcnt": 3,
+          "options": {
+            "limit": 1000,
+            "delay": {
+              "delay": 0.015,
+              "jitter": 0,
+              "correlation": 0
+            },
+            "ecn": false,
+            "gap": 0
+          },
+          "bytes": 274564,
+          "packets": 188,
+          "drops": 0,
+          "overlimits": 0,
+          "requeues": 0,
+          "backlog": 0,
+          "qlen": 0
+        }
+      ]
+    },
+    {
+      "kind": "scenario",
+      "name": "loss",
+      "client": {
+        "kind": "pull-client",
+        "sent": 262144,
+        "sha256": "2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9",
+        "total_retrans": 8,
+        "elapsed_ms": 173.806
+      },
+      "server": [
+        {
+          "kind": "pull-server",
+          "received": 262144,
+          "sha256": "2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9"
+        }
+      ],
+      "capture": [
+        {
+          "kind": "real-capture",
+          "packets": 286,
+          "zero_windows": 0,
+          "socket_packets": 288,
+          "socket_drops": 0,
+          "window_seconds": 4,
+          "repeated_exact_ranges": 0,
+          "file": "loss.pcap",
+          "sha256": "0f3e50bf4995b6376e77ad53b554b3d3999a438c71dc480cee1c72bbd00a8bcc",
+          "bytes": 285824
+        }
+      ],
+      "qdisc": [
+        {
+          "kind": "netem",
+          "handle": "8002:",
+          "root": true,
+          "refcnt": 3,
+          "options": {
+            "limit": 1000,
+            "delay": {
+              "delay": 0.015,
+              "jitter": 0,
+              "correlation": 0
+            },
+            "loss-random": {
+              "loss": 0.05,
+              "correlation": 0
+            },
+            "ecn": false,
+            "gap": 0
+          },
+          "bytes": 274564,
+          "packets": 188,
+          "drops": 2,
+          "overlimits": 0,
+          "requeues": 0,
+          "backlog": 0,
+          "qlen": 0
+        }
+      ]
+    },
+    {
+      "kind": "scenario",
+      "name": "slow-reader",
+      "client": {
+        "kind": "push-client",
+        "received": 2097152,
+        "sha256": "6932fd31e5daf4739b9fa78ff777b2831b0995cc1d0b0093cac80601902013bc"
+      },
+      "server": [
+        {
+          "kind": "push-server",
+          "sent": 2097152,
+          "eagain": 239
+        }
+      ],
+      "capture": [
+        {
+          "kind": "real-capture",
+          "packets": 2241,
+          "zero_windows": 2,
+          "socket_packets": 2241,
+          "socket_drops": 0,
+          "window_seconds": 4,
+          "repeated_exact_ranges": 1,
+          "file": "slow-reader.pcap",
+          "sha256": "9afc51700c1e647f658fcdac8c4ea1f0fbe0f2ea31376f42723943435a422e67",
+          "bytes": 2282416
+        }
+      ],
+      "qdisc": [
+        {
+          "kind": "noqueue",
+          "handle": "0:",
+          "root": true,
+          "refcnt": 2,
+          "options": {},
+          "bytes": 0,
+          "packets": 0,
+          "drops": 0,
+          "overlimits": 0,
+          "requeues": 0,
+          "backlog": 0,
+          "qlen": 0
+        }
+      ]
+    }
+  ],
+  "environment": {
+    "kind": "environment",
+    "kernel": "6.8.0-142-generic",
+    "tc": "tc utility, iproute2-6.1.0, libbpf 1",
+    "external_nic": false
+  }
+}

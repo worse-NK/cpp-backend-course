@@ -14,12 +14,15 @@ import zipfile
 from build_cheatsheet import render as render_cheatsheet
 from build_sources import render as render_sources
 from build_sql_lab import render as render_sql_worker
+from build_security_sql_demo import render as render_security_sql_worker
 from build_stations import html_for, validate
 from checkpoint_data import with_checkpoints
 from build_visual_labs import render as render_labs
 from build_glossary import render as render_glossary, render_data as render_terms
 from build_service_workshop import render as render_service_workshop
 from build_traffic_examples import build as build_traffic_examples
+from build_distributed_lab import render as render_distributed_lab
+from course_theme import decorate_html, SUPPORT_PAGES
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT.parent / 'publish' / 'github-pages'
@@ -33,15 +36,62 @@ PAGES = (
     'cpp_backend_roadmap.html', 'cpp_basic_level.html',
     'cpp_project_device_monitoring.html', 'cpp_station9_databases_intro.html',
     'object_lifetime_demo.html', 'sql_trainer.html', 'visual_labs.html',
+    'security_sql_demo.html', 'security_labs.html', 'distributed_lab.html',
 )
 ASSETS = (
     'home.css', 'station.css', 'station-app.js', 'cheatsheet.css', 'cheatsheet.js',
+    'course-ui.css', 'course-reader.css',
+    'course-theme.css', 'course-dark-surfaces.css', 'course-dark-reader.css', 'course-code.js', 'course-code.css',
     'database-intro.css', 'database-route.js', 'sql-lab-core.js', 'sql-lab.css',
     'sql-lab.js', 'visual-lab-models.js', 'visual-labs.css', 'visual-labs.js',
     'terms-core.js', 'terms.js', 'terms.css', 'glossary.js', 'glossary.css',
     'service-workshop.js', 'service-workshop.css',
+    'security-sql-demo.css', 'security-sql-demo.js',
+    'security-sql-model.js', 'security-sql-worker.js',
+    'security-lab-models.js', 'security-labs.js', 'security-labs.css',
+    'distributed-lab-model.js', 'distributed-lab.js', 'distributed-lab.css',
+)
+HIGHLIGHT_ASSETS = (
+    'highlight.min.js', 'http.min.js', 'cmake.min.js', 'dockerfile.min.js', 'nginx.min.js', 'LICENSE', 'ORIGIN.json',
 )
 EXAMPLES = (
+    'sql-design/README.md', 'sql-design/history.sql', 'sql-design/model.sql',
+    'sql-design/observe.sql', 'sql-design/run.sql',
+    'query-execution/README.md', 'query-execution/join-query.sql',
+    'query-execution/joins-plans.sql', 'query-execution/joins-setup.sql',
+    'query-execution/memory-plans.sql', 'query-execution/memory-setup.sql',
+    'query-execution/run.sql', 'query-execution/statistics.sql',
+    'tooling-closed-loop/CMakeLists.txt', 'tooling-closed-loop/README.txt',
+    'tooling-closed-loop/conan/app/CMakeLists.txt',
+    'tooling-closed-loop/conan/app/conanfile.py', 'tooling-closed-loop/conan/app/main.cpp',
+    'tooling-closed-loop/conan/conan.lock.json',
+    'tooling-closed-loop/conan/library/CMakeLists.txt',
+    'tooling-closed-loop/conan/library/conanfile.py',
+    'tooling-closed-loop/conan/library/include/task_label.hpp',
+    'tooling-closed-loop/conan/library/src/task_label.cpp',
+    'tooling-closed-loop/conan/profiles/linux-gcc13.txt',
+    'tooling-closed-loop/conan/requirements-conan.txt',
+    'tooling-closed-loop/perf-vm-evidence.json', 'tooling-closed-loop/perf_workload.cpp',
+    'tooling-closed-loop/report_before.cpp', 'tooling-closed-loop/report_fixed.cpp',
+    'bounded-asio/CMakeLists.txt', 'bounded-asio/README.txt', 'bounded-asio/resolve.cpp',
+    'bounded-asio/server.cpp', 'bounded-asio/verify.py',
+    'tcp-observation/README.txt', 'tcp-observation/build_vm.py',
+    'tcp-observation/captures/baseline.pcap', 'tcp-observation/captures/delay.pcap',
+    'tcp-observation/captures/loss.pcap', 'tcp-observation/captures/report.json',
+    'tcp-observation/captures/slow-reader.pcap', 'tcp-observation/experiment.py',
+    'tcp-observation/guest_init.sh', 'tcp-observation/run_vm.py',
+    'station16/README.txt', 'station16/history_checker.cpp', 'station16/workflow_recovery.py',
+    'unix-ipc/CMakeLists.txt', 'unix-ipc/README.txt', 'unix-ipc/descriptor_transfer.cpp',
+    'unix-ipc/ipc_common.hpp', 'unix-ipc/socketpair_stream.cpp',
+    'network-specialization/README.txt', 'network-specialization/build_vm.py',
+    'network-specialization/guest.py', 'network-specialization/init.sh',
+    'network-specialization/run_vm.py',
+    'cpp-foundations/global-lifetime/runtime.hpp',
+    'cpp-foundations/global-lifetime/runtime.cpp',
+    'cpp-foundations/global-lifetime/main.cpp',
+    'cpp-foundations/global-lifetime/README.txt',
+    'cpp23/s7-endian-frame.cpp', 'cpp23/s8-expected-http.cpp',
+    'cpp23/s15-endian-regression.cpp', 'cpp23/README.md', 'station10/README.md',
     'traffic-analysis/traffic_http_ok.pcap',
     'traffic-analysis/traffic_http_delay.pcap',
     'traffic-analysis/traffic_dns.pcap',
@@ -69,6 +119,23 @@ EXAMPLES = (
     'service-workshop/.dockerignore', 'service-workshop/.gitignore',
     'service-workshop/init-db.sh', 'service-workshop/lab.py', 'service-workshop/load.py',
     'service-workshop/README.md',
+    'service-workshop/production-path-lab/.dockerignore',
+    'service-workshop/production-path-lab/.gitignore',
+    'service-workshop/production-path-lab/CMakeLists.txt',
+    'service-workshop/production-path-lab/Dockerfile',
+    'service-workshop/production-path-lab/README.md',
+    'service-workshop/production-path-lab/acceptance.py',
+    'service-workshop/production-path-lab/api.cpp',
+    'service-workshop/production-path-lab/common.cpp',
+    'service-workshop/production-path-lab/common.hpp',
+    'service-workshop/production-path-lab/compose.yaml',
+    'service-workshop/production-path-lab/init-db.sh',
+    'service-workshop/production-path-lab/lab.py',
+    'service-workshop/production-path-lab/main.cpp',
+    'service-workshop/production-path-lab/messaging.cpp',
+    'service-workshop/production-path-lab/replication_lab.py',
+    'service-workshop/production-path-lab/schema.sql',
+    'service-workshop/production-path-lab/test_lab.py',
     'service-workshop/release-lab/CMakeLists.txt',
     'service-workshop/release-lab/Dockerfile',
     'service-workshop/release-lab/client.cpp',
@@ -80,19 +147,80 @@ EXAMPLES = (
     'service-workshop/release-lab/README.md',
     'service-workshop/release-lab/.dockerignore',
     'service-workshop/release-lab/.gitignore',
+    'station11/CMakeLists.txt', 'station11/README.txt', 'station11/compose.yaml',
+    'station11/delivery_model.cpp', 'station11/kafka_roundtrip.cpp',
+    'station11/rabbit_roundtrip.cpp', 'station11/rabbit_api.py',
+    'station12/.dockerignore', 'station12/.env.example', 'station12/.gitignore',
+    'station12/CMakeLists.txt', 'station12/Dockerfile', 'station12/README.md',
+    'station12/cache_client.cpp', 'station12/cache_model.cpp', 'station12/compose.yaml',
+    'station12/lab.py', 'station12/rate_limit.lua', 'station12/redis.conf',
+    'station12/release_lock.lua',
+    'station13/.dockerignore', 'station13/.gitignore', 'station13/CMakeLists.txt',
+    'station13/Dockerfile', 'station13/README.txt', 'station13/app.cpp',
+    'station13/configmap.json', 'station13/deployment.json', 'station13/drain_model.cpp',
+    'station13/hpa-example.json', 'station13/kind.yaml', 'station13/namespace.json',
+    'station13/networkpolicy-example.json', 'station13/pdb-example.json',
+    'station13/role-example.json', 'station13/service.json', 'station13/verify.py',
+    'station14/.dockerignore', 'station14/.gitignore', 'station14/CMakeLists.txt',
+    'station14/Dockerfile', 'station14/README.txt', 'station14/alerts.yaml',
+    'station14/app.cpp', 'station14/collector.yaml', 'station14/compose.yaml',
+    'station14/dashboard.json', 'station14/dashboards.yaml', 'station14/datasource.yaml',
+    'station14/lab.py', 'station14/metrics.hpp', 'station14/metrics_model.cpp',
+    'station14/prometheus.yaml',
+    'security_sql_demo.cpp',
+    'station15/README.txt', 'station15/CMakeLists.txt',
+    'station15/access_policy.cpp', 'station15/access_policy_test.cpp',
+    'station15/frame_parser.hpp', 'station15/frame_parser_test.cpp',
+    'station15/frame_fuzz.cpp', 'station15/verify_security_evidence.py',
+    'station15/outbound-policy.example.json', 'station15/network-evidence.example.json',
+    'station15/delivery-policy.example.json', 'station15/release-evidence.example.json',
 )
 PUBLIC_README = '''# C++ и backend-разработка
 
 Учебный маршрут для читателей с базовыми знаниями C/C++: классы и ресурсы,
 STL, сборка, многопоточность, сети, API, SQL, PostgreSQL и эксплуатация сервиса.
-Станции 0–10 включают 5Б (системное программирование Linux), 9A (SQL)
+Станции 0–16 включают 5Б (системное программирование Linux), 9A (SQL)
 и 9B (PostgreSQL). После сборки пройдите 5Б перед многопоточностью и сетями.
 После общих сетей есть 7Б — изолированная Linux-сетевая лаборатория.
 Её root-настройки выполняются только внутри отдельной одноразовой VM со снимком,
 не на рабочем компьютере или сервере. Чтение схем и моделей не требует запуска.
 7В — необязательная станция по анализу трафика в Wireshark и TShark.
-Её PCAP-файлы синтетические: байты и временные метки созданы для обучения,
-это не измерения реального сервера. Разбор можно читать без установки Wireshark.
+Прежние traffic-analysis/*.pcap синтетические: байты и метки созданы для обучения.
+Новые tcp-observation/captures/*.pcap записаны в настоящем учебном TCP-обмене
+в изолированной offline VM; условия и границы отдельно указаны в README/отчёте.
+Ни те, ни другие файлы не являются захватом рабочего пользовательского сервиса.
+Разбор можно читать без установки Wireshark.
+
+Backend-ветка продолжается после станции 10: 11 — Kafka/RabbitMQ, 12 — Redis,
+13 — Kubernetes, 14 — Prometheus/Grafana/OpenTelemetry/Jaeger. Каждая глава
+начинается с основ и содержит самостоятельные локальные лабораторные,
+скачиваемые C++-проекты и отдельные модели, не требующие сервера.
+Ограничения и версии закреплены в README соответствующего examples/stationN.
+Дополнительная часть service_workshop.html#production связывает вход, права,
+PostgreSQL/outbox/RabbitMQ и постоянный receipt, затем отдельно проверяет
+ручное переключение и пересоздание копии PostgreSQL. Это новый локальный стенд,
+не обновление прежнего Task API и не промышленная HA-система.
+Docker-лаборатории требуют собственного доступного движка; Kubernetes — своего
+локального kind-кластера и отдельного kubeconfig. Не используйте рабочие
+контексты, серверы, базы и секреты. Чтение, тесты и схемы не требуют контейнеров.
+
+15 — безопасность backend-сервиса: вход и права, недоверенные данные,
+исходящие запросы, TLS, секреты, выпуск и C++-обработчики. Её можно проходить
+после основных станций 7–10, без предварительного изучения Kafka или Kubernetes.
+SQL-лаборатория `roadmap/security_sql_demo.html` выполняет запросы на локальной
+SQLite в браузере. `roadmap/security_labs.html` содержит подготовленные модели
+доступа, исходящих запросов и TLS: они не отправляют сетевые запросы, не проверяют
+настоящие сертификаты и не применяют правила сервера. Обе страницы используют
+локальные скрипты и стили; работа моделей не требует сервера или внешнего fetch.
+Файлы политик и отчётов в `roadmap/examples/station15/` проверяются отдельно;
+корректная структура JSON не доказывает применение защиты в работающей системе.
+
+16 — распределённые системы: истории операций, согласованность, Raft,
+время и владение, шардирование и восстановление многошагового процесса.
+distributed_lab.html показывает три подготовленные истории, а не исполняет
+настоящий протокол или платёж. Отдельные C++ и Python/SQLite-примеры запускаются
+локально. Необязательные UNIX IPC, VLAN/STP и OSPF/BGP расширяют Linux/сетевой
+маршрут; их вопросы не включаются в обязательный итоговый тест станции.
 
 ## Как открыть
 
@@ -100,7 +228,8 @@ STL, сборка, многопоточность, сети, API, SQL, PostgreSQ
 репозитория. После скачивания и распаковки всего репозитория откройте `index.html`
 в браузере. Один HTML без соседних папок не содержит весь учебник.
 
-Страницы, тесты и лаборатории выполняются в браузере. React 18.3.1 загружается
+Страницы, тесты и интерактивные учебные модели выполняются в браузере;
+серверные лабораторные запускаются отдельно, по инструкциям. React 18.3.1 загружается
 с unpkg.com; Inter и JetBrains Mono — из Google Fonts (для шрифтов есть системная
 замена). Поэтому полностью автономный режим для всего курса не заявляется.
 SQL-тренажёр использует локальную SQLite/sql.js, а не сервер PostgreSQL.
@@ -131,8 +260,11 @@ SQL-тренажёр использует локальную SQLite/sql.js, а �
 
 ```sh
 python3 roadmap/tools/build_stations.py
+python3 roadmap/tools/build_home_metadata.py
 python3 roadmap/tools/build_sources.py
 python3 roadmap/tools/build_cheatsheet.py
+python3 roadmap/tools/build_security_sql_demo.py
+python3 roadmap/tools/build_distributed_lab.py
 python3 roadmap/tools/validate_materials.py
 python3 roadmap/tools/build_publication.py
 ```
@@ -151,8 +283,14 @@ python3 roadmap/tools/sync_repository.py --repository /путь/к/checkout
 конфликтующие локальные правки. Если работа идёт прямо в клоне, укажите `.`:
 она пересоберёт готовые страницы и сохранит исходники на месте.
 Для полного набора тестов нужны C++-компилятор и стандартная библиотека
-с поддержкой C++20 и `std::expected` из C++23, CMake/CTest, Ninja и GJS
+с поддержкой используемых средств C++20/23, CMake/CTest, Ninja и GJS
 (он запускает JS-тесты и часть проверок из Python).
+Проверки новых листингов запускаются отдельно: `CXX=g++-15 python3
+roadmap/tools/cpp_examples.py --require-supported`. Указывайте фактический
+путь к компилятору; один номер версии не гарантирует наличие всех библиотек.
+Матрица этих проверок — `roadmap/content/cpp-examples.json`.
+Для C++23-программ визуальных лабораторий также задайте `CXX23`.
+Отсутствующая возможность отмечается как UNSUPPORTED, а не успешный пропуск.
 Браузерные проверки, Docker/PostgreSQL и VM-приёмка требуют отдельной среды:
 для обычного изменения текста и сборки сайта они не нужны.
 
@@ -241,8 +379,12 @@ def collect():
     files = {'index.html': entry_page().encode(), '.nojekyll': b'\n',
              'README.md': PUBLIC_README.encode()}
     for name in (*PAGES, *(f'assets/{n}' for n in ASSETS),
-                 *(f'examples/{n}' for n in EXAMPLES), 'vendor/sqljs/LICENSE'):
-        files['roadmap/' + name] = source_bytes(name)
+                 *(f'examples/{n}' for n in EXAMPLES), 'vendor/sqljs/LICENSE',
+                 *(f'vendor/highlightjs/{name}' for name in HIGHLIGHT_ASSETS)):
+        content = source_bytes(name)
+        if name in SUPPORT_PAGES:
+            content = decorate_html(content.decode(), page=SUPPORT_PAGES[name]).encode()
+        files['roadmap/' + name] = content
     stations = []
     for path in sorted((ROOT / 'content').glob('station*.json')):
         data = json.loads(source_bytes('content/' + path.name))
@@ -259,8 +401,10 @@ def collect():
         'cpp_cheatsheet.html': render_cheatsheet(), 'sources.html': render_sources(),
         'generated/visual-labs.data.js': render_labs(),
         'generated/sql-lab-worker.data.js': render_sql_worker(),
+        'generated/security-sql-worker.data.js': render_security_sql_worker(),
         'glossary.html': render_glossary(), 'generated/terms.data.js': render_terms(),
         'service_workshop.html': render_service_workshop(),
+        'distributed_lab.html': render_distributed_lab(),
     }.items():
         files['roadmap/' + name] = content.encode()
     return files, stations
@@ -294,11 +438,23 @@ def strings(value):
 
 
 def check_release(files, stations):
-    # Never accidentally ship a real capture under a teaching filename. Only
-    # the exact deterministic offline fixtures from the generator are allowed.
+    # Never ship an arbitrary capture. Older fixtures are deterministic and
+    # synthetic; these four new real experiments are individually allowlisted
+    # and bound to their reviewed report hashes. Keep their provenance distinct.
     traffic_captures = {'roadmap/examples/traffic-analysis/' + name: data
                         for name, data in build_traffic_examples().items()
                         if name.endswith('.pcap')}
+    report_name = 'roadmap/examples/tcp-observation/captures/report.json'
+    if files.get(report_name) != source_bytes('examples/tcp-observation/captures/report.json'):
+        raise ValueError('Real TCP capture manifest differs from reviewed experiment')
+    report = json.loads(files[report_name])
+    expected_real = {'baseline.pcap', 'delay.pcap', 'loss.pcap', 'slow-reader.pcap'}
+    observed_real = {s['capture'][0]['file']: s['capture'][0]
+                     for s in report['scenarios']}
+    if set(observed_real) != expected_real or report['environment']['external_nic']:
+        raise ValueError('Unexpected real TCP capture provenance')
+    real_captures = {'roadmap/examples/tcp-observation/captures/' + name: capture
+                     for name, capture in observed_real.items()}
     sections = {'roadmap/' + s['meta']['sourceFile']: {v['id'] for v in s['theory']}
                 for s in stations}
     checked, external = 0, set()
@@ -353,6 +509,12 @@ def check_release(files, stations):
                 raise ValueError(f'Synthetic teaching capture differs from generator: {name}')
             # Latin-1 preserves every byte, including ASCII secrets/path markers;
             # binary files are not exempt from the privacy scan below.
+            text = content.decode('latin-1')
+        elif name in real_captures:
+            capture = real_captures[name]
+            if (hashlib.sha256(content).hexdigest() != capture['sha256']
+                    or len(content) != capture['bytes'] or capture['socket_drops'] != 0):
+                raise ValueError(f'Real TCP capture differs from reviewed experiment: {name}')
             text = content.decode('latin-1')
         else:
             text = content.decode('utf-8')

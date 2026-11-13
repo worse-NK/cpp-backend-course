@@ -1,0 +1,16 @@
+{
+  "apiVersion": "policy/v1",
+  "kind": "PodDisruptionBudget",
+  "metadata": {
+    "name": "course-api",
+    "namespace": "course13"
+  },
+  "spec": {
+    "minAvailable": 1,
+    "selector": {
+      "matchLabels": {
+        "app": "course-api"
+      }
+    }
+  }
+}

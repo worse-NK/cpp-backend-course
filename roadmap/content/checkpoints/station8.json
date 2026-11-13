@@ -63,8 +63,20 @@
         "index": 13
       },
       {
-        "bank": "advanced",
-        "index": 12
+        "substation": "validation-errors",
+        "level": "medium",
+        "q": "C++23: parse_number(\"0\") успешен, а validate_id возвращает unexpected(outside_policy). Что произойдёт с последующим transform?",
+        "options": [
+          "Он превратит ноль в успешный Reply",
+          "Он выбросит bad_expected_access",
+          "Он не вызовет лямбду и сохранит ошибку",
+          "Он повторно вызовет parse_number"
+        ],
+        "answer": 2,
+        "why": "And_then получает число и возвращает ошибку проверки диапазона. Transform выполняет свою функцию только для успешного значения; здесь до неё дело не доходит. Отображение ошибки в статус остаётся явным следующим решением.",
+        "theoryRefs": [
+          "expected-input-http-cpp23"
+        ]
       }
     ],
     "cpp-service": [

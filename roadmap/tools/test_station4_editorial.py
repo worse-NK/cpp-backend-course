@@ -44,6 +44,7 @@ class StationFourEditorial(unittest.TestCase):
             "exception-safety", "noexcept", "strong-guarantee-example",
             "transactional-updates", "noexcept-deep",
             "external-effects-guarantees", "practical", "expected-composition",
+            "expected-chain-steps", "optional-chain-steps",
             "error-boundaries", "retry-idempotency", "context-and-logging",
             "reload-final-workbook", "summary",
         ])

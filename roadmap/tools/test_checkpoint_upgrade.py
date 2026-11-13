@@ -1,4 +1,4 @@
-"""Dedicated five-question checkpoints, taught syntax and disjoint final exams."""
+"""Dedicated checkpoints (at least five), taught syntax and disjoint final exams."""
 import copy
 import json
 from pathlib import Path
@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class Checkpoints(unittest.TestCase):
-    def test_every_module_has_five_independent_questions(self):
+    def test_every_module_has_all_authored_independent_questions(self):
         actual = json.loads(subprocess.check_output(
             ["gjs", "roadmap/tools/export_final_selection.js"], cwd=ROOT.parent, text=True))
         modules, questions, assemblies = 0, 0, 0
@@ -24,13 +24,15 @@ class Checkpoints(unittest.TestCase):
                 validate(source, path)
                 original = copy.deepcopy(source)
                 browser = with_checkpoints(source)
+                plan = load_json(ROOT / 'content/checkpoints' / path.name)
                 self.assertEqual(source, original, "Resolver mutated canonical source")
                 finals = actual["stations"][path.stem]["reserved"]
                 final_stems = {normalize_prompt(source["quizzes"][ref["bank"]][ref["index"]]["q"])
                                for ref in finals}
                 self.assertEqual(len(final_stems), 25)
                 for module, entries in browser["checkpoints"].items():
-                    self.assertEqual(len(entries), 5)
+                    self.assertGreaterEqual(len(entries), 5)
+                    self.assertEqual(len(entries), len(plan['modules'][module]))
                     self.assertEqual(len(browser["checkpointVersion"][module]), 12)
                     modules += 1
                     questions += len(entries)
@@ -38,8 +40,13 @@ class Checkpoints(unittest.TestCase):
                         self.assertNotIn(normalize_prompt(question["q"]), final_stems,
                                          "Checkpoint repeats the final exam")
                         assemblies += question.get("type") == "assemble"
-        self.assertEqual(modules, 96)
-        self.assertEqual(questions, 480)
+        expected_modules=sum(len(load_json(p)['substations'])
+                             for p in (ROOT/'content').glob('station*.json'))
+        self.assertEqual(modules, expected_modules)
+        expected_questions = sum(len(entries)
+                                 for p in (ROOT/'content/checkpoints').glob('station*.json')
+                                 for entries in load_json(p)['modules'].values())
+        self.assertEqual(questions, expected_questions)
         self.assertEqual(assemblies, 8)
 
     def test_short_or_future_checkpoints_are_rejected(self):

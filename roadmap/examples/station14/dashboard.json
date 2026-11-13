@@ -1,0 +1,14 @@
+{
+  "uid": "course-station14",
+  "title": "Course: one request through two C++ services",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": {"from": "now-15m", "to": "now"},
+  "panels": [
+    {"id": 1, "title": "API completions per second", "type": "timeseries", "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}, "datasource": {"type": "prometheus", "uid": "course-prometheus"}, "targets": [{"refId": "A", "expr": "sum(rate(course_requests_total{job=\"course-api\"}[1m]))"}]},
+    {"id": 2, "title": "API error fraction", "type": "timeseries", "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}, "datasource": {"type": "prometheus", "uid": "course-prometheus"}, "targets": [{"refId": "A", "expr": "sum(rate(course_requests_total{job=\"course-api\",outcome=\"error\"}[1m])) / sum(rate(course_requests_total{job=\"course-api\"}[1m]))"}]},
+    {"id": 3, "title": "API p95, classic buckets: estimate in seconds", "type": "timeseries", "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}, "datasource": {"type": "prometheus", "uid": "course-prometheus"}, "targets": [{"refId": "A", "expr": "histogram_quantile(0.95, sum by (le) (rate(course_request_duration_seconds_bucket{job=\"course-api\"}[1m])))"}]},
+    {"id": 4, "title": "Scrape availability is not request success", "type": "timeseries", "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}, "datasource": {"type": "prometheus", "uid": "course-prometheus"}, "targets": [{"refId": "A", "expr": "up{job=~\"course-(api|worker)\"}", "legendFormat": "{{job}}"}]}
+  ]
+}

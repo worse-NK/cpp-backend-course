@@ -5,6 +5,7 @@ They print argv or start /bin/true; they do not change host settings, inspect
 another user's process, capture traffic, or generate load. Larger existing
 examples are covered by test_linux_systems and test_memory_loader_deepening.
 """
+import hashlib
 import json
 from pathlib import Path
 import platform
@@ -54,9 +55,14 @@ class LinuxEditorial(unittest.TestCase):
         validate(self.data, SOURCE)
         self.assertEqual(self.data["meta"]["storeKey"],
                          "cpp_station5_linux_progress_v1")
-        self.assertEqual(len(self.sections), 28)
+        self.assertEqual(len(self.sections), 30)
         self.assertEqual([len(v) for v in self.data["quizzes"].values()],
-                         [22, 12, 24])
+                         [26, 16, 26])
+        prefix = {bank: self.data["quizzes"][bank][:count] for bank, count in
+                  (("basic", 22), ("advanced", 12), ("interview", 24))}
+        self.assertEqual(hashlib.sha256(json.dumps(prefix, ensure_ascii=False,
+                         sort_keys=True).encode()).hexdigest(),
+                         "079c37de76f8fc1257cb1a4814d7aa787f03a5d87c9205da323f2abcf42729d1")
 
     def test_every_section_has_an_answer_bearing_self_check(self):
         count = 0

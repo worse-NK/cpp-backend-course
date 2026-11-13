@@ -44,20 +44,21 @@ class StationFiveEditorial(unittest.TestCase):
 
     def test_addresses_and_store_key_are_stable(self):
         self.assertEqual(list(self.sections), [
-            'learning-route', 'why-build', 'compilation-stages',
+            'learning-route', 'why-build', 'compilation-stages', 'language-standard-modes',
             'headers-sources', 'diagnose-build-stage', 'translation-units-odr',
             'incremental-build-graph', 'linkage-symbols', 'libraries-abi',
-            'symbol-journey', 'loader-before-main', 'abi-evolution',
-            'why-cmake', 'cmake-basics', 'cmake-configure-model',
+            'standard-library-feature-probes', 'symbol-journey', 'loader-before-main',
+            'global-initialization-order', 'global-lifetime-workbook', 'abi-evolution',
+            'why-cmake', 'cmake-basics', 'cmake-standard-profiles', 'cmake-configure-model',
             'cmake-libraries', 'project-structure', 'cmake-usage-requirements',
             'cmake-propagation', 'cmake-tests-install', 'git-basics',
             'git-object-model', 'build-reproducibility', 'reproducibility-chain',
-            'ci-cross-build-tests', 'tooling', 'linux-basics',
+            'ci-cross-build-tests', 'conan-target-lock-workbook', 'tooling', 'linux-basics',
             'linux-process-model', 'linux-processes-memory', 'stack-frame-object',
             'signals-and-shutdown', 'ipc-pipes-shared-memory',
-            'diagnostics-production', 'diagnostic-ladder', 'profiling-evidence',
+            'diagnostics-production', 'gdb-core-regression', 'stacktrace-capture', 'diagnostic-ladder', 'profiling-evidence',
             'diagnostic-cases-workbook', 'profile-comparison-workbook',
-            'build-final-workbook', 'summary'])
+            'perf-cpu-wait-workbook', 'build-final-workbook', 'summary'])
         self.assertEqual(self.data['meta']['storeKey'], 'cpp_station5_progress_v1')
 
     def test_every_section_has_a_revealable_reasoning_check(self):
@@ -197,7 +198,10 @@ class StationFiveEditorial(unittest.TestCase):
     def test_checkpoint_count_and_scenario_answers_are_stable(self):
         checkpoints = json.loads((ROOT / 'content/checkpoints/station5.json').read_text())
         self.assertEqual(len(checkpoints['modules']), 5)
-        self.assertTrue(all(len(v) == 5 for v in checkpoints['modules'].values()))
+        self.assertEqual({k: len(v) for k, v in checkpoints['modules'].items()}, {
+            'build-pipeline': 6, 'linking-abi': 7, 'cmake-targets': 6,
+            'workflow-repro': 6, 'linux-diagnostics': 8,
+        })
         self.assertEqual(self.data['quizzes']['advanced'][5]['answer'], 2)
         self.assertEqual(self.data['quizzes']['advanced'][30]['answer'], 0)
         self.assertEqual(self.data['quizzes']['advanced'][34]['answer'], 1)

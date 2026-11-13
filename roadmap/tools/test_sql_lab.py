@@ -3,6 +3,7 @@ import re
 import unittest
 from pathlib import Path
 from html.parser import HTMLParser
+from urllib.parse import urlsplit
 from build_sql_lab import render, ROOT
 
 class Tags(HTMLParser):
@@ -22,7 +23,7 @@ class SqlLabTests(unittest.TestCase):
         self.assertEqual(len(page.ids),len(set(page.ids)))
         for link in page.links:
             self.assertFalse(link.startswith('https://'),'Runtime must be offline')
-            self.assertTrue((ROOT/link.split('#')[0]).is_file(),link)
+            self.assertTrue((ROOT/urlsplit(link).path).is_file(),link)
         self.assertTrue((ROOT/'vendor/sqljs/LICENSE').is_file())
         ui=(ROOT/'assets/sql-lab.js').read_text()
         self.assertNotIn('innerHTML',ui)

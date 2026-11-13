@@ -1,14 +1,21 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SQL с нуля · тренажёр</title><link rel="stylesheet" href="assets/sql-lab.css"></head>
-<body><main>
-<nav><a href="cpp_station9_sql.html#section=sql-first-query" target="_top">← К теории SQL</a><a href="cpp_backend_roadmap.html" target="_top">Курс</a></nav>
+<html lang="ru" class="course-dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SQL с нуля · тренажёр</title><link rel="stylesheet" href="assets/sql-lab.css">
+<meta name="theme-color" content="#18252f">
+<link rel="stylesheet" href="assets/course-theme.css?v=4b6f4f70fb3b">
+<link rel="stylesheet" href="assets/course-dark-surfaces.css?v=a50d1a13466e">
+</head>
+<body class="course-dark course-support course-page-sql"><main>
+<nav><a href="cpp_station9_sql.html#section=sql-first-query" target="_top">← К теории SQL</a><a href="cpp_backend_roadmap.html" target="_top">Курс</a><a class="lab-catalog-link" href="visual_labs.html" target="_top"><svg class="lab-flask" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5.2 8.5A2.3 2.3 0 0 0 6.8 21h10.4a2.3 2.3 0 0 0 2-3.5L14 9V3M8 15h8"/></svg>Все лаборатории</a></nav>
 <header><p class="eyebrow">СТАНЦИЯ 9A · ПРАКТИКА В БРАУЗЕРЕ</p><h1>Напиши запрос. Посмотри на данные.</h1>
-<p>Локальная учебная база на SQLite, не PostgreSQL. Запросы не отправляются на сервер. Каждый запуск — на свежей копии исходных таблиц, поэтому можно безопасно ошибаться.</p></header>
+<p>В этом тренажёре есть вымышленные люди и их список дел: у Анны две задачи, у Бориса одна, а у Веры пока ни одной. Попробуем узнать, кому что осталось сделать, посчитать задачи и изменить одну запись, не затронув остальные. Так станет понятно, как программа получает нужную информацию из сохранённых данных.</p>
+<p>Данные разложены по двум таблицам — спискам со строками и именованными столбцами. В <code>users</code> одна строка описывает человека: его номер <code>id</code> и имя <code>name</code>. В <code>tasks</code> одна строка — задача: номер <code>id</code>, номер её владельца <code>owner_id</code>, название <code>title</code>, отметка выполнения <code>done</code> и необязательный приоритет <code>priority</code>. Например, <code>owner_id = 1</code> связывает задачу с Анной, а не с задачей № 1. Все исходные записи можно раскрыть ниже.</p>
+<p>SQL — язык команд для работы с такими таблицами. Выбери упражнение в списке: сначала будет простое вычисление без таблиц, затем чтение и изменение списка дел. Прочитай условие, введи команду в поле «Твой SQL» и нажми «Выполнить», чтобы увидеть результат, или «Проверить решение», чтобы сверить его с заданием. Подсказка и разбор открываются отдельно.</p>
+<p>Здесь работает SQLite — встроенный в страницу механизм выполнения SQL, а не сервер PostgreSQL. Каждый запуск получает свежую копию исходных таблиц; реальные данные и серверы не затрагиваются. Проверка использует также второй подготовленный набор записей: решение должно выражать правило, а не перечислять запомненные номера.</p></header>
 <label for="exercise">Упражнение</label><select id="exercise"></select>
 <nav class="exercise-navigation" aria-label="Переход между упражнениями"><button id="previous" class="quiet" type="button">← Предыдущее</button><span id="exercise-position" class="muted" aria-live="polite"></span><button id="next" class="quiet" type="button">Следующее →</button></nav>
-<section class="assignment"><h2 id="task-title"></h2><p id="task-prompt"></p><a id="theory-link" target="_top">Разобрать тему в учебнике →</a></section>
-<details><summary>Исходные таблицы и схема</summary><div id="seed-tables"></div><pre id="schema"></pre><p>В SQLite done отображается как 0/1. priority может быть NULL. В PostgreSQL boolean — отдельный тип. SQLite также иначе проверяет типы и некоторые кавычки: успешный запрос здесь не доказывает переносимость всего синтаксиса.</p></details>
+<section class="assignment"><h2 id="task-title"></h2><p id="task-prompt" style="white-space:pre-line"></p><a id="theory-link" target="_top">Разобрать тему в учебнике →</a></section>
+<details><summary>Исходные таблицы и схема</summary><p>В основном наборе Анна — пользователь 1: её задача 10 «Написать тест» ещё не выполнена, а задача 11 «Обновить README» уже выполнена. Борис — пользователь 2, ему принадлежит незавершённая задача 12 «Проверить API». Вера — пользователь 3, на неё пока не ссылается ни одна задача.</p><div id="seed-tables"></div><pre id="schema"></pre><p><code>done = 0</code> означает «не выполнено», <code>done = 1</code> — «выполнено». <code>priority</code> принимает числа от 1 до 5; <code>NULL</code> означает, что приоритет не задан, а не равен нулю. Ниже записана схема — команды создания таблиц и исходных записей. В PostgreSQL boolean — отдельный тип; SQLite также иначе проверяет типы и некоторые кавычки. Успех здесь не доказывает переносимость всего синтаксиса.</p></details>
 <label for="query">Твой SQL <span class="muted">· Ctrl/⌘ + Enter — выполнить</span></label>
 <textarea id="query" spellcheck="false" rows="8" maxlength="16000" aria-describedby="reset-note"></textarea>
 <p id="reset-note" class="muted">Можно написать несколько команд через «;». Изменения живут только в рамках одного запуска. Черновик запроса сохраняется в этом браузере, если доступно локальное хранилище.</p>

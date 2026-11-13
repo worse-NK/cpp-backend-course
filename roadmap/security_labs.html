@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru" class="course-dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'">
+  <meta name="description" content="Пошаговые учебные модели доступа к данным, исходящих запросов и TLS. Задача, нарушение, причина и проверка исправления без сетевых обращений.">
+  <title>Лаборатория безопасности · C++ и backend</title>
+  <link rel="stylesheet" href="assets/security-sql-demo.css">
+  <link rel="stylesheet" href="assets/course-ui.css">
+  <link rel="stylesheet" href="assets/security-labs.css">
+<meta name="theme-color" content="#18252f">
+<link rel="stylesheet" href="assets/course-theme.css?v=4b6f4f70fb3b">
+<link rel="stylesheet" href="assets/course-dark-surfaces.css?v=a50d1a13466e">
+</head>
+<body class="course-lab-pilot course-dark course-support course-page-security">
+  <a class="skip-link" href="#experiment">Перейти к опыту</a>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand lab-catalog-link" href="visual_labs.html"><span class="brand-mark" aria-hidden="true"><svg class="lab-flask" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5.2 8.5A2.3 2.3 0 0 0 6.8 21h10.4a2.3 2.3 0 0 0 2-3.5L14 9V3M8 15h8"/></svg></span><span>Все лаборатории<small>Лаборатория безопасности</small></span></a>
+      <a id="theory-link" class="back-link" href="cpp_station15_security.html#section=access-laboratory">Вернуться в учебник</a>
+    </header>
+    <main>
+      <section class="hero" aria-labelledby="title">
+        <h1 id="title" tabindex="-1">Свои и чужие задачи на одном сайте</h1>
+        <p id="intro" class="intro">Представим сайт, на котором сотрудники ведут списки рабочих дел. Разберём, как не показать человеку чужую запись — даже если он уже знает её номер.</p>
+      </section>
+      <section class="orientation" aria-labelledby="orientation-title">
+        <div class="orientation-copy"><h2 id="orientation-title">Сначала — сама задача</h2><div id="context"></div></div>
+        <aside class="dataset" aria-labelledby="dataset-title"><h3 id="dataset-title">Данные примера</h3><div id="fixture-table" class="table-scroll"></div><p>Участники и данные вымышлены. Ничего не отправляется внешним или внутренним серверам.</p></aside>
+        <div class="orientation-goal"><h2>Что будем проверять</h2><p id="experiment-goal">Разрешённые действия должны работать, а чужие записи и запрещённые изменения — оставаться недоступными.</p><p>Пример для каждого этапа уже выбран. Нажми «Проверить решение» и сравни результат с условием. Выбор другого примера или способа проверки сам ничего не выполняет. Можно идти по этапам последовательно или вернуться к любому из них.</p></div>
+      </section>
+      <nav class="lab-switch" aria-label="Лаборатории безопасности">
+        <span class="lab-switch-label">Темы лаборатории</span>
+        <div class="lab-switch-links">
+          <button type="button" id="lab-access" aria-pressed="true">Доступ к данным</button>
+          <button type="button" id="lab-outbound" aria-pressed="false">Исходящие запросы</button>
+          <button type="button" id="lab-tls" aria-pressed="false">TLS и границы</button>
+          <a href="security_sql_demo.html">SQL-инъекция</a>
+        </div>
+      </nav>
+      <section class="experiment-header" aria-labelledby="experiment-title"><h2 id="experiment-title">Проверяем на примере</h2><p>Пять этапов: от обычной работы до проверки исправления. Любой из них можно открыть сразу.</p></section>
+      <nav class="steps" aria-label="Этапы разбора"><ol id="stages"></ol></nav>
+      <section class="guide" aria-labelledby="guide-title">
+        <div id="guide-index" class="guide-index" aria-hidden="true">01</div>
+        <div class="guide-copy"><h2 id="guide-title" tabindex="-1">Своё чтение</h2><p id="guide-context"></p>
+          <div class="instruction"><p><strong>Что сделать</strong><span id="guide-action"></span></p><p><strong>С чем сравнить</strong><span id="guide-expectation"></span></p></div>
+        </div>
+      </section>
+      <section id="experiment" class="workspace" aria-label="Условия и ход решения">
+        <div class="panel">
+          <div class="panel-heading"><h2>Попробуй один случай</h2></div>
+          <div class="app-content">
+            <form id="model-form" class="model-form">
+              <label for="case">Условие запроса<select id="case" name="case"></select></label>
+              <label for="policy"><span id="policy-label">Как проверяется действие</span><select id="policy" name="policy"></select></label>
+              <label id="backend-control" for="backend" hidden>После входного прокси<select id="backend" name="backend"><option value="plaintext">HTTP без TLS на втором участке</option><option value="tls">Отдельный правильно настроенный TLS</option></select></label>
+              <p id="case-facts" class="case-facts"></p>
+              <button id="run" class="run-model" type="submit" disabled>Проверить решение</button>
+            </form>
+            <button type="button" id="after-run-next" class="after-run-next" hidden>Следующий этап →</button>
+          </div>
+        </div>
+        <div class="panel observation-panel"><div class="panel-heading"><h2>Результат и ход проверки</h2></div><div class="app-content">
+          <div id="result" class="model-result" role="status" aria-live="polite"><p>Выбери условие и выполни проверку. Здесь появится результат именно этой модели.</p></div>
+          <div id="result-rows" class="table-scroll"></div>
+          <div class="trace-heading"><h3>Почему принято такое решение</h3><p id="trace-empty">После выполнения покажем, какие условия проверены, пропущены или стали причиной отказа.</p></div>
+          <ol id="trace" class="decision-trace"></ol><div id="hops" class="tls-hops"></div>
+        </div></div>
+      </section>
+      <section id="checks-section" class="checks-section" aria-labelledby="checks-title" hidden>
+        <div><h2 id="checks-title">Один вариант проверки — несколько случаев</h2><p>Сравни не только запреты, но и нормальную работу. Количество совпадений — результат этих случаев, а не процент безопасности сервиса.</p></div>
+        <button id="check" type="button">Проверить все условия →</button>
+        <div id="checks-summary" role="status" aria-live="polite"></div><div id="checks-results"></div>
+      </section>
+      <nav class="lesson-actions" aria-label="Переходы по разбору"><button id="previous" type="button">Предыдущий этап</button><button id="reset" type="button">Начать сначала</button><button id="next" type="button">Следующий этап</button><a id="lesson-return" class="lesson-return" href="cpp_station15_security.html#section=access-laboratory" hidden>Вернуться к объяснению</a></nav>
+      <section class="reading-notes" aria-labelledby="boundary-title"><h2 id="boundary-title">Что показывает этот опыт</h2><p id="boundary"></p><details><summary>Что проверять в настоящем сервисе?</summary><p>Нужны реализация и настройки соответствующих компонентов, положительные и отрицательные интеграционные проверки, наблюдение отсутствия запрещённых последствий. Совпадение решений модели не подтверждает состояние рабочей системы. Подробности и локальные C++-примеры находятся в связанной теории станции 15.</p></details></section>
+      <footer class="footer"><div><strong>Основания и область проверки</strong><p>Интерфейс и данные — собственные учебные примеры. Правила разобраны по первоисточникам; ограничения модели перечислены выше.</p></div><div id="sources" class="sources"></div></footer>
+    </main>
+  </div>
+  <noscript><p class="noscript">Для интерактивной модели нужен JavaScript. <a href="cpp_station15_security.html">Пошаговые объяснения доступны в теории станции 15</a>.</p></noscript>
+  <script src="generated/visual-labs.data.js"></script>
+  <script src="assets/security-lab-models.js"></script>
+  <script src="assets/security-labs.js"></script>
+</body>
+</html>

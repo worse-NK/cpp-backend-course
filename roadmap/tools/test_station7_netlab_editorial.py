@@ -23,10 +23,16 @@ class NetlabEditorialTests(unittest.TestCase):
     def test_schema_progress_and_section_count(self):
         validate(self.data, SOURCE)
         self.assertEqual(self.data['meta']['storeKey'], 'cpp_station7_netlab_progress_v1')
-        self.assertEqual(len(self.sections), 25)
+        self.assertEqual(len(self.sections), 30)
 
     def test_original_code_and_visual_payloads_unchanged(self):
-        payloads = [(s['id'], b) for s in self.data['theory'] for b in s['blocks']
+        appended = {'netlab-vlan-boundaries', 'netlab-stp-loop-recovery',
+                    'netlab-ospf-route-convergence', 'netlab-bgp-policy-choice',
+                    'netlab-tcp-loss-slow-reader'}
+        self.assertTrue(appended <= set(self.sections))
+        original = [s for s in self.data['theory'] if s['id'] not in appended]
+        self.assertEqual(len(original), 25)
+        payloads = [(s['id'], b) for s in original for b in s['blocks']
                     if b['type'] not in ('text', 'note', 'self-check')]
         digest = hashlib.sha256(json.dumps(payloads, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
         self.assertEqual(digest, 'dbac2153747ae27cf8dd7b7c6b46ee2ee55c6a608ce7ab0b46a8dbb4c82ecc27')

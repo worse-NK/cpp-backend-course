@@ -6,9 +6,10 @@ const window=globalThis;
 (0,eval)(read('roadmap/generated/visual-labs.data.js'));
 (0,eval)(read('roadmap/assets/visual-lab-models.js'));
 const M=CourseLabModels;
+// Standalone lifetime/security lessons have their own model and controller tests.
+const modelLabs=COURSE_LABS.filter(lab=>lab.file==='visual_labs.html');
 let total=0;
-for(const lab of COURSE_LABS){
-  if(lab.id==='lifetime')continue;
+for(const lab of modelLabs){
   for(const mode of lab.scenarios){
     const model=M[lab.id](mode);
     assert(model.steps.length>=3,'Incomplete event sequence: '+lab.id+'/'+mode);
@@ -41,6 +42,19 @@ assert(shared.at(-2).state.control&&!shared.at(-2).state.alive,'Weak link must r
 assert(!shared.at(-1).state.control,'Control block never released');
 assert(M.ownership('cycle').steps.at(-1).state.aliveA,'Strong cycle silently collected');
 assert(!M.ownership('weak-cycle').steps.at(-1).state.aliveA&&!M.ownership('weak-cycle').steps.at(-1).state.aliveB,'Weak cycle not released');
+for (const mode of ['cxx20','parameter']) {
+  const model=M.temporaries(mode),last=model.steps.at(-1).state;
+  assert(last.borrow==='dangling'&&last.iteration==='blocked'&&!last.values.length&&!model.program,'Unsafe range is never read or offered as executable program');
+}
+for (const mode of ['cxx23','named']) {
+  const steps=M.temporaries(mode).steps;
+  assert(steps.filter(e=>e.state.iteration==='reading').every(e=>e.state.owner==='alive'&&e.state.borrow==='valid'),'Each modeled range read requires a live owner');
+  assert(steps.at(-1).state.owner==='destroyed'&&steps.at(-1).state.values.join(',')==='1,2,3','Destruction occurs after safe iteration');
+}
+const completedTask=M.taskownership('run-task').steps;
+assert(completedTask.at(-2).state.alive&&completedTask.at(-2).state.ran===1,'Invocation does not destroy the owning callable');
+assert(!completedTask.at(-1).state.alive,'Explicit callable destruction releases captured data');
+assert(!M.taskownership('discard-task').steps.at(-1).state.alive&&M.taskownership('discard-task').steps.at(-1).state.ran===0,'Discarding pending work frees data without invocation');
 assert(M.vector('growth').steps.at(-1).state.pointer==='invalid','Reallocation access');
 assert(M.vector('reserved').steps.at(-1).state.pointer==='valid','Reserved append access');
 assert(M.vector('erase').steps.at(-1).state.pointer==='at-after-invalid','Erase invalidation');
@@ -68,5 +82,5 @@ for(let rate=0;rate<=12;rate++)for(let workers=1;workers<=8;workers++)for(const 
     if(s.phase!=='Serving')assert(s.lastAccepted===0,'Drain admitted new work');
   }queues++;
 }
-if(ARGV.includes('--json'))print(JSON.stringify(COURSE_LABS.filter(l=>l.id!=='lifetime').flatMap(l=>l.scenarios.map(mode=>({lab:l.id,mode,...M[l.id](mode)})))));
+if(ARGV.includes('--json'))print(JSON.stringify(modelLabs.flatMap(l=>l.scenarios.map(mode=>({lab:l.id,mode,...M[l.id](mode)})))));
 else print('PASS: '+total+' scenarios, all scheduler outcomes, '+partitions+' TCP partitions, ownership/vector/transaction invariants, '+queues+' queue configurations');

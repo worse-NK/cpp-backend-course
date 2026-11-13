@@ -1,0 +1,15 @@
+{
+  "scope": "training-policy-not-applied",
+  "purpose": "catalog-covers",
+  "destination_selection": "fixed-services",
+  "allowed_services": ["catalog-a", "catalog-b"],
+  "allowed_scheme": "https",
+  "allowed_port": 443,
+  "dns_policy": "all-addresses-allowed",
+  "connect_policy": "validated-address-original-tls-name",
+  "redirect_policy": "validate-every-hop",
+  "max_redirects": 2,
+  "deadline_ms": 1500,
+  "max_response_bytes": 262144,
+  "enforcement": "not-applied"
+}

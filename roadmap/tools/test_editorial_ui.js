@@ -27,7 +27,18 @@ const fakeWindow = {
     getSelection: () => ({ removeAllRanges: () => {}, addRange: () => {} })
 };
 const source = read('roadmap/assets/station-app.js');
-const fragments = source.slice(source.indexOf('  function CodeBlock('), source.indexOf('  function splitQuestion('))
+const library = new Function(read('roadmap/vendor/highlightjs/highlight.min.js') + '\n;return hljs;')();
+assert(library.versionString === '11.12.0', 'Use the real locally pinned highlighter');
+const origin = JSON.parse(read('roadmap/vendor/highlightjs/ORIGIN.json'));
+for (const name of Object.keys(origin.files))
+    if (/\.js$/.test(name) && name !== 'highlight.min.js')
+        new Function('hljs', read('roadmap/vendor/highlightjs/' + name))(library);
+fakeWindow.hljs = library;
+new Function('window', read('roadmap/assets/course-code.js'))(fakeWindow);
+assert(typeof fakeWindow.CourseCode.element === 'function', 'Load the actual shared code renderer');
+const fragments = source.slice(source.indexOf('  function backendLabEntry('), source.indexOf('  function PracticeLinks('))
+    + source.slice(source.indexOf('  function LabFlask('), source.indexOf('  function LabBlock('))
+    + source.slice(source.indexOf('  function codeElement('), source.indexOf('  function splitQuestion('))
     + source.slice(source.indexOf('  function SubstationNav('), source.indexOf('  function QuizPicker('));
 const components = new Function('React', 'window', 'document', 'navigator', 'localStorage',
     'var h=React.createElement, useState=React.useState, data=window.STATION_DATA, meta=data.meta, theory=data.theory, noteLabels={tip:"СОВЕТ",key:"ГЛАВНОЕ"}; function isWorkbook(s){return /(?:-final-workbook|clock-worked-example)$/.test(s.id);}'
@@ -41,10 +52,16 @@ function find(node, predicate) {
 }
 const code = components.CodeBlock({ block: { caption: 'Пример', code: 'int main() {}' } });
 assert(find(code, n => n.type === 'pre').props.tabIndex === 0, 'Code must be keyboard focusable');
+const highlighted = find(code, n => n.type === 'code');
+assert(highlighted.props.className.includes('hljs') && highlighted.props.translate === 'no' &&
+       highlighted.props.dangerouslySetInnerHTML.__html.includes('hljs-type'),
+       'The actual production code helper emits highlighted source, not an empty stub');
 find(code, n => n.type === 'button').props.onClick();
 assert(selected, 'Without clipboard permission the code must be selectable');
 const output = components.CodeBlock({ block: { caption: 'Ожидаемый вывод полной программы', code: '42' } });
 assert(output.props.className.includes('output-wrap'), 'Output must be visually distinct from source');
+const literalOutput = find(output, n => n.type === 'code');
+assert(!literalOutput.props.dangerouslySetInnerHTML && literalOutput.children.join('') === '42', 'Output remains exact literal text rather than highlighted C++');
 const ordinaryCode = components.CodeBlock({ block: { caption: 'Полная программа: сначала предскажи вывод', code: 'int main() {}' } });
 assert(!ordinaryCode.props.className.includes('output-wrap'), 'Code mentioning output must remain a source listing');
 const section = { id: 'example', title: 'Пример', blocks: [{type: 'note', html: '<b>Источники.</b> Правило', kind: 'tip'}] };
@@ -62,19 +79,20 @@ const data = fakeWindow.STATION_DATA;
 const nav = components.SubstationNav({ items: data.substations, active: data.substations[0].id, view: 'theory', store: {}, onChoose: () => {}, onNavigate: () => {} });
 assert(nav.type === 'details' && nav.props.open === false, 'Small-screen contents must start collapsed');
 assert(find(nav, n => n.props['aria-current'] === 'page'), 'Current section must be accessible');
-assert(!find(nav, n => n.props.className === 'contents-finale'), 'No permanent top-level finale button');
-assert(find(nav, n => n.props.className === 'contents-ending'), 'Final activities must follow the chapters');
+const endingGroup = find(nav, n => n.props.className === 'contents-ending');
+assert(endingGroup && endingGroup.type === 'nav' && endingGroup.props['aria-label'] === 'Завершение станции', 'Final activities must follow the chapters in their labelled navigation group');
+assert(!find({children:nav.children.filter(child => child !== endingGroup)}, n => n.props && n.props.className === 'contents-finale'), 'No duplicate permanent finale entry outside the lower ending group');
 let destination = '';
 const endingNav = components.SubstationNav({ items: data.substations, active: data.substations[0].id, view: 'final', store: {}, onPage: page => { destination = page; } });
 const ending = find(endingNav, n => n.props.className === 'contents-ending');
-assert(ending.children.filter(Boolean).length === 1 && ending.children[0].type === 'button', 'Without analysis tasks finale must have a single sidebar entry');
+assert(ending.children.filter(Boolean).length === 1 && ending.children[0].type === 'a' && ending.children[0].props.href === '#view=final', 'Without analysis tasks finale must have a single native sidebar link');
 assert(ending.children[0].children.includes('Завершение станции'), 'Finale entry must use the page name');
 assert(ending.children[0].props['aria-current'] === 'page', 'Finale must indicate the current page');
 ending.children[0].props.onClick();
 assert(destination === 'final', 'Finale entry must open the overview, not a quiz');
 const analysisNav = components.SubstationNav({ items: data.substations, active: data.substations[0].id, view: 'analysis', store: {}, analysisCount: 8, onPage: page => { destination = page; } });
 const analysis = find(analysisNav, n => n.props.className === 'contents-analysis');
-assert(analysis && analysis.props['aria-current'] === 'page', 'Open-answer analysis must be discoverable in ending contents');
+assert(analysis && analysis.type === 'a' && analysis.props.href === '#view=analysis' && analysis.props['aria-current'] === 'page', 'Open-answer analysis must be discoverable through its exact native link in ending contents');
 analysis.props.onClick();
 assert(destination === 'analysis', 'Analysis entry must lead directly to open answers');
 const selfCheck = components.Theory({ sections: [{id:'check', title:'Проверка', blocks:[{type:'self-check',prompt:'Объясни правило',answer:'<p>Разбор правила</p>'}]}], store:{} });

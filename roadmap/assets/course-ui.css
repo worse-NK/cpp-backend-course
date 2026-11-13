@@ -1,0 +1,75 @@
+/* Shared reader/lab foundations. Opt-in: legacy stations keep their current UI. */
+:root {
+  --course-paper: #f7f9fa;
+  --course-surface: #ffffff;
+  --course-ink: #24333b;
+  --course-muted: #52636b;
+  --course-accent: #185c65;
+  --course-accent-soft: #edf4f4;
+  --course-line: #dce4e7;
+  --course-code: #202c35;
+  --course-focus: #176e81;
+  --course-space-1: 4px;
+  --course-space-2: 8px;
+  --course-space-3: 12px;
+  --course-space-4: 16px;
+  --course-space-6: 24px;
+  --course-space-8: 32px;
+  --course-space-12: 48px;
+  --course-space-16: 64px;
+  --course-radius: 6px;
+  --course-panel-radius: 10px;
+  --course-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --course-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.course-reader,
+.course-lab-pilot {
+  color-scheme: light;
+  color: var(--course-ink);
+  background: var(--course-paper);
+  font-family: var(--course-sans);
+  --ink: var(--course-ink);
+  --mute: var(--course-muted);
+  --muted: var(--course-muted);
+  --line: var(--course-line);
+  --blue: var(--course-accent);
+  --blue-deep: var(--course-accent);
+  --green: var(--course-accent);
+  --green-soft: var(--course-accent-soft);
+  --paper: var(--course-paper);
+  --card: var(--course-surface);
+  --code: var(--course-code);
+}
+
+:where(.course-reader, .course-lab-pilot) :where(button, a, input, select, summary) {
+  touch-action: manipulation;
+}
+
+:where(.course-reader, .course-lab-pilot) :where(button, a, input, select, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--course-focus);
+  outline-offset: 4px;
+}
+
+:where(.course-reader, .course-lab-pilot) :where(h1, h2, h3) {
+  text-wrap: balance;
+  scroll-margin-block-start: 24px;
+}
+
+:where(.course-reader, .course-lab-pilot) :where(pre, code) {
+  font-family: var(--course-mono);
+}
+
+:where(.course-reader, .course-lab-pilot) [hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.course-reader, .course-lab-pilot) *,
+  :where(.course-reader, .course-lab-pilot) *::before,
+  :where(.course-reader, .course-lab-pilot) *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

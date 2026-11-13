@@ -1,0 +1,886 @@
+/*
+ * Course reader: the Studio palette with the familiar left-hand contents rail.
+ * Loaded after station.css, course-ui.css, course-reader.css and course-theme.css.
+ * The reading layout stays independent of the design comparison pages.
+ */
+body.course-reader.course-dark {
+  --reader-hover: #2b4350;
+  --reader-selected: #2c4553;
+  --reader-border-strong: #6d8c9d;
+  --reader-success: #b1d3bf;
+  --reader-success-bg: #243b34;
+  --reader-warning: #e1cca3;
+  --reader-warning-bg: #3c382d;
+  --reader-error: #e8bcbc;
+  --reader-error-bg: #493238;
+  --green: var(--reader-success);
+  --green-bg: var(--reader-success-bg);
+  --amber: var(--reader-warning);
+  --amber-bg: var(--reader-warning-bg);
+  --red: var(--reader-error);
+  --red-bg: var(--reader-error-bg);
+  --blue-bg: var(--course-accent-soft);
+  color-scheme: dark;
+  -webkit-tap-highlight-color: #98c6db30;
+}
+
+body.course-reader.course-dark :is(.page, .page-wide) {
+  max-width: 1280px;
+  column-gap: 64px;
+  padding-top: 32px;
+}
+
+body.course-reader.course-dark .reader-header {
+  gap: 12px 24px;
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+
+body.course-reader.course-dark .reader-course-title {
+  font-size: 19px;
+  font-weight: 550;
+}
+
+body.course-reader.course-dark .reader-content {
+  max-width: 75ch;
+}
+
+body.course-reader.course-dark :is(.reader-brand, .reader-breadcrumb a, .course-home, .contents-all-labs) {
+  color: var(--course-accent);
+}
+
+body.course-reader.course-dark .reader-header .file-warning {
+  border-left-color: #b9a271;
+  color: var(--reader-warning);
+}
+
+body.course-reader.course-dark .reader-breadcrumb {
+  gap: 4px 10px;
+  margin-bottom: 24px;
+  color: var(--course-muted);
+  font-size: 13px;
+}
+
+body.course-reader.course-dark :is(.reader-options summary, .contents-toggle) {
+  width: fit-content;
+  min-height: 44px;
+  padding-block: 10px;
+}
+
+body.course-reader.course-dark .reading-settings button {
+  border-color: transparent;
+  color: var(--course-muted);
+}
+
+body.course-reader.course-dark .reading-settings button:hover {
+  color: var(--course-ink);
+  background: var(--reader-hover);
+}
+
+body.course-reader.course-dark .reading-settings button[aria-pressed="true"] {
+  border-color: var(--reader-border-strong);
+  color: var(--course-ink);
+  background: var(--reader-selected);
+}
+
+/* The rail is deliberately quiet. An active page is not another large card. */
+body.course-reader.course-dark .page > .substation-shell {
+  scrollbar-color: #587281 transparent;
+}
+
+body.course-reader.course-dark .substation-grid {
+  gap: 0;
+}
+
+body.course-reader.course-dark .substation-card {
+  min-height: 0;
+  padding: 12px;
+  border-radius: 5px;
+  color: var(--course-ink);
+  background: transparent;
+}
+
+body.course-reader.course-dark .substation-card:hover {
+  border-color: transparent;
+  color: var(--course-ink);
+  background: var(--reader-hover);
+  box-shadow: none;
+}
+
+body.course-reader.course-dark .substation-card.active {
+  border-color: transparent;
+  color: var(--course-ink);
+  background: var(--reader-selected);
+}
+
+body.course-reader.course-dark .substation-number,
+body.course-reader.course-dark .substation-card.active .substation-number {
+  color: var(--course-accent);
+  background: transparent;
+}
+
+body.course-reader.course-dark :is(.substation-subtitle, .substation-progress, .search-result-count) {
+  color: var(--course-muted);
+}
+
+body.course-reader.course-dark .contents-sections :is(button, a:not(.contents-lab-link)):hover,
+body.course-reader.course-dark .contents-ending :is(button, a):hover {
+  color: var(--course-ink);
+  background: var(--reader-hover);
+}
+
+body.course-reader.course-dark .contents-sections :is(button, a:not(.contents-lab-link))[aria-current],
+body.course-reader.course-dark .contents-ending :is(button, a)[aria-current] {
+  border-left-color: var(--course-accent);
+  color: var(--course-ink);
+  background: var(--reader-selected);
+}
+
+body.course-reader.course-dark .contents-sections a.contents-lab-link {
+  border-color: var(--course-line);
+  color: var(--course-accent);
+  background: var(--course-surface);
+}
+
+body.course-reader.course-dark .contents-sections a.contents-lab-link:hover {
+  border-color: var(--reader-border-strong);
+  background: var(--reader-hover);
+}
+
+/* A visible destination, not another muted footer link. */
+body.course-reader.course-dark .contents-ending a.contents-finale {
+  margin: 0 0 10px;
+  padding: 13px 14px;
+  min-height: 48px;
+  border: 1px solid #7895a8;
+  border-radius: 6px;
+  color: var(--course-focus);
+  background: var(--course-surface-raised);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+body.course-reader.course-dark .contents-ending a.contents-finale:hover {
+  color: var(--course-ink);
+  background: #385566;
+  border-color: var(--course-accent);
+}
+body.course-reader.course-dark .contents-ending a.contents-finale[aria-current] {
+  color: var(--course-canvas);
+  background: var(--course-accent);
+  border-color: var(--course-accent);
+}
+body.course-reader.course-dark .contents-sections a.contents-lab-link,
+body.course-reader.course-dark .contents-all-labs:has(.lab-flask),
+body.course-reader.course-dark .course-lab-entry a:has(.lab-flask) {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+body.course-reader.course-dark :is(.contents-lab-link, .contents-all-labs) .lab-flask {
+  width: 19px; height: 21px; flex-basis: 19px;
+}
+
+body.course-reader.course-dark :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  border-color: var(--reader-border-strong);
+  color: var(--course-ink);
+  background-color: var(--course-surface);
+  font-family: var(--course-sans);
+}
+
+body.course-reader.course-dark input::placeholder,
+body.course-reader.course-dark textarea::placeholder {
+  color: var(--course-muted);
+  opacity: 1;
+}
+
+/* Typography carries the lesson; colored surfaces only signal a change of task. */
+body.course-reader.course-dark :is(.reader-content > h2, .section-title) {
+  font-size: 36px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -.03em;
+}
+
+body.course-reader.course-dark .section-lead {
+  color: var(--course-muted);
+  font-size: 19px;
+  line-height: 1.8;
+}
+
+body.course-reader.course-dark .theory-text {
+  color: var(--course-ink);
+  font-size: 18px;
+  line-height: 1.85;
+}
+
+body.course-reader.course-dark :is(.kicker, .note-label, .self-check-title, .solution-label, .notes-label, .course-lab-eyebrow) {
+  color: var(--course-muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+body.course-reader.course-dark :is(.theory-text, .note-text, .self-check, .notes, .task-solution-text) code {
+  color: #cee5ee;
+  background: #2b424f;
+}
+
+body.course-reader.course-dark :is(.code-block, .question-code, .solution-code, .assembly-solution pre) {
+  border: 1px solid #456171;
+  border-radius: 6px;
+  color: #dfeef5;
+  background: var(--course-code);
+  scrollbar-color: #678594 var(--course-code);
+}
+
+body.course-reader.course-dark :is(.code-block, .question-code, .solution-code, .assembly-solution pre) > code {
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+}
+
+body.course-reader.course-dark .output-wrap .code-block {
+  border-color: #4f7265;
+  border-left-color: #91b3a2;
+  color: #d1e6dc;
+  background: var(--reader-success-bg);
+}
+
+body.course-reader.course-dark .output-wrap .code-caption {
+  color: #b1cdbf;
+}
+
+body.course-reader.course-dark .copy-code {
+  border-color: var(--course-line);
+  color: var(--course-accent);
+  background: transparent;
+}
+
+body.course-reader.course-dark .copy-code:hover {
+  border-color: var(--reader-border-strong);
+  color: var(--course-ink);
+  background: var(--reader-hover);
+}
+
+body.course-reader.course-dark :is(.note, .self-check, .course-lab-entry, .reader-return, .assembly-workspace, .analysis-entry, .quiz-theory-refs, .task-revisit) {
+  border-color: var(--course-line);
+  color: var(--course-ink);
+  background: var(--course-surface);
+}
+
+body.course-reader.course-dark .note.key {
+  border-left-color: #88acbc;
+  background: #243a47;
+}
+
+body.course-reader.course-dark .note.tip {
+  border-left-color: #95b5a4;
+  background: var(--reader-success-bg);
+}
+
+body.course-reader.course-dark .note.warn {
+  border-left-color: #c0a66d;
+  background: var(--reader-warning-bg);
+}
+
+body.course-reader.course-dark .note.source-note {
+  border-color: var(--course-line);
+  background: transparent;
+}
+
+body.course-reader.course-dark :is(.note-text, .self-check-answer, .assembly-context, .notes, .hint-text, .task-brief, .task-solution-text, .task-preparation p, .explanation p) {
+  color: var(--course-ink);
+}
+
+body.course-reader.course-dark :is(.source-note .note-text, .reader-return > p, .course-lab-entry small) {
+  color: var(--course-muted);
+}
+
+body.course-reader.course-dark :is(.note.tip .note-label, .solution-label) {
+  color: var(--reader-success);
+}
+
+body.course-reader.course-dark .note.warn .note-label {
+  color: var(--reader-warning);
+}
+
+body.course-reader.course-dark :is(.note.key .note-label, .course-lab-entry .course-lab-eyebrow) {
+  color: var(--course-accent);
+}
+
+body.course-reader.course-dark .theory-text .table-scroll {
+  border-color: var(--course-line);
+  background: var(--course-surface);
+}
+
+body.course-reader.course-dark :is(.theory-text th, .note-text th) {
+  color: var(--course-ink);
+  background: #2b424f;
+}
+
+/* Compact actions keep their own size; a long route wraps onto its own row. */
+body.course-reader.course-dark :is(.primary, .secondary, .solution-button, .ghost, .quiz-back, .hint-button) {
+  flex: 0 0 auto;
+  width: fit-content;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+  height: auto;
+  padding: 10px 16px;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  border-radius: 5px;
+  font-size: 15px;
+  font-weight: 550;
+  line-height: 1.6;
+  text-align: left;
+}
+
+body.course-reader.course-dark :is(.section-actions, .assembly-actions, .reader-return-actions) {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 12px;
+}
+
+body.course-reader.course-dark :is(.section-actions, .assembly-actions, .reader-return-actions) > :is(button, a) {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  height: auto;
+}
+
+body.course-reader.course-dark :is(.primary, .course-lab-entry a, .solution-button, .sql-trainer-launch, .sql-practice-link > a) {
+  border: 1px solid #a2c8d9;
+  color: #172d3a;
+  background: var(--course-accent);
+  text-decoration: none;
+}
+
+body.course-reader.course-dark :is(.primary, .course-lab-entry a, .solution-button, .sql-trainer-launch, .sql-practice-link > a):not(:disabled):hover {
+  border-color: #c4e2ee;
+  color: #152a35;
+  background: #b7d9e7;
+}
+
+body.course-reader.course-dark .primary.done {
+  border-color: #a5cbb6;
+  color: #19372a;
+  background: #b2cebd;
+}
+
+body.course-reader.course-dark .primary.done:not(:disabled):hover {
+  border-color: #c9e6d5;
+  color: #19372a;
+  background: #c1ddcc;
+}
+
+body.course-reader.course-dark :is(.secondary, .ghost, .quiz-back, .hint-button, .pill) {
+  border: 1px solid #648391;
+  color: #c4e0ec;
+  background: transparent;
+}
+
+body.course-reader.course-dark :is(.secondary, .ghost, .quiz-back, .hint-button, .pill):not(:disabled):hover {
+  border-color: #a1c1ce;
+  color: var(--course-ink);
+  background: var(--reader-hover);
+}
+
+body.course-reader.course-dark .pill.active {
+  border-color: #91b8c9;
+  color: var(--course-ink);
+  background: #3b5a6a;
+}
+
+body.course-reader.course-dark :is(.primary, .secondary, .ghost, .hint-button):disabled {
+  cursor: default;
+  opacity: .55;
+}
+
+body.course-reader.course-dark .quiz-back {
+  margin-bottom: 20px;
+}
+
+/* Answers and choice cards legitimately use the available reading width. */
+body.course-reader.course-dark .reader-content h2.question {
+  margin: 24px 0;
+  font-size: 22px;
+  line-height: 1.6;
+  letter-spacing: -.015em;
+}
+
+body.course-reader.course-dark .reader-content .quiz-choice h2 {
+  margin: 0 0 12px;
+  font-size: 23px;
+  line-height: 1.45;
+}
+
+body.course-reader.course-dark .reader-content h2.task-title {
+  margin: 0 0 20px;
+  font-size: 30px;
+  line-height: 1.35;
+}
+
+body.course-reader.course-dark .option {
+  width: 100%;
+  border-color: #648391;
+  color: var(--course-ink);
+  background: var(--course-surface);
+}
+
+body.course-reader.course-dark .option:not(:disabled):hover {
+  border-color: #a6ccdc;
+  background: var(--reader-hover);
+}
+
+body.course-reader.course-dark .option-mark {
+  color: #d0e9f5;
+  background: #365361;
+}
+
+body.course-reader.course-dark .option.correct {
+  border-color: #8fbaa2;
+  color: #e0eee5;
+  background: #294638;
+}
+
+body.course-reader.course-dark .option.wrong {
+  border-color: #c49494;
+  color: #f1dddd;
+  background: #50373b;
+}
+
+body.course-reader.course-dark .correct .option-mark {
+  color: #193427;
+  background: #b1d0bc;
+}
+
+body.course-reader.course-dark .wrong .option-mark {
+  color: #4e2828;
+  background: #e4bbbb;
+}
+
+body.course-reader.course-dark .option.dim {
+  opacity: .78;
+}
+
+body.course-reader.course-dark .level-easy {
+  color: var(--reader-success);
+  background: var(--reader-success-bg);
+}
+
+body.course-reader.course-dark :is(.level-medium, .task-level, .try-note, .hint-number) {
+  border-color: #80734c;
+  color: var(--reader-warning);
+  background: var(--reader-warning-bg);
+}
+
+body.course-reader.course-dark .level-hard {
+  color: var(--reader-error);
+  background: var(--reader-error-bg);
+}
+
+body.course-reader.course-dark :is(.quiz-progress, .result-bar) {
+  background: #405664;
+}
+
+body.course-reader.course-dark .quiz-progress > div {
+  background: var(--course-accent);
+}
+
+body.course-reader.course-dark :is(.finale-item, .training-batch, .training-review, .quiz-choice, .quiz-choice.advanced, .quiz-choice.interview, .hint) {
+  border-color: var(--course-line);
+  color: var(--course-ink);
+  background: var(--course-surface);
+  box-shadow: none;
+}
+
+body.course-reader.course-dark :is(.quiz-choice, .training-batch):hover {
+  border-color: #91b8c9;
+  color: var(--course-ink);
+  background: var(--reader-hover);
+  transform: none;
+}
+
+body.course-reader.course-dark :is(.finale-item p, .quiz-choice p, .training-batch-result, .training-batch-number, .assessment-extra p, .analysis-entry p, .training-entry p) {
+  color: var(--course-muted);
+}
+
+body.course-reader.course-dark .check-item {
+  color: var(--course-ink);
+}
+
+body.course-reader.course-dark .check-item:hover {
+  background: var(--reader-hover);
+}
+
+body.course-reader.course-dark .check-mark {
+  border-color: #87a4b1;
+}
+
+body.course-reader.course-dark .check-item.checked {
+  color: #d0e3d7;
+  background: #294638;
+}
+
+body.course-reader.course-dark .check-item.checked .check-mark {
+  border-color: #a2c8b2;
+  color: #193427;
+  background: #b1d0bc;
+}
+
+body.course-reader.course-dark :is(.assembly-pool button, .assembly-answer button) {
+  border-color: #7899aa;
+  color: var(--course-ink);
+  background: #2b4352;
+}
+
+body.course-reader.course-dark .assembly-pool button:not(:disabled):hover {
+  border-color: #b1d7e7;
+  background: #345362;
+}
+
+body.course-reader.course-dark .assembly-answer button {
+  border-color: #9bbbc9;
+  background: #365566;
+}
+
+body.course-reader.course-dark .assembly-answer button:not(:disabled):hover {
+  border-color: #c1e1ef;
+  background: #406374;
+}
+
+body.course-reader.course-dark .assembly-context code,
+body.course-reader.course-dark .assembly button code {
+  color: inherit;
+  background: transparent;
+}
+
+body.course-reader.course-dark :is(.sql-trainer-entry, .sql-practice-link) {
+  border-color: var(--course-line);
+  color: var(--course-ink);
+  background: var(--course-surface);
+  box-shadow: none;
+}
+
+body.course-reader.course-dark .sql-trainer-entry:hover {
+  border-color: var(--reader-border-strong);
+  background: var(--reader-hover);
+}
+
+body.course-reader.course-dark :is(.sql-trainer-entry small, .sql-practice-link > span) {
+  color: var(--course-muted);
+}
+
+body.course-reader.course-dark .sql-trainer-icon {
+  color: #172d3a;
+  background: var(--course-accent);
+}
+
+/* Existing instructional diagrams share the theme without losing their roles. */
+body.course-reader.course-dark :is(.diagram, .network-visual, .packet-lab, .exchange-diagram, .lanes-diagram) {
+  margin: 32px 0;
+  padding: 24px;
+  border: 1px solid var(--course-line);
+  border-radius: 8px;
+  background: #20333f;
+  box-shadow: none;
+}
+
+body.course-reader.course-dark .network-visual::before {
+  display: none;
+}
+
+body.course-reader.course-dark :is(.diagram-title, .visual-head figcaption, .diagram-item strong, .visual-item strong, .packet-result-head, .exchange-message strong) {
+  color: var(--course-ink);
+}
+
+body.course-reader.course-dark :is(.diagram-item, .visual-item, .visual-layers .visual-item:nth-child(2n), .packet-result, .exchange-message) {
+  border-color: #587584;
+  color: var(--course-ink);
+  background: #2b4350;
+  box-shadow: none;
+}
+
+body.course-reader.course-dark :is(.diagram-item p, .visual-item-text, .visual-caption, .diagram-caption, .packet-assumption, .packet-scale, .exchange-message p, .lane-label span, .lane-row > p, .lanes-axis) {
+  color: var(--course-muted);
+}
+
+body.course-reader.course-dark :is(.visual-label, .exchange-actors, .exchange-arrow, .lane-label strong) {
+  color: var(--course-accent);
+}
+
+body.course-reader.course-dark .visual-head span {
+  color: var(--course-muted);
+  background: #304955;
+}
+
+body.course-reader.course-dark :is(.visual-item-text code, .diagram-item code) {
+  color: #cce3ed;
+  background: transparent;
+}
+
+body.course-reader.course-dark .visual-layers .visual-item {
+  border-left-color: #81afc4;
+}
+
+body.course-reader.course-dark .visual-layers .visual-item:nth-child(2n) {
+  border-left-color: #b2cbd4;
+}
+
+body.course-reader.course-dark :is(.diagram-index, .exchange-index) {
+  color: #172d3a;
+  background: var(--course-accent);
+}
+
+body.course-reader.course-dark .packet-step {
+  border-color: #648391;
+  color: var(--course-ink);
+  background: #243b48;
+}
+
+body.course-reader.course-dark .packet-step:hover {
+  border-color: #a6ccdc;
+  background: var(--reader-hover);
+}
+
+body.course-reader.course-dark .packet-step > span {
+  color: var(--course-accent);
+  background: #365361;
+}
+
+body.course-reader.course-dark .packet-step small {
+  color: var(--course-muted);
+}
+
+body.course-reader.course-dark .packet-step strong {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+body.course-reader.course-dark :is(.packet-step small, .packet-scale, .lanes-axis, .lane-label span) {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+body.course-reader.course-dark :is(.packet-assumption, .packet-result-head, .exchange-actors, .exchange-message strong, .lane-label strong) {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+body.course-reader.course-dark .packet-segment strong {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+body.course-reader.course-dark .packet-segment span {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+body.course-reader.course-dark .packet-explanation strong {
+  font-size: 15px;
+}
+
+body.course-reader.course-dark .packet-explanation p {
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+body.course-reader.course-dark :is(.exchange-message p, .lane-row > p) {
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+body.course-reader.course-dark .lane-segment {
+  min-height: 36px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+body.course-reader.course-dark .packet-step.active {
+  border-color: #acd5e5;
+  background: #365361;
+  box-shadow: none;
+}
+
+body.course-reader.course-dark .packet-step.active > span {
+  color: #172d3a;
+  background: var(--course-accent);
+}
+
+body.course-reader.course-dark .packet-bar {
+  border-color: #89a4b2;
+  background: #20333f;
+}
+
+body.course-reader.course-dark .packet-explanation {
+  border-color: var(--course-accent);
+  color: var(--course-ink);
+  background: var(--course-surface);
+}
+
+body.course-reader.course-dark :is(.exchange-steps::before, .exchange-steps::after) {
+  background: #6d8c9d;
+}
+
+body.course-reader.course-dark .lane-row {
+  border-color: var(--course-line);
+}
+
+/* Glossary popovers remain part of the reader, not a separate light overlay. */
+body.course-reader.course-dark a.course-term {
+  text-decoration-color: #98bdcf;
+}
+
+body.course-reader.course-dark a.course-term:hover,
+body.course-reader.course-dark a.course-term[aria-expanded="true"] {
+  color: #d6edf6;
+  background: #335363;
+}
+
+body.course-reader.course-dark .term-popup {
+  border-color: #7898a8;
+  color: var(--course-ink);
+  background: #263d4a;
+  border-radius: 8px;
+  box-shadow: 0 12px 36px #0d192b66;
+  font-family: var(--course-sans);
+}
+
+body.course-reader.course-dark .term-popup :is(h2, #course-term-description) {
+  color: var(--course-ink);
+  font-family: var(--course-sans);
+}
+
+body.course-reader.course-dark .term-popup .term-popup-label {
+  color: var(--course-muted);
+  letter-spacing: 0;
+}
+
+body.course-reader.course-dark .term-popup-close {
+  color: #d6e9f3;
+  background: #3c5868;
+}
+
+body.course-reader.course-dark .term-popup-close:hover {
+  color: #f1f8fc;
+  background: #4b6d7f;
+}
+
+body.course-reader.course-dark .term-popup a.term-popup-more {
+  border-color: #6a8b9b;
+  color: #b8dfef;
+}
+
+body.course-reader.course-dark :is(a, button, summary, input, select, textarea, pre[tabindex]):focus-visible {
+  outline: 3px solid var(--course-focus);
+  outline-offset: 4px;
+}
+
+body.course-reader.course-dark .reader-content:focus-visible {
+  outline: 0;
+  box-shadow: 0 -3px 0 var(--course-focus);
+}
+
+body.course-reader.course-dark .reader-skip {
+  border-color: var(--course-focus);
+  color: var(--course-ink);
+  background: var(--course-surface);
+}
+
+@media (max-width: 1099px) {
+  body.course-reader.course-dark :is(.page, .page-wide) {
+    max-width: 824px;
+    padding-top: 24px;
+  }
+
+  body.course-reader.course-dark .page > .substation-shell {
+    background: var(--course-surface);
+  }
+}
+
+@media (max-width: 600px) {
+  body.course-reader.course-dark :is(.page, .page-wide) {
+    padding-top: 16px;
+  }
+
+  body.course-reader.course-dark .reader-course-title {
+    font-size: 17px;
+  }
+
+  body.course-reader.course-dark :is(.reader-content > h2, .section-title) {
+    font-size: 28px;
+    line-height: 1.3;
+  }
+
+  body.course-reader.course-dark .section-lead {
+    font-size: 18px;
+  }
+
+  body.course-reader.course-dark .theory-text {
+    font-size: 16px;
+    line-height: 1.85;
+  }
+
+  body.course-reader.course-dark .section-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  body.course-reader.course-dark :is(.diagram, .network-visual, .packet-lab, .exchange-diagram, .lanes-diagram) {
+    padding: 18px;
+  }
+}
+
+@media print {
+  body.course-reader.course-dark {
+    --course-paper: #fff;
+    --course-surface: #fff;
+    --course-ink: #111;
+    --course-muted: #444;
+    --course-accent: #263c4c;
+    --course-line: #ccc;
+    color-scheme: light;
+    color: #111;
+    background: #fff;
+  }
+
+  body.course-reader.course-dark :is(.page, .page-wide) {
+    max-width: none;
+    padding: 0;
+  }
+
+  body.course-reader.course-dark :is(.theory-text, .section-lead, .note-text, .self-check-answer, .notes, .task-brief, .task-solution-text, .explanation p) {
+    color: #111;
+  }
+
+  body.course-reader.course-dark :is(.note, .note.key, .note.tip, .note.warn, .self-check, .course-lab-entry, .diagram, .network-visual, .diagram-item, .visual-item, .visual-layers .visual-item:nth-child(2n), .analysis-entry, .assembly-workspace, .finale-item, .training-review, .packet-lab, .packet-result, .exchange-diagram, .exchange-message, .lanes-diagram) {
+    border-color: #ccc;
+    color: #111;
+    background: #fff;
+    box-shadow: none;
+  }
+
+  body.course-reader.course-dark :is(.code-block, .question-code, .solution-code, .assembly-solution pre, .output-wrap .code-block) {
+    border-color: #ccc;
+    color: #111;
+    background: #f4f4f4;
+  }
+
+  body.course-reader.course-dark :is(.theory-text, .note-text, .self-check, .notes, .task-solution-text) code {
+    color: #111;
+    background: #f4f4f4;
+  }
+
+  body.course-reader.course-dark :is(.note-label, .self-check-title, .solution-label, .notes-label, .course-lab-entry .course-lab-eyebrow, .diagram-item p, .visual-item-text, .visual-caption, .diagram-caption, .packet-assumption, .exchange-message p, .lane-label span, .lane-row > p) {
+    color: #444;
+  }
+}

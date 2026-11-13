@@ -1,0 +1,127 @@
+name: ${PATH_PROJECT:?Use python3 lab.py init and python3 lab.py up}
+x-app: &app
+  image: course-production-path:${PATH_LAB_ID:?Use lab.py}
+  build: .
+  init: true
+  user: "10001:10001"
+  read_only: true
+  tmpfs: ["/tmp:rw,nosuid,nodev,noexec,size=16m"]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  cpus: 0.75
+  mem_limit: 256m
+  pids_limit: 48
+  networks: [lab]
+  labels:
+    org.cpp-course.production-path: ${PATH_LAB_ID:?Use lab.py}
+  logging:
+    driver: json-file
+    options: {max-size: "2m", max-file: "2"}
+
+services:
+  db:
+    image: postgres:18-bookworm
+    environment:
+      POSTGRES_DB: course_path
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/admin_password
+      PGDATA: /var/lib/postgresql/18/docker
+    secrets: [admin_password, api_password, relay_password, consumer_password]
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./init-db.sh:/docker-entrypoint-initdb.d/010-schema.sh:ro
+      - ./schema.sql:/opt/production-path/schema.sql:ro
+    read_only: true
+    tmpfs: ["/var/run/postgresql:rw,nosuid,nodev,size=8m", "/tmp:rw,nosuid,nodev,noexec,size=16m"]
+    shm_size: 64m
+    cpus: 0.75
+    mem_limit: 384m
+    pids_limit: 80
+    networks: [lab]
+    labels: {org.cpp-course.production-path: "${PATH_LAB_ID:?Use lab.py}"}
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U postgres -d course_path && test "$$(cat /proc/1/comm)" = postgres']
+      interval: 2s
+      timeout: 3s
+      retries: 40
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}
+  broker:
+    image: rabbitmq:4.4.0@sha256:485319d42170eab53d8a030e1cc49d95e41f5d325479fa504736db8091981eb7
+    hostname: broker
+    environment:
+      RABBITMQ_LOGS: "-"
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "+S 2:2 +A 2"
+    volumes: ["brokerdata:/var/lib/rabbitmq"]
+    secrets:
+      - source: broker_config
+        target: /etc/rabbitmq/rabbitmq.conf
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,nodev,noexec,size=32m"]
+    cpus: 0.75
+    mem_limit: 512m
+    pids_limit: 128
+    networks: [lab]
+    labels: {org.cpp-course.production-path: "${PATH_LAB_ID:?Use lab.py}"}
+    healthcheck:
+      test: [CMD, rabbitmq-diagnostics, -q, ping]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}
+  api:
+    <<: *app
+    networks: [lab, edge]
+    command: ["${PATH_API_MODE:-api}"]
+    environment: {PATH_API_BIND: "0.0.0.0", PATH_LAB_ID: "${PATH_LAB_ID:?Use lab.py}"}
+    ports: ["127.0.0.1:${PATH_PORT:?Use lab.py}:8080"]
+    secrets: [api_password]
+    depends_on:
+      db: {condition: service_healthy}
+  seed:
+    <<: *app
+    profiles: [tools]
+    command: [seed]
+    secrets: [admin_password, alice_password, bo_password]
+    depends_on:
+      db: {condition: service_healthy}
+  relay:
+    <<: *app
+    profiles: [tools]
+    command: [relay-once]
+    secrets: [relay_password, broker_password]
+    depends_on:
+      db: {condition: service_healthy}
+      broker: {condition: service_healthy}
+  consumer:
+    <<: *app
+    profiles: [tools]
+    command: [consume-once]
+    secrets: [consumer_password, broker_password]
+    depends_on:
+      db: {condition: service_healthy}
+      broker: {condition: service_healthy}
+
+networks:
+  lab:
+    internal: true
+    labels: {org.cpp-course.production-path: "${PATH_LAB_ID:?Use lab.py}"}
+  edge:
+    labels: {org.cpp-course.production-path: "${PATH_LAB_ID:?Use lab.py}"}
+volumes:
+  pgdata:
+    labels: {org.cpp-course.production-path: "${PATH_LAB_ID:?Use lab.py}"}
+  brokerdata:
+    labels: {org.cpp-course.production-path: "${PATH_LAB_ID:?Use lab.py}"}
+secrets:
+  admin_password: {file: .state/admin_password}
+  api_password: {file: .state/api_password}
+  relay_password: {file: .state/relay_password}
+  consumer_password: {file: .state/consumer_password}
+  broker_password: {file: .state/broker_password}
+  alice_password: {file: .state/alice_password}
+  bo_password: {file: .state/bo_password}
+  broker_config: {file: .state/broker.conf}

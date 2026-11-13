@@ -365,11 +365,6 @@ footer { margin-top: 14px; color: var(--mute-soft); font-size: 12px; line-height
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; scroll-behavior: auto !important; }
 }
-.reading-mode[aria-pressed="true"] {
-  outline: 2px solid var(--green);
-  outline-offset: 2px;
-}
-
 /* Editorial layout: content first, restrained navigation, readable measure. */
 .contents-search { display:block; margin:0 0 18px; color:var(--mute); font-size:12px; }
 .contents-search > span { display:block; margin-bottom:7px; }

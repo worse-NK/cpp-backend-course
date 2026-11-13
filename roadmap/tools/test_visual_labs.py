@@ -1,5 +1,7 @@
 """Integration points and independent checks for course visualization models."""
+from copy import deepcopy
 import json
+import os
 from pathlib import Path
 import re
 import sqlite3
@@ -7,7 +9,7 @@ import subprocess
 import tempfile
 import unittest
 
-from build_visual_labs import render, load_catalog
+from build_visual_labs import render, load_catalog, validate_introduction
 from build_stations import validate
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +26,23 @@ class VisualLabs(unittest.TestCase):
 
     def test_generated_catalog_is_current(self):
         self.assertEqual((ROOT / 'generated/visual-labs.data.js').read_text(), render())
+
+    def test_introduction_data_contract(self):
+        # These checks prevent broken rendering, not unclear prose.
+        labs = [lab for lab in load_catalog()['labs'] if lab['file'] == 'visual_labs.html']
+        for lab in labs:
+            validate_introduction(lab)
+            for field, invalid in [('paragraphs', []), ('paragraphs', 'text'),
+                                   ('goal', ''), ('action', None)]:
+                broken = deepcopy(lab)
+                broken['introduction'][field] = invalid
+                with self.subTest(lab=lab['id'], field=field, invalid=invalid):
+                    with self.assertRaises(ValueError):
+                        validate_introduction(broken)
+            broken = deepcopy(lab)
+            broken['scenarioNotes'] = {'not-a-scenario': 'A note'}
+            with self.assertRaises(ValueError):
+                validate_introduction(broken)
 
     def test_controller_and_course_context(self):
         run = subprocess.run(['gjs', str(ROOT / 'tools/test_visual_labs_ui.js')], cwd=ROOT.parent,
@@ -45,7 +64,11 @@ class VisualLabs(unittest.TestCase):
                         self.assertNotIn(key, actual)
                         actual.add(key)
         self.assertEqual(actual, expected)
-        self.assertEqual(len({entry[0] for entry in actual}), 13)
+        self.assertEqual({entry[0] for entry in actual}, {
+            'station0', 'station1', 'station2', 'station3', 'station4', 'station5',
+            'station6', 'station7', 'station7-netlab', 'station8', 'station9-sql',
+            'station9', 'station10', 'station15', 'station16',
+        })
         for lab in catalog:
             self.assertTrue((ROOT / lab['file']).is_file())
             for entry in lab['entries']:
@@ -74,12 +97,14 @@ class VisualLabs(unittest.TestCase):
                 if not model.get('program'):
                     continue
                 binary = str(Path(work) / model['mode'])
-                compiled = subprocess.run(['g++', '-std=c++20', '-x', 'c++', '-', '-o', binary],
+                standard = '23' if model.get('programStandard') == '23' else '20'
+                compiler = os.environ.get('CXX23', os.environ.get('CXX', 'g++')) if standard == '23' else os.environ.get('CXX', 'g++')
+                compiled = subprocess.run([compiler, '-std=c++' + standard, '-x', 'c++', '-', '-o', binary],
                                           input=model['program'], text=True, capture_output=True, timeout=30)
                 self.assertEqual(compiled.returncode, 0, compiled.stderr)
                 run = subprocess.run([binary], text=True, capture_output=True, timeout=5)
                 self.assertEqual(run.returncode, 0, run.stderr)
-                self.assertEqual(run.stdout, expected[model['mode']])
+                self.assertEqual(run.stdout, model.get('expectedOutput', expected.get(model['mode'])))
 
     def test_lifetime_programs_and_actual_printing_lines(self):
         html = (ROOT / 'object_lifetime_demo.html').read_text()

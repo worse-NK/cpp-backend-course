@@ -1,0 +1,13 @@
+{
+  "scope": "review-only-no-runtime",
+  "evidence_kind": "example-not-a-recorded-run",
+  "changes": [
+    {
+      "field": "docker_socket",
+      "before": true,
+      "after": false,
+      "reason": "Предлагаем исключить путь управления Docker-хостом из процесса приложения. Это пример проектного изменения, не сообщение об изменённом хосте."
+    }
+  ],
+  "not_tested": ["container-runtime", "database-roles", "ci-permissions", "secret-revocation", "dependency-provenance"]
+}

@@ -20,12 +20,16 @@ class RepositoryInventory(unittest.TestCase):
         checkpoints = {name for name in self.files
                        if name.startswith('roadmap/content/checkpoints/station')
                        and name.endswith('.json')}
-        self.assertEqual(len(stations), 15)
+        expected={'roadmap/content/'+p.name
+                  for p in (publication.ROOT/'content').glob('station*.json')}
+        self.assertEqual(stations, expected)
+        self.assertTrue({'roadmap/content/station'+str(i)+'.json'
+                         for i in range(11,15)} <= stations)
         self.assertEqual(checkpoints, {
             name.replace('roadmap/content/', 'roadmap/content/checkpoints/', 1)
             for name in stations
         })
-        for name in ('cheatsheet.json', 'glossary.json', 'visual-labs.json',
+        for name in ('cheatsheet.json', 'glossary.json', 'visual-labs.json', 'cpp-examples.json',
                      'service-workshop/route.json', 'service-workshop/start.html',
                      'service-workshop/release.html'):
             self.assertTrue('roadmap/content/' + name in self.files, name)
@@ -37,7 +41,8 @@ class RepositoryInventory(unittest.TestCase):
                      'roadmap/vendor/sqljs/README.md',
                      'README.md',
                      'roadmap/tools/build_publication.py',
-                     'roadmap/tools/build_stations.py',
+                     'roadmap/tools/build_stations.py', 'roadmap/tools/cpp_examples.py',
+                     'roadmap/tools/course_theme.py',
                      'roadmap/tools/build_sql_lab.py',
                      'roadmap/tools/checkpoint_data.py',
                      'roadmap/tools/validate_materials.py',
@@ -90,6 +95,27 @@ class RepositoryInventory(unittest.TestCase):
             self.assertFalse(set(Path(name).parts) & {'content', 'tools', 'tests', '__pycache__'})
         self.assertTrue('roadmap/content/station0.json' in self.files)
         self.assertFalse('roadmap/content/station0.json' in files)
+
+    @unittest.skipUnless(shutil.which('git'), 'requires Git')
+    def test_reviewed_tcp_captures_are_not_silently_ignored(self):
+        captures = [
+            'roadmap/examples/tcp-observation/captures/' + name
+            for name in ('baseline.pcap', 'delay.pcap', 'loss.pcap', 'slow-reader.pcap')
+        ]
+        for name in captures:
+            self.assertIn(name, self.files)
+        with tempfile.TemporaryDirectory(prefix='course-capture-ignore-') as work:
+            destination = Path(work)
+            subprocess.run(['git', 'init', '-q', str(destination)], check=True)
+            (destination / '.gitignore').write_bytes(self.files['.gitignore'])
+            result = subprocess.run(
+                ['git', '-C', str(destination), 'check-ignore', '--no-index', '--stdin'],
+                input='\n'.join(captures).encode() + b'\n',
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            )
+            self.assertEqual(result.returncode, 1,
+                             'Reviewed captures ignored by Git: ' + result.stdout.decode())
+            self.assertEqual(result.stdout, b'')
 
 
 @unittest.skipUnless(shutil.which('git'), 'requires Git')

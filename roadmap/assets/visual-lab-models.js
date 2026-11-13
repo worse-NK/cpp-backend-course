@@ -337,5 +337,58 @@
     return t;
   }
 
-  global.CourseLabModels={ownership,vector,build,concurrency,concurrencyInitial,concurrencyStep,network,sql,transactions,overload,packetpath,copy};
+  function temporaries(mode) {
+    const named=mode==="named",parameter=mode==="parameter",safe=named||mode==="cxx23";
+    const code=parameter?
+      `const std::vector<int>& broken(std::vector<int> values) {\n    return values; // reference to the function's own parameter\n}\n// for (int n : broken(std::vector<int>{1, 2, 3})) { ... }\n// Stop: the returned reference does not keep values alive.`:
+      `${named?"for (Batch batch = make_batch(); int n : batch.rows()) {":"for (int n : make_batch().rows()) {"}\n    std::cout << n << '\\n';\n}\nstd::cout << "after loop\\n";`;
+    const s={mode,owner:"waiting",borrow:"waiting",iteration:"not-started",values:[],phase:0,history:[],safe};
+    let program=null;
+    if(safe){
+      const guard=named?"":`#include <version>\n#if __cpp_range_based_for < 202211L\n#error C++23 range-for temporary lifetime support required\n#endif\n`;
+      program=guard+`#include <iostream>\n#include <vector>\nstruct Batch {\n    std::vector<int> data{1, 2, 3};\n    Batch() { std::cout << "create\\n"; }\n    ~Batch() { std::cout << "destroy\\n"; }\n    const std::vector<int>& rows() const { return data; }\n};\nBatch make_batch() { return Batch{}; }\nint main() {\n${code}\n}\n`;
+    }
+    const t=trace("temporaries",code,named?"C++20 / C++23 · именованный владелец":mode==="cxx20"?"C++20 · остановка перед недействительным доступом":"C++23 · подготовленный разбор",s,program);
+    if(program){t.programStandard=named?"20/23":"23";t.expectedOutput="create\n1\n2\n3\ndestroy\nafter loop\n";t.requiredMacros=named?{}:{__cpp_range_based_for:202211};}
+    function emit(line,title,text,rule,note){s.history.push(title);t.add(line,title,text,rule,s,note);}
+    emit(0,"До получения списка","Программа собирается вывести три числа. Чтобы читать их, ей нужен живой объект, в котором хранится список.","Ссылка позволяет обратиться к списку, но сама не владеет им.","Ни списка, ни ссылки на него пока нет.");
+    Object.assign(s,{owner:"alive",phase:1});
+    emit(0,parameter?"Создан параметр values":named?"Создан именованный batch":"Создан временный Batch",parameter?"Вызов broken получает собственный параметр values по значению. Это отдельный объект внутри вызова функции.":named?"В начальной части for создана переменная batch. Её область действия охватывает весь цикл.":"make_batch возвращает Batch со списком 1, 2, 3. В выражении нет имени, которое отдельно хранило бы этот Batch.","Список — часть объекта-владельца. При его уничтожении заканчивается жизнь списка.","Владелец и список существуют.");
+    Object.assign(s,{borrow:"valid",phase:2});
+    emit(parameter?1:0,"Получена ссылка на список",parameter?"return values возвращает ссылку на параметр. Данные не копируются и новому владельцу не передаются.":"rows() возвращает const-ссылку на data. Служебная ссылка range внутри цикла связывается со списком; это не копия vector.","Для понимания достаточно представить служебную ссылку range. Её имя в показанном пользовательском коде не записано.","Есть ссылка; список пока жив.");
+    if(!safe){
+      Object.assign(s,{owner:"destroyed",borrow:"dangling",iteration:"blocked",phase:3});
+      emit(parameter?1:0,"Владелец уже уничтожен",parameter?"Параметр values не переживает завершение полного выражения вызова; ABI может уничтожить его ещё при выходе из функции. В любом случае к началу обхода его уже нет. Правило C++23 не сохраняет этот параметр для цикла.":"В C++20 временный Batch здесь уничтожается в конце вычисления выражения, подготавливающего диапазон, до получения итераторов. Вызов rows() не продлевал его жизнь по прежнему правилу.","Показываем только момент потери действительности ссылки. Недействительный список не читаем.","Ссылка осталась, списка уже нет.");
+      emit(parameter?3:1,"Останавливаемся до чтения", "Указатель или ссылка могут сохранять прежнее значение после уничтожения данных. Это не разрешает пользоваться ими. У такой программы нет обещанного вывода чисел.","Здесь нельзя выбирать «мусор», «123» или «падение» как гарантированный результат: дальнейший доступ дал бы неопределённое поведение.","Чтение запрещено. Вывод программы не моделируется.");
+    }else{
+      s.phase=3;
+      emit(0,"Владелец пережил подготовку цикла",named?"Именованный batch продолжает жить до выхода из for. Это решение подходит и для C++20, и для C++23.":"По правилу C++23 жизнь этого временного Batch продолжается до конца цикла. Его список остаётся доступен через range.",named?"Надёжность обеспечена явным временем жизни переменной, а не специальным поведением rows().":"Это специальное правило для временных объектов в выражении диапазона. Оно не чинит любые висячие ссылки.","Список жив к началу обхода.");
+      for(let value=1;value<=3;value++){s.phase=4;s.iteration="reading";s.values.push(value);emit(1,"Прочитано число "+value,"Цикл читает очередной элемент существующего списка и печатает его. Владелец не меняется между итерациями.","Продление жизни объекта не делает vector потокобезопасным и не разрешает менять его без правил инвалидации.","Напечатано: "+s.values.join(", "));}
+      Object.assign(s,{owner:"destroyed",borrow:"ended",iteration:"finished",phase:5});
+      emit(2,"Цикл завершён — Batch уничтожен", "После выхода из цикла больше не нужен ни владелец списка, ни служебная ссылка range. Вызывается деструктор Batch, затем выполнение идёт к следующей строке.","Разрушение после последней итерации — существенный результат опыта. Схема не изображает физический стек и адреса памяти.","Сначала 1, 2, 3; затем destroy; затем after loop.");
+    }
+    return t;
+  }
+
+  function taskownership(mode) {
+    const discard=mode==="discard-task";
+    const code=`auto payload = std::make_unique<Payload>(42);\nstd::deque<std::move_only_function<void()>> queue;\nqueue.emplace_back([p = std::move(payload)] {\n    std::cout << "work " << p->id << '\\n';\n});\n${discard?"queue.clear(); // discard without invocation":"auto job = std::move(queue.front());\nqueue.pop_front();\nif (job) job();\njob = nullptr; // destroy the callable and its captured owner"}`;
+    const program=`#include <deque>\n#include <functional>\n#include <iostream>\n#include <memory>\n#include <utility>\n#include <version>\n#if __cpp_lib_move_only_function < 202110L\n#error std::move_only_function support required\n#endif\nstruct Payload {\n    int id;\n    explicit Payload(int n) : id(n) { std::cout << "create " << id << '\\n'; }\n    ~Payload() { std::cout << "destroy " << id << '\\n'; }\n};\nint main() {\n${code}\n}\n`;
+    const s={owner:"none",alive:false,sender:false,queued:false,worker:false,ran:0,discard,stage:0};
+    const t=trace("taskownership",code,"C++23 · передача задачи в одном потоке",s,program);
+    t.programStandard="23";t.expectedOutput="create 42\n"+(discard?"":"work 42\n")+"destroy 42\n";t.requiredMacros={__cpp_lib_move_only_function:202110};
+    t.add(0,"Перед отправкой задачи","Программа должна обработать данные с номером 42 позднее. Проследим отдельно данные и объект, который хранит команду обработки.","Отправитель и исполнитель — роли кода; эта небольшая программа не создаёт второй поток.",s,"Данные ещё не созданы.");
+    Object.assign(s,{owner:"sender",alive:true,sender:true,stage:1});t.add(0,"Отправитель владеет Payload", "make_unique создала данные. Локальная переменная payload отвечает за их удаление.","На всех следующих шагах это тот же Payload, а не несколько копий данных.",s,"Один Payload; владелец — payload.");
+    Object.assign(s,{owner:"queue",sender:false,queued:true,stage:2});t.add(2,"Задача приняла владение", "Захват p = std::move(payload) передал unique_ptr внутрь лямбды. Обёртка move_only_function сохранила лямбду в очереди. Исходный unique_ptr payload теперь пуст.","Копирования Payload нет. Обёртке не требуется копируемая лямбда; сама очередь ещё не означает запуск.",s,"Владелец находится внутри команды в очереди.");
+    if(discard){
+      Object.assign(s,{owner:"none",alive:false,queued:false,stage:5});t.add(5,"Отменили ожидающую работу", "queue.clear уничтожает хранимую команду. При разрушении лямбды разрушается её unique_ptr, поэтому Payload удалён без вызова тела задачи.","Удаление из очереди и выполнение — разные события. Это условие этой однопоточной программы, не протокол отмены работающего потока.",s,"work не печатался; данные освобождены.");
+    }else{
+      Object.assign(s,{owner:"worker",queued:false,worker:true,stage:3});t.add(6,"Исполнитель забрал команду", "Локальная job получает команду из начала очереди. Затем pop_front удаляет оставшийся перемещённый элемент. Владельцем данных теперь служит захват в job.","Состояние исходной move_only_function после перемещения не обещано пустым. Код её не вызывает и сразу удаляет элемент очереди.",s,"Очередь пуста; Payload удерживает job.");
+      s.ran=1;s.stage=4;t.add(7,"Вызов закончился, владелец ещё жив", "Проверка if (job) исключает вызов пустой обёртки. Команда печатает work 42, но её захват не уничтожается от самого факта вызова.","move_only_function не обещает однократного выполнения. Здесь одну попытку задаёт наш код; повторный вызов этой непустой job сам по себе допустим.",s,"Команда вызвана один раз; Payload пока жив.");
+      Object.assign(s,{owner:"none",alive:false,worker:false,stage:5});t.add(8,"Освободили завершённую команду", "Присваивание nullptr уничтожает хранимую лямбду и её unique_ptr. Только теперь удалён Payload.","Синхронизацию, ограничение очереди, обработку исключений и остановку реального пула проектируют отдельно.",s,"После work 42 печатается destroy 42.");
+    }
+    return t;
+  }
+
+  global.CourseLabModels={ownership,temporaries,taskownership,vector,build,concurrency,concurrencyInitial,concurrencyStep,network,sql,transactions,overload,packetpath,copy};
 })(globalThis);

@@ -3,6 +3,7 @@
 import json
 from html import escape
 from pathlib import Path
+from course_theme import decorate_html
 from build_glossary import catalog_version
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def render():
     data = json.loads((ROOT / 'content/cheatsheet.json').read_text())
     groups = data['stations']
+    last_station=max(int(s['num']) for s in groups if s['num'].isdigit())
     extra_sources = {'5Б': '5-linux', '7Б': '7-netlab', '7В': '7-traffic'}
     ids = ['station-' + (extra_sources.get(s['num'], s['num'])) if s['num'].isdigit() or s['num'] in extra_sources else ('code-review' if s['num'] == '★' else 'std-functions') for s in groups]
     nav, body = [], []
@@ -45,7 +47,7 @@ def render():
 {''.join(sections)}
 <nav class="chapter-pagination" aria-label="Переходы: {title}">{previous}{following}</nav></div></details>''')
     embedded = json.dumps(data, ensure_ascii=False, indent=2).replace('</', '<\\/')
-    return f'''<!doctype html>
+    return decorate_html(f'''<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{escape(data['title'])}</title><link rel="stylesheet" href="assets/cheatsheet.css"><link rel="stylesheet" href="assets/terms.css?v=20261021"></head>
 <body id="top"><a class="skip-link" href="#reference">К справочнику</a>
@@ -55,7 +57,7 @@ def render():
 <nav aria-label="Станции шпаргалки">{''.join(nav)}</nav></details>
 <a class="sources-link" href="glossary.html">Глоссарий терминов ↗</a>
 <a class="sources-link" href="sources.html">Источники курса ↗</a></aside>
-<main id="reference"><header><p class="eyebrow">СПРАВОЧНИК · СТАНЦИИ 0–10</p>
+<main id="reference"><header><p class="eyebrow">СПРАВОЧНИК · СТАНЦИИ 0–{last_station}</p>
 <h1>{escape(data['title'])}</h1><p class="lead">{escape(data['subtitle'])}</p>
 <p class="scope-note">Для первого знакомства открывай полную главу. Здесь — опорные правила для повторения; подсказки не заменяют разбор предусловий и проверку кода.</p>
 <div class="search-panel" hidden><label for="reference-search">Найти правило или пример</label>
@@ -63,8 +65,8 @@ def render():
 <p id="search-status" role="status" aria-live="polite"></p>
 <div class="controls"><button id="expand-all" type="button">Раскрыть всё</button><button id="collapse-all" type="button">Свернуть всё</button></div></div></header>
 {''.join(body)}
-<footer><a href="#top">Наверх ↑</a><a href="cpp_backend_roadmap.html">← Вернуться к курсу</a><p>Редакция от 26 октября 2026. Материал хранится локально; ссылки на первоисточники требуют интернета. UB означает отсутствие гарантий поведения, а не особый вариант вывода.</p></footer>
-</main></div><script id="cheat-data" type="application/json">{embedded}</script><script src="assets/cheatsheet.js" defer></script><script src="generated/terms.data.js?v={catalog_version()}" defer></script><script src="assets/terms-core.js?v=20261021" defer></script><script src="assets/terms.js?v=20261021" defer></script></body></html>'''
+<footer><a href="#top">Наверх ↑</a><a href="cpp_backend_roadmap.html">← Вернуться к курсу</a><p>Редакция от 5 ноября 2026. Материал хранится локально; ссылки на первоисточники требуют интернета. UB означает отсутствие гарантий поведения, а не особый вариант вывода.</p></footer>
+</main></div><script id="cheat-data" type="application/json">{embedded}</script><script src="assets/cheatsheet.js" defer></script><script src="generated/terms.data.js?v={catalog_version()}" defer></script><script src="assets/terms-core.js?v=20261021" defer></script><script src="assets/terms.js?v=20261021" defer></script></body></html>''', page='reference')
 
 
 if __name__ == '__main__':

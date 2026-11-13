@@ -1,4 +1,5 @@
 import json
+import re
 import unittest
 from html.parser import HTMLParser
 from pathlib import Path
@@ -65,6 +66,20 @@ class CheatSheetTest(unittest.TestCase):
         allowed = set('html head meta title link body a div aside details summary nav span main header p h1 label input button h2 h3 h4 section pre code b strong em footer script'.split())
         self.assertFalse(self.page.tags - allowed, self.page.tags - allowed)
         self.assertIn('template&lt;typename T&gt;', self.html)
+
+    def test_observability_queries_select_the_actual_lab_jobs(self):
+        config=(ROOT/'examples/station14/prometheus.yaml').read_text()
+        jobs=set(re.findall(r'job_name:\s*([a-z0-9-]+)',config))
+        group=next(s for s in self.data['stations'] if s['num']=='14')
+        selectors=[]
+        for section in group['sections']:
+            for item in section['items']:
+                code=item.get('code','')
+                if 'course_' in code:
+                    selectors+=re.findall(r'job="([^"]+)"',code)
+        self.assertGreaterEqual(len(selectors),4)
+        self.assertTrue(set(selectors)<=jobs,(selectors,jobs))
+        self.assertEqual({'course-api'},set(selectors))
 
     def test_pure_virtual_rule_distinguishes_qualified_nonvirtual_call(self):
         station = next(s for s in self.data['stations'] if s['num'] == '2')

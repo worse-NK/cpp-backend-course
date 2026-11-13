@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru" class="course-dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#18252f">
+<meta name="description" content="Пошаговый разбор потерянного ответа, старого лидера и восстановления заказа. Подготовленная учебная модель распределённых решений.">
+<title>Распределённые решения — лаборатория станции 16</title>
+<link rel="stylesheet" href="assets/course-theme.css?v=4b6f4f70fb3b">
+<link rel="stylesheet" href="assets/distributed-lab.css?v=0af61841ebb4">
+<script defer src="assets/distributed-lab-model.js?v=bc97757d5333"></script>
+<script defer src="assets/distributed-lab.js?v=966ee3382464"></script>
+</head>
+<body class="course-dark distributed-lab">
+<a class="skip-link" href="#experiment">К разбору события</a>
+<header class="lab-header">
+  <a class="course-home" href="cpp_backend_roadmap.html">C++ и backend</a>
+  <nav aria-label="Навигация курса">
+    <a href="cpp_station16_distributed_systems.html#section=learning-route">Станция 16</a>
+    <a class="lab-catalog-link" href="visual_labs.html"><svg class="lab-flask" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5.2 8.5A2.3 2.3 0 0 0 6.8 21h10.4a2.3 2.3 0 0 0 2-3.5L14 9V3M8 15h8"/></svg>Все лаборатории</a>
+  </nav>
+</header>
+<main>
+<section class="lab-intro" aria-labelledby="lab-title">
+  <p class="section-number">Лаборатория станции 16</p>
+  <h1 id="lab-title">Кто уже принял решение?</h1>
+  <p class="intro-copy">Покупатель нажал кнопку и ждёт подтверждение. Но изменение могло уже сохраниться на сервере, пока ответ ещё идёт или потерялся. Остановимся на каждом событии: сравним, что произошло на самом деле и что знает каждый участник.</p>
+  <p class="model-scope"><strong>Подготовленная учебная модель.</strong> Здесь нет настоящего кластера, сетевых задержек или платежей. Шаг назад восстанавливает снимок истории, а не отменяет реальную программу. Ничего не движется само.</p>
+</section>
+<nav id="scenario-navigation" class="scenario-navigation" aria-label="Выбрать историю"></nav>
+<section id="scenario-intro" class="scenario-intro" aria-labelledby="scenario-title">
+  <div class="scenario-heading"><h2 id="scenario-title" tabindex="-1"></h2><a id="theory-link" href="cpp_station16_distributed_systems.html#section=raft-log-commit">Разобрать в учебнике</a></div>
+  <div id="scenario-context" class="scenario-context"></div>
+  <details class="assumptions"><summary>Условия именно этой истории</summary><ul id="scenario-assumptions"></ul></details>
+</section>
+<div class="experiment-layout" id="experiment" tabindex="-1">
+  <aside class="step-rail" aria-label="События истории">
+    <h2>Порядок событий</h2>
+    <ol id="step-list"></ol>
+    <p class="rail-note">Можно выбрать любое событие. Цифры — шаги модели, не измеренные секунды.</p>
+  </aside>
+  <article class="experiment-content" aria-labelledby="event-title">
+    <nav class="step-controls" aria-label="Перемещение по событиям">
+      <button id="first-step" type="button">В начало истории</button>
+      <div class="step-controls-main">
+        <button id="previous-step" type="button">Назад</button>
+        <button id="next-step" type="button" class="primary-action">Следующий шаг</button>
+      </div>
+    </nav>
+    <header class="event-header">
+      <p id="step-count" class="step-count"></p>
+      <h2 id="event-title" tabindex="-1"></h2>
+      <p id="event-description" class="event-description"></p>
+    </header>
+    <section class="state-area" aria-labelledby="states-title">
+      <div class="section-heading"><h3 id="states-title">Состояния участников</h3><span id="state-kind"></span></div>
+      <p id="state-guide" class="reading-note"></p>
+      <div id="participants" class="participants"></div>
+    </section>
+    <div class="evidence-grid">
+      <section class="delivery-area" aria-labelledby="delivery-title">
+        <h3 id="delivery-title">Доставка в этом событии</h3>
+        <div id="delivery"></div>
+      </section>
+      <section class="client-area" aria-labelledby="client-title">
+        <h3 id="client-title">Что известно клиенту</h3>
+        <p id="client-knowledge"></p>
+      </section>
+    </div>
+    <section id="read-comparison" class="read-comparison" aria-labelledby="read-comparison-title" hidden>
+      <h3 id="read-comparison-title">Два ответа на один запрос</h3>
+      <p>Это альтернативы, а не два последовательных чтения. Сравниваем обещание одного и того же сильного договора.</p>
+      <div id="read-alternatives"></div>
+    </section>
+    <section class="reasoning-area" aria-labelledby="reasoning-title">
+      <h3 id="reasoning-title">Почему это важно</h3>
+      <p id="event-why"></p>
+      <p id="event-rule" class="event-rule"></p>
+      <details id="prediction-check" class="prediction-check">
+        <summary id="prediction-question"></summary>
+        <p id="prediction-answer"></p>
+      </details>
+    </section>
+    <section id="operation-area" class="operation-area" aria-labelledby="operation-title">
+      <h3 id="operation-title">История операций</h3>
+      <div id="operation-history"></div>
+    </section>
+    <p class="keyboard-help">Клавиши ← и → меняют шаг. Ссылка в адресной строке открывает выбранное событие; назад и вперёд в браузере сохраняют обычную историю.</p>
+  </article>
+</div>
+<section class="lab-limits" aria-labelledby="limits-title">
+  <h2 id="limits-title">Что мы проверяем — и чего не проверяем</h2>
+  <p>Состояния и сообщения заданы автором заранее. Они помогают проверить причинное рассуждение: отличить сохранение от применения, неизвестный исход от отказа и локальные данные от полномочий отвечать. Это не выполнение произвольного Raft, банка или внешнего API.</p>
+  <p>Проверяемые локальные программы и исходные работы находятся в <a href="cpp_station16_distributed_systems.html#section=distributed-final-workbook">разборе станции 16</a>. Настоящие участники, диски, доставка и безопасность требуют отдельных испытаний в разрешённой среде.</p>
+</section>
+<noscript><p class="noscript-note">Для пошаговых снимков нужен JavaScript. Те же правила и подробные истории доступны в <a href="cpp_station16_distributed_systems.html#section=learning-route">тексте станции 16</a>.</p></noscript>
+<p id="lab-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+</main>
+<footer class="lab-footer"><a href="cpp_station16_distributed_systems.html#section=distributed-observation-lab">Вернуться к главе о лаборатории</a><span>Без счётчика баллов и скрытых сетевых действий</span></footer>
+</body>
+</html>

@@ -4,11 +4,12 @@ import json
 import hashlib
 from html import escape
 from pathlib import Path
+from course_theme import decorate_html
 import re
 from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
-GROUPS = ('C++', 'Инструменты', 'Многопоточность', 'Сети', 'API', 'Данные', 'Эксплуатация')
+GROUPS = ('C++', 'Инструменты', 'Многопоточность', 'Сети', 'API', 'Данные', 'Эксплуатация', 'Распределённые системы')
 
 
 def catalog_version():
@@ -66,7 +67,7 @@ def render():
 <a class="entry-lesson" href="{href}">Разобрать в учебнике: {escape(learn['label'])} →</a>
 <details class="entry-sources"><summary>Первоисточники</summary><p>{sources}</p></details>
 </article>''')
-    return f'''<!doctype html>
+    return decorate_html(f'''<!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Понятные определения терминов курса C++ и backend: кратко, подробнее, с примерами и ссылками на главы и первоисточники.">
 <title>Глоссарий · C++ и backend</title><link rel="stylesheet" href="assets/glossary.css"></head>
@@ -80,8 +81,8 @@ def render():
 <p id="term-count" role="status" aria-live="polite">{len(entries)} понятий · станции 0–10</p>
 <p class="glossary-note">В главах термины с пунктиром открываются по нажатию. Подробное объяснение — в отдельной вкладке: позиция чтения и попытка теста сохраняются на прежней странице.</p></aside>
 <main id="terms"><p class="glossary-empty" id="term-empty" hidden>Совпадений нет. Попробуй короткую часть слова, русское название или английское сокращение.</p>{''.join(articles)}</main></div>
-<footer class="glossary-footer"><a href="#top">К началу ↑</a><a href="cpp_backend_roadmap.html">Вернуться к курсу →</a><p>Определения служат опорой для чтения, а не заменой учебной главы. Основная версия C++ — C++20; серверная глава о данных использует PostgreSQL 18.</p></footer>
-<script src="assets/glossary.js" defer></script></body></html>'''
+<footer class="glossary-footer"><a href="#top">К началу ↑</a><a href="cpp_backend_roadmap.html">Вернуться к курсу →</a><p>Определения служат опорой для чтения, а не заменой учебной главы. Общая основа C++20 дополнена явно отмеченными возможностями C++23; серверная глава о данных использует PostgreSQL 18.</p></footer>
+<script src="assets/glossary.js" defer></script></body></html>''', page='glossary')
 
 
 if __name__ == '__main__':

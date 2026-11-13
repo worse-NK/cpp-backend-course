@@ -4,6 +4,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
+.toolchains/
 venv/
 node_modules/
 .DS_Store
@@ -24,9 +25,13 @@ CMakeCache.txt
 *.qcow2
 *.img
 *.deb
-# Only the three deterministic teaching captures belong in Git.
+# Only the explicitly reviewed teaching captures belong in Git.
 *.pcap
 *.pcapng
 !roadmap/examples/traffic-analysis/traffic_dns.pcap
 !roadmap/examples/traffic-analysis/traffic_http_ok.pcap
 !roadmap/examples/traffic-analysis/traffic_http_delay.pcap
+!roadmap/examples/tcp-observation/captures/baseline.pcap
+!roadmap/examples/tcp-observation/captures/delay.pcap
+!roadmap/examples/tcp-observation/captures/loss.pcap
+!roadmap/examples/tcp-observation/captures/slow-reader.pcap

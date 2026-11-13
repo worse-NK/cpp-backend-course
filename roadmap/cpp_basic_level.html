@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="course-dark">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,8 +34,11 @@
   .fade-in { animation: fadeIn 0.25s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 </style>
+<meta name="theme-color" content="#18252f">
+<link rel="stylesheet" href="assets/course-theme.css?v=4b6f4f70fb3b">
+<link rel="stylesheet" href="assets/course-dark-surfaces.css?v=a50d1a13466e">
 </head>
-<body>
+<body class="course-dark course-support course-page-basic">
 <div id="root"></div>
 
 <script id="topics-data" type="application/json">
@@ -3963,10 +3966,10 @@ const TOPICS = JSON.parse(document.getElementById("topics-data").textContent);
 const REFERENCE = JSON.parse(document.getElementById("reference-data").textContent);
 // ── палитра ──
 const C = {
-    rust: "#2D6FB3", rustDeep: "#1B4E85", ink: "#1B1714", line: "#E7DCCB",
-    paper: "#FCFAF6", green: "#2E7D52", greenBg: "#EAF6EF",
-    amber: "#B07A12", amberBg: "#FBF1DC", red: "#C0392B", redBg: "#FBECEA",
-    blue: "#1F6FB0", blueBg: "#E6F0F8", mute: "#9A8B78", muteSoft: "#B9A98F",
+    rust: "#98c6db", rustDeep: "#b9deef", ink: "#e4edf2", line: "#405664",
+    paper: "#223440", green: "#a6d6ba", greenBg: "#244239",
+    amber: "#edc78d", amberBg: "#443b2b", red: "#f2ada5", redBg: "#492f33",
+    blue: "#98c6db", blueBg: "#2b414f", mute: "#b1c1cc", muteSoft: "#a6bac6",
 };
 const LV = {
     easy: { label: "просто", c: C.green, bg: C.greenBg },
@@ -4398,6 +4401,26 @@ const S = {
     refDesc: { fontSize: 13.5, lineHeight: 1.55, color: "#3D332A", marginBottom: 6 },
     refEx: { background: C.ink, color: "#F4E9DA", padding: "9px 12px", borderRadius: 9, fontSize: 12, lineHeight: 1.5, fontFamily: "'JetBrains Mono', ui-monospace, monospace", overflowX: "auto", margin: 0, whiteSpace: "pre" },
 };
+// Presentation only: preserve quiz logic, question data and stored progress.
+for (const name of ["overallCard", "tile", "backBtn", "doneToggle", "tabOn", "card", "taskSwitchOn", "refEntry"]) {
+    S[name].background = C.paper;
+    S[name].boxShadow = "none";
+}
+for (const name of ["heroSub", "overallLabel", "foot", "doneToggle", "tab", "btnGhostWide", "blurb", "taskSwitchBtn", "refTab"]) S[name].color = C.mute;
+for (const name of ["explainText", "brief", "hintText", "notes", "refDesc"]) S[name].color = C.ink;
+for (const name of ["logo", "tabs", "optMark", "refName", "refTab"]) S[name].background = C.blueBg;
+for (const name of ["tileDoneMark", "doneBox", "optMarkCorrect", "optMarkWrong", "btnPrimary", "refTabOn"]) S[name].color = "#18252f";
+for (const name of ["code", "codeGreen", "refEx"]) { S[name].background = "#263b49"; S[name].color = C.ink; }
+for (const name of ["btnPrimary", "btnGhostWide", "btnSolution"]) {
+    S[name].width = "auto"; S[name].height = "auto"; S[name].maxWidth = "100%";
+    S[name].minWidth = 0; S[name].padding = "10px 16px"; S[name].boxShadow = "none";
+}
+S.btnSolution.background = C.blueBg; S.btnSolution.color = C.rustDeep;
+S.tileDone.background = C.greenBg; S.tileDone.borderColor = C.green;
+S.doneToggleOn.borderColor = C.green;
+S.overallBarFill.background = C.rust;
+S.tryNote.color = C.amber; S.tryNote.border = "1px solid #7c6947";
+S.tileDoneMark.transition = "background .15s ease, border-color .15s ease";
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App, null));
 
 </script>

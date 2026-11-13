@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Guard selected teaching dependencies, not the readability of prose."""
 import json
+import re
 from pathlib import Path
 import unittest
 
@@ -8,6 +9,51 @@ CONTENT = Path(__file__).resolve().parents[1] / "content"
 
 # Only pedagogically important edges: unrelated sections may still move.
 BEFORE = {
+    16: [('failure-model', 'unknown-outcome'),
+         ('operation-histories', 'consistency-contracts'),
+         ('consistency-contracts', 'partitions-cap'),
+         ('quorum-intersections', 'raft-log-commit'),
+         ('raft-log-commit', 'raft-elections-reads'),
+         ('logical-physical-clocks', 'leases-fencing'),
+         ('sharding-key-design', 'shard-migration'),
+         ('workflow-state-machine', 'workflow-recovery'),
+         ('workflow-recovery', 'compensation-not-rollback'),
+         ('coordination-choices', 'atomic-commit-boundaries'),
+         ('atomic-commit-boundaries', 'distributed-final-workbook')],
+    15: [('identity-session-jwt', 'identity-oauth-oidc'),
+         ('frame-parser-contract', 'frame-parser-bounds-lifetime'),
+         ('frame-parser-bounds-lifetime', 'endian-modernization-regression')],
+    11: [('commands-events-jobs', 'queue-versus-log'),
+         ('acknowledgement-boundaries', 'failure-windows-dedup'),
+         ('kafka-topics-partitions-offsets', 'kafka-acks-isr'),
+         ('kafka-consumer-positions', 'kafka-parallel-frontier'),
+         ('rabbit-routing', 'rabbit-confirms-acks'),
+         ('cpp-client-lifecycle', 'messaging-local-lab'),
+         ('messaging-local-lab', 'kafka-replay-lab')],
+    12: [('ttl-and-expiry', 'cache-contract'),
+         ('cache-aside-read-write', 'cache-invalidation-race'),
+         ('atomic-command-vs-sequence', 'multi-exec-errors'),
+         ('multi-exec-errors', 'lua-server-logic'),
+         ('rdb-aof-lifecycle', 'replica-ack-wait'),
+         ('lease-vs-lock', 'fencing-resource-contract'),
+         ('cpp-hiredis-ownership', 'redis-lab-guide'),
+         ('cache-race-final-workbook', 'redis-design-review')],
+    13: [('why-cluster', 'control-plane-and-node'),
+         ('deployment-reading', 'rollout-budget'),
+         ('service-and-endpoints', 'connection-lifetime'),
+         ('probe-questions', 'termination-timeline'),
+         ('termination-timeline', 'cpp-drain-contract'),
+         ('filesystem-lifetimes', 'pv-pvc-storageclass'),
+         ('resource-contract', 'hpa-loop'),
+         ('cpp-drain-contract', 'lab-readiness-rollout')],
+    14: [('request-boundaries', 'promql-rates'),
+         ('metric-types', 'promql-rates'),
+         ('histogram-buckets', 'promql-quantiles'),
+         ('trace-tree', 'context-propagation'),
+         ('cpp-instrumentation', 'lab-trace-path'),
+         ('sli-slo', 'burn-rate'),
+         ('burn-rate', 'alert-design'),
+         ('lab-failures', 'incident-reasoning')],
     '7-traffic': [('learning-route', 'traffic-wireshark-three-panes'),
                   ('traffic-filter-pipeline', 'traffic-stream-follow'),
                   ('traffic-tcp-sequence-ledger', 'traffic-tcp-retransmission-evidence')],
@@ -39,6 +85,9 @@ BEFORE = {
         ("references", "const"),
         ("const", "ownership-contracts"),
         ("smart-ptr", "smart-ptr-deep"),
+        ("storage-and-construction", "object-representation-access"),
+        ("object-representation-access", "representation-copy-bit-cast"),
+        ("representation-copy-bit-cast", "shared-aliasing"),
         ("move", "rule-of-five"),
         ("rule-of-five", "copy-elision"),
         ("modern-syntax", "lambda-lifetime"),
@@ -53,6 +102,8 @@ BEFORE = {
     3: [
         ("vector", "allocation-containers"),
         ("allocation-containers", "invalidation-erasure"),
+        ("allocation-containers", "numeric-sizes-conversions"),
+        ("numeric-sizes-conversions", "numeric-intermediate-narrowing"),
         ("map-set", "unordered-contract"),
         ("iterators", "algorithms"),
         ("interview-sequence-workbook", "bit-mask-workbook"),
@@ -63,6 +114,13 @@ BEFORE = {
         ("template-compilation", "templates-deep"),
         ("non-owning-vocabulary", "ranges-lifetime"),
         ("template-compilation", "sfinae-and-constraints"),
+        ("template-compilation", "lookup-adl"),
+        ("lookup-adl", "adl-customization"),
+        ("sfinae-and-constraints", "parameter-packs-fold"),
+        ("parameter-packs-fold", "callables-and-invoke"),
+        ("templates-class", "template-specialization-choices"),
+        ("chrono-types-units", "chrono-deadline-clock"),
+        ("chrono-deadline-clock", "sliding-window-workbook"),
         ("lru-window-generations", "sliding-window-workbook"),
         ("sliding-window-workbook", "generation-storage"),
         ("generation-storage", "fixed-pool-workbook"),
@@ -140,6 +198,9 @@ BEFORE = {
     5: [
         ("headers-sources", "diagnose-build-stage"),
         ("diagnose-build-stage", "translation-units-odr"),
+        ("loader-before-main", "global-initialization-order"),
+        ("global-initialization-order", "global-lifetime-workbook"),
+        ("global-lifetime-workbook", "abi-evolution"),
         ("cmake-basics", "cmake-configure-model"),
         ("cmake-configure-model", "cmake-libraries"),
         ("cmake-usage-requirements", "cmake-tests-install"),
@@ -184,19 +245,26 @@ class LearningSequence(unittest.TestCase):
         for n, data in self.stations.items():
             for module in data["substations"]:
                 with self.subTest(station=n, module=module["id"]):
-                    sections = [
-                        s for s in data["theory"]
-                        if s["substation"] == module["id"]
-                    ]
+                    sections = [s for s in data["theory"]
+                                if s["substation"] == module["id"]]
                     checkpoints = [
                         (i, j) for i, s in enumerate(sections)
                         for j, b in enumerate(s["blocks"])
                         if b["type"] == "note"
                         and "Контрольная точка" in b.get("html", "")
                     ]
-                    self.assertEqual(checkpoints, [
-                        (len(sections) - 1, len(sections[-1]["blocks"]) - 1)
-                    ])
+                    # The shared reader separates station-level workbooks
+                    # from ordinary chapter reading. A concluding note may
+                    # close that chapter or the separate worked example, but
+                    # must never interrupt ordinary theory or appear twice.
+                    ordinary = [(i, s) for i, s in enumerate(sections)
+                                if not re.search(r'(?:-final-workbook|clock-worked-example)$', s['id'])]
+                    allowed = {(len(sections) - 1, len(sections[-1]["blocks"]) - 1)}
+                    if ordinary:
+                        i, last = ordinary[-1]
+                        allowed.add((i, len(last["blocks"]) - 1))
+                    self.assertEqual(len(checkpoints), 1)
+                    self.assertIn(checkpoints[0], allowed)
 
     def test_route_first_summary_last(self):
         for n, data in self.stations.items():

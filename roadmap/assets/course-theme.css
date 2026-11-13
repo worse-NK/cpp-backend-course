@@ -1,0 +1,120 @@
+/* Shared, opt-in dark palette. No filters: text, native controls and scenes
+   consume explicit tokens, keeping selection and semantic colors intact. */
+html.course-dark,
+body.course-dark {
+  color-scheme: dark;
+  --course-canvas: #18252f;
+  --course-paper: #18252f;
+  --course-surface: #223440;
+  --course-surface-raised: #2b414f;
+  --course-ink: #e4edf2;
+  --course-muted: #b1c1cc;
+  --course-accent: #98c6db;
+  --course-accent-soft: #2b414f;
+  --course-line: #405664;
+  --course-code: #263b49;
+  --course-focus: #c4e7f7;
+  --course-success: #a6d6ba;
+  --course-success-soft: #244239;
+  --course-warning: #edc78d;
+  --course-warning-soft: #443b2b;
+  --course-danger: #f2ada5;
+  --course-danger-soft: #492f33;
+  --course-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --course-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --paper: var(--course-paper);
+  --bg: var(--course-paper);
+  --card: var(--course-surface);
+  --surface: var(--course-surface);
+  --ink: var(--course-ink);
+  --text: var(--course-ink);
+  --muted: var(--course-muted);
+  --mute: var(--course-muted);
+  --mute-soft: var(--course-muted);
+  --line: var(--course-line);
+  --border: var(--course-line);
+  --blue: var(--course-accent);
+  --blue-deep: var(--course-accent);
+  --blue-soft: var(--course-accent-soft);
+  --accent: var(--course-accent);
+  --teal: var(--course-accent);
+  --teal-soft: var(--course-accent-soft);
+  --green: var(--course-success);
+  --green-soft: var(--course-success-soft);
+  --green-bg: var(--course-success-soft);
+  --amber: var(--course-warning);
+  --warn: var(--course-warning);
+  --amber-soft: var(--course-warning-soft);
+  --amber-bg: var(--course-warning-soft);
+  --red: var(--course-danger);
+  --red-soft: var(--course-danger-soft);
+  --red-bg: var(--course-danger-soft);
+  --soft: var(--course-accent-soft);
+  --tint: var(--course-accent-soft);
+  --code: var(--course-code);
+  --sans: var(--course-sans);
+  --mono: var(--course-mono);
+  background: var(--course-canvas);
+  color: var(--course-ink);
+}
+body.course-dark {
+  font-family: var(--course-sans);
+  min-height: 100vh;
+  accent-color: var(--course-accent);
+  -webkit-tap-highlight-color: #98c6db33;
+  scrollbar-color: #6f899a var(--course-canvas);
+}
+.course-dark ::-webkit-scrollbar-thumb { background: #6f899a; border-radius: 8px; }
+.course-dark ::-webkit-scrollbar-track { background: var(--course-canvas); }
+.course-dark *, .course-dark *::before, .course-dark *::after { box-sizing: border-box; }
+.course-dark :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--course-focus);
+  outline-offset: 4px;
+}
+.course-dark :is(button, input, select, textarea) { font-family: inherit; }
+.course-dark :is(select, textarea, input:not([type="range"]):not([type="checkbox"]):not([type="radio"])) {
+  background-color: var(--course-surface);
+  color: var(--course-ink);
+  border-color: var(--course-line);
+}
+.course-dark :is(input, textarea)::placeholder { color: var(--course-muted); opacity: .85; }
+.course-dark select option { color: var(--course-ink); background: var(--course-surface); }
+.course-dark :is(button, a, summary) { touch-action: manipulation; }
+.course-dark .lab-flask {
+  display: inline-block; width: 24px; height: 24px; flex: 0 0 24px;
+  vertical-align: middle; fill: none; stroke: currentColor;
+}
+.course-dark a.lab-catalog-link {
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 44px; max-width: 100%; color: var(--course-accent);
+  font-size: 16px; line-height: 1.45; text-decoration: none;
+}
+.course-dark a.lab-catalog-link:hover { color: var(--course-focus); }
+.course-dark :is(h1, h2, h3) { text-wrap: balance; scroll-margin-top: 28px; }
+.course-dark :is(code, pre, kbd) { font-family: var(--course-mono); }
+.course-dark pre { max-width: 100%; overflow-x: auto; }
+.course-dark :is(main, section, article, aside) { min-width: 0; }
+.course-dark ::selection { color: var(--course-ink); background: #496b81; }
+.course-dark [hidden] { display: none !important; }
+.course-dark a.course-term:hover,.course-dark a.course-term[aria-expanded=true] {
+  color: var(--course-accent); background: var(--course-accent-soft);
+}
+.course-dark .term-popup {
+  background: var(--course-surface); color: var(--course-ink);
+  border-color: var(--course-line); box-shadow: 0 16px 48px #08121b66;
+  font-family: var(--course-sans);
+}
+.course-dark .term-popup :is(h2,#course-term-description) { color: var(--course-ink); }
+.course-dark .term-popup .term-popup-label { color: var(--course-muted); }
+.course-dark .term-popup-close { background: var(--course-surface-raised); color: var(--course-ink); }
+.course-dark .term-popup-close:hover { background: #3a5262; }
+.course-dark .term-popup a.term-popup-more { color: var(--course-accent); border-color: var(--course-line); }
+@media (prefers-reduced-motion: reduce) {
+  html.course-dark { scroll-behavior: auto; }
+  .course-dark *, .course-dark *::before, .course-dark *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

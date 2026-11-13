@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" class="course-dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,18 +13,28 @@
     @media(max-width:1050px){.shell{padding:0 25px}.hero-aside{display:none}.scenario{padding:13px 12px;gap:9px}.scenario small{font-size:10px}.scenario strong{font-size:12px}.workspace{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}.scene{padding:20px 17px;min-height:321px}.object-shell{padding:14px}.object-parts{gap:7px}.part{padding:11px;min-height:80px}.object-heading{gap:7px}.object-status{font-size:9px}.scene-footer{padding:11px 13px}.legend{gap:9px}.controls{gap:15px}.insight{padding:18px}.insight h3{font-size:17px}.experiment-copy{font-size:11px;max-width:50%}.bottom-notes{gap:30px}}
     @media(max-width:740px){.shell{padding:0 18px}.topbar{min-height:69px}.hero{padding:26px 0 22px}.hero h1{font-size:35px}.hero p{font-size:13px;max-width:500px}.scenarios{grid-template-columns:1fr 1fr;gap:8px}.scenario{min-height:69px}.experiment{flex-direction:column;align-items:flex-start;gap:10px;padding:12px 14px;margin-bottom:15px}.experiment-copy{max-width:none;font-size:11px}.experiment-control{width:100%;justify-content:flex-start}.workspace{grid-template-columns:1fr;gap:14px}.column{gap:14px}.code-body{min-height:0;max-height:255px}.code-foot{font-size:9px}.output-lines{height:95px}.scene{min-height:290px;padding:19px}.insight{min-height:190px;padding:20px}.controls{position:sticky;bottom:10px;z-index:5;box-shadow:0 6px 30px #29423417;padding:12px;gap:13px;grid-template-columns:auto 1fr}.scrubber{grid-row:1;grid-column:1/-1}.transport{grid-column:1}.next{grid-column:2;justify-self:end}.control-help{font-size:9px}.control-help>span{display:none}.bottom-notes{grid-template-columns:1fr;gap:16px;padding-top:24px}.footer{font-size:9px}.object-name{font-size:15px}.top-link{font-size:10px}.code-line{font-size:11px}.panel-head{padding:12px 16px}.hero .eyebrow{font-size:9px}.dialog-toolbar{gap:10px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-  </style>
+.lab-introduction{margin:0 0 24px;padding:20px 23px;border:1px solid var(--line);border-radius:10px;background:#fff;max-width:850px}.lab-introduction h2{font-size:18px;margin:0 0 10px;letter-spacing:-.02em}.lab-introduction p{font-size:14px;line-height:1.85;margin:9px 0;color:#52624d}.lab-introduction code{font-size:12px;background:#f0f5ed;padding:1px 4px;border-radius:3px}.lab-introduction .intro-boundary{font-size:12px;color:#72806a}
+</style>
+<meta name="theme-color" content="#18252f">
+<link rel="stylesheet" href="assets/course-theme.css?v=4b6f4f70fb3b">
+<link rel="stylesheet" href="assets/course-dark-surfaces.css?v=a50d1a13466e">
 </head>
-<body>
+<body class="course-dark course-support course-page-lifetime">
 <div class="shell">
   <header class="topbar">
-    <a href="cpp_backend_roadmap.html" class="brand"><span class="brand-icon">C++</span><span class="brand-name">BACKEND<span class="brand-sub">Визуальная лаборатория</span></span></a>
+    <a href="visual_labs.html" class="brand lab-catalog-link"><span class="brand-icon" aria-hidden="true"><svg class="lab-flask" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5.2 8.5A2.3 2.3 0 0 0 6.8 21h10.4a2.3 2.3 0 0 0 2-3.5L14 9V3M8 15h8"/></svg></span><span class="brand-name">Все лаборатории<span class="brand-sub">C++ и backend</span></span></a>
     <nav class="top-links"><a class="top-link" id="returnToTheory" href="cpp_backend_roadmap.html"><span aria-hidden="true">←</span> К программе курса</a><a class="top-link" href="visual_labs.html">Все лаборатории</a></nav>
   </header>
   <main>
     <section class="hero" aria-labelledby="pageTitle">
-      <div><div class="eyebrow">Объектная модель · интерактивный разбор</div><h1 id="pageTitle">Жизнь объекта</h1><p>Проследи, как создаются поля, когда начинается тело конструктора<br class="desktop-break"> и что уничтожается при выходе из блока или исключении.</p></div>
+      <div><div class="eyebrow">Объектная модель · интерактивный разбор</div><h1 id="pageTitle">Жизнь объекта</h1><p>C++-программа создаёт объект <code>Session</code> с двумя полями — <code>first</code> и <code>second</code>. Эти поля тоже объекты. При создании и уничтожении программа печатает их имена. Пройдём код по шагам, чтобы связать каждую строку вывода с созданием или уничтожением конкретного объекта.</p></div>
       <div class="hero-aside"><span class="version">C++20</span><span>Один шаг — одно объяснение</span></div>
+    </section>
+    <section class="lab-introduction" aria-labelledby="introTitle">
+      <h2 id="introTitle">Что здесь происходит</h2>
+      <p id="scenarioIntro">У <code>Session</code> есть два поля — <code>first</code> и <code>second</code>. Поля хранят данные внутри объекта; здесь каждое из них само является объектом типа <code>Probe</code>. У <code>Probe</code> есть конструктор (функция, вызываемая при создании объекта) и деструктор (функция, вызываемая при его уничтожении). Они только печатают имена: файлов и сетевых соединений в примере нет. После двоеточия в <code>Session()</code> записан список инициализации — указания, с какими значениями создавать <code>first</code> и <code>second</code>.</p>
+      <p id="scenarioAction">Оставь выбранными «Два поля» и нажимай «Следующий шаг». В панели «Код сценария» подсветится строка, в «Составе объекта» изменится состояние частей, а в «Выводе программы» появятся сообщения. Затем включи «Обратный список инициализации» и пройди те же шаги: проверь, изменился ли порядок создания полей.</p>
+      <p class="intro-boundary">Страница показывает заранее подготовленный разбор, а не запускает C++-компилятор. Схема — состав одного объекта, не карта байтов памяти. «Полная программа» открывает исходный код, который при желании можно скачать и отдельно собрать у себя.</p>
     </section>
     <nav class="scenarios" aria-label="Выбрать сценарий">
       <button class="scenario" data-scenario="members" aria-pressed="true"><span class="scenario-number">01</span><span><strong>Два поля</strong><small>Порядок создания и разрушения</small></span></button>
@@ -243,6 +253,18 @@
   function configure() {
     const focusedControl = document.activeElement ? document.activeElement.id : null;
     stop(); cursor = 0; model = makeScenario(kind,reversed,failure,allowedScenarios.includes("exception"));
+    $("scenarioIntro").innerHTML = {
+      members:'У <code>Session</code> есть два поля — <code>first</code> и <code>second</code>. Поля хранят данные внутри объекта; здесь каждое из них само является объектом типа <code>Probe</code>. У <code>Probe</code> есть конструктор (функция, вызываемая при создании объекта) и деструктор (функция, вызываемая при его уничтожении). Они только печатают имена: файлов и сетевых соединений в примере нет. После двоеточия в <code>Session()</code> записан список инициализации — указания, с какими значениями создавать <code>first</code> и <code>second</code>.',
+      inheritance:'Теперь объект <code>Session</code> содержит не только поля <code>first</code> и <code>second</code>, но и базовую часть <code>Base</code>. Это пример наследования: <code>Session</code> строится на основе <code>Base</code>. Базовая часть находится внутри той же <code>Session</code>, а не рядом с ней. Каждая часть печатает сообщение о своём создании и разрушении; по ним сравним порядок.',
+      exception:'Снова создаём <code>Session</code> с двумя полями <code>Probe</code>: <code>first</code> и <code>second</code>. Теперь в выбранном месте создание можно прервать исключением — сигналом об ошибке, который передаёт управление обработчику <code>catch</code>. Будем смотреть, какие части уже успели создаться и какие сообщения об очистке действительно появятся.',
+      dynamic:'Здесь <code>Session</code> с двумя полями создаётся через <code>new</code>: сначала ей выделяется память, затем создаётся сам объект. Переменная <code>ptr</code> хранит его адрес, а при обычном завершении <code>delete ptr</code> заканчивает существование объекта и освобождает память. Разделим эти действия на схеме и сравним обычное завершение с ошибкой при создании.'
+    }[kind];
+    $("scenarioAction").textContent = {
+      members:'Оставь выбранными «Два поля» и нажимай «Следующий шаг». В панели «Код сценария» подсветится строка, в «Составе объекта» изменится состояние частей, а в «Выводе программы» появятся сообщения. Затем включи «Обратный список инициализации» и пройди те же шаги: проверь, изменился ли порядок создания полей.',
+      inheritance:'Если нужен исходный случай, сначала выбери «Два поля». Затем вернись к «Добавим базу» и пройди «Следующий шаг» до конца. Сопоставь строки вывода Base(), first(), second() с подсветкой кода: кто создаётся первым и кто разрушается последним?',
+      exception:'В списке «Исключение» сначала выбери «Не бросать» и пройди все шаги. Затем выбери отказ «В конструкторе second» и повтори. Сравни появившиеся строки с предыдущим выводом; после этого проверь вариант «В теле Session()». Назад можно вернуться кнопкой со стрелкой или ползунком.',
+      dynamic:'Начни с варианта «Не бросать» и пройди «Следующий шаг» до конца. Следи отдельно за объектом, памятью и ptr. Затем выбери исключение в second и повтори: дойдёт ли программа до delete ptr и каким событием в этом случае освободится память?'
+    }[kind];
     document.querySelectorAll("[data-scenario]").forEach(b => { b.hidden = !allowedScenarios.includes(b.dataset.scenario); b.setAttribute("aria-pressed",String(b.dataset.scenario === kind)); });
     $("experimentCopy").innerHTML = {members:'<strong>Проверь одно правило.</strong> Измени список инициализации и проследи порядок полей.',inheritance:'<strong>Ещё один подобъект.</strong> База создаётся до полей, а разрушается после них.',exception:'<strong>Измени точку отказа.</strong> Посмотри, какие деструкторы действительно вызовутся.',dynamic:'<strong>Раздели объект и память.</strong> Сравни обычный delete и отказ во время new.'}[kind];
     if (kind === "members") $("experimentControl").innerHTML='<label class="toggle-label"><input type="checkbox" id="reverseInput" '+(reversed?'checked':'')+'>Обратный список инициализации</label>';

@@ -1,0 +1,41 @@
+# Two separate teaching brokers, one node each. No high availability claim.
+# Use only with a NEW project name from README.txt and unused local ports.
+services:
+  kafka:
+    image: apache/kafka:4.1.2@sha256:5cc2a2fd93fa2687b44015eee04fb2c3edd9e526bd64bf8bec5ff1e268772e0e
+    hostname: kafka
+    ports:
+      - "127.0.0.1:29092:9092"
+    environment:
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:19092,EXTERNAL://:9092,CONTROLLER://:19093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://127.0.0.1:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:19093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+  rabbit:
+    image: rabbitmq:4.3.6-management@sha256:54cb013d76cd1fd6c0a0708f34062ad61c452bb6f016b434c6c33f1a765d2b58
+    hostname: rabbit
+    ports:
+      - "127.0.0.1:25672:5672"
+      - "127.0.0.1:25673:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: course11
+      RABBITMQ_DEFAULT_PASS: "${COURSE11_RABBIT_PASSWORD:?Set COURSE11_RABBIT_PASSWORD for this local lab}"
+      RABBITMQ_DEFAULT_VHOST: course11
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
+volumes:
+  kafka_data:
+  rabbit_data:

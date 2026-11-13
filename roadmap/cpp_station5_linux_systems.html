@@ -1,28 +1,38 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" class="course-dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Интерактивная станция 5Б курса по backend-разработке на C++">
   <title>Linux: процессы, память и системное I/O</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/station.css?v=86932618d194">
+
+  <link rel="stylesheet" href="assets/station.css?v=ed56bfd6895a">
   <link rel="stylesheet" href="assets/terms.css?v=20261021">
 
+  <link rel="stylesheet" href="assets/course-ui.css?v=d68ec7afb80a">
+  <link rel="stylesheet" href="assets/course-reader.css?v=f2efb558cd9d">
+<meta name="theme-color" content="#18252f">
+<link rel="stylesheet" href="assets/course-theme.css?v=4b6f4f70fb3b">
+<link rel="stylesheet" href="assets/course-code.css?v=49bd40c0f747">
+<link rel="stylesheet" href="assets/course-dark-reader.css?v=2d63f0e7ecaa">
 </head>
-<body>
+<body class="course-reader course-dark">
   <div id="root"><div class="fatal">Загрузка станции…</div></div>
   <noscript><div class="fatal">Для интерактивной станции нужен JavaScript.</div></noscript>
 
   <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-  <script src="generated/station5-linux.data.js?v=bb36a2f2c70e"></script>
+  <script src="vendor/highlightjs/highlight.min.js?v=8ab71eb09c51"></script>
+  <script src="vendor/highlightjs/http.min.js?v=b09b4afc1ce7"></script>
+  <script src="vendor/highlightjs/cmake.min.js?v=0cd6dc22b0b9"></script>
+  <script src="vendor/highlightjs/dockerfile.min.js?v=d96f73b077d6"></script>
+  <script src="vendor/highlightjs/nginx.min.js?v=8c53cc63ce0c"></script>
+  <script src="assets/course-code.js?v=b5ed8f526792"></script>
+  <script src="generated/station5-linux.data.js?v=0385f701c7e7"></script>
   <script src="generated/visual-labs.data.js"></script>
-  <script src="generated/terms.data.js?v=37cf68473104" defer></script>
+  <script src="generated/terms.data.js?v=0ae18ddda92c" defer></script>
   <script src="assets/terms-core.js?v=20261021" defer></script>
   <script src="assets/terms.js?v=20261021" defer></script>
-  <script src="assets/station-app.js?v=58dc7df605e5"></script>
+  <script src="assets/station-app.js?v=905d78c7803d"></script>
 </body>
 </html>

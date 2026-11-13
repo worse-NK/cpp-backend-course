@@ -1,0 +1,43 @@
+cmake_minimum_required(VERSION 3.25)
+project(course_observability LANGUAGES CXX)
+set(COURSE_CXX_STANDARD "20" CACHE STRING "C++ standard for the course: 20 or 23")
+set_property(CACHE COURSE_CXX_STANDARD PROPERTY STRINGS 20 23)
+if(NOT COURSE_CXX_STANDARD MATCHES "^(20|23)$")
+  message(FATAL_ERROR "COURSE_CXX_STANDARD must be 20 or 23")
+endif()
+set(CMAKE_CXX_STANDARD "${COURSE_CXX_STANDARD}")
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+option(COURSE_WITH_OTEL "Build the real OpenTelemetry OTLP exporter" ON)
+include(FetchContent)
+find_package(Threads REQUIRED)
+set(HTTPLIB_USE_OPENSSL_IF_AVAILABLE OFF CACHE BOOL "" FORCE)
+set(HTTPLIB_USE_ZLIB_IF_AVAILABLE OFF CACHE BOOL "" FORCE)
+set(HTTPLIB_USE_BROTLI_IF_AVAILABLE OFF CACHE BOOL "" FORCE)
+set(HTTPLIB_USE_ZSTD_IF_AVAILABLE OFF CACHE BOOL "" FORCE)
+set(HTTPLIB_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(httplib
+  URL https://codeload.github.com/yhirose/cpp-httplib/tar.gz/refs/tags/v0.59.0
+  URL_HASH SHA256=7c8cc7df044abb837d75f7c1e56333305acb40335c3788b8f5fbf5927e63e148
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+FetchContent_MakeAvailable(httplib)
+add_executable(course_observe app.cpp)
+target_link_libraries(course_observe PRIVATE httplib::httplib Threads::Threads)
+target_compile_options(course_observe PRIVATE -Wall -Wextra -Wpedantic)
+add_executable(course_metrics_model metrics_model.cpp)
+target_compile_options(course_metrics_model PRIVATE -Wall -Wextra -Wpedantic)
+if(COURSE_WITH_OTEL)
+  # These are the actual option names of opentelemetry-cpp 1.30.0.
+  set(OTELCPP_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+  set(OTELCPP_WITH_EXAMPLES OFF CACHE BOOL "" FORCE)
+  set(OTELCPP_WITH_EXAMPLES_HTTP OFF CACHE BOOL "" FORCE)
+  set(OTELCPP_WITH_OTLP_GRPC OFF CACHE BOOL "" FORCE)
+  set(OTELCPP_WITH_OTLP_HTTP ON CACHE BOOL "" FORCE)
+  FetchContent_Declare(otel
+    URL https://codeload.github.com/open-telemetry/opentelemetry-cpp/tar.gz/refs/tags/v1.30.0
+    URL_HASH SHA256=85aae7a42d7b71d17e510ddebc85db622d9078cc6d29cf9fb7373014b063859f
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+  FetchContent_MakeAvailable(otel)
+  target_compile_definitions(course_observe PRIVATE COURSE_WITH_OTEL=1)
+  target_link_libraries(course_observe PRIVATE opentelemetry-cpp::otlp_http_exporter)
+endif()

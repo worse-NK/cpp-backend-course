@@ -6,14 +6,37 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def validate_introduction(lab):
+    """Validate renderable data, not literary quality or technical correctness."""
+    intro = lab.get("introduction")
+    if intro is None and lab["file"] != "visual_labs.html":
+        return
+    prefix = f"{lab['id']}: introduction"
+    if not isinstance(intro, dict):
+        raise ValueError(f"{prefix} must be an object")
+    paragraphs = intro.get("paragraphs")
+    if not isinstance(paragraphs, list) or not paragraphs:
+        raise ValueError(f"{prefix}.paragraphs must be a nonempty list")
+    for value in [*paragraphs, intro.get("goal"), intro.get("action")]:
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"{prefix} requires nonempty text paragraphs, goal and action")
+    notes = lab.get("scenarioNotes", {})
+    if not isinstance(notes, dict) or any(
+        key not in lab["scenarios"] or not isinstance(value, str) or not value.strip()
+        for key, value in notes.items()
+    ):
+        raise ValueError(f"{lab['id']}: scenarioNotes must name existing scenarios and contain text")
+
+
 def load_catalog():
     data = json.loads((ROOT / "content/visual-labs.json").read_text())
     seen = set()
     for lab in data["labs"]:
         assert lab["id"] not in seen, lab["id"]
         seen.add(lab["id"])
-        assert lab["file"] in {"visual_labs.html", "object_lifetime_demo.html"}
+        assert lab["file"] in {"visual_labs.html", "object_lifetime_demo.html", "security_sql_demo.html", "security_labs.html", "distributed_lab.html"}
         assert len(set(lab["scenarios"])) == len(lab["scenarios"])
+        validate_introduction(lab)
         for entry in lab["entries"]:
             station = json.loads((ROOT / ("content/" + entry["station"] + ".json")).read_text())
             assert any(s["id"] == entry["section"] for s in station["theory"]), entry
@@ -32,6 +55,7 @@ def render():
     var level = station === "station0" ? "basics" : station === "station2" ? "inheritance" : "all";
     return lab.file + "?level=" + level + context + "#" + encodeURIComponent(scenario);
   }
+  if (id === "distributed") return lab.file + "#scenario=" + encodeURIComponent(scenario) + "&step=0";
   return lab.file + "#lab=" + encodeURIComponent(id) + "&scenario=" + encodeURIComponent(scenario) + context;
 };
 '''

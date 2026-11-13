@@ -49,10 +49,20 @@ new Function('window',read('roadmap/generated/visual-labs.data.js'))(win);
 new Function('globalThis',read('roadmap/assets/visual-lab-models.js'))(win);
 new Function('window','document','location','setInterval','clearInterval','URLSearchParams',read('roadmap/assets/visual-labs.js'))(win,doc,location,(f,ms)=>{timers.set(++nextTimer,{f,ms});return nextTimer;},id=>timers.delete(id),Params);
 const get=id=>doc.getElementById(id);
-assert(doc.querySelectorAll('.catalog-card').length===10,'Catalog cards');
+assert(doc.querySelectorAll('.catalog-card').length===win.COURSE_LABS.length,'All catalog cards, including standalone security lessons');
 let visited=0;
-for(const lab of win.COURSE_LABS){if(lab.id==='lifetime')continue;for(const mode of lab.scenarios){
+for(const lab of win.COURSE_LABS){if(lab.file!=='visual_labs.html')continue;for(const mode of lab.scenarios){
   location.hash='#lab='+lab.id+'&scenario='+mode;listeners.hashchange();
+  const intro=get('labIntroduction'),authored=lab.introduction;
+  assert(intro&&!intro.hidden,'Visible introduction '+lab.id+'/'+mode);
+  assert(intro.querySelectorAll('details').length===0,'Introduction must not require opening a panel');
+  const paragraphs=intro.querySelector('.lab-primer-copy').querySelectorAll('p');
+  assert(paragraphs.length===authored.paragraphs.length&&paragraphs.every((p,i)=>p.textContent===authored.paragraphs[i]),'Complete authored context '+lab.id);
+  assert(intro.textContent.includes(authored.goal)&&intro.textContent.includes(authored.action),'Goal and first action '+lab.id);
+  const markup=get('labRoot').innerHTML;
+  assert(markup.indexOf('id="labIntroduction"')<markup.indexOf('id="labCode"')&&markup.indexOf('id="labIntroduction"')<markup.indexOf('id="labTools"'),'Context before settings and code '+lab.id);
+  const note=lab.scenarioNotes&&lab.scenarioNotes[mode];
+  assert(note?get('labScenarioNote').textContent===note:!get('labScenarioNote'),'Current scenario explanation '+lab.id+'/'+mode);
   const model=win.CourseLabModels[lab.id](mode);
   for(let i=0;i<model.steps.length;i++){
     get('labRange').oninput({target:{value:i}});
@@ -65,6 +75,12 @@ for(const lab of win.COURSE_LABS){if(lab.id==='lifetime')continue;for(const mode
   get('labPlay').onclick();assert(timers.size===1,'Autoplay start');[...timers.values()][0].f();get('labPrev').onclick();assert(timers.size===0,'Manual navigation stops autoplay');
   visited++;
 }}
+const sqlIntro=win.COURSE_LABS.find(lab=>lab.id==='sql').introduction;
+const originalParagraph=sqlIntro.paragraphs[0];
+sqlIntro.paragraphs[0]='A <img src=x onerror="bad()"> & a plain definition';
+location.hash='#lab=sql&scenario=left';listeners.hashchange();
+assert(get('labIntroduction').textContent.includes(sqlIntro.paragraphs[0])&&get('labIntroduction').querySelectorAll('img').length===0,'Introduction data remains literal text');
+sqlIntro.paragraphs[0]=originalParagraph;
 location.hash='#lab=network&scenario=retry&from=station7&section=stream-parser-engineering';listeners.hashchange();
 assert(doc.querySelectorAll('[data-mode]').length===3&&!get('labRoot').textContent.includes('Устаревший If-Match'),'Network prerequisites');
 assert(get('returnLink').href==='cpp_station7_networking.html#section=stream-parser-engineering','Exact return to theory');
@@ -103,9 +119,11 @@ location.hash='#lab=sql&scenario=where';listeners.hashchange();get('labRange').o
 assert(get('labScene').textContent.includes('owner_id')&&get('labScene').textContent.includes('Пары после WHERE'),'SQL displayed schema/stage must agree with query');
 get('labPlay').onclick();location.hash='';listeners.hashchange();assert(timers.size===0&&doc.title==='Визуальные лаборатории · C++ / Backend','Catalog resets playback and document title');
 const app=read('roadmap/assets/station-app.js');
-const blockSource=app.slice(app.indexOf('  function LabBlock('),app.indexOf('  function SubstationNav('));
-const navSource=app.slice(app.indexOf('  function SubstationNav('),app.indexOf('  function Theory('));
-const h=(type,props,...children)=>({type,props:props||{},children:children.flat(Infinity)});
+const flaskSource=app.slice(app.indexOf('  function LabFlask('),app.indexOf('  function LabBlock('));
+const blockSource=flaskSource+app.slice(app.indexOf('  function LabBlock('),app.indexOf('  function SubstationNav('));
+const navSource=flaskSource+app.slice(app.indexOf('  function backendLabEntry('),app.indexOf('  function PracticeLinks('))
+  +app.slice(app.indexOf('  function SubstationNav('),app.indexOf('  function Theory('));
+const h=(type,props,...children)=>typeof type==='function'?type(Object.assign({},props,{children:children.flat(Infinity)})):{type,props:props||{},children:children.flat(Infinity)};
 const walk=n=>n&&typeof n==='object'?[n,...(n.children||[]).flatMap(walk)]:[];
 win.matchMedia=()=>({matches:true});let entries=0;
 for(const item of win.COURSE_LABS)for(const entry of item.entries){
@@ -113,11 +131,15 @@ for(const item of win.COURSE_LABS)for(const entry of item.entries){
   const section=station.theory.find(s=>s.id===entry.section),block=section.blocks.find(b=>b.type==='lab'&&b.lab===item.id);
   const makeBlock=new Function('h','meta','window',blockSource+';return LabBlock;')(h,station.meta,win);
   const href=win.courseLabHref(item.id,entry.scenario,entry.station,entry.section);
-  assert(walk(makeBlock({block,section})).some(n=>n.type==='a'&&n.props.href===href),'Theory lab card '+entry.station);
+  const cardTree=makeBlock({block,section});
+  assert(walk(cardTree).some(n=>n.type==='a'&&n.props.href===href),'Theory lab card '+entry.station);
+  assert(walk(cardTree).some(n=>n.type==='svg'&&n.props.className==='lab-flask'&&n.props['aria-hidden']==='true'&&n.props.focusable==='false'),'Theory lab icon is decorative '+entry.station);
   const makeNav=new Function('h','meta','theory','window','useState','isWorkbook',navSource+';return SubstationNav;')(
     h,station.meta,station.theory,win,initial=>[typeof initial==='function'?initial():initial,()=>{}],s=>/(?:-final-workbook|clock-worked-example)$/.test(s.id));
   const tree=makeNav({items:station.substations,active:section.substation,selected:section.id,view:'theory',store:{}});
   assert(walk(tree).some(n=>n.type==='a'&&n.props.className==='contents-lab-link'&&n.props.href===href),'Contents entry '+entry.station+'/'+entry.section);
+  assert(walk(tree).some(n=>n.type==='a'&&n.props.className==='contents-all-labs'&&n.props.href==='visual_labs.html'),'Catalog retains native navigation '+entry.station);
+  assert(walk(tree).some(n=>n.type==='svg'&&n.props.className==='lab-flask'&&n.props['aria-hidden']==='true'&&n.props.focusable==='false'),'Contents lab icon is decorative '+entry.station);
   let hook=0;
   const searchNav=new Function('h','meta','theory','window','useState','isWorkbook',navSource+';return SubstationNav;')(
     h,station.meta,station.theory,win,initial=>[hook++===1?entry.title.toLocaleUpperCase('ru'):typeof initial==='function'?initial():initial,()=>{}],()=>false);
@@ -128,11 +150,19 @@ for(const item of win.COURSE_LABS)for(const entry of item.entries){
 const lifetimeScript=read('roadmap/object_lifetime_demo.html').match(/<script>\n([\s\S]*?)<\/script>/)[1];
 for(const [from,hash,expectedModes] of [['station0','#exception',1],['station2','#inheritance',2],['station4','#dynamic',4]]){
   const page=createDOM('roadmap/object_lifetime_demo.html'),win={location:{search:'?from='+from,hash}};
+  const initialIntro=page.getElementById('scenarioIntro').textContent;
+  const hero=page.querySelectorAll('.hero')[0].textContent;
+  // The opening must describe the displayed objects, not an unnamed "whole".
+  // This guards this concrete regression; it is not a literary-quality test.
+  assert(['Session','first','second'].every(name=>hero.includes(name)),'Lifetime opening names the example objects');
   new Function('window','document','URLSearchParams','setInterval','clearInterval',lifetimeScript)(win,page,Params,()=>1,()=>{});
   const buttons=page.querySelectorAll('[data-scenario]');
   assert(buttons.filter(b=>!b.hidden).length===expectedModes,'Lifetime prerequisite profile '+from);
   assert(page.getElementById('returnToTheory').href.includes('#section='),'Lifetime exact course return');
-  if(from==='station0')assert(!page.getElementById('fullSource').textContent.includes('throw '),'Exception implementation shown before exceptions');
+  if(from==='station0'){
+    assert(!page.getElementById('fullSource').textContent.includes('throw '),'Exception implementation shown before exceptions');
+    assert(page.getElementById('scenarioIntro').textContent===initialIntro,'Static and initialized members introduction agree');
+  }
   let prevented=false;
   page.listeners.keydown({target:page.getElementById('codeBody'),key:'ArrowRight',preventDefault:()=>{prevented=true;}});
   assert(!prevented,'Lifetime code must retain native keyboard scrolling');
@@ -145,4 +175,4 @@ for(const [from,hash,expectedModes] of [['station0','#exception',1],['station2',
     assert(page.getElementById('pointerStatus').textContent.includes('самого ptr завершилось'),'Final pointer state readable in UI');
   }
 }
-print('PASS: '+visited+' lab modes, every event rendered, navigation/timers, custom schedules, queue parameters, source dialog; '+entries+' theory/contents entries and 3 lifetime course profiles. DOM model only.');
+print('PASS: '+visited+' lab modes, visible introductions and variant notes before settings/code, literal text, every event rendered, navigation/timers, custom schedules, queue parameters, source dialog; '+entries+' theory/contents entries and 3 lifetime course profiles. DOM model only.');

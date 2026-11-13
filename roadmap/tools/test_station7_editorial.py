@@ -15,6 +15,9 @@ import unittest
 from test_cpp_editorial_audit import ProseParser
 
 ROOT = Path(__file__).resolve().parents[1]
+ADDED_SECTIONS = {'endian-frame-cpp20-cpp23', 'linux-name-resolution-path',
+                  'split-dns-debug-workbook', 'bounded-asio-server-contract',
+                  'bounded-asio-server-lab'}
 
 
 def digest(value):
@@ -57,23 +60,26 @@ class StationSevenEditorial(unittest.TestCase):
         return codes[0]
 
     def test_section_addresses_and_progress_are_preserved(self):
-        self.assertEqual(len(self.sections), 101)
+        self.assertEqual(len(self.sections), 106)
+        self.assertTrue(ADDED_SECTIONS <= set(self.sections))
         self.assertEqual(self.data['meta']['storeKey'], 'cpp_station7_progress_v1')
         self.assertEqual(digest([(x['id'], x.get('substation')) for x in
-                                 self.data['theory']]),
+                                 self.data['theory'] if x['id'] not in ADDED_SECTIONS]),
                          '90a7a08fc713cd209a19cf890698784695e72ec27c830c61def2808cc454f8c9')
 
     def test_original_code_and_visual_payloads_are_preserved(self):
         # Deliberate source/diagram changes require reviewing these baselines.
+        original = [s for s in self.data['theory'] if s['id'] not in ADDED_SECTIONS]
+        self.assertEqual(len(original), 101)
         codes = [(s['id'], [b['code'] for b in s['blocks'] if b['type'] == 'code'])
-                 for s in self.data['theory']]
+                 for s in original]
         visual = [(s['id'], [b for b in s['blocks'] if b['type'] not in
                             ('code', 'text', 'note', 'self-check')])
-                  for s in self.data['theory']]
+                  for s in original]
         self.assertEqual(digest(codes),
                          'af7301ec538541eb073abbdbb384e63b1425ae75af1c05e916a8a6a5fce70f18')
         self.assertEqual(digest(visual),
-                         'd7eeae404c9e70396dd5d790d07a14c91e0c131f939de43dc420fafa56afb41f')
+                         'b5c9760815c0186bf1eb1401301ebc816c3b400bd5459c6c94e357afa8e7c904')
 
     def test_each_section_has_explained_retrieval_check_and_valid_html(self):
         count = 0

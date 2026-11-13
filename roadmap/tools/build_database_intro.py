@@ -1,11 +1,12 @@
 """Sync canonical station9 C++ listings and preserve the old entry URL."""
 import json
 from pathlib import Path
+from course_theme import decorate_html
 
 ROOT = Path(__file__).resolve().parents[1]
 
 def updated_page():
-    return '''<!doctype html>
+    return decorate_html('''<!doctype html>
 <html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Станция 9 · Базы данных</title></head><body>
@@ -19,7 +20,7 @@ const destination = legacy === 'next' ? '#view=final'
     : '#section=' + encodeURIComponent(legacy);
 location.replace('cpp_station9_databases.html' + destination);
 </script></body></html>
-'''
+''', page='redirect')
 
 def sync_listings():
     path = ROOT / 'content/station9.json'

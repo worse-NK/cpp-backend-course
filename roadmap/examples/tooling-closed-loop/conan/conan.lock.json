@@ -1,0 +1,9 @@
+{
+  "version": "0.5",
+  "requires": [
+    "course-task-label/1.0#f63e7a05c4cce3f812333a73a3609d33%1793885220.907938"
+  ],
+  "build_requires": [],
+  "python_requires": [],
+  "config_requires": []
+}

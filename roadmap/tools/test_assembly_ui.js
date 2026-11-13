@@ -4,11 +4,23 @@ const read=p=>BA.toString(GLib.file_get_contents(p)[1]);
 function assert(value,message){if(!value)throw new Error(message);}
 const app=read('roadmap/assets/station-app.js');
 new Function(app);
+const codeStart=app.indexOf('  function codeElement('),codeEnd=app.indexOf('  function stationDisplayNumber(');
+assert(codeStart>=0&&codeEnd>codeStart,'Production code helper boundaries changed');
+const codeHelpers=app.slice(codeStart,codeEnd);
+const library=new Function(read('roadmap/vendor/highlightjs/highlight.min.js')+'\n;return hljs;')();
+assert(library.versionString==='11.12.0','Use the real locally pinned highlighter');
+const origin=JSON.parse(read('roadmap/vendor/highlightjs/ORIGIN.json'));
+for(const name of Object.keys(origin.files))
+  if(/\.js$/.test(name)&&name!=='highlight.min.js')
+    new Function('hljs',read('roadmap/vendor/highlightjs/'+name))(library);
+const codeWindow={hljs:library};
+new Function('window',read('roadmap/assets/course-code.js'))(codeWindow);
+assert(typeof codeWindow.CourseCode.element==='function','Load the actual shared code renderer');
 const helper=app.slice(app.indexOf('  function prepareQuestions('),app.indexOf('  function Quiz(props)'));
 let cells=[],cursor=0;
 const h=(type,props,...children)=>({type,props:props||{},children:children.flat(Infinity)});
 function useState(initial){const i=cursor++;if(!(i in cells))cells[i]=typeof initial==='function'?initial():initial;return[cells[i],v=>{cells[i]=v;}];}
-const api=new Function('h','useState',helper+';return {prepareQuestions,assembledText,assemblyCorrect,AssemblyAnswer};')(h,useState);
+const api=new Function('h','useState','window',codeHelpers+helper+';return {prepareQuestions,assembledText,assemblyCorrect,AssemblyAnswer};')(h,useState,codeWindow);
 function all(node,test){if(!node||typeof node!=='object')return[];return(test(node)?[node]:[]).concat(node.children.flatMap(n=>all(n,test)));}
 function button(tree,label){return all(tree,n=>n.type==='button'&&n.children.includes(label))[0];}
 const plan=JSON.parse(read('roadmap/content/checkpoints/station0.json'));
@@ -24,11 +36,20 @@ for(const [module,entries]of Object.entries(plan.modules)){
     cells=[]; let checked=null,locked=false;
     const render=()=>{cursor=0;return api.AssemblyAnswer({question:q,locked,onCheck:v=>{checked=v;locked=true;}});};
     let tree=render();
+    assert(all(tree,n=>n.props.role==='group'&&n.props['aria-label']==='Доступные фрагменты кода').length===1,'Token pool retains its accessible group');
+    const contexts=all(tree,n=>n.props.className==='assembly-context');
+    assert(contexts.length===(q.before?1:0)+(q.after?1:0),'Both authored assembly contexts must remain present');
+    for(const context of contexts){
+      const code=all(context,n=>n.type==='code');
+      assert(code.length===1&&code[0].props.className.includes('hljs')&&code[0].props.translate==='no',
+        'Assembly context uses the actual C++ highlighter, not an empty helper stub');
+    }
     assert(button(tree,'Проверить код').props.disabled,'Empty code must not be graded');
     const pool=()=>all(tree,n=>n.props.className==='assembly-pool')[0];
     for(const token of q.answer){
       const choice=pool().children.find(n=>n.props.key===token);
       assert(choice&&!choice.props.disabled,'Needed token missing or locked');
+      assert(choice.props['aria-label']==='Добавить фрагмент: '+q.tokens[token],'Token has its exact accessible action label');
       choice.props.onClick();tree=render();
       assert(pool().children.find(n=>n.props.key===token).props.disabled,'Used token must not be reusable');
     }

@@ -43,7 +43,10 @@ class TrafficStation(unittest.TestCase):
         self.assertEqual(route['stages'][8]['id'], 'networking')
         self.assertEqual(route['stages'][9]['id'], 'linux-network-lab')
         self.assertEqual(route['stages'][10]['id'], 'rest-api')
-        self.assertEqual(len([stage for stage in route['stages'] if not stage.get('optional')]), 14)
+        self.assertEqual({stage['id'] for stage in route['stages'] if not stage.get('optional')}, {
+            'oop-basics','modern-cpp','inheritance-poly','stl-templates','error-handling',
+            'build-tools','linux-systems','concurrency','networking','linux-network-lab',
+            'rest-api','sql','databases','production','messaging','redis','kubernetes','observability'})
 
     def test_full_six_part_route_and_assessment_prerequisites(self):
         validate(self.data, self.source)

@@ -34,6 +34,17 @@ import verify_service_workshop as verify
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples/service-workshop"
+CORE_CHAPTERS = ["start", "local", "http", "database", "workload", "release", "vm", "vps", "operate"]
+CORE_SOURCE_FILES = {
+    "CMakeLists.txt", "app.cpp", "storage.hpp", "storage.cpp", "tests.cpp", "schema.sql", "Dockerfile",
+    "compose.yaml", "compose.https.yaml", "Caddyfile", "init-db.sh", "lab.py", "load.py", "README.md",
+    ".dockerignore", ".gitignore",
+}
+PRODUCTION_SOURCE_FILES = {
+    ".dockerignore", ".gitignore", "CMakeLists.txt", "Dockerfile", "README.md", "acceptance.py", "api.cpp",
+    "common.cpp", "common.hpp", "compose.yaml", "init-db.sh", "lab.py", "main.cpp", "messaging.cpp",
+    "replication_lab.py", "schema.sql", "test_lab.py",
+}
 
 
 def run(command, *, cwd=None, env=None, timeout=60):
@@ -238,7 +249,10 @@ class WorkshopArtifacts(unittest.TestCase):
         self.assertIn("COURSE_WITH_POSTGRES", cmake)
         self.assertIn("OFF", cmake)
         self.assertIn("course_tasks", cmake)
-        self.assertIn("CMAKE_CXX_STANDARD 20", cmake)
+        self.assertIn('set(COURSE_CXX_STANDARD "20" CACHE STRING', cmake)
+        self.assertIn('set(CMAKE_CXX_STANDARD "${COURSE_CXX_STANDARD}")', cmake)
+        self.assertIn('set(CMAKE_CXX_STANDARD_REQUIRED ON)', cmake)
+        self.assertIn('set(CMAKE_CXX_EXTENSIONS OFF)', cmake)
         self.assertIn("FetchContent", cmake)
         self.assertEqual(cmake.count("URL_HASH SHA256="), 3)
         self.assertIn("v0.59.0", cmake)
@@ -324,12 +338,21 @@ class WorkshopArtifacts(unittest.TestCase):
                 private = Path(tmp) / private_path
                 private.parent.mkdir()
                 private.write_text(next(iter(entries.values())))
+            # The supplementary program is distributed with the full repository,
+            # never recursively folded into the old flat VM-upload archive.
+            for nested_path in ("release-lab/client.cpp", "production-path-lab/api.cpp",
+                                "production-path-lab/.state/alice_session"):
+                nested = Path(tmp) / nested_path
+                nested.parent.mkdir(parents=True, exist_ok=True)
+                nested.write_text("must not enter the core transfer archive")
             archive = Path(tmp) / "source.tar.gz"
             packed = self.helper("pack", "--output", archive.name, cwd=tmp)
             self.assertEqual(packed.returncode, 0, packed.stdout + packed.stderr)
             with tarfile.open(archive, "r:gz") as source_archive:
                 members = source_archive.getmembers()
                 self.assertTrue(any(item.name.endswith("CMakeLists.txt") for item in members))
+                self.assertEqual({item.name for item in members},
+                                 {"service-workshop/" + name for name in CORE_SOURCE_FILES})
                 for item in members:
                     self.assertFalse(item.issym() or item.islnk())
                     self.assertNotIn("..", Path(item.name).parts)
@@ -520,8 +543,12 @@ class WorkshopPublication(unittest.TestCase):
         import build_service_workshop
 
         route = json.loads((ROOT / "content/service-workshop/route.json").read_text())
-        expected = ["start", "local", "http", "database", "workload", "release", "vm", "vps", "operate"]
-        self.assertEqual([item["id"] for item in route["chapters"]], expected)
+        ids = [item["id"] for item in route["chapters"]]
+        self.assertEqual(ids[:len(CORE_CHAPTERS)], CORE_CHAPTERS,
+                         "the established nine-stage route must retain its exact order")
+        self.assertEqual(ids[len(CORE_CHAPTERS):], ["production"],
+                         "the integrated program is one separate supplementary stage")
+        expected = CORE_CHAPTERS + ["production"]
         rendered = build_service_workshop.render()
         self.assertTrue((ROOT / "service_workshop.html").read_text() == rendered,
                         "regenerate the published workshop after editing its source")
@@ -552,6 +579,30 @@ class WorkshopPublication(unittest.TestCase):
                             self.assertIn(section[0], stations[parts.path], "unknown station theory section")
                     elif parts.fragment:
                         self.assertIn(parts.fragment, markup.ids, "broken workshop anchor")
+
+    def test_production_stage_is_separate_and_has_contextual_theory_links(self):
+        route = json.loads((ROOT / "content/service-workshop/route.json").read_text())
+        supplementary = route["chapters"][len(CORE_CHAPTERS):]
+        self.assertEqual(len(supplementary), 1)
+        self.assertEqual(supplementary[0]["id"], "production")
+        self.assertIn("Дополнительно", supplementary[0]["context"])
+        self.assertIn("11", supplementary[0]["context"])
+        self.assertIn("15", supplementary[0]["context"])
+        fragment = (ROOT / "content/service-workshop/production.html").read_text()
+        markup = _WorkshopMarkup()
+        markup.feed(fragment)
+        for station, section in (("cpp_station11_messaging.html", "outbox-real-chain-lab"),
+                                 ("cpp_station15_security.html", "identity-real-sessions-lab"),
+                                 ("cpp_station9_databases.html", "postgres-recovery-real-lab")):
+            self.assertIn(station + "#section=" + section, markup.links)
+        self.assertIn("examples/service-workshop/production-path-lab/README.md", markup.links)
+        commands = self.chapter_commands("production")
+        self.assertTrue(any("cd roadmap/examples/service-workshop/production-path-lab &&\n" in code
+                            for _, _, code in commands))
+        self.assertTrue(any("acceptance.py --run-local-docker" in code for _, _, code in commands))
+        self.assertTrue(any("replication_lab.py --run-local-docker --interactive" in code for _, _, code in commands))
+        self.assertIn("lab.py pack", fragment)
+        self.assertIn("не включает", fragment)
 
     def test_renderer_rejects_unsafe_or_duplicate_ids_and_escapes_metadata(self):
         import build_service_workshop
@@ -662,14 +713,16 @@ const GLib = imports.gi.GLib, ByteArray = imports.byteArray;
 const source = ByteArray.toString(GLib.file_get_contents(ARGV[0])[1]);
 const start=source.indexOf('  function ServiceWorkshopEntry('), end=source.indexOf('  function Theory(');
 if(start<0 || end<=start) throw new Error('shared workshop components missing');
-const fragment=source.slice(start,end);
+const fragment=source.slice(source.indexOf('  function LabFlask('),source.indexOf('  function LabBlock('))+
+  source.slice(source.indexOf('  function backendLabEntry('),source.indexOf('  function PracticeLinks('))+source.slice(start,end);
 function check(value,message) {if(!value) throw new Error(message);}
 function nodes(node) {return !node || typeof node!=='object' ? [] : [node,...(node.children||[]).flatMap(nodes)];}
-const React={createElement:(type,props,...children)=>({type,props:props||{},children:children.flat(Infinity)}),
+const React={createElement:(type,props,...children)=>typeof type==='function'?type(props||{}):({type,props:props||{},children:children.flat(Infinity)}),
   useState:initial=>[typeof initial==='function'?initial():initial,()=>{}]};
 const expected={station8:'local',station9:'database',station10:'vm'};
 const ids=['station0','station1','station2','station3','station4','station5','station5-linux','station6',
-  'station7','station7-netlab','station8','station9-sql','station9','station10'];
+  'station7','station7-netlab','station7-traffic','station8','station9-sql','station9','station10',
+  'station11','station12','station13','station14'];
 for(const id of ids) {
   const meta={id,number:id.startsWith('station9')?9:0,logo:id};
   const window={matchMedia:()=>({matches:true}),COURSE_LABS:[]};
@@ -702,13 +755,16 @@ print('PASS: shared card/sidebar only in 8, 9B and 10; 9A and other stations una
             self.assertTrue(path in files, "publication is missing " + path)
         prefix = "roadmap/examples/service-workshop/"
         names = {name[len(prefix):] for name in files if name.startswith(prefix)}
-        expected = {"CMakeLists.txt", "app.cpp", "storage.hpp", "storage.cpp", "tests.cpp", "schema.sql", "Dockerfile",
-                    "compose.yaml", "compose.https.yaml", "Caddyfile", "init-db.sh", "lab.py", "load.py", "README.md",
-                    ".dockerignore", ".gitignore"}
+        expected = set(CORE_SOURCE_FILES)
         expected.update("release-lab/" + name for name in (
             "CMakeLists.txt", "Dockerfile", "client.cpp", "001-initial.sql", "002-expand-note.sql",
             "init-db.sh", "compose.yaml", "release_lab.py", "README.md", ".dockerignore", ".gitignore"))
-        self.assertEqual(names, expected)
+        supplementary = {name for name in names if name.startswith("production-path-lab/")}
+        self.assertEqual(names - supplementary, expected,
+                         "the established core and release allowlists must remain exact")
+        self.assertEqual(supplementary,
+                         {"production-path-lab/" + name for name in PRODUCTION_SOURCE_FILES},
+                         "only the seventeen explicit supplementary sources may be published")
         for name in files:
             self.assertFalse(set(Path(name).parts) & {".env", ".secrets", "build", "__pycache__"})
             self.assertNotIn("content/service-workshop", name)
@@ -727,7 +783,7 @@ function world(hash, mobile=false, withMedia=true) {
   const objects = Object.create(null), events = {}, copies = [], timers = [];
   const viewport = {matches:mobile, events:{}, addEventListener(name,handler) {this.events[name]=handler;}};
   const contents = {open:true};
-  const chapters = ['start','local','http','database','workload','release','vm','vps','operate'].map(id => {
+  const chapters = ['start','local','http','database','workload','release','vm','vps','operate','production'].map(id => {
     const item = {id, hidden:false, focused:0, scrolled:0,
       closest: () => item, querySelector: () => ({textContent:'Title '+id}),
       focus: () => { item.focused++; }, scrollIntoView: () => { item.scrolled++; }};
@@ -774,6 +830,8 @@ w.location.hash='#vm'; w.events.hashchange(); selected(w,'vm');
 check(w.objects.vm.focused === 1, 'chapter navigation moves keyboard focus');
 w.location.hash='#workload'; w.events.hashchange(); selected(w,'workload');
 w.location.hash='#release'; w.events.hashchange(); selected(w,'release');
+w.location.hash='#production'; w.events.hashchange(); selected(w,'production');
+check(w.objects.production.focused === 1, 'supplementary chapter is keyboard reachable');
 w.location.hash='#vm'; w.events.hashchange(); selected(w,'vm');
 w.location.hash='#workshop-main'; w.events.hashchange(); selected(w,'vm');
 w.location.hash='#not-a-chapter'; w.events.hashchange(); selected(w,'start');
@@ -797,6 +855,9 @@ mobile.contents.open=true;
 check(mobile.contents.open === true, 'mobile reader can manually expand contents');
 mobile.location.hash='#database'; mobile.events.hashchange(); selected(mobile,'database');
 check(mobile.contents.open === false, 'mobile chapter navigation closes contents');
+mobile.contents.open=true;
+mobile.location.hash='#production'; mobile.events.hashchange(); selected(mobile,'production');
+check(mobile.contents.open === false, 'supplementary mobile chapter closes contents too');
 mobile.viewport.matches=false; mobile.viewport.events.change();
 check(mobile.contents.open === true, 'crossing to desktop expands contents');
 mobile.viewport.matches=true; mobile.viewport.events.change();

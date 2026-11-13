@@ -1,0 +1,14 @@
+{
+  "scope": "synthetic-only",
+  "evidence_kind": "example-not-a-recorded-run",
+  "observations": [
+    {
+      "case": "redirect",
+      "weak_strategy": "initial-host-only",
+      "weak_decision": "allow",
+      "every_hop_decision": "deny",
+      "trace_reason": "Следующее назначение не входит в разрешённые. Заменить эту примерную запись своим наблюдением после запуска модели."
+    }
+  ],
+  "not_tested": ["real-dns", "real-http-client", "ipv6", "url-parser", "timers", "response-body-limit", "host-firewall"]
+}

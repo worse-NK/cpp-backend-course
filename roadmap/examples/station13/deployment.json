@@ -1,0 +1,138 @@
+{
+  "apiVersion": "apps/v1",
+  "kind": "Deployment",
+  "metadata": {
+    "name": "course-api",
+    "namespace": "course13"
+  },
+  "spec": {
+    "replicas": 2,
+    "revisionHistoryLimit": 3,
+    "progressDeadlineSeconds": 120,
+    "minReadySeconds": 2,
+    "strategy": {
+      "type": "RollingUpdate",
+      "rollingUpdate": {
+        "maxSurge": 1,
+        "maxUnavailable": 0
+      }
+    },
+    "selector": {
+      "matchLabels": {
+        "app": "course-api"
+      }
+    },
+    "template": {
+      "metadata": {
+        "labels": {
+          "app": "course-api"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "terminationGracePeriodSeconds": 15,
+        "securityContext": {
+          "runAsNonRoot": true,
+          "runAsUser": 65532,
+          "runAsGroup": 65532,
+          "fsGroup": 65532,
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          }
+        },
+        "containers": [
+          {
+            "name": "api",
+            "image": "course-api:station13-v1",
+            "imagePullPolicy": "Never",
+            "ports": [
+              {
+                "name": "http",
+                "containerPort": 8080
+              }
+            ],
+            "env": [
+              {
+                "name": "APP_VERSION",
+                "valueFrom": {
+                  "configMapKeyRef": {
+                    "name": "course-api-config",
+                    "key": "APP_VERSION"
+                  }
+                }
+              },
+              {
+                "name": "APP_INSTANCE",
+                "valueFrom": {
+                  "fieldRef": {
+                    "fieldPath": "metadata.name"
+                  }
+                }
+              }
+            ],
+            "resources": {
+              "requests": {
+                "cpu": "100m",
+                "memory": "64Mi"
+              },
+              "limits": {
+                "cpu": "500m",
+                "memory": "128Mi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "readOnlyRootFilesystem": true,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              }
+            },
+            "startupProbe": {
+              "httpGet": {
+                "path": "/livez",
+                "port": "http"
+              },
+              "periodSeconds": 1,
+              "timeoutSeconds": 1,
+              "failureThreshold": 30
+            },
+            "readinessProbe": {
+              "httpGet": {
+                "path": "/readyz",
+                "port": "http"
+              },
+              "periodSeconds": 2,
+              "timeoutSeconds": 1,
+              "failureThreshold": 1
+            },
+            "livenessProbe": {
+              "httpGet": {
+                "path": "/livez",
+                "port": "http"
+              },
+              "periodSeconds": 5,
+              "timeoutSeconds": 1,
+              "failureThreshold": 3
+            },
+            "volumeMounts": [
+              {
+                "name": "tmp",
+                "mountPath": "/tmp"
+              }
+            ]
+          }
+        ],
+        "volumes": [
+          {
+            "name": "tmp",
+            "emptyDir": {
+              "sizeLimit": "16Mi"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

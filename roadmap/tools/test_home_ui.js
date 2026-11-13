@@ -26,8 +26,8 @@ function textOf(node) {
     return (node.children || []).map(textOf).join(' ');
 }
 const preview = tree.find(n => n.props.className === 'home-preview-steps');
-assert(preview.children.length === 5, 'Preview must show all five course groups');
-assert(textOf(tree.find(n => n.props.className === 'home-preview-top')).includes('01 — 05'), 'Preview range must match group count');
+assert(preview.children.length === 6, 'Preview must include the backend continuation');
+assert(textOf(tree.find(n => n.props.className === 'home-preview-top')).includes('01 — 06'), 'Preview range must match group count');
 preview.children.forEach(item => {
     const label = item.children[0].children[1];
     assert(typeof label.children[0] === 'string' && label.children[0].trim(), 'No empty preview label');
@@ -49,7 +49,7 @@ const actualSections = DATA.stages.filter(stage => stage.station).reduce((total,
 }, 0);
 assert(textOf(facts.children[1]).includes(String(actualSections)), 'Theory section count must match current sources');
 assert(textOf(facts.children[1]).includes('разделов теории'), 'Theory section label');
-assert(textOf(facts.children[2]).includes('C++20') && textOf(facts.children[2]).includes('основная версия языка'), 'Language version metric');
+assert(textOf(facts.children[2]).includes('C++20 / 23') && textOf(facts.children[2]).includes('различия редакций'), 'Both language editions are visible without implying that a flag supplies all library features');
 assert(!/в плане/i.test(textOf(facts)), 'Course facts must not include a planned-stage metric');
 const planned = DATA.stages.find(stage => stage.id === 'production');
 const savedStation = planned.station;
@@ -111,13 +111,13 @@ print('PASS: keyboard focus retained, accessible completion state, collapsed pro
 const progressHelper = script.slice(script.indexOf('function loadStationProgress('), script.indexOf('\nconst Icon'));
 const loadProgress = new Function('localStorage', progressHelper + ';return loadStationProgress;')({
     getItem: key => JSON.stringify(key === 'cpp_station7_progress_v1'
-        ? {'station-final:editorial-20261029:v1:basic':{score:23,total:25},'station-final:architecture-20261025:v1:basic':{score:2,total:25},'station-final:v3:basic':{score:1,total:25}}
-        : {'station-final:editorial-20261029:v1:basic':{score:21,total:25},'station-final:netlab-20261021:v1:basic':{score:2,total:25}})
+        ? {'station-final:deepening-20261105:v1:basic':{score:23,total:25},'station-final:editorial-20261029:v1:basic':{score:3,total:25},'station-final:architecture-20261025:v1:basic':{score:2,total:25},'station-final:v3:basic':{score:1,total:25}}
+        : {'station-final:deepening-20261105:v1:basic':{score:21,total:25},'station-final:editorial-20261029:v1:basic':{score:3,total:25},'station-final:netlab-20261021:v1:basic':{score:2,total:25}})
 });
 assert(loadProgress('cpp_station7_progress_v1',101).quiz.score === 23, 'Networking home score must match current assessment epoch');
 assert(loadProgress('cpp_station7_netlab_progress_v1',25).quiz.score === 21, '7Б home score must use its own assessment key');
 const trafficProgress = new Function('localStorage', progressHelper + ';return loadStationProgress;')({
-    getItem: () => JSON.stringify({'sec:learning-route':true,'station-final:editorial-20261029:v1:basic':{score:24,total:25},'station-final:traffic-20261026:v1:basic':{score:1,total:25}})
+    getItem: () => JSON.stringify({'sec:learning-route':true,'station-final:deepening-20261105:v1:basic':{score:24,total:25},'station-final:editorial-20261029:v1:basic':{score:2,total:25},'station-final:traffic-20261026:v1:basic':{score:1,total:25}})
 });
 assert(trafficProgress('cpp_station7_traffic_progress_v1',25).quiz.score === 24, '7В must not reuse the 7Б exam score');
 assert(trafficProgress('cpp_station7_traffic_progress_v1',25).secDone === 1, '7В theory progress must survive score loading');
@@ -127,6 +127,7 @@ print('PASS: networking and 7Б assessment keys are isolated and match home prog
 const stationKeyHelper = stationApp.slice(stationApp.indexOf('    function quizStoreKey('), stationApp.indexOf('    var quizResults ='));
 const stationQuizKey = meta => new Function('meta', stationKeyHelper + ';return quizStoreKey;')(meta)('basic');
 for (const [key,id,number,epoch] of [
+    ['cpp_station1_progress_v1','station1',1,'v1'],
     ['cpp_station2_progress_v1','station2',2,'v1'],
     ['cpp_station3_progress_v1','station3',3,'v2'],
     ['cpp_station4_progress_v1','station4',4,'v1'],
@@ -139,9 +140,14 @@ for (const [key,id,number,epoch] of [
     ['cpp_station8_progress_v1','station8',8,'v1'],
     ['cpp_station9_sql_progress_v1','station9-sql',9,'v1'],
     ['cpp_station9_progress_v1','station9',9,'v1'],
-    ['cpp_station10_progress_v1','station10',10,'v1']
+    ['cpp_station10_progress_v1','station10',10,'v1'],
+    ['cpp_station11_progress_v1','station11',11,'v1'],
+    ['cpp_station15_progress_v1','station15',15,'v1'],
+    ['cpp_station16_progress_v1','station16',16,'v1']
 ]) {
-    const currentKey = 'station-final:editorial-20261029:' + epoch + ':basic';
+    const foundations = ['station1','station3','station5'].includes(id);
+    const deepening = ['station5','station7','station7-netlab','station7-traffic','station9-sql','station9','station11','station15','station16'].includes(id);
+    const currentKey = 'station-final:' + (deepening ? 'deepening-20261105:v1' : foundations ? 'foundations-20261105:v1' : 'editorial-20261029:' + epoch) + ':basic';
     assert(stationQuizKey({id,number}) === currentKey, 'Home and station must agree on the editorial score key: ' + key);
     const oldStore = {'sec:existing-section':true, 'sec:unread-section':false,
         'station-final:coverage:v1:basic':{score:25,total:25},
@@ -155,6 +161,17 @@ for (const [key,id,number,epoch] of [
         'quiz:module:basic':{score:5,total:5}, quiz:{score:25,total:25}};
     const otherEpoch = number === 3 ? 'v1' : 'v2';
     oldStore['station-final:editorial-20261029:'+otherEpoch+':basic'] = {score:25,total:25};
+    if (foundations) {
+        oldStore['station-final:editorial-20261029:v1:basic'] = {score:25,total:25};
+        oldStore['station-final:editorial-20261029:v2:basic'] = {score:25,total:25};
+    }
+    if (deepening) {
+        oldStore['station-final:editorial-20261029:v1:basic'] = {score:25,total:25};
+        oldStore['station-final:editorial-20261029:v2:basic'] = {score:25,total:25};
+        oldStore['station-final:foundations-20261105:v1:basic'] = {score:25,total:25};
+        oldStore['station-final:deepening-20261105:v0:basic'] = {score:25,total:25};
+        oldStore['station-final:deepening-20261105:v2:basic'] = {score:25,total:25};
+    }
     const before = JSON.stringify(oldStore);
     const loadOld = new Function('localStorage', progressHelper + ';return loadStationProgress;')({getItem: () => JSON.stringify(oldStore)});
     const oldProgress = loadOld(key,40);
@@ -166,7 +183,12 @@ for (const [key,id,number,epoch] of [
         const raw = JSON.stringify(legacyStore);
         const loadLegacy = new Function('localStorage', progressHelper + ';return loadStationProgress;')({getItem: () => raw});
         const legacyProgress = loadLegacy(key,40);
-        assert(legacyProgress.quizAdvanced === null, 'Home must not show an old advanced-bank result after editing: ' + key);
+        if (['station1','station11','station15','station16'].includes(id)) {
+            const expectedAdvanced = legacy.quizAdvanced || legacy['quiz:module:advanced'];
+            assert(JSON.stringify(legacyProgress.quizAdvanced) === JSON.stringify(expectedAdvanced), 'Review must retain unchanged legacy advanced progress: ' + key);
+        } else {
+            assert(legacyProgress.quizAdvanced === null, 'Home must not show an old advanced-bank result after editing: ' + key);
+        }
         assert(legacyProgress.secDone === 1, 'Ignoring a stale advanced score must retain theory marks: ' + key);
         assert(JSON.stringify(legacyStore) === raw, 'Ignoring a stale advanced score must not delete the saved record');
     }
@@ -175,8 +197,8 @@ for (const [key,id,number,epoch] of [
     assert(loadCurrent(key,40).quiz.score === 21 && loadCurrent(key,40).secDone === 1, 'Home must show the editorial score and retain theory marks: ' + key);
 }
 const untouchedCpp = new Function('localStorage', progressHelper + ';return loadStationProgress;')({getItem: () => JSON.stringify({'sec:existing-section':true,'station-final:coverage:v1:basic':{score:23,total:25},'station-final:editorial-20261029:v1:basic':{score:1,total:25},'station-final:systems-depth-20261025:v1:basic':{score:2,total:25}})});
-for (const key of ['cpp_station0_progress_v1','cpp_station1_progress_v1']) {
+for (const key of ['cpp_station0_progress_v1']) {
     assert(untouchedCpp(key,25).quiz.score === 23 && untouchedCpp(key,25).secDone === 1, 'Unchanged C++ station must retain its existing score epoch: ' + key);
 }
-print('PASS: editorial score versions agree with home, ignore stale scores and preserve section progress');
+print('PASS: editorial/foundations score versions agree with home, ignore stale scores and preserve section progress');
 print('PASS: architecture and systems exam epochs isolated; prior theory marks retained; unchanged stations unaffected');

@@ -30,17 +30,18 @@ class StationThreeEditorial(unittest.TestCase):
     def test_section_addresses_and_progress_key_are_stable(self):
         self.assertEqual(list(self.sections), [
             "learning-route", "what-is-stl", "vector", "allocation-containers",
+            "numeric-sizes-conversions", "numeric-intermediate-narrowing",
             "map-set", "container-cost-model", "associative-deep",
             "unordered-contract", "invalidation-erasure",
             "sequence-container-topology", "container-decision", "iterators",
-            "algorithms", "iterator-categories-ranges", "algorithm-pipeline",
+            "algorithms", "iterator-categories-ranges", "algorithm-pipeline", "ranges23-owned-result",
             "interview-algorithm-invariants", "interview-sequence-workbook",
             "bit-mask-workbook", "subtree-sets-workbook", "graph-copy-workbook",
             "rle-workbook", "comparator-contract", "templates", "templates-class",
-            "template-compilation", "templates-deep", "constant-evaluation",
-            "sfinae-and-constraints", "callables-and-invoke",
-            "template-instantiation-cost", "modern-tools", "non-owning-vocabulary",
-            "ranges-lifetime", "lru-window-generations", "sliding-window-workbook",
+            "template-compilation", "lookup-adl", "adl-customization", "templates-deep", "explicit-object23", "constant-evaluation", "if-consteval23",
+            "sfinae-and-constraints", "parameter-packs-fold", "template-specialization-choices", "callables-and-invoke", "move-only-callables23",
+            "template-instantiation-cost", "modern-tools", "format-print23", "non-owning-vocabulary",
+            "ranges-lifetime", "lru-window-generations", "chrono-types-units", "chrono-deadline-clock", "sliding-window-workbook",
             "generation-storage", "fixed-pool-workbook", "request-memory-arena",
             "frequency-final-workbook", "summary",
         ])

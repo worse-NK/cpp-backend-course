@@ -32,8 +32,9 @@ class StationOneEditorial(unittest.TestCase):
             "lifetime-storage", "local-object-journey", "references", "const",
             "const-and-aliases", "ownership-contracts", "new-delete",
             "smart-ptr", "smart-ptr-deep", "storage-and-construction",
+            "object-representation-access", "representation-copy-bit-cast",
             "shared-aliasing", "ownership-graph", "move", "rule-of-five",
-            "copy-elision", "modern-syntax", "lambda-lifetime",
+            "copy-elision", "implicit-move23", "modern-syntax", "range-for-lifetime23", "lambda-lifetime",
             "move-cost-model", "ownership-final-workbook",
         ])
         self.assertEqual(self.data["meta"]["storeKey"], "cpp_station1_progress_v1")

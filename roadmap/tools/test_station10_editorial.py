@@ -75,7 +75,9 @@ class Station10Editorial(unittest.TestCase):
 
     def test_original_code_and_visual_payload_order(self):
         expected = {
-            'code': (16, '2f5a842b470c52ae8516f86161ec722923f170fa6ab2d5506b62c2f484fbd7c7'),
+            # Includes the earlier, intentional C++20/23 CMake selector in
+            # gate-final-workbook. Its behaviour is tested below, not just hashed.
+            'code': (16, 'ab8c8574c0701aabfcb162c17d609145f75d3b2d58c0dd4d679959351887f921'),
             'diagram': (16, 'e4b96e2ea3a69c30cccca42d7d236020eea9d3e7288471a1ca5d61580d984ae9'),
             'lab': (1, '39369db963fe72c4daf492d39154442589ba740ee8bbc6ba82f2e25388d714cc'),
         }
@@ -92,6 +94,33 @@ class Station10Editorial(unittest.TestCase):
         self.assertEqual(hashlib.sha256(json.dumps(task_codes, ensure_ascii=False)
                                        .encode()).hexdigest(),
                          '4c636cb05ee2090cb582be350bfb4aeb7e4590e7ccd06c17774b9b6d322a82cd')
+
+    def test_workbook_cmake_accepts_both_course_standards(self):
+        if not shutil.which('cmake') or not shutil.which('g++'):
+            self.skipTest('CMake and g++ are required')
+        blocks = [b['code'] for b in section('gate-final-workbook')['blocks'] if b['type'] == 'code']
+        source = next(code for code in blocks if code.startswith('#include'))
+        cmake = next(code for code in blocks if code.startswith('cmake_minimum_required'))
+        with tempfile.TemporaryDirectory(prefix='station10-cmake-standards-') as folder:
+            project = Path(folder)
+            (project / 'main.cpp').write_text(source)
+            (project / 'CMakeLists.txt').write_text(cmake)
+            for standard in ('20', '23'):
+                build = project / ('build-' + standard)
+                configure = subprocess.run(['cmake', '-S', str(project), '-B', str(build),
+                                           '-DCOURSE_CXX_STANDARD=' + standard],
+                                          capture_output=True, text=True, timeout=30)
+                self.assertEqual(configure.returncode, 0, configure.stderr)
+                compiled = subprocess.run(['cmake', '--build', str(build), '--parallel', '2'],
+                                          capture_output=True, text=True, timeout=30)
+                self.assertEqual(compiled.returncode, 0, compiled.stderr)
+                run = subprocess.run([str(build / 'gate_check')], capture_output=True, text=True, timeout=5)
+                self.assertEqual(run.returncode, 0, run.stderr)
+                self.assertEqual(run.stdout, 'all checks passed\n')
+            invalid = subprocess.run(['cmake', '-S', str(project), '-B', str(project / 'invalid'),
+                                      '-DCOURSE_CXX_STANDARD=17'], capture_output=True, text=True, timeout=30)
+            self.assertNotEqual(invalid.returncode, 0)
+            self.assertIn('COURSE_CXX_STANDARD must be 20 or 23', invalid.stderr)
 
     def test_answers_can_be_revealed_in_every_section(self):
         for s in DATA['theory']:
@@ -228,6 +257,20 @@ int main() {
             self.assertIn(phrase, text.casefold())
         self.assertIn('не реализует выпуск без разрыва', DATA['tasks'][7]['solution'])
         self.assertIn('не реализуются', prose('release-compatibility'))
+
+    def test_k6_preparation_precedes_the_first_run(self):
+        blocks = section('capacity-local-lab')['blocks']
+        preparation = next(i for i, block in enumerate(blocks)
+                           if 'Где взять k6' in block.get('html', ''))
+        first_run = next(i for i, block in enumerate(blocks)
+                         if 'k6 run ' in block.get('code', ''))
+        self.assertLess(preparation, first_run)
+        text = blocks[preparation]['html']
+        self.assertIn('https://grafana.com/docs/k6/latest/set-up/install-k6/', text)
+        self.assertIn('k6 version', text)
+        self.assertIn('не создаёт нагрузку', text)
+        self.assertIn('не устанавливают', text)
+        self.assertIn('замени путь', text)
 
 
 if __name__ == '__main__':

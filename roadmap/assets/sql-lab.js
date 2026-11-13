@@ -3,6 +3,14 @@
   const $=id=>document.getElementById(id), lab=window.SqlLab;
   let worker=null,timer=null,url=null,job=0;
   function current(){return lab.exercises.find(e=>e.id===$('exercise').value) || lab.exercises[0];}
+  function context(e){
+    if(e.id==='expression')return 'Начнём без списка дел: попросим SQL выполнить одно вычисление и вернуть ответ как маленькую таблицу. Исходные users и tasks для этого задания читать не требуется.';
+    if(e.id==='upsert')return 'Теперь меняется список людей users: у уже известной Анны может обновиться имя. Связанные с ней задачи остаются в tasks; их владелец определяется номером, а не написанием имени.';
+    if(e.kind==='state')return 'Здесь нужно изменить сам учебный список дел, а не только показать ответ. Таблица tasks содержит задачи, а owner_id связывает каждую с человеком из users. После запуска открой состояние таблиц и проверь, что остальные записи сохранились.';
+    if(['join','left','exists','cte','report'].includes(e.id))return 'В этом задании сведения нужны сразу из двух списков: users хранит людей, tasks — их задачи. Они связаны значениями users.id и tasks.owner_id. В основном наборе у Веры задач нет — это тоже важный случай, а не пропавшая запись.';
+    if(['group','having','window','frame'].includes(e.id))return 'Будем получать сводку по списку дел. Исходная строка tasks описывает одну задачу; несколько строк могут относиться к одному владельцу owner_id. Условие ниже уточняет, нужен ли общий подсчёт или отдельный результат для каждой задачи.';
+    return 'Работаем с таблицей tasks: в основном наборе две задачи Анны и одна Бориса. Одна строка — одна задача; id обозначает её номер, owner_id — номер человека. В этом упражнении данные нужно прочитать, не изменяя исходный список.';
+  }
   function status(text,kind){$('status').textContent=text;$('status').className=kind || '';}
   function table(result,title){
     const box=document.createElement('div');box.className='table-scroll';
@@ -18,7 +26,7 @@
   function cancel(){job++;clearTimeout(timer);if(worker)worker.terminate();worker=null;if(url)URL.revokeObjectURL(url);url=null;$('run').disabled=false;$('check').disabled=false;$('query').readOnly=false;$('stop').hidden=true;}
   function save(){try{localStorage.setItem('cpp-sql-lab:v1:'+current().id,$('query').value);}catch(_){}}
   function choose(){
-    cancel();const e=current();$('task-title').textContent=e.title;$('task-prompt').textContent=e.prompt;
+    cancel();const e=current();$('task-title').textContent=e.title;$('task-prompt').textContent=context(e)+'\n\n'+e.prompt;
     const index=lab.exercises.indexOf(e);
     $('previous').disabled=index===0;$('next').disabled=index===lab.exercises.length-1;
     $('exercise-position').textContent=(index+1)+' / '+lab.exercises.length;

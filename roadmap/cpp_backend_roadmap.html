@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="course-dark">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -28,14 +28,17 @@
   .fade-in { animation: fadeIn 0.25s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 </style>
+<meta name="theme-color" content="#18252f">
+<link rel="stylesheet" href="assets/course-theme.css?v=4b6f4f70fb3b">
+<link rel="stylesheet" href="assets/course-dark-surfaces.css?v=a50d1a13466e">
 </head>
-<body>
+<body class="course-dark course-support course-page-home">
 <div id="root"></div>
 <script id="roadmap-data" type="application/json">
 {
   "title": "C++ и backend-разработка",
   "subtitle": "Маршрут от C++ и управления ресурсами к сетевым сервисам, SQL, PostgreSQL и эксплуатации.",
-  "intro": "Курс для всех, кто знаком с основами C или C++: переменными, условиями, циклами, функциями, массивами и базовым использованием указателей. Классы и управление ресурсами изучаются с начала; опыт embedded-разработки, многопоточности, сетей и баз данных не требуется. Для расчётов достаточно школьной арифметики; новые понятия вводятся по мере необходимости. Основной материал и задания можно изучать в браузере. Для самостоятельного запуска примеров понадобится компилятор, а для серверных проектов — среда разработки; работу с терминалом и сборкой разбирает станция 5. Основная версия языка — C++20, возможности C++23 отмечены отдельно.",
+  "intro": "Курс для всех, кто знаком с основами C или C++: переменными, условиями, циклами, функциями, массивами и базовым использованием указателей. Классы и управление ресурсами изучаются с начала; опыт многопоточности, сетей и баз данных не требуется. Для расчётов достаточно школьной арифметики; новые понятия вводятся по мере необходимости. Основной материал и задания можно изучать в браузере. Для самостоятельного запуска примеров понадобится компилятор, а для серверных проектов — среда разработки; работу с терминалом и сборкой разбирает станция 5. Курс охватывает C++20 и C++23 в одном маршруте. Общие правила объясняются один раз; новые средства и изменения поведения C++23 отмечены в соответствующих разделах. У прежних листингов без отдельной пометки сохраняется основа C++20. Пометка C++20 / C++23 указывает применимые редакции, а не гарантирует поддержку вашим компилятором: возможности языка и стандартной библиотеки проверяются отдельно. Версия явно указана в заданиях, где от неё зависит ответ.",
   "stages": [
     {
       "id": "oop-basics",
@@ -119,7 +122,7 @@
       "station": {
         "file": "cpp_station1_modern_cpp.html",
         "storeKey": "cpp_station1_progress_v1",
-        "totalSections": 23,
+        "totalSections": 27,
         "label": "Станция 1"
       },
       "num": 2
@@ -211,7 +214,7 @@
       "station": {
         "file": "cpp_station3_stl_templates.html",
         "storeKey": "cpp_station3_progress_v1",
-        "totalSections": 40,
+        "totalSections": 53,
         "label": "Станция 3"
       },
       "num": 4,
@@ -263,7 +266,7 @@
       "station": {
         "file": "cpp_station4_error_handling.html",
         "storeKey": "cpp_station4_progress_v1",
-        "totalSections": 28,
+        "totalSections": 30,
         "label": "Станция 4"
       },
       "num": 5
@@ -284,7 +287,8 @@
         "Linux CLI: навигация, grep/sed/awk, процессы, права и пайпы",
         "Менеджеры зависимостей: vcpkg/Conan и фиксация версий",
         "Presets/toolchains, compile_commands, ccache, LTO/PGO",
-        "CTest, gdb/core dumps, sanitizers, perf и strace"
+        "CTest, gdb/core dumps, sanitizers, perf и strace",
+        "Законченные GDB/perf-опыты и Conan с lock, ревизией и целью CMake"
       ],
       "res": [
         {
@@ -317,7 +321,7 @@
       "station": {
         "file": "cpp_station5_build_tools.html",
         "storeKey": "cpp_station5_progress_v1",
-        "totalSections": 39,
+        "totalSections": 48,
         "label": "Станция 5"
       },
       "num": 6
@@ -338,7 +342,8 @@
         "Запись, page cache, fsync и атомарная замена имени",
         "Виртуальная память, страницы, COW, RSS/PSS и mmap",
         "Сигналы, безопасный приём и согласованное завершение",
-        "Лимиты, cgroups, namespaces и контекст службы"
+        "Лимиты, cgroups, namespaces и контекст службы",
+        "Необязательное углубление: UNIX-сокеты, учётные данные и передача FD"
       ],
       "res": [
         {
@@ -366,7 +371,7 @@
       "station": {
         "file": "cpp_station5_linux_systems.html",
         "storeKey": "cpp_station5_linux_progress_v1",
-        "totalSections": 28,
+        "totalSections": 30,
         "label": "Станция 5Б"
       },
       "num": 7
@@ -418,7 +423,7 @@
       "station": {
         "file": "cpp_station6_multithreading.html",
         "storeKey": "cpp_station6_progress_v1",
-        "totalSections": 57,
+        "totalSections": 60,
         "label": "Станция 6"
       },
       "num": 8
@@ -438,7 +443,8 @@
         "7.5: select/poll/epoll, LT/ET, reactor state machine, fairness и backpressure",
         "7.6: Boost.Asio executors/strand, lifetime buffers/Session, cancellation и C++20 coroutines",
         "7.7: HTTP/1.1–3, framing и request smuggling, TLS 1.3, certificates, SNI/ALPN и Beast",
-        "7.8: сроки и повторы, разные очереди сервера, балансировка соединений/запросов, перегрузка и диагностика"
+        "7.8: сроки и повторы, разные очереди сервера, балансировка соединений/запросов, перегрузка и диагностика",
+        "Системное разрешение имён, split DNS и запускаемый ограниченный Asio-сервер"
       ],
       "res": [
         {
@@ -476,7 +482,7 @@
       "station": {
         "file": "cpp_station7_networking.html",
         "storeKey": "cpp_station7_progress_v1",
-        "totalSections": 101,
+        "totalSections": 106,
         "label": "Станция 7"
       },
       "num": 9
@@ -496,7 +502,8 @@
         "IPv6 scopes, RA/SLAAC, DAD, MTU и ICMPv6 PTB",
         "SNAT, DNAT, original/reply tuples и старое состояние",
         "Tcpdump, счётчики и trace как проверка гипотезы",
-        "Один UDP ping/pong на C++20 с ограничением ожидания"
+        "Один UDP ping/pong на C++20 с ограничением ожидания",
+        "Необязательно: VLAN/STP, OSPF/BGP и реальный TCP-опыт в изолированной VM"
       ],
       "res": [
         {
@@ -524,7 +531,7 @@
       "station": {
         "file": "cpp_station7_linux_networks.html",
         "storeKey": "cpp_station7_netlab_progress_v1",
-        "totalSections": 25,
+        "totalSections": 30,
         "label": "Станция 7Б"
       },
       "num": 10
@@ -571,7 +578,7 @@
       "station": {
         "file": "cpp_station8_rest_api.html",
         "storeKey": "cpp_station8_progress_v1",
-        "totalSections": 66,
+        "totalSections": 67,
         "label": "Станция 8"
       },
       "num": 11
@@ -586,7 +593,8 @@
         "SELECT, WHERE, NULL, сортировка и изменения",
         "JOIN и агрегаты без потерянных и размноженных строк",
         "Подзапросы, EXISTS, CTE и UNION",
-        "Оконные функции, страницы и UPSERT"
+        "Оконные функции, страницы и UPSERT",
+        "Схема организаций и проектов: составные ключи, обязательность и удаление"
       ],
       "res": [
         {
@@ -604,7 +612,7 @@
       "station": {
         "file": "cpp_station9_sql.html",
         "storeKey": "cpp_station9_sql_progress_v1",
-        "totalSections": 26,
+        "totalSections": 27,
         "label": "Станция 9A"
       },
       "num": 12
@@ -624,7 +632,8 @@
         "Репликация, свежесть чтения, failover и защита от двух писателей",
         "Cache-aside: гонка заполнения, TTL, одновременные промахи и бюджет БД",
         "Outbox и receipt: атомарная запись, повторная доставка, порядок и очистка",
-        "Паттерн «репозиторий»: отделение доступа к данным от логики"
+        "Паттерн «репозиторий»: отделение доступа к данным от логики",
+        "Физические JOIN, статистика/spill и реальная копия PostgreSQL с восстановлением"
       ],
       "res": [
         {
@@ -652,7 +661,7 @@
       "station": {
         "file": "cpp_station9_databases.html",
         "storeKey": "cpp_station9_progress_v1",
-        "totalSections": 21,
+        "totalSections": 25,
         "label": "Станция 9B"
       },
       "num": 13
@@ -716,11 +725,20 @@
         "Различать фильтр захвата и фильтр отображения, связывать список пакетов, поля и байты.",
         "Читать sequence/ACK, повторные передачи и окна TCP без поспешных выводов.",
         "Разбирать DNS, собирать HTTP-поток и понимать, что скрывают TLS и QUIC.",
-        "Сравнивать трассы, считать интервалы и отделять наблюдение от гипотезы о причине."
+        "Сравнивать трассы, считать интервалы и отделять наблюдение от гипотезы о причине.",
+        "Готовые реальные TCP-записи: потери, качество захвата и медленный читатель"
       ],
       "res": [
-        {"name": "Wireshark User’s Guide", "url": "https://www.wireshark.org/docs/wsug_html_chunked/", "note": "официальное руководство"},
-        {"name": "Учебные PCAP и пояснения", "url": "examples/traffic-analysis/README.txt", "note": "синтетические, без чужого трафика"}
+        {
+          "name": "Wireshark User’s Guide",
+          "url": "https://www.wireshark.org/docs/wsug_html_chunked/",
+          "note": "официальное руководство"
+        },
+        {
+          "name": "Учебные PCAP и пояснения",
+          "url": "examples/traffic-analysis/README.txt",
+          "note": "синтетические, без чужого трафика"
+        }
       ],
       "project": {
         "title": "Отчёт о медленном HTTP-ответе",
@@ -731,12 +749,263 @@
       "station": {
         "file": "cpp_station7_traffic_analysis.html",
         "storeKey": "cpp_station7_traffic_progress_v1",
-        "totalSections": 25,
+        "totalSections": 26,
         "label": "Станция 7В"
+      }
+    },
+    {
+      "id": "messaging",
+      "num": 16,
+      "phase": "BACKEND · ПРОДОЛЖЕНИЕ",
+      "title": "11 · Обмен сообщениями: Kafka и RabbitMQ",
+      "goal": "Объяснять асинхронную работу, подтверждения, повторную доставку и порядок; применять Kafka и RabbitMQ в ограниченном учебном стенде.",
+      "why": "Начинаем с задачи, которую нельзя завершить одним синхронным вызовом. Затем прослеживаем запись события, обработку, потерю подтверждения и восстановление. Kafka и RabbitMQ изучаются как разные модели, а не взаимозаменяемые названия очереди.",
+      "skills": [
+        "Событие, команда, очередь и журнал; договор асинхронного результата",
+        "Kafka: topic, partition, ключ, репликация, producer и consumer group",
+        "Смещения, повторы, идемпотентность и границы транзакций",
+        "RabbitMQ: exchanges, queues, confirms, acknowledgements и ограничение доставки",
+        "C++-клиенты, локальные опыты и разбор отказов",
+        "Сквозная практика API → PostgreSQL/outbox → RabbitMQ → устойчивый receipt"
+      ],
+      "res": [
+        {
+          "name": "Apache Kafka 4.1",
+          "url": "https://kafka.apache.org/41/getting-started/introduction/",
+          "note": "назначение и устройство потоков событий"
+        },
+        {
+          "name": "RabbitMQ 4.3",
+          "url": "https://www.rabbitmq.com/docs/4.3/confirms",
+          "note": "разные подтверждения отправителя и обработчика"
+        }
+      ],
+      "project": {
+        "title": "Событие задачи: от записи до повторной обработки",
+        "desc": "Прочитай готовые разборы, затем в своём локальном стенде сравни независимое чтение Kafka и повторную доставку RabbitMQ. C++-модель доступна без брокера.",
+        "deliver": "Карта гарантий, наблюдения до и после отказа, проверка повторов и объяснение выбранного порядка.",
+        "skills": "Асинхронные контракты, Kafka/RabbitMQ, C++ lifetime, восстановление и честная диагностика."
+      },
+      "station": {
+        "file": "cpp_station11_messaging.html",
+        "storeKey": "cpp_station11_progress_v1",
+        "totalSections": 33,
+        "label": "Станция 11"
+      }
+    },
+    {
+      "id": "redis",
+      "num": 17,
+      "phase": "BACKEND · ПРОДОЛЖЕНИЕ",
+      "title": "12 · Redis: данные в памяти и кэширование",
+      "goal": "Понимать типы данных Redis, цену памяти, атомарные операции, сохранность и ограничения кэширования.",
+      "why": "Кэш не знает автоматически, что источник изменился. Начинаем с ключей и срока хранения, затем разбираем гонки, память, транзакции, репликацию и безопасный доступ из C++.",
+      "skills": [
+        "RESP, ключи, типы и TTL",
+        "Инвалидация, устаревание, промахи и ограничение нагрузки на БД",
+        "Память, eviction и задержки",
+        "MULTI/WATCH, Lua, сохранение и репликация",
+        "C++/hiredis и изолированная лаборатория без доступа к рабочей базе"
+      ],
+      "res": [
+        {
+          "name": "Redis: официальные руководства",
+          "url": "https://redis.io/docs/latest/develop/",
+          "note": "типы, команды и гарантии отдельных механизмов"
+        },
+        {
+          "name": "hiredis 1.3.0",
+          "url": "https://github.com/redis/hiredis/tree/v1.3.0",
+          "note": "C API, владение ответами и безопасная оболочка C++"
+        }
+      ],
+      "project": {
+        "title": "Кэш с определённым договором",
+        "desc": "Сначала проследи гонку на маленькой модели. Затем выполни отдельный локальный опыт с Redis, C++-клиентом, ограничениями времени и памяти.",
+        "deliver": "Критерий свежести, проверка отказа и восстановления, корректное владение ответом, отсутствие секретов в отчёте.",
+        "skills": "Redis, кэширование, ресурсные границы и различение атомарности/долговечности."
+      },
+      "station": {
+        "file": "cpp_station12_redis.html",
+        "storeKey": "cpp_station12_progress_v1",
+        "totalSections": 32,
+        "label": "Станция 12"
+      }
+    },
+    {
+      "id": "kubernetes",
+      "num": 18,
+      "phase": "BACKEND · ПРОДОЛЖЕНИЕ",
+      "title": "13 · Kubernetes для backend-разработчика",
+      "goal": "Развёртывать и исследовать учебный C++-сервис в собственном локальном кластере, объясняя состояние, сеть, обновление и ограничения ресурсов.",
+      "why": "После Docker переходим от одного процесса к желаемому состоянию нескольких экземпляров. Сначала рисуем компоненты и путь запроса, затем наблюдаем готовность, выпуск и остановку.",
+      "skills": [
+        "Pod, Deployment, контроллеры и желаемое состояние",
+        "Service, DNS и границы сетевых адресов",
+        "Readiness, liveness, startup и мягкая остановка",
+        "Requests/limits, размещение, обновление, хранение и доступ",
+        "Собственный kind-контекст, C++-приложение и ограниченные диагностические опыты"
+      ],
+      "res": [
+        {
+          "name": "Kubernetes 1.36",
+          "url": "https://v1-36.docs.kubernetes.io/docs/concepts/",
+          "note": "версионные контракты платформы"
+        },
+        {
+          "name": "kind",
+          "url": "https://kind.sigs.k8s.io/docs/user/quick-start/",
+          "note": "локальный кластер отдельно от рабочего окружения"
+        }
+      ],
+      "project": {
+        "title": "C++-сервис и управляемое обновление",
+        "desc": "В отдельном kubeconfig создай только свой учебный kind-стенд. Проверь настройки, готовность, несколько экземпляров и смену версии; разбор доступен и без запуска.",
+        "deliver": "Манифесты, карта соединений, события изменения состояния и проверка восстановления без рабочих секретов и чужих ресурсов.",
+        "skills": "Kubernetes как пользователь платформы, безопасность эксперимента и объяснимый выпуск."
+      },
+      "station": {
+        "file": "cpp_station13_kubernetes.html",
+        "storeKey": "cpp_station13_progress_v1",
+        "totalSections": 34,
+        "label": "Станция 13"
+      }
+    },
+    {
+      "id": "observability",
+      "num": 19,
+      "phase": "BACKEND · ПРОДОЛЖЕНИЕ",
+      "title": "14 · Наблюдаемость и расследование отказов",
+      "goal": "Получать проверяемые ответы о поведении сервиса через логи, метрики и трассы; отличать полезную работу от доставки телеметрии.",
+      "why": "Начинаем с конкретного вопроса и границы измерения. Затем считаем распределения и доли, проводим контекст через два C++-процесса и отдельно ломаем работу и её наблюдение.",
+      "skills": [
+        "Безопасный структурный журнал и корреляция",
+        "Prometheus, counters/gauges, histogram, PromQL и кардинальность",
+        "OpenTelemetry, W3C Trace Context, sampling и конечные очереди",
+        "SLI/SLO, бюджет ошибок, правила оповещений и проверка гипотез",
+        "Локальные Prometheus/Grafana/Collector/Jaeger и полный C++-разбор"
+      ],
+      "res": [
+        {
+          "name": "Prometheus",
+          "url": "https://prometheus.io/docs/practices/histograms/",
+          "note": "распределения, агрегация и ограничения оценки"
+        },
+        {
+          "name": "OpenTelemetry C++ 1.30.0",
+          "url": "https://github.com/open-telemetry/opentelemetry-cpp/tree/v1.30.0",
+          "note": "API и реализация выбранной версии SDK"
+        },
+        {
+          "name": "Google SRE Workbook",
+          "url": "https://sre.google/workbook/alerting-on-slos/",
+          "note": "инженерные рекомендации, не универсальные нормативные пороги"
+        }
+      ],
+      "project": {
+        "title": "Один запрос через два C++-сервиса",
+        "desc": "Собери известный поток, найди его события и трассу, проверь метрики и правило. Затем сравни отказ worker и отказ Collector, сохрани наблюдения и восстанови стенд.",
+        "deliver": "Связанные свидетельства, корректные расчёты, безопасный отчёт и границы измеренного результата.",
+        "skills": "Наблюдаемость, диагностика, цена телеметрии и самостоятельное объяснение архитектуры."
+      },
+      "station": {
+        "file": "cpp_station14_observability.html",
+        "storeKey": "cpp_station14_progress_v1",
+        "totalSections": 30,
+        "label": "Станция 14"
+      }
+    },
+    {
+      "id": "security",
+      "num": 20,
+      "phase": "BACKEND · ПРОДОЛЖЕНИЕ",
+      "title": "15 · Безопасность сервиса: от запроса до хоста",
+      "goal": "Понимать границы доверия, проверять доступ и недоверенный ввод, ограничивать последствия и проверять защиту на конкретных условиях.",
+      "why": "Начинаем с обычной работы сервиса задач. Затем меняем объект, поле, адрес или стоимость запроса и прослеживаем причину нарушения. Исправление должно сохранить нормальную работу, а не просто запретить показанный ввод.",
+      "skills": [
+        "Модель угроз и проверяемые границы защиты",
+        "Вход, пароли, сессии и права на объект, действие и поля",
+        "SQL-инъекции, команды, загрузки, XSS/CSRF и SSRF",
+        "TLS, доверие к прокси, сетевые границы и пределы ресурсов",
+        "Секреты, выпуск, C++-парсер, отрицательные проверки и инцидент",
+        "Два пользователя настоящего API: пароль, сессия, чужой объект, срок и отзыв"
+      ],
+      "res": [
+        {
+          "name": "OWASP ASVS 5.0.0",
+          "url": "https://asvs.owasp.org/",
+          "note": "проверяемые требования, не сертификат учебному проекту"
+        },
+        {
+          "name": "OWASP Cheat Sheet Series",
+          "url": "https://cheatsheetseries.owasp.org/",
+          "note": "точечные руководства связаны с объяснениями в главе"
+        },
+        {
+          "name": "RFC 8446 и 9525",
+          "url": "https://www.rfc-editor.org/rfc/rfc9525.html",
+          "note": "TLS 1.3 и подтверждение имени сервиса"
+        }
+      ],
+      "project": {
+        "title": "Одно правило — положительная и отрицательная проверки",
+        "desc": "Пройди четыре пошаговых опыта: настоящий SQLite, модель доступа, исходящие назначения и TLS. Затем проверь C++-политику и парсер локально; сохрани условия, результат и непроверенные границы.",
+        "deliver": "Модель угроз, матрица проверок, воспроизводимые наблюдения и разбор последствий без настоящих секретов и чужих целей.",
+        "skills": "Проектирование защиты, безопасная обработка данных и честная оценка результата."
+      },
+      "station": {
+        "file": "cpp_station15_security.html",
+        "storeKey": "cpp_station15_progress_v1",
+        "totalSections": 42,
+        "label": "Станция 15"
+      }
+    },
+    {
+      "id": "distributed-systems",
+      "num": 21,
+      "phase": "BACKEND · ПРОДОЛЖЕНИЕ",
+      "title": "16 · Распределённые системы и восстановление процессов",
+      "goal": "Объяснять, какие результаты допустимы при задержках, потерянных ответах, нескольких копиях и остановках участников.",
+      "why": "Начинаем с покупки, ответ на которую не пришёл. Через истории чтений и записей переходим к кворумам, журналу, правам владельца, разделению данных и восстановлению оплаты.",
+      "skills": [
+        "Неизвестный исход и повтор одного намерения",
+        "Линейризуемость, причинность, сходимость и условия CAP",
+        "Кворумы, Raft, commit/apply и чтение после выборов",
+        "Логические часы, аренды и fencing",
+        "Шардирование, перенос владения, сага и границы 2PC"
+      ],
+      "res": [
+        {
+          "name": "Herlihy–Wing, Linearizability",
+          "url": "https://cs.brown.edu/~mph/HerlihyW90/p463-herlihy.pdf",
+          "note": "истории вызовов и последовательное объяснение результата"
+        },
+        {
+          "name": "Ongaro–Ousterhout, Raft extended",
+          "url": "https://raft.github.io/raft.pdf",
+          "note": "журнал, сохранность решений, выборы и чтения"
+        },
+        {
+          "name": "Garcia-Molina–Salem, Sagas",
+          "url": "https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf",
+          "note": "локальные транзакции, компенсация и восстановление"
+        }
+      ],
+      "project": {
+        "title": "Проверить историю и восстановить неизвестный результат",
+        "desc": "Пройди три подготовленных интерактивных истории. Затем запусти C++-проверку одного регистра и отдельную модель двух SQLite-процессов с остановкой после оплаты.",
+        "deliver": "Контрпример истории, сохранённые состояния до/после остановки, объяснение повтора без второго эффекта и границ модели.",
+        "skills": "Согласованность, отказоустойчивое продолжение и самостоятельное чтение контрактов систем."
+      },
+      "station": {
+        "file": "cpp_station16_distributed_systems.html",
+        "storeKey": "cpp_station16_progress_v1",
+        "totalSections": 21,
+        "label": "Станция 16"
       }
     }
   ],
-  "closing": "Практические задания помогают собрать портфолио и научиться объяснять решения: какие ограничения были у задачи, почему выбран этот подход, как проверялась корректность и что изменится при росте нагрузки. Учебный проект следует представлять как учебный, не подменяя им коммерческий опыт. Прохождение курса не гарантирует определённый грейд: готовность к собеседованию лучше оценивать по самостоятельному решению незнакомых задач и способности обсуждать альтернативы. Маршрут завершается станцией 10: тестирование, доставка изменений и эксплуатация сервиса.",
+  "closing": "Практические задания помогают собрать портфолио и научиться объяснять решения: какие ограничения были у задачи, почему выбран этот подход, как проверялась корректность и что изменится при росте нагрузки. Учебный проект следует представлять как учебный, не подменяя им коммерческий опыт. Прохождение курса не гарантирует определённый грейд: готовность к собеседованию лучше оценивать по самостоятельному решению незнакомых задач и способности обсуждать альтернативы. После станции 10 backend-ветка продолжается станциями 11–16: Kafka/RabbitMQ, Redis, Kubernetes, наблюдаемость, безопасность и распределённые системы. Для станции 16 нужны основы API, транзакций и сообщений из 8/9B/11; Redis помогает связать примеры аренды с практикой. Для основной части безопасности достаточно 7–10; системы 11–14 не обязательны. Чтение, тесты и браузерные модели доступны без серверного стенда; отдельные локальные практики требуют указанного окружения.",
   "bonusFiles": [
     {
       "label": "Свой сервер: сквозной практикум",
@@ -751,7 +1020,7 @@
     {
       "label": "Визуальные лаборатории",
       "file": "visual_labs.html",
-      "desc": "Девять связанных экспериментов: жизнь объекта, владение, vector, сборка, потоки, сеть и API, SQL, транзакции и перегрузка. Входы также есть в оглавлениях нужных подглав."
+      "desc": "Связанные разборы: жизнь объекта, ресурсы, сборка, потоки, пакеты, SQL, транзакции и перегрузка. Отдельно — доступ, SQL-инъекции, исходящие запросы и TLS. Входы есть в оглавлениях нужных подглав. В станции 16 — потерянный ответ, чтение старого лидера и восстановление заказа."
     },
     {
       "label": "Источники теории",
@@ -759,7 +1028,7 @@
       "desc": "Первоисточники по разделам: правила C++, протоколы, документация инструментов и рекомендации по проектированию."
     },
     {
-      "label": "Шпаргалка по станциям 0–10",
+      "label": "Шпаргалка по станциям 0–16",
       "file": "cpp_cheatsheet.html",
       "desc": "C++, сборка, многопоточность, сеть и API: ключевые правила, примеры, источники и быстрые переходы к полным главам."
     },
@@ -776,9 +1045,9 @@
 const { useState, useEffect, useCallback } = React;
 const DATA = JSON.parse(document.getElementById("roadmap-data").textContent);
 const C = {
-    blue: "#2D6FB3", blueDeep: "#1B4E85", ink: "#16202B", line: "#DCE5EE",
-    paper: "#F7FAFD", green: "#2E7D52", greenBg: "#E7F5EE", mute: "#7E8C9A", muteSoft: "#A7B4C1",
-    amber: "#B07A12", amberBg: "#FBF1DC", red: "#C0392B",
+    blue: "#98c6db", blueDeep: "#b9deef", ink: "#e4edf2", line: "#405664",
+    paper: "#223440", green: "#a6d6ba", greenBg: "#244239", mute: "#b1c1cc", muteSoft: "#a6bac6",
+    amber: "#edc78d", amberBg: "#443b2b", red: "#f2ada5",
 };
 const PHASE_COLORS = {
     "Подготовка": "#7A5BB0",
@@ -828,9 +1097,11 @@ function loadStationProgress(storeKey, totalSections) {
         const trafficLab = storeKey === 'cpp_station7_traffic_progress_v1';
         const architectureAudit = ['cpp_station7_progress_v1', 'cpp_station8_progress_v1', 'cpp_station9_progress_v1', 'cpp_station10_progress_v1'].includes(storeKey);
         const systemsDepthAudit = ['cpp_station3_progress_v1', 'cpp_station5_progress_v1', 'cpp_station5_linux_progress_v1', 'cpp_station6_progress_v1', 'cpp_station9_sql_progress_v1'].includes(storeKey);
+        const foundationsReview = ['cpp_station1_progress_v1', 'cpp_station3_progress_v1', 'cpp_station5_progress_v1'].includes(storeKey);
+        const deepeningReview = ['cpp_station5_progress_v1', 'cpp_station7_progress_v1', 'cpp_station7_netlab_progress_v1', 'cpp_station7_traffic_progress_v1', 'cpp_station9_sql_progress_v1', 'cpp_station9_progress_v1', 'cpp_station11_progress_v1', 'cpp_station15_progress_v1', 'cpp_station16_progress_v1'].includes(storeKey);
         const editorialReview = ['cpp_station2_progress_v1', 'cpp_station3_progress_v1', 'cpp_station4_progress_v1', 'cpp_station5_progress_v1', 'cpp_station5_linux_progress_v1', 'cpp_station6_progress_v1', 'cpp_station7_progress_v1', 'cpp_station7_netlab_progress_v1', 'cpp_station7_traffic_progress_v1', 'cpp_station8_progress_v1', 'cpp_station9_sql_progress_v1', 'cpp_station9_progress_v1', 'cpp_station10_progress_v1'].includes(storeKey);
         const editorialQuizKey = storeKey === 'cpp_station3_progress_v1' ? 'station-final:editorial-20261029:v2:basic' : 'station-final:editorial-20261029:v1:basic';
-        const quiz = editorialReview ? data[editorialQuizKey] : systemsDepthAudit ? data['station-final:systems-depth-20261025:v1:basic'] : architectureAudit ? data['station-final:architecture-20261025:v1:basic'] : splitDatabase ? data['station-final:database-split:v1:basic'] : auditedCpp ? data["station-final:coverage:v1:basic"] : networkLab ? data['station-final:netlab-20261021:v1:basic'] : trafficLab ? data['station-final:traffic-20261026:v1:basic'] : networkFoundation ? data['station-final:network-foundation-20261021:v1:basic'] : data["station-final:v3:basic"] || data["station-final:v2:basic"] || data.quiz || aggregateModuleQuiz("basic");
+        const quiz = deepeningReview ? data['station-final:deepening-20261105:v1:basic'] : foundationsReview ? data['station-final:foundations-20261105:v1:basic'] : editorialReview ? data[editorialQuizKey] : systemsDepthAudit ? data['station-final:systems-depth-20261025:v1:basic'] : architectureAudit ? data['station-final:architecture-20261025:v1:basic'] : splitDatabase ? data['station-final:database-split:v1:basic'] : auditedCpp ? data["station-final:coverage:v1:basic"] : networkLab ? data['station-final:netlab-20261021:v1:basic'] : trafficLab ? data['station-final:traffic-20261026:v1:basic'] : networkFoundation ? data['station-final:network-foundation-20261021:v1:basic'] : data["station-final:v3:basic"] || data["station-final:v2:basic"] || data.quiz || aggregateModuleQuiz("basic");
         const quizAdvanced = (editorialReview || splitDatabase || architectureAudit || systemsDepthAudit) ? null : data.quizAdvanced || aggregateModuleQuiz("advanced");
         return { secDone, totalSections, quiz, quizAdvanced };
     }
@@ -912,7 +1183,7 @@ function MilestoneCard({ milestone, accent }) {
 }
 function Stage({ stage, index, done, expanded, onToggleDone, onToggleExpand, isLast }) {
     const [stationProgress, setStationProgress] = useState(null);
-    const accent = "#386789";
+    const accent = "#98c6db";
     // читаем прогресс станции при раскрытии
     useEffect(() => {
         if (stage.station) {
@@ -935,7 +1206,7 @@ function Stage({ stage, index, done, expanded, onToggleDone, onToggleExpand, isL
     }, [expanded, stage.station]);
     return (React.createElement("div", { style: S.stageRow },
         React.createElement("div", { style: S.rail },
-            React.createElement("button", { style: Object.assign(Object.assign({}, S.node), { borderColor: accent, background: done ? accent : "#fff", color: done ? "#fff" : accent }), onClick: onToggleDone, "aria-pressed": done, "aria-label": (done ? "Снять отметку: " : "Отметить пройденным: ") + stage.title, title: done ? "Пройдено" : "Отметить пройденным" }, done ? React.createElement(Icon.check, null) : React.createElement("span", { style: S.nodeNum }, stage.optional ? "+" : index + 1)),
+            React.createElement("button", { style: Object.assign(Object.assign({}, S.node), { borderColor: accent, background: done ? accent : C.paper, color: done ? "#18252f" : accent }), onClick: onToggleDone, "aria-pressed": done, "aria-label": (done ? "Снять отметку: " : "Отметить пройденным: ") + stage.title, title: done ? "Пройдено" : "Отметить пройденным" }, done ? React.createElement(Icon.check, null) : React.createElement("span", { style: S.nodeNum }, stage.optional ? "+" : index + 1)),
             !isLast && React.createElement("div", { style: Object.assign(Object.assign({}, S.railLine), { background: done ? accent : C.line }) })),
         React.createElement("div", { style: Object.assign(Object.assign({}, S.stageCard), (done ? S.stageCardDone : {})) },
             React.createElement("button", { style: S.stageHead, "aria-expanded": expanded, onClick: onToggleExpand },
@@ -1045,11 +1316,12 @@ function App() {
         { id: "engineering", label: "02 / ИНЖЕНЕРНАЯ ПРАКТИКА", title: "От кода — к работающей программе", description: "Сборка, процессы и ресурсы Linux, затем потоки и координация нескольких операций.", indices: [5, 6, 7] },
         { id: "backend", label: "03 / BACKEND", title: "Построить взаимодействие", description: "Сети, изолированная Linux-лаборатория и API. Необязательная 7В — анализ пакетов в Wireshark; к ней можно перейти сразу после 7.", indices: [8, 9, 14, 10] },
         { id: "databases-group", label: "04 / БАЗЫ ДАННЫХ", title: "От запросов к надёжному хранению", description: "9A — SQL и практика запросов. Затем 9B — PostgreSQL, конкуренция, индексы и работа из C++.", indices: [11, 12] },
-        { id: "planned", label: "05 / ЭКСПЛУАТАЦИЯ", title: "Эксплуатация сервиса", description: "Тесты, контейнеры, CI, безопасный выпуск и наблюдаемость — станция 10.", indices: [13] }
+        { id: "planned", label: "05 / ЭКСПЛУАТАЦИЯ", title: "Эксплуатация сервиса", description: "Тесты, контейнеры, CI, безопасный выпуск и основы наблюдаемости — станция 10.", indices: [13] },
+        { id: "backend-extension", label: "06 / BACKEND · ПРОДОЛЖЕНИЕ", title: "От одного сервиса к системе", description: "Станции 11–16: сообщения, Redis, Kubernetes, наблюдаемость, безопасность и распределённые решения. Механизмы разбираются через работу, нарушение условий и проверку исправления; подготовленные модели отделены от настоящих локальных стендов.", indices: [15, 16, 17, 18, 19, 20] }
     ];
     const previewTitles = {
         foundation: "Язык и ресурсы", engineering: "Сборка, Linux и потоки",
-        backend: "Сети и API", "databases-group": "SQL и PostgreSQL", planned: "Эксплуатация сервиса"
+        backend: "Сети и API", "databases-group": "SQL и PostgreSQL", planned: "Эксплуатация сервиса", "backend-extension": "Брокеры, платформа, диагностика и безопасность"
     };
     return h("div", { className: "course-home-page" },
         h("a", { className: "home-skip", href: "#curriculum" }, "Перейти к программе"),
@@ -1059,9 +1331,9 @@ function App() {
         h("main", null,
             h("section", { className: "home-hero", "aria-labelledby": "course-title" },
                 h("div", { className: "home-hero-copy" },
-                    h("p", { className: "home-eyebrow" }, "C++20 · ТЕОРИЯ · РАЗБОРЫ · ПРАКТИКА"),
+                    h("p", { className: "home-eyebrow" }, "C++20 / C++23 · ТЕОРИЯ · РАЗБОРЫ · ПРАКТИКА"),
                     h("h1", { id: "course-title" }, "Понять C++.", h("br"), h("span", null, "Построить backend.")),
-                    h("p", { className: "home-description" }, "От классов и владения памятью — к Linux, многопоточности, сетям, серверным API, SQL и PostgreSQL. С подробной теорией, разборами задач, практикой и основами эксплуатации сервиса."),
+                    h("p", { className: "home-description" }, "Научимся писать C++-программы, которые принимают запросы, работают с данными и взаимодействуют по сети. Начнём с классов и памяти, затем разберём устройство серверов, работу под нагрузкой и поиск причин сбоев. С теорией, разборами задач и лабораториями."),
                     h("div", { className: "home-actions" },
                         h("a", { className: "home-primary", href: lastRead ? lastRead.file + "#section=" + encodeURIComponent(lastRead.section) : "cpp_station0_oop_basics.html" }, lastRead ? "Продолжить обучение →" : "Начать с основ →"),
                         h("a", { className: "home-secondary", href: "#curriculum" }, "Посмотреть программу ↓")),
@@ -1075,7 +1347,7 @@ function App() {
             h("section", { className: "home-course-facts", "aria-label": "Содержание курса" },
                 h("div", null, h("strong", null, ready.length), h("span", null, "готовых станций")),
                 h("div", null, h("strong", null, ready.reduce((sum, stage) => sum + stage.station.totalSections, 0)), h("span", null, "разделов теории")),
-                h("div", null, h("strong", null, "C++20"), h("span", null, "основная версия языка"))),
+                h("div", null, h("strong", null, "C++20 / 23"), h("span", null, "общая основа и различия редакций"))),
             h("details", { className: "home-prerequisites" }, h("summary", null, "Подойдёт ли мне курс и что нужно для начала?"), h("p", null, DATA.intro)),
             h("section", { id: "curriculum", className: "home-curriculum", "aria-labelledby": "curriculum-title" },
                 h("div", { className: "home-section-heading" }, h("div", null, h("p", { className: "home-eyebrow" }, "ПРОГРАММА"), h("h2", { id: "curriculum-title" }, "Шаг за шагом, без пробелов.")), h("p", null, "Раскройте станцию, чтобы увидеть темы, материалы и итоговый проект.")),
@@ -1201,6 +1473,18 @@ Object.assign(S, {
     closing: { borderTop: "1px solid #dfe2e2", padding: "28px 0", marginTop: 32 },
     closingText: { fontSize: 16, lineHeight: 1.8, margin: 0 }
 });
+// Color reconciliation for expanded route cards; content and progress are unchanged.
+for (const name of ["subtitle", "stageGoal", "projectMetaRow", "milestoneBlockWhy"]) S[name].color = C.mute;
+for (const name of ["introBox", "whyText", "skillItem", "resName", "projectDesc", "milestoneDesc", "milestoneListItem"]) S[name].color = C.ink;
+for (const name of ["projectCard", "milestoneCard", "stationInDev"]) S[name].background = C.paper;
+for (const name of ["openBtn", "milestoneOpenBtn", "doneBtn"]) {
+    S[name].color = "#18252f"; S[name].width = "auto"; S[name].height = "auto";
+    S[name].maxWidth = "100%"; S[name].minWidth = 0; S[name].boxShadow = "none";
+}
+S.stageCardDone.background = "#244239";
+S.milestoneCode.background = "#263b49";
+S.milestoneCode.color = C.ink;
+S.node.transition = "background .2s ease, border-color .2s ease";
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App, null));
 
 </script>

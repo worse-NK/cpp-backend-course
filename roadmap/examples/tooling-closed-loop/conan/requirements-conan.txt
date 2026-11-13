@@ -1,0 +1,17 @@
+# Runtime environment checked with Python 3.12 on Linux x86_64.
+# These version pins are not a wheel/archive hash lock or a pinned Python build.
+certifi==2026.10.23
+charset-normalizer==3.5.2
+colorama==0.4.6
+conan==2.22.2
+distro==1.8.0
+fasteners==0.20
+idna==3.20
+Jinja2==3.1.6
+MarkupSafe==3.0.4
+patch-ng==1.18.1
+python-dateutil==2.9.0.post0
+PyYAML==6.0.3
+requests==2.34.2
+six==1.17.0
+urllib3==2.8.0

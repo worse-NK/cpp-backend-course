@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ru" class="course-dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'">
+  <meta name="description" content="Интерактивный разбор SQL-инъекции: ввод, настоящий SQLite, причина ошибки и проверка исправления. Учебная база работает только в браузере.">
+  <title>Когда данные становятся SQL · Лаборатория безопасности</title>
+  <link rel="stylesheet" href="assets/security-sql-demo.css">
+<meta name="theme-color" content="#18252f">
+<link rel="stylesheet" href="assets/course-theme.css?v=4b6f4f70fb3b">
+<link rel="stylesheet" href="assets/course-dark-surfaces.css?v=a50d1a13466e">
+</head>
+<body class="course-dark course-support course-page-security-sql">
+  <a class="skip-link" href="#experiment">Перейти к эксперименту</a>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand lab-catalog-link" href="visual_labs.html"><span class="brand-mark" aria-hidden="true"><svg class="lab-flask" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5.2 8.5A2.3 2.3 0 0 0 6.8 21h10.4a2.3 2.3 0 0 0 2-3.5L14 9V3M8 15h8"/></svg></span><span>Все лаборатории<small>Безопасность · SQL и правило публикации</small></span></a>
+      <a id="sql-theory-link" class="back-link" href="cpp_station15_security.html#section=sql-injection-laboratory">К объяснению в учебнике <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="title">
+        <p class="eyebrow">Безопасность сервисов · Практический разбор</p>
+        <h1 id="title">Может ли поиск<br><span>показать лишнее?</span></h1>
+        <p class="intro">На сайте есть опубликованные статьи и ещё не готовые черновики. Разберём, почему поиск должен показывать посетителю только открытые материалы — независимо от того, что он написал в строке поиска.</p>
+      </section>
+
+      <section id="orientation" class="orientation" aria-labelledby="orientation-title">
+        <div class="orientation-copy">
+          <h2 id="orientation-title">Сначала — сама задача</h2>
+          <p>Представим сайт с учебными статьями. Авторы готовят новые тексты и пока держат их в черновиках, а посетители читают опубликованное. У посетителя есть строка поиска: он вводит название и получает подходящую открытую статью. В этом опыте проверим, может ли изменение текста поиска заставить сайт показать чужие черновики.</p>
+          <p>В нашем маленьком каталоге четыре опубликованных материала и два черновика. Ищем по точному названию, не по части слова. Для допустимого открытого названия должна найтись его статья; для отсутствующего названия — ничего. Черновики не должны появляться в ответе, даже если посетитель знает их названия.</p>
+          <p>Данные хранятся в таблице: одна строка — один материал, а столбцы — его свойства. <code>title</code> хранит название; <code>is_public</code> отмечает публикацию: <code>1</code> — опубликовано, <code>0</code> — черновик.</p>
+          <p>После нажатия «Найти» обработчик (код приложения, выполняющий поиск) готовит команду для базы данных. Такие команды записывают на <strong>SQL — языке для работы с базами данных</strong>. Наша команда должна означать: «Найти опубликованные материалы с указанным названием».</p>
+        </div>
+        <aside id="dataset" class="dataset" aria-labelledby="dataset-title">
+          <h3 id="dataset-title">Данные этого примера</h3>
+          <div id="fixture-table" class="table-scroll"></div>
+          <p>Все шесть записей вымышлены. Перед каждым запуском они восстанавливаются. Мы ничего не удаляем и не обращаемся к чужому серверу.</p>
+        </aside>
+        <div class="orientation-goal"><strong>Что будем проверять</strong><p>В начальной версии введённое название вставляется прямо в текст команды. Посмотрим, может ли это изменить само условие поиска. Затем сравним исправления. Писать код не нужно: вводим текст, запускаем поиск и разбираем результат.</p><p>SQLite — библиотека, которая здесь хранит таблицу и выполняет SQL-команды прямо в браузере. HTTP и C++ — дополнительные пояснения, а не работающий сервер.</p></div>
+      </section>
+
+      <nav id="lesson" class="steps" aria-label="Этапы разбора"><ol>
+        <li><button id="stage-0" type="button" data-stage="0" aria-current="step"><span>01</span>Обычный поиск</button></li>
+        <li><button id="stage-1" type="button" data-stage="1"><span>02</span>Другой ввод</button></li>
+        <li><button id="stage-2" type="button" data-stage="2"><span>03</span>Причина</button></li>
+        <li><button id="stage-3" type="button" data-stage="3"><span>04</span>Исправление</button></li>
+        <li><button id="stage-4" type="button" data-stage="4"><span>05</span>Проверка</button></li>
+      </ol></nav>
+      <p class="navigation-note">Для первого знакомства переходи по этапам по порядку. Можно свободно открыть любой этап или вернуться к уже просмотренному.</p>
+
+      <section class="guide" aria-labelledby="guide-title">
+        <div class="guide-index" id="guide-index" aria-hidden="true">01</div>
+        <div class="guide-copy"><h2 id="guide-title" tabindex="-1">Сначала проверим обычный поиск</h2><p id="guide-copy">Начнём с известного названия и убедимся, что понимаем нормальную работу поиска.</p>
+          <div id="guide-context" class="guide-context"></div>
+          <div class="instruction"><p><strong>Что сделать</strong><span id="guide-action">Оставь RAII в поле и нажми «Найти».</span></p><p><strong>С чем сравнить</strong><span id="guide-expectation">В каталоге есть один опубликованный материал RAII. В ответе должна быть одна строка.</span></p></div>
+          <details id="guide-hint"><summary>Небольшая подсказка</summary><p id="hint-copy"></p></details>
+        </div>
+      </section>
+
+      <section id="experiment" class="workspace" aria-label="Учебное приложение и разбор запроса">
+        <div class="app-panel panel">
+          <div class="panel-heading"><h2>Попробуй поиск</h2></div>
+          <div class="app-content">
+            <form id="search-form" novalidate>
+              <label for="search-term">Название материала</label>
+              <div class="search-line"><input id="search-term" name="title" type="text" value="RAII" maxlength="120" autocomplete="off" spellcheck="false" aria-describedby="input-help"><button id="run" type="submit" disabled>Найти <span aria-hidden="true">→</span></button></div>
+              <div class="input-meta"><span id="input-help">Точное совпадение, с учётом регистра</span><span id="input-count">4 / 120 байт</span></div>
+            </form>
+            <div class="presets" aria-label="Примеры ввода"><button type="button" id="preset-normal" data-preset="RAII">RAII</button><button type="button" id="preset-quote" data-preset="O'Reilly">O'Reilly</button><button type="button" id="preset-attack" data-preset="' OR 1=1 --">Учебный ввод</button></div>
+            <p class="preset-help">Эти кнопки только подставляют текст. Выполняет поиск кнопка «Найти». Можно ввести и своё название.</p>
+            <div class="response-heading"><h3>Ответ приложения</h3><span id="response-count" class="meta">Запрос ещё не выполнен</span></div>
+            <div id="results" class="results"><div class="empty-state"><span aria-hidden="true">⌕</span><p>Введи название и нажми «Найти».<br>Здесь появится настоящий результат SQLite.</p></div></div>
+            <p id="result-note" class="result-note">Ответ появится после выполнения запроса.</p>
+            <button id="after-run-next" class="after-run-next" type="button" hidden>Разобрать следующий шаг →</button>
+          </div>
+          <div class="application-foot">Правило поиска: только опубликованные совпадения.</div>
+        </div>
+
+        <div class="inspector panel">
+          <div class="panel-heading"><h2>Что получает база данных</h2><span id="mode-badge" class="mode-badge">Склейка SQL</span></div>
+          <details id="technical-details" class="technical-details"><summary>Дополнительно: код C++ и HTTP</summary>
+          <div class="request-path" aria-label="Путь учебного запроса"><span id="path-input" class="path-node active"><b>1</b>Ввод</span><span aria-hidden="true">→</span><span id="path-handler" class="path-node"><b>2</b>Обработчик</span><span aria-hidden="true">→</span><span id="path-db" class="path-node"><b>3</b>SQLite</span><span aria-hidden="true">→</span><span id="path-result" class="path-node"><b>4</b>Ответ</span></div>
+          <div class="inspector-tabs" role="tablist" aria-label="Представления запроса"><button id="tab-sql" type="button" role="tab" aria-selected="true" aria-controls="view-sql" tabindex="0" data-tab="sql">SQL и данные</button><button id="tab-cpp" type="button" role="tab" aria-selected="false" aria-controls="view-cpp" tabindex="-1" data-tab="cpp">Код C++</button><button id="tab-http" type="button" role="tab" aria-selected="false" aria-controls="view-http" tabindex="-1" data-tab="http">HTTP-запрос</button></div>
+          </details>
+          <div id="view-sql" class="inspector-view" role="tabpanel" aria-labelledby="tab-sql" tabindex="0">
+            <div class="code-caption"><span id="sql-caption">SQL-текст, который получит движок</span><span id="query-state">До выполнения</span></div>
+            <pre class="sql-code" id="sql-code"></pre>
+            <div id="parameter-box" class="parameter-box" hidden><span>Отдельное значение параметра <code>$term</code></span><code id="parameter-value"></code><p>Кавычки здесь лишь обозначают показанную строку: это не вставка кавычек в SQL и не экранирование. Само значение передаётся отдельно от команды.</p></div>
+            <div id="boundary-note" class="boundary-note"><span class="legend-swatch" aria-hidden="true"></span><p id="boundary-copy">Выделенное значение пришло из поля поиска. Сейчас обработчик вставляет его прямо в текст команды.</p></div>
+          </div>
+          <div id="view-cpp" class="inspector-view" role="tabpanel" aria-labelledby="tab-cpp" tabindex="0" hidden><div class="code-caption"><span id="cpp-caption">Фрагмент обработчика · C++ / SQLite</span><span>Не исполняется в браузере</span></div><pre class="cpp-code" id="cpp-code"></pre><p class="code-note" id="cpp-note"></p><a class="source-link" href="examples/security_sql_demo.cpp" download>Скачать безопасный пример на C++ ↗</a><details class="source-help"><summary>Как собрать и что выведет программа</summary><p>Нужны C++20 и заголовки с библиотекой SQLite. Все данные создаются в памяти, без доступа к серверу.</p><pre>c++ -std=c++20 security_sql_demo.cpp -lsqlite3 -o security_sql_demo
+./security_sql_demo</pre><p>Ожидаемый смысл результата: RAII — строка 1; O'Reilly — строка 3; ввод <code>' OR 1=1 --</code> — ни одной строки. Версия SQLite выводится в первой строке и зависит от установленной библиотеки.</p></details></div>
+          <div id="view-http" class="inspector-view" role="tabpanel" aria-labelledby="tab-http" tabindex="0" hidden><div class="code-caption"><span>Как мог бы выглядеть запрос к серверу</span><span>Подготовленная модель</span></div><pre class="http-code" id="http-code"></pre><p class="code-note">Кодирование URL позволяет передать символы в адресе. После декодирования обработчик снова получает исходный текст. Это не параметризация SQL. В этой лаборатории HTTP-запрос не отправляется.</p></div>
+          <div class="engine-status"><span id="status" role="status" aria-live="polite">Готово к первому эксперименту.</span><button id="stop" type="button" hidden>Остановить</button></div>
+        </div>
+      </section>
+
+      <section id="explanation-panel" class="explanation" aria-labelledby="explanation-title" hidden><div class="section-label">Разбираем наблюдение</div><h2 id="explanation-title">Что должен показать обычный поиск</h2><div id="explanation-body"></div></section>
+
+      <section id="fix-panel" class="fix-panel" aria-labelledby="fix-title" hidden><div class="section-head"><div><p class="eyebrow">Выбор изменения</p><h2 id="fix-title">Что поменяем в обработчике?</h2></div><p>Выбери вариант и повтори поиск.<br>Сравни не только отказ, но и обычный ввод.</p></div>
+        <div class="mode-options" role="group" aria-label="Способ обработки поискового значения"><button id="mode-concat" type="button" data-mode="concat" aria-pressed="true"><span class="option-index">01</span><strong>Склеить SQL со вводом</strong><span>Исходная реализация</span></button><button id="mode-filter" type="button" data-mode="filter" aria-pressed="false"><span class="option-index">02</span><strong>Запретить символ <code>'</code></strong><span>Ограничить допустимый ввод</span></button><button id="mode-bind" type="button" data-mode="bind" aria-pressed="false"><span class="option-index">03</span><strong>Передать значение отдельно</strong><span>Использовать SQL-параметр</span></button></div>
+        <p id="mode-explanation" class="mode-explanation"></p><p class="mode-help">Выбор меняет учебный обработчик, но сам не запускает поиск. После выбора нажми «Найти» и сравни ответ.</p>
+      </section>
+
+      <section id="checks-panel" class="checks-panel panel" aria-labelledby="checks-title" hidden><div class="checks-intro"><div><p class="eyebrow">Приёмка изменения</p><h2 id="checks-title">Проверим и защиту, и поиск</h2><p>Четыре отдельных запуска на исходных данных. Каждая проверка сравнивает реальные строки ответа с ожидаемыми.</p></div><button id="check" type="button">Запустить проверки <span aria-hidden="true">→</span></button></div><div id="checks-results"><p class="checks-placeholder">Пока нет результатов для выбранного способа обработки.</p></div><p id="checks-summary" class="checks-summary">Это проверки конкретного сценария, не полный аудит безопасности.</p></section>
+
+      <nav class="lesson-controls" aria-label="Переход между этапами"><button id="previous" class="quiet" type="button" disabled>← Назад</button><span id="stage-position">Этап 1 из 5</span><button id="next" type="button">Дальше: другой ввод →</button><button id="restart" class="quiet" type="button" hidden>Начать сначала ↺</button></nav>
+
+      <section class="reading-notes" aria-label="Данные, пояснения и границы примера">
+        <details><summary>Разобрать SQL и причину нарушения по шагам</summary><div class="prose"><p><code>SELECT</code> перечисляет столбцы результата, <code>FROM lessons</code> выбирает таблицу. Часть после <code>WHERE</code> задаёт условие для каждой строки. Здесь нужны одновременно публикация и совпадение названия: <code>is_public = 1 AND title = …</code>.</p><p>Одинарные кавычки ограничивают строковое значение SQL. В уязвимом варианте введённая кавычка может закрыть это значение. Тогда <code>OR 1=1</code> уже разбирается как часть условия, а не как часть названия.</p><p>В этом запросе <code>AND</code> связывает выражения сильнее <code>OR</code>. Получается <code>(is_public = 1 AND title = '') OR 1=1</code>. Правая часть истинна для каждой строки. Два дефиса <code>--</code> начинают комментарий до конца строки; при показанном вводе добавленная обработчиком завершающая кавычка и <code>ORDER BY</code> оказываются в комментарии.</p><p>Это SQL-инъекция: недоверенный ввод изменил структуру SQL-команды. При параметризации структура задаётся заранее, а весь введённый текст передаётся как одно значение. Кавычки и SQL-слова внутри него не становятся новым условием.</p></div></details>
+        <details><summary>Почему одной параметризации недостаточно для всего сервиса?</summary><div class="prose"><p>Она защищает передачу значений в этот SQL-запрос от изменения его структуры. Но если разработчик вообще уберёт <code>is_public = 1</code>, параметр не восстановит потерянное правило доступа. Права пользователя и допустимое состояние данных проверяются отдельно.</p><p>Параметр обозначает значение, а не произвольное имя таблицы, столбца или направление сортировки. Для таких частей запроса приложение выбирает из явно разрешённых вариантов. Проверка размера и смысла ввода тоже остаётся нужна.</p><p>HTTPS защищает транспортное соединение. После расшифрования сервер всё равно должен безопасно обработать полученный текст: шифрование не исправляет склейку SQL.</p></div></details>
+        <details><summary>Что здесь действительно выполняется, а что является моделью?</summary><div class="prose"><p>Запрос выполняет SQLite из локальной библиотеки sql.js 1.13.0, а не PostgreSQL. HTTP и C++ показаны для объяснения: браузер не запускает C++-обработчик и не отправляет запрос серверу.</p><p id="engine-version">Версия движка появится после первого выполнения.</p><p>Каждый запуск получает новую базу в памяти отдельного Web Worker (фонового исполнителя JavaScript). После запуска он завершается. В этой демонстрации разрешён один подготовленный запрос, база переводится в режим чтения; длина ввода и число показываемых строк ограничены. Долгое выполнение прерывается по времени. Это не доказательство жёсткого ограничения памяти и не универсальная песочница для произвольного недоверенного кода.</p><p>Диагностика SQLite видна здесь для обучения. Реальный публичный API не должен выдавать клиенту внутренний SQL, полный текст ошибок и скрытые записи.</p></div></details>
+        <details><summary>Проверить себя: что именно мы исправили?</summary><div class="prose"><p>Почему запрет кавычек остановил показанный ввод, но не выполнил требования поиска? Что произойдёт с тем же вводом при передаче параметром? Вернёт ли параметризация правило публикации, если его удалили из SQL?</p><details class="selfcheck"><summary>Показать разбор ответа</summary><p>Запрет остановил запрос с кавычкой ещё до SQLite, но отверг и допустимое название O'Reilly. Параметризация передаст весь текст как одно значение: совпадающего опубликованного названия для показанного изменяющего условие ввода нет, поэтому ожидаем пустой ответ. Если убрать проверку публикации из SQL, параметризация её не добавит. Надёжность передачи значения и правило доступа — разные обязанности.</p></details></div></details>
+      </section>
+
+      <footer class="footer"><div><strong>На чём основан разбор</strong><p>Объяснения — по документации SQLite и рекомендациям OWASP. Приложение, данные и интерфейс — собственный учебный пример.</p></div><div class="sources"><a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html#defense-option-1-prepared-statements-with-parameterized-queries" target="_blank" rel="noopener noreferrer">OWASP: параметры и границы защиты ↗</a><a href="https://www.sqlite.org/c3ref/bind_blob.html" target="_blank" rel="noopener noreferrer">SQLite: связывание параметров ↗</a><a href="https://www.sqlite.org/lang_expr.html" target="_blank" rel="noopener noreferrer">SQLite: строки и приоритет AND / OR ↗</a><a href="https://www.sqlite.org/lang_comment.html" target="_blank" rel="noopener noreferrer">SQLite: SQL-комментарии ↗</a><a href="vendor/sqljs/LICENSE">sql.js 1.13.0 · MIT</a></div></footer>
+    </main>
+  </div>
+  <noscript><p class="noscript">Для интерактивного разбора нужен JavaScript. Пояснения и ссылки на источники доступны выше.</p></noscript>
+  <script src="generated/visual-labs.data.js"></script>
+  <script src="assets/security-sql-model.js"></script>
+  <script src="generated/security-sql-worker.data.js"></script>
+  <script src="assets/security-sql-demo.js"></script>
+</body>
+</html>

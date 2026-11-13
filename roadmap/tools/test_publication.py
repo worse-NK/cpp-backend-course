@@ -15,7 +15,9 @@ class Publication(unittest.TestCase):
         cls.files, cls.stations = public.collect()
 
     def test_full_course_and_no_private_source_tree(self):
-        self.assertEqual(len(self.stations), 15)
+        expected={p.stem for p in (public.ROOT/'content').glob('station*.json')}
+        self.assertEqual({s['meta']['id'] for s in self.stations}, expected)
+        self.assertTrue({'station11','station12','station13','station14'} <= expected)
         self.assertIn('station5-linux', {s['meta']['id'] for s in self.stations})
         self.assertIn('station7-netlab', {s['meta']['id'] for s in self.stations})
         self.assertIn('station7-traffic', {s['meta']['id'] for s in self.stations})
@@ -41,6 +43,13 @@ class Publication(unittest.TestCase):
         self.assertIn('roadmap/cpp_backend_roadmap.html', self.files['index.html'].decode())
         self.assertIn('location.search + location.hash', self.files['index.html'].decode())
 
+    def test_cpp23_downloads_keep_dependencies_and_exclude_local_toolchains(self):
+        for name in ('s7-endian-frame.cpp', 's8-expected-http.cpp',
+                     's15-endian-regression.cpp', 'README.md'):
+            self.assertIn('roadmap/examples/cpp23/' + name, self.files)
+        self.assertIn('roadmap/examples/station15/frame_parser.hpp', self.files)
+        self.assertTrue(all('.toolchains' not in Path(name).parts for name in self.files))
+
     def test_missing_learner_download_is_rejected(self):
         files = dict(self.files)
         del files['roadmap/examples/interview_gaps/capacity.js']
@@ -55,6 +64,21 @@ class Publication(unittest.TestCase):
         changed[-1] ^= 1
         files[name] = bytes(changed)
         with self.assertRaisesRegex(ValueError, 'Synthetic teaching capture differs'):
+            public.check_release(files, self.stations)
+
+    def test_real_tcp_captures_keep_reviewed_origin_and_hashes(self):
+        name = 'roadmap/examples/tcp-observation/captures/loss.pcap'
+        files = dict(self.files)
+        self.assertIn(name, files)
+        mutated = bytearray(files[name]); mutated[-1] ^= 1
+        files[name] = bytes(mutated)
+        with self.assertRaisesRegex(ValueError, 'Real TCP capture differs'):
+            public.check_release(files, self.stations)
+        files = dict(self.files)
+        name = 'roadmap/examples/tcp-observation/captures/report.json'
+        report = json.loads(files[name]); report['environment']['external_nic'] = True
+        files[name] = json.dumps(report).encode()
+        with self.assertRaisesRegex(ValueError, 'manifest differs'):
             public.check_release(files, self.stations)
 
     def test_absolute_resource_path_is_rejected_on_project_pages(self):

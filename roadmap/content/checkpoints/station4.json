@@ -186,6 +186,36 @@
           "expected-composition"
         ],
         "substation": "value-errors"
+      },
+      {
+        "substation": "value-errors",
+        "level": "medium",
+        "q": "C++23: parse_int(\"80x\") вернул trailing. Что происходит с and_then(check_port) и transform, создающим Port?",
+        "options": [
+          "Обе функции пропускаются",
+          "Выполняется только check_port",
+          "Обе функции получают число 80"
+        ],
+        "answer": 0,
+        "why": "Успешный путь прекращается на ошибке разбора; причина передаётся дальше. and_then и transform не вызывают свои функции в этом состоянии.",
+        "theoryRefs": [
+          "expected-chain-steps"
+        ]
+      },
+      {
+        "substation": "value-errors",
+        "level": "medium",
+        "q": "C++23: пустой optional прошёл через or_else, но запасная функция тоже вернула nullopt. Что теперь допустимо?",
+        "options": [
+          "Сразу разыменовать запасное значение",
+          "Сначала проверить оставшийся пустым результат",
+          "Вызвать error() и прочитать причину"
+        ],
+        "answer": 1,
+        "why": "or_else использует возвращённый optional и не гарантирует заполнения. Для * требуется наличие значения; причины ошибки в optional нет.",
+        "theoryRefs": [
+          "optional-chain-steps"
+        ]
       }
     ],
     "system-boundaries": [

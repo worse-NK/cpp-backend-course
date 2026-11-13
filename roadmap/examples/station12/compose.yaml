@@ -1,0 +1,48 @@
+name: ${COURSE12_PROJECT:?Run python3 lab.py init first}
+services:
+  redis:
+    labels:
+      io.cpp-course.station: "12"
+      io.cpp-course.run-id: ${COURSE12_RUN_ID:?Run lab.py init}
+    image: redis:8.2.11-alpine
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    ports:
+      - "127.0.0.1:${COURSE12_PORT:?Run lab.py init}:6379"
+    environment:
+      REDISCLI_AUTH: ${COURSE12_PASSWORD:?Run lab.py init}
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./runtime/users.acl:/usr/local/etc/redis/users.acl:ro
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 2s
+      timeout: 1s
+      retries: 15
+    mem_limit: 192m
+    restart: "no"
+  client:
+    labels:
+      io.cpp-course.station: "12"
+      io.cpp-course.run-id: ${COURSE12_RUN_ID:?Run lab.py init}
+    profiles: ["tools"]
+    build: .
+    environment:
+      COURSE12_HOST: redis
+      COURSE12_PORT: "6379"
+      COURSE12_PASSWORD: ${COURSE12_PASSWORD:?Run lab.py init}
+      COURSE12_RUN_ID: ${COURSE12_RUN_ID:?Run lab.py init}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: "no"
+volumes:
+  redis-data:
+    labels:
+      io.cpp-course.station: "12"
+      io.cpp-course.run-id: ${COURSE12_RUN_ID:?Run lab.py init}
+networks:
+  default:
+    labels:
+      io.cpp-course.station: "12"
+      io.cpp-course.run-id: ${COURSE12_RUN_ID:?Run lab.py init}
