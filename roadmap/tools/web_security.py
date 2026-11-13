@@ -166,7 +166,9 @@ def secure_html(content, *, name='index.html', files=None, mode='web'):
         "script-src-attr 'none'", "style-src 'self' 'unsafe-inline'" +
             (' https://fonts.googleapis.com' if mode == 'web' else ''),
         "font-src 'self'" + (' https://fonts.gstatic.com' if mode == 'web' else ''),
-        "img-src 'self' data: blob:", "connect-src 'none'",
+        "img-src 'self' data: blob:",
+        # The packaged settings page reads its local build metadata, not an API.
+        "connect-src 'self'" if mode == 'desktop' and name == 'progress.html' else "connect-src 'none'",
         "worker-src 'self' blob:", "frame-src 'self'", "form-action 'none'",
     ])
     changes.append((insertion, insertion, '\n<meta http-equiv="Content-Security-Policy" '

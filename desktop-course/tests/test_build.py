@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Standalone content is a local, source-free clone, never a PWA."""
 import json
+from html import unescape
 from pathlib import Path
+import re
 import sys
 import tempfile
 import unittest
@@ -54,6 +56,21 @@ class BuildTests(unittest.TestCase):
             self.assertTrue(self.files[f'icons/app-{size}.png'].startswith(b'\x89PNG'))
         self.assertIn('icons/app.svg', self.files)
         self.assertEqual(self.files['progress-core.js'], (ROOT / 'web/progress-core.js').read_bytes())
+
+    def test_progress_metadata_fetch_is_permitted_only_on_the_settings_page(self):
+        self.assertIn("fetch('desktop-meta.json')", self.files['progress-ui.js'].decode())
+        self.assertIn('applicationVersion', json.loads(self.files['desktop-meta.json']))
+        for name, content in self.files.items():
+            if not name.endswith('.html'):
+                continue
+            policy = unescape(re.search(
+                r'<meta[^>]*data-course-security="1"[^>]*content="([^"]+)"',
+                content.decode())[1])
+            directives = dict((parts[0], parts[1:]) for item in policy.split(';')
+                              if (parts := item.split()))
+            with self.subTest(page=name):
+                self.assertEqual(directives['connect-src'],
+                                 ["'self'"] if name == 'progress.html' else ["'none'"])
 
     def test_all_station_maps_use_the_same_production_assets_as_the_website(self):
         self.assertIn('roadmap/assets/station-map.css', self.files)

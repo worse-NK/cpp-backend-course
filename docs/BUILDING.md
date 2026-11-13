@@ -101,8 +101,8 @@ Electron 45.2.3 в `desktop-course/.toolchain/`, сверяет опублико
 с закреплённой SHA-256, затем проверяет файлы при упаковке. Для первого
 получения движка нужен интернет; проверенная локальная копия используется повторно.
 
-Готовый пакет: `desktop-course/release/cpp-backend-course-desktop_1.1.2_amd64.deb`
-для текущей версии приложения 1.1.2. Версия берётся из
+Готовый пакет: `desktop-course/release/cpp-backend-course-desktop_1.1.3_amd64.deb`
+для текущей версии приложения 1.1.3. Версия берётся из
 `desktop-course/app/package.json`, а не угадывается по номеру коммита.
 Повторная сборка не должна молча перезаписывать уже выпущенный пакет:
 используй другую выходную папку через `deb --output` или повысь версию для нового выпуска.
@@ -110,7 +110,7 @@ Electron 45.2.3 в `desktop-course/.toolchain/`, сверяет опублико
 Установка — отдельное действие:
 
 ```sh
-sudo apt install ./desktop-course/release/cpp-backend-course-desktop_1.1.2_amd64.deb
+sudo apt install ./desktop-course/release/cpp-backend-course-desktop_1.1.3_amd64.deb
 cpp-backend-course-desktop
 ```
 

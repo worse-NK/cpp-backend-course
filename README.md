@@ -42,10 +42,10 @@ Docker и компилятор для этого не нужны.
 ### Установить приложение
 
 Скачай `.deb` из [Releases](https://github.com/worse-NK/cpp-backend-course/releases/latest).
-Например, для версии 1.1.2 из папки с загруженным файлом:
+Например, для версии 1.1.3 из папки с загруженным файлом:
 
 ```sh
-sudo apt install ./cpp-backend-course-desktop_1.1.2_amd64.deb
+sudo apt install ./cpp-backend-course-desktop_1.1.3_amd64.deb
 cpp-backend-course-desktop
 ```
 

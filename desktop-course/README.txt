@@ -20,7 +20,7 @@ Firefox, Python, npm или локальный HTTP-сервер. Интерне
 
 Из папки с установщиком:
 
-  sudo apt install ./cpp-backend-course-desktop_1.1.2_amd64.deb
+  sudo apt install ./cpp-backend-course-desktop_1.1.3_amd64.deb
 
 Права администратора нужны только для системной установки. Если в системе
 не хватает обычных графических библиотек, apt получит их из репозитория:
@@ -164,7 +164,7 @@ cpp-backend-course-offline действительно установлен, но
 
   python3 desktop-course/fetch_runtime.py --version 45.2.3 --output desktop-course/.toolchain/electron-45.2.3-linux-x64
   python3 desktop-course/build_site.py
-  python3 desktop-course/build_deb.py --site desktop-course/release/site --runtime desktop-course/.toolchain/electron-45.2.3-linux-x64 --output desktop-course/release --version 1.1.2
+  python3 desktop-course/build_deb.py --site desktop-course/release/site --runtime desktop-course/.toolchain/electron-45.2.3-linux-x64 --output desktop-course/release --version 1.1.3
 
 Получение runtime — отдельная сетевая операция с проверкой опубликованной
 SHA256 и закреплённого значения. Повторная сборка из уже полученных файлов

@@ -74,3 +74,11 @@ Release, загружает проверенные вложения и дела�
 GitHub также [рекомендует Releases для больших бинарных файлов](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github#distributing-large-binaries).
 
 О механизме выпусков: [GitHub Releases](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
+
+## Известные ограничения выпусков
+
+В desktop-пакете 1.1.2 новая CSP блокирует чтение локальных сведений о сборке
+на странице «Прогресс и приложение». Эта страница показывает ошибку загрузки
+метаданных; запрет сам по себе не удаляет сохранённый прогресс. Используй 1.1.3
+или новее: локальное чтение разрешено только этой странице, а регрессионный
+тест проверяет его вместе с запретом соединений на остальных страницах.
