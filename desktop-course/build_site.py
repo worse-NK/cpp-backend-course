@@ -19,6 +19,7 @@ PROJECT = HERE.parent
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(PROJECT / 'roadmap/tools'))
 import build_publication as publication
+from web_security import secure_html, secure_files, validate_files
 
 REACT = {
     'https://unpkg.com/react@18.3.1/umd/react.production.min.js':
@@ -64,6 +65,11 @@ def localize(name, content, controls=True):
     """Keep the document and rendering order intact; only localize resources."""
     text = content.decode()
     for url, target in REACT.items():
+        # SRI on file:// resources may fail CORS eligibility; these bytes are
+        # already checked by the vendor lock and package manifest instead.
+        text = re.sub(r'<script\b[^>]*>', lambda match: re.sub(
+            r'\s+(?:integrity|crossorigin)(?:\s*=\s*(?:"[^"]*"|\x27[^\x27]*\x27|[^\s>]+))?', '',
+            match.group(), flags=re.I) if url in match.group() else match.group(), text, flags=re.I)
         text = text.replace(url, relative(name, target))
     text = re.sub(r'<link\b[^>]*\brel=["\x27]preconnect["\x27][^>]*>\s*', '', text)
     text = re.sub(r'<link\b[^>]*href=["\x27]https://fonts\.googleapis\.com/[^"\x27]+["\x27][^>]*>',
@@ -74,7 +80,7 @@ def localize(name, content, controls=True):
                     '\n<link rel="stylesheet" href="' + relative(name, 'desktop.css') + '">'
                     '\n<script defer src="' + relative(name, 'desktop-ui.js') + '"></script>\n')
         text = text.replace('</head>', injected + '</head>', 1)
-    return text.encode()
+    return secure_html(text.encode(), name=name, mode='desktop' if controls else 'local')
 
 
 class RuntimeLinks(HTMLParser):
@@ -91,6 +97,7 @@ class RuntimeLinks(HTMLParser):
 
 
 def check_local(files):
+    validate_files(files, mode='desktop')
     count = 0
     for name, content in files.items():
         links = []
@@ -124,6 +131,7 @@ def collect():
     for name in ('app.svg', 'app-256.png', 'app-512.png'):
         files['icons/' + name] = (HERE / 'icons' / name).read_bytes()
     files['README.txt'] = (HERE / 'README.txt').read_bytes()
+    files = secure_files(files, mode='desktop')
     version = digest(json.dumps({name: digest(content) for name, content in sorted(files.items())},
                                 sort_keys=True).encode())[:20]
     files['desktop-meta.json'] = json.dumps({'version': version, 'stationCount': len(stations),

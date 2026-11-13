@@ -17,7 +17,7 @@ def asset(name: str) -> str:
 
 
 def render() -> str:
-    return """<!doctype html>
+    source = """<!doctype html>
 <html lang="ru" class="course-dark">
 <head>
 <meta charset="utf-8">
@@ -121,6 +121,8 @@ def render() -> str:
 </html>
 """.format(theme=asset("course-theme.css"), css=asset("distributed-lab.css"),
            model=asset("distributed-lab-model.js"), script=asset("distributed-lab.js"), flask=lab_flask_icon())
+    from web_security import secure_html
+    return secure_html(source.encode(), name='roadmap/distributed_lab.html').decode()
 
 
 def main() -> None:

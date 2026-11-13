@@ -42,10 +42,10 @@ Docker и компилятор для этого не нужны.
 ### Установить приложение
 
 Скачай `.deb` из [Releases](https://github.com/worse-NK/cpp-backend-course/releases/latest).
-Например, для версии 1.1.1 из папки с загруженным файлом:
+Например, для версии 1.1.2 из папки с загруженным файлом:
 
 ```sh
-sudo apt install ./cpp-backend-course-desktop_1.1.1_amd64.deb
+sudo apt install ./cpp-backend-course-desktop_1.1.2_amd64.deb
 cpp-backend-course-desktop
 ```
 
@@ -99,6 +99,7 @@ Git хранит исходники, но не результаты каждой
 
 - [Как устроен выпуск](https://github.com/worse-NK/cpp-backend-course/blob/main/docs/RELEASING.md): тег, сборка, контрольные суммы и готовые архивы.
 - [Защита простыми словами](https://github.com/worse-NK/cpp-backend-course/blob/main/docs/SECURITY.md): внешние библиотеки, CSP, проверка секретов и её границы.
+- [Проверка секретов до push](https://github.com/worse-NK/cpp-backend-course/blob/main/docs/secret-scanning.md): ручной запуск, самопроверка и локальный hook.
 - [Сторонние компоненты](https://github.com/worse-NK/cpp-backend-course/blob/main/docs/THIRD_PARTY.md): версии и сохранённые лицензии.
 
 Не коммить реальные `.env`, ключи, пользовательские профили и резервные копии.

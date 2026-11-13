@@ -79,7 +79,9 @@ def decorate_html(source, *, surfaces=True, page=None):
     for asset in assets:
         version = hashlib.sha256((ROOT / 'assets' / asset).read_bytes()).hexdigest()[:12]
         links.append(f'<link rel="stylesheet" href="assets/{asset}?v={version}">')
-    return re.sub(r'\s*</head>', '\n' + '\n'.join(links) + '\n</head>', source, count=1, flags=re.I)
+    result = re.sub(r'\s*</head>', '\n' + '\n'.join(links) + '\n</head>', source, count=1, flags=re.I)
+    from web_security import secure_html
+    return secure_html(result.encode('utf-8')).decode('utf-8')
 
 
 if __name__ == '__main__':

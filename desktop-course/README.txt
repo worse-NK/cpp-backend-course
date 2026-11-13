@@ -14,13 +14,13 @@ Firefox, Python, npm или локальный HTTP-сервер. Интерне
 
 Установка и запуск
 -----------------
-Целевая сборка — Debian/Ubuntu, Linux x86_64 (amd64). Проверенная среда
-указана в release/verification-1.1.1.json. Совместимость с каждым дистрибутивом
-и оконным менеджером не предполагается автоматически.
+Целевая сборка — Debian/Ubuntu, Linux x86_64 (amd64). Сборка проверяется
+на Ubuntu 24.04; это не доказывает совместимость с каждым дистрибутивом
+и оконным менеджером. Успешная упаковка не заменяет проверку окна приложения.
 
 Из папки с установщиком:
 
-  sudo apt install ./cpp-backend-course-desktop_1.1.1_amd64.deb
+  sudo apt install ./cpp-backend-course-desktop_1.1.2_amd64.deb
 
 Права администратора нужны только для системной установки. Если в системе
 не хватает обычных графических библиотек, apt получит их из репозитория:
@@ -164,7 +164,7 @@ cpp-backend-course-offline действительно установлен, но
 
   python3 desktop-course/fetch_runtime.py --version 45.2.3 --output desktop-course/.toolchain/electron-45.2.3-linux-x64
   python3 desktop-course/build_site.py
-  python3 desktop-course/build_deb.py --site desktop-course/release/site --runtime desktop-course/.toolchain/electron-45.2.3-linux-x64 --output desktop-course/release --version 1.1.1
+  python3 desktop-course/build_deb.py --site desktop-course/release/site --runtime desktop-course/.toolchain/electron-45.2.3-linux-x64 --output desktop-course/release --version 1.1.2
 
 Получение runtime — отдельная сетевая операция с проверкой опубликованной
 SHA256 и закреплённого значения. Повторная сборка из уже полученных файлов
@@ -185,5 +185,7 @@ SHA256 и закреплённого значения. Повторная сбо
   https://www.electronjs.org/docs/latest/tutorial/sandbox
 
 Это объяснение конкретной сборки, не обещание поддержки всех систем Linux
-и не новый полный аудит технической теории курса. Результаты запуска,
-проверенные версии и ограничения зафиксированы в release/verification-1.1.1.json.
+и не новый полный аудит технической теории курса. История выпусков находится
+на странице GitHub Releases. Локальные отчёты о дополнительных GUI-проверках
+не включаются в Git или установщик; такие проверки не следует считать
+выполненными только по результату автоматической сборки.

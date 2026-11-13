@@ -139,7 +139,7 @@ def build_deb_command(args):
 def run_checks():
     commands = [
         ([sys.executable, '-m', 'unittest', 'discover', '-s', 'tools', '-p', 'test_*.py'], ROOT),
-        ([sys.executable, '-m', 'unittest', 'test_publication', 'test_repository_sync'], ROOT / 'roadmap/tools'),
+        ([sys.executable, '-m', 'unittest', 'test_publication', 'test_repository_sync', 'test_web_security'], ROOT / 'roadmap/tools'),
         ([sys.executable, '-m', 'unittest', 'discover', '-s', 'desktop-course/tests', '-p', 'test_build.py'], ROOT),
         ([sys.executable, '-m', 'unittest', 'discover', '-s', 'desktop-course/tests', '-p', 'test_package.py'], ROOT),
     ]

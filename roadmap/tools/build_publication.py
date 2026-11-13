@@ -23,6 +23,7 @@ from build_service_workshop import render as render_service_workshop
 from build_traffic_examples import build as build_traffic_examples
 from build_distributed_lab import render as render_distributed_lab
 from course_theme import decorate_html, SUPPORT_PAGES
+from web_security import secure_files, validate_files
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT.parent / 'publish' / 'github-pages'
@@ -407,7 +408,7 @@ def collect():
         'distributed_lab.html': render_distributed_lab(),
     }.items():
         files['roadmap/' + name] = content.encode()
-    return files, stations
+    return secure_files(files), stations
 
 
 class Links(HTMLParser):
@@ -538,7 +539,8 @@ def check_release(files, stations):
         check_url('roadmap/cpp_backend_roadmap.html', stage['station']['file'])
     for extra in data['bonusFiles']:
         check_url('roadmap/cpp_backend_roadmap.html', extra['file'])
-    return {'local_links_checked': checked, 'external_runtime_resources': sorted(external)}
+    return {'local_links_checked': checked, 'external_runtime_resources': sorted(external),
+            'protected_html_checked': validate_files(files)}
 
 
 def write_release(output=DEFAULT_OUTPUT):

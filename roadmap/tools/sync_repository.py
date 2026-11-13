@@ -23,6 +23,8 @@ PROJECT_SOURCES = (
     "tools/build_local.py", "tools/test_course_tools.py",
     "tools/publish_release.py", "tools/test_publish_release.py",
     ".github/workflows/release-desktop.yml",
+    ".github/workflows/secret-scan.yml", ".githooks/pre-push",
+    "tools/check_secrets.py", "tools/test_check_secrets.py", "docs/secret-scanning.md",
 )
 DESKTOP_SOURCES = (
     ".gitignore", "README.txt", "build_site.py", "build_deb.py", "fetch_runtime.py",
@@ -144,7 +146,7 @@ def collect_repository_files() -> dict[str, bytes]:
                    for path in (ROOT / "tools").glob(pattern))
     sources.update("tools/" + name for name in (
         "checkpoint_data.py", "export_final_selection.js", "audit_question_choices.py",
-        "validate_materials.py", "cpp_examples.py", "course_theme.py", "netlab_vm_guest.py", "netlab_vm_init.sh",
+        "validate_materials.py", "cpp_examples.py", "course_theme.py", "web_security.py", "netlab_vm_guest.py", "netlab_vm_init.sh",
         "run_netlab_vm.py", "sync_repository.py"))
     sources.update("tools/" + name for name in (
         "run_gap_network_vm.py", "gap_network_vm_init.sh", "tooling_perf_vm_guest.py",

@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+course_repo=$(git rev-parse --show-toplevel)
+exec python3 "$course_repo/tools/check_secrets.py" --repository "$course_repo"
