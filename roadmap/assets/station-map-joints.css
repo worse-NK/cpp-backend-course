@@ -1,0 +1,97 @@
+/* The approved station route. The curved bridge has vertical tangents at BOTH
+   markers; a rounded CSS border instead leaves a horizontal tail at the end.
+   Shared by every station; navigation and learner storage are unchanged. */
+body.course-map {
+  --trail-stroke: 3px;
+  --trail-slot-inset: calc((var(--trail-row-height) - var(--trail-node-size)) / 2);
+  --trail-curve-height: calc(var(--trail-row-height) + var(--trail-step-gap) - var(--trail-node-size));
+  /* The path's x range is 3..33 in a 36-unit viewport. A width of 1.2*offset
+     gives offset/10 of padding on both sides and exactly offset between axes.
+     non-scaling-stroke keeps the stroke at 3px as the bridge height changes. */
+  --trail-curve-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 100' preserveAspectRatio='none'%3E%3Cpath d='M3 0 C3 50 33 50 33 100' fill='none' stroke='white' stroke-width='3' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+}
+
+body.course-map .map-chapter {
+  --chapter-track: var(--map-track);
+}
+body.course-map .map-chapter.is-complete {
+  --chapter-track: #5f9980;
+}
+
+/* A long title may increase the button height. Keep the marker's vertical
+   position tied to its slot, so the previous connector still meets its edge. */
+body.course-map .map-chapter-toggle {
+  padding-block: 0;
+}
+body.course-map .map-chapter-link > .map-marker {
+  align-self: start;
+  margin-top: var(--trail-slot-inset);
+}
+body.course-map .map-chapter-copy {
+  padding-block: 4px;
+}
+
+/* A long branch lengthens only this straight stem, never the short S-curve. */
+body.course-map .map-chapter::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: calc((var(--trail-row-height) + var(--trail-node-size)) / 2);
+  bottom: calc(var(--trail-curve-height) - var(--trail-slot-inset));
+  left: calc((var(--trail-node-size) - var(--trail-stroke)) / 2);
+  width: var(--trail-stroke);
+  background: var(--chapter-track);
+  pointer-events: none;
+}
+
+/* The bridge starts on the stem's axis and finishes on the next marker's axis.
+   Its first and last control points are directly above/below their endpoints:
+   no horizontal stub or sharp change of direction at a marker. */
+body.course-map .map-chapter::after {
+  display: block;
+  top: auto;
+  bottom: calc(0px - var(--trail-slot-inset));
+  left: calc(var(--trail-node-size) / 2 - var(--trail-offset) / 10);
+  width: calc(var(--trail-offset) * 1.2);
+  height: var(--trail-curve-height);
+  border: 0;
+  border-radius: 0;
+  background: var(--chapter-track);
+  -webkit-mask: var(--trail-curve-mask) 0 0 / 100% 100% no-repeat;
+  mask: var(--trail-curve-mask) 0 0 / 100% 100% no-repeat;
+  mask-mode: alpha;
+  transform: none;
+}
+body.course-map .map-chapter:nth-child(even)::after {
+  left: calc(var(--trail-node-size) / 2 - var(--trail-offset) - var(--trail-offset) / 10);
+  border: 0;
+  border-radius: 0;
+  transform: scaleX(-1);
+}
+
+/* Never paint a second spine over the stem. */
+body.course-map .map-lessons::before {
+  display: none;
+}
+/* The final chapter has no next node; only its expanded branch has a stem. */
+body.course-map .map-chapter:last-child::after {
+  display: none;
+}
+body.course-map .map-chapter:last-child:not(.is-expanded)::before {
+  display: none;
+}
+body.course-map .map-chapter:last-child.is-expanded::before {
+  bottom: calc(var(--trail-step-gap) + 6px);
+}
+
+/* Center each small horizontal tick on its 13px topic marker. Checkpoints have
+   a different top padding, so they use the same formula with a different input. */
+body.course-map .map-lesson {
+  --topic-top-padding: 9px;
+}
+body.course-map .map-checkpoint {
+  --topic-top-padding: 13px;
+}
+body.course-map .map-lesson::before {
+  top: calc(var(--topic-top-padding) + 4px + (13px - 1px) / 2);
+}

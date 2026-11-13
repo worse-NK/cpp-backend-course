@@ -496,9 +496,12 @@ def html_for(data: dict) -> str:
 </html>
 """
     html = decorate_html(html, surfaces=False)
+    # The approved smooth route is shared by every station. Keep it last so its
+    # SVG bridges replace the original border-based connectors at all sizes.
+    final_css = ["course-code.css", "course-dark-reader.css", "station-map.css", "station-map-joints.css"]
     last_styles = "\n".join(
         f'<link rel="stylesheet" href="assets/{name}?v={hashlib.sha256((ROADMAP / "assets" / name).read_bytes()).hexdigest()[:12]}">'
-        for name in ("course-code.css", "course-dark-reader.css", "station-map.css")
+        for name in final_css
     )
     return html.replace("</head>", last_styles + "\n</head>")
 
