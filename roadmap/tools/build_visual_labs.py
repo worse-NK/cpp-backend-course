@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+NETWORK_LABS = {"https-journey", "tcp-delivery", "packetpath", "network-setup", "vpn-tunnels"}
 
 
 def validate_introduction(lab):
@@ -34,13 +35,18 @@ def load_catalog():
     for lab in data["labs"]:
         assert lab["id"] not in seen, lab["id"]
         seen.add(lab["id"])
-        assert lab["file"] in {"visual_labs.html", "object_lifetime_demo.html", "security_sql_demo.html", "security_labs.html", "distributed_lab.html"}
+        assert lab["file"] in {"visual_labs.html", "object_lifetime_demo.html", "security_sql_demo.html", "security_labs.html", "distributed_lab.html", "https_journey_lab.html", "tcp_delivery_lab.html", "packet_path_lab.html", "network_setup_lab.html", "vpn_tunnels_lab.html"}
         assert len(set(lab["scenarios"])) == len(lab["scenarios"])
+        if lab["id"] in NETWORK_LABS:
+            assert all(type(entry.get("primary")) is bool for entry in lab["entries"]), lab["id"]
+            assert sum(entry["primary"] for entry in lab["entries"]) == 1, lab["id"]
         validate_introduction(lab)
         for entry in lab["entries"]:
             station = json.loads((ROOT / ("content/" + entry["station"] + ".json")).read_text())
             assert any(s["id"] == entry["section"] for s in station["theory"]), entry
             assert entry["scenario"] in lab["scenarios"], entry
+            if lab["id"] == "https-journey":
+                assert entry.get("phase") in {"start", "dns", "tcp", "tls", "http"}, entry
             entry["file"] = station["meta"]["sourceFile"]
     return data
 
@@ -56,6 +62,13 @@ def render():
     return lab.file + "?level=" + level + context + "#" + encodeURIComponent(scenario);
   }
   if (id === "distributed") return lab.file + "#scenario=" + encodeURIComponent(scenario) + "&step=0";
+  if (id === "https-journey") {
+    var entry = lab.entries.find(function(item) { return item.station === station && item.section === section; });
+    var phase = entry ? "&phase=" + encodeURIComponent(entry.phase) : "&step=0";
+    return lab.file + "#scenario=" + encodeURIComponent(scenario) + phase + context;
+  }
+  if (["tcp-delivery", "packetpath", "network-setup", "vpn-tunnels"].indexOf(id) >= 0)
+    return lab.file + "#scenario=" + encodeURIComponent(scenario) + "&step=0" + context;
   return lab.file + "#lab=" + encodeURIComponent(id) + "&scenario=" + encodeURIComponent(scenario) + context;
 };
 '''

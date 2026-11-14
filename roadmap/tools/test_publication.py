@@ -5,8 +5,10 @@ from pathlib import Path
 import tempfile
 import unittest
 import zipfile
+from unittest.mock import patch
 
 import build_publication as public
+from web_security import secure_html
 
 
 class Publication(unittest.TestCase):
@@ -28,7 +30,7 @@ class Publication(unittest.TestCase):
             self.assertIn('roadmap/generated/' + station['meta']['id'] + '.data.js', self.files)
         for name in self.files:
             self.assertFalse(set(Path(name).parts) &
-                             {'content', 'tools', 'tests', '__pycache__', '.git', '.aws', '.codex'})
+                             {'content', 'tools', 'tests', 'templates', '__pycache__', '.git', '.aws', '.codex'})
             self.assertNotIn('REVIEW', name)
             self.assertNotIn('CHECKLIST', name)
         self.assertIn('roadmap/vendor/sqljs/LICENSE', self.files)
@@ -42,6 +44,27 @@ class Publication(unittest.TestCase):
         self.assertIn('unpkg.com', self.files['README.md'].decode())
         self.assertIn('roadmap/cpp_backend_roadmap.html', self.files['index.html'].decode())
         self.assertIn('location.search + location.hash', self.files['index.html'].decode())
+
+    def test_https_journey_is_shipped_with_local_dependencies_not_its_template(self):
+        name = 'roadmap/https_journey_lab.html'
+        self.assertIn(name, self.files)
+        self.assertEqual(self.files[name], secure_html(
+            public.render_https_journey(), name=name, files=self.files, mode='web'))
+        for asset in ('https-journey-model.js', 'https-journey-lab.js', 'https-journey-lab.css'):
+            target = 'roadmap/assets/' + asset
+            self.assertIn(target, self.files)
+            self.assertEqual(self.files[target], public.source_bytes('assets/' + asset))
+        self.assertNotIn('roadmap/templates/https_journey_lab.html', self.files)
+        self.assertNotRegex(self.files[name].decode(), r'<(?:script|link)\b[^>]+(?:src|href)="https?://')
+
+    def test_https_journey_is_rendered_fresh_instead_of_shipping_stale_html(self):
+        original = public.source_bytes
+        def stale_page(name):
+            return b'<html><head></head><body>stale HTTPS laboratory</body></html>' if name == 'https_journey_lab.html' else original(name)
+        with patch.object(public, 'source_bytes', side_effect=stale_page):
+            files, _ = public.collect()
+        self.assertEqual(files['roadmap/https_journey_lab.html'], self.files['roadmap/https_journey_lab.html'])
+        self.assertNotIn(b'stale HTTPS laboratory', files['roadmap/https_journey_lab.html'])
 
     def test_cpp23_downloads_keep_dependencies_and_exclude_local_toolchains(self):
         for name in ('s7-endian-frame.cpp', 's8-expected-http.cpp',

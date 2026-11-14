@@ -59,7 +59,7 @@ class VisualLabs(unittest.TestCase):
             validate(station, path)
             for section in station['theory']:
                 for block in section['blocks']:
-                    if block['type'] == 'lab':
+                    if block['type'] in {'lab', 'lab-ref'}:
                         key = (path.stem, section['id'], block['lab'], block['scenario'])
                         self.assertNotIn(key, actual)
                         actual.add(key)

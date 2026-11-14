@@ -43,7 +43,7 @@ class Params {
   get(k){return this.values.get(k)??null;}set(k,v){this.values.set(k,String(v));}
   toString(){return [...this.values].map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');}
 }
-const win={addEventListener:(k,f)=>listeners[k]=f},location={hash:''};
+const win={addEventListener:(k,f)=>listeners[k]=f},location={hash:'',replace(value){this.redirected=value;}};
 let routeHash='';Object.defineProperty(location,'hash',{get:()=>routeHash,set:value=>{routeHash=value&&!value.startsWith('#')?'#'+value:value;}});
 new Function('window',read('roadmap/generated/visual-labs.data.js'))(win);
 new Function('globalThis',read('roadmap/assets/visual-lab-models.js'))(win);
@@ -111,6 +111,10 @@ const cycleButton=doc.querySelectorAll('[data-mode]').find(b=>b.dataset.mode==='
 assert(doc.activeElement.dataset.mode==='cycle'&&doc.activeElement.getAttribute('aria-pressed')==='true','Mode switch preserves keyboard focus');
 location.hash='#lab=ownership&scenario=shared';listeners.hashchange();
 get('labRange').oninput({target:{value:8}});assert(get('labScene').textContent.includes('Освобождён'),'Control block released at the actual final event');
+location.hash='#lab=packetpath&scenario=pmtu6&from=station7-netlab&section=netlab-ipv6-pmtu';listeners.hashchange();
+assert(location.redirected==='packet_path_lab.html#scenario=pmtu6&step=0&from=station7-netlab&section=netlab-ipv6-pmtu','Legacy packet-path bookmark retains registered local scenario and context');
+location.hash='#lab=packetpath&scenario=javascript%3Aalert(1)&from=evil&section=evil';listeners.hashchange();
+assert(location.redirected==='packet_path_lab.html#scenario=routed&step=0','Legacy redirect rejects unregistered context and scenario');
 for(const mode of ['cycle','weak-cycle']){location.hash='#lab=ownership&scenario='+mode;listeners.hashchange();assert(!get('labScene').textContent.includes('уничтожен'),'Future nodes shown as destroyed');}
 location.hash='#lab=network&scenario=retry';listeners.hashchange();assert(!get('labScene').innerHTML.includes('class="edge strong"'),'No exchange arrow before the first command');
 get('labNext').onclick();assert(get('labScene').innerHTML.includes('class="edge strong"'),'Request arrow absent when actually sent');
@@ -127,7 +131,17 @@ const walk=n=>n&&typeof n==='object'?[n,...(n.children||[]).flatMap(walk)]:[];
 win.matchMedia=()=>({matches:true});let entries=0;
 for(const item of win.COURSE_LABS)for(const entry of item.entries){
   const station=mapTest.mapFixture(entry.station);
-  const section=station.theory.find(s=>s.id===entry.section),block=section.blocks.find(b=>b.type==='lab'&&b.lab===item.id);
+  const section=station.theory.find(s=>s.id===entry.section),block=section.blocks.find(b=>['lab','lab-ref'].includes(b.type)&&b.lab===item.id);
+  assert(block,'Registered course entry has source block '+item.id+'/'+entry.section);
+  if(entry.primary===false){
+    assert(block.type==='lab-ref','Related section must be a short reference '+item.id+'/'+entry.section);
+    const makeRef=new Function('h','window',blockSource+';return LabReference;')(h,win);
+    const primary=item.entries.find(e=>e.primary===true),tree=makeRef({block,section});
+    assert(walk(tree).some(n=>n.type==='a'&&n.props.href===primary.file+'#section='+primary.section),'Reference points to the single canonical course location');
+    const env=mapTest.mapEnvironment(station,{active:section.substation,selected:section.id});env.render();
+    assert(!walk(env.open(section.substation)).some(n=>n.type==='a'&&n.props.className==='map-lab-link'&&n.props.href===win.courseLabHref(item.id,entry.scenario,entry.station,entry.section)),'Reference must not duplicate a lab map node');
+    env.dispose();entries++;continue;
+  }
   const makeBlock=new Function('h','meta','window',blockSource+';return LabBlock;')(h,station.meta,win);
   const href=win.courseLabHref(item.id,entry.scenario,entry.station,entry.section);
   const cardTree=makeBlock({block,section});

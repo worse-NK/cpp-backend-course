@@ -22,6 +22,8 @@ from build_glossary import render as render_glossary, render_data as render_term
 from build_service_workshop import render as render_service_workshop
 from build_traffic_examples import build as build_traffic_examples
 from build_distributed_lab import render as render_distributed_lab
+from build_https_journey import render as render_https_journey
+from build_network_labs import render_all as render_network_labs
 from course_theme import decorate_html, SUPPORT_PAGES
 from web_security import secure_files, validate_files
 
@@ -38,6 +40,8 @@ PAGES = (
     'cpp_project_device_monitoring.html', 'cpp_station9_databases_intro.html',
     'object_lifetime_demo.html', 'sql_trainer.html', 'visual_labs.html',
     'security_sql_demo.html', 'security_labs.html', 'distributed_lab.html',
+    'https_journey_lab.html', 'tcp_delivery_lab.html', 'packet_path_lab.html',
+    'network_setup_lab.html', 'vpn_tunnels_lab.html',
 )
 ASSETS = (
     'home.css', 'station.css', 'station-app.js', 'cheatsheet.css', 'cheatsheet.js',
@@ -51,6 +55,9 @@ ASSETS = (
     'security-sql-model.js', 'security-sql-worker.js',
     'security-lab-models.js', 'security-labs.js', 'security-labs.css',
     'distributed-lab-model.js', 'distributed-lab.js', 'distributed-lab.css',
+    'https-journey-model.js', 'https-journey-lab.js', 'https-journey-lab.css',
+    'network-labs.js', 'network-labs.css', 'network-tcp-model.js',
+    'network-config-model.js', 'network-routing-model.js', 'network-vpn-model.js',
 )
 HIGHLIGHT_ASSETS = (
     'highlight.min.js', 'http.min.js', 'cmake.min.js', 'dockerfile.min.js', 'nginx.min.js', 'LICENSE', 'ORIGIN.json',
@@ -406,8 +413,11 @@ def collect():
         'glossary.html': render_glossary(), 'generated/terms.data.js': render_terms(),
         'service_workshop.html': render_service_workshop(),
         'distributed_lab.html': render_distributed_lab(),
+        'https_journey_lab.html': render_https_journey().decode('utf-8'),
     }.items():
         files['roadmap/' + name] = content.encode()
+    for name, content in render_network_labs().items():
+        files['roadmap/' + name] = content
     return secure_files(files), stations
 
 

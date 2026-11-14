@@ -291,6 +291,11 @@
           "html": "Для HTTP/3 клиент выбирает другой транспорт — QUIC поверх UDP; согласование TLS встроено в его установление. ALPN не превращает готовое TCP-соединение в QUIC. На первом проходе достаточно видеть эту развилку; детали обоих вариантов разберём отдельно."
         },
         {
+          "type": "lab",
+          "lab": "https-journey",
+          "scenario": "normal"
+        },
+        {
           "type": "self-check",
           "prompt": "Сайт вернул HTTP 404 для /metrics. Следует ли из этого, что DNS не нашёл api.example.com?",
           "answer": "Нет. Получен прикладной HTTP-ответ, значит какой-то HTTP-участник обслужил обращение на этом пути. Причину 404 ищут в выборе ресурса или маршруте приложения; при наличии посредника ещё выясняют, кто сформировал ответ. DNS-ошибка не является HTTP-статусом."
@@ -1082,6 +1087,11 @@
           "type": "note",
           "kind": "tip",
           "html": "Что обычно попадает в захват, уточняет <a href=\"https://wiki.wireshark.org/Ethernet\" target=\"_blank\" rel=\"noopener noreferrer\">официальная wikiWireshark: Ethernet и FCS</a>: преамбула отфильтровывается оборудованием, а FCS часто не передаётся анализатору. Поэтому отсутствие этих полей в PCAP не меняет формат настоящего кадра."
+        },
+        {
+          "type": "lab-ref",
+          "lab": "network-setup",
+          "scenario": "arp"
         }
       ]
     },
@@ -1389,6 +1399,11 @@
           "type": "note",
           "kind": "tip",
           "html": "Основания: <a href=\"https://www.rfc-editor.org/rfc/rfc2131.html#section-3.1\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 2131 §§3.1 и 4.4.5: начальная выдача и продление</a>; <a href=\"https://www.rfc-editor.org/rfc/rfc2132.html#section-3\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 2132: маска, маршрутизаторы и DNS-параметры</a>; <a href=\"https://www.rfc-editor.org/rfc/rfc4861.html#section-3.1\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 4861: задачи RA</a>; <a href=\"https://www.rfc-editor.org/rfc/rfc4862.html#section-5.5.3\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 4862: SLAAC</a>. Команды относятся к Linux и установленным службам, а не к обязательному интерфейсу любой ОС."
+        },
+        {
+          "type": "lab",
+          "lab": "network-setup",
+          "scenario": "dhcp"
         }
       ]
     },
@@ -1455,6 +1470,11 @@
           "type": "note",
           "kind": "tip",
           "html": "Основная модель и пример соответствий: <a href=\"https://www.rfc-editor.org/rfc/rfc3022.html#section-2.2\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 3022 §2.2</a>. Это Informational RFC — описание традиционного NAT, а не единый контракт всех современных реализаций. Выбор портов, таймеры и ограничения конкретного шлюза нужно проверять отдельно."
+        },
+        {
+          "type": "lab-ref",
+          "lab": "packetpath",
+          "scenario": "snat"
         }
       ]
     },
@@ -1539,6 +1559,11 @@
             }
           ],
           "caption": "Для примера исключены serve-stale и дополнительные клиентские политики кэширования."
+        },
+        {
+          "type": "lab-ref",
+          "lab": "https-journey",
+          "scenario": "cached"
         },
         {
           "type": "self-check",
@@ -2208,6 +2233,11 @@
           "type": "note",
           "kind": "tip",
           "html": "Основания: <a href=\"https://www.rfc-editor.org/rfc/rfc3022.html#section-2.2\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 3022: NAPT и входящие отображения</a>; <a href=\"https://www.rfc-editor.org/rfc/rfc6598.html#section-4\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 6598: Shared Address Space</a>; <a href=\"https://www.rfc-editor.org/rfc/rfc6092.html\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 6092: рекомендации по домашней IPv6-фильтрации</a>. DDNS-сервис может обновлять DNS через собственный API: поддержка определённого сервиса не выводится из одного RFC о динамическом DNS."
+        },
+        {
+          "type": "lab-ref",
+          "lab": "vpn-tunnels",
+          "scenario": "expired-nat"
         }
       ]
     },
@@ -2305,6 +2335,11 @@
           "type": "note",
           "kind": "tip",
           "html": "Источники и границы: <a href=\"https://www.wireguard.com/\" target=\"_blank\" rel=\"noopener noreferrer\">WireGuard: защищённый интерфейс и перенос IP</a>; <a href=\"https://www.wireguard.com/quickstart/\" target=\"_blank\" rel=\"noopener noreferrer\">WireGuard: persistent keepalive</a>; <a href=\"https://tailscale.com/docs/reference/connection-types\" target=\"_blank\" rel=\"noopener noreferrer\">Tailscale: типы соединения, редакция с отметкой проверки 1 июня 2026</a>; <a href=\"https://man7.org/linux/man-pages/man8/ip-route.8.html\" target=\"_blank\" rel=\"noopener noreferrer\">Linux: выбор маршрута</a>. Это примеры технологий, а не обязательные зависимости курса; не все технологии с названием VPN имеют одинаковые свойства."
+        },
+        {
+          "type": "lab",
+          "lab": "vpn-tunnels",
+          "scenario": "split"
         }
       ]
     },
@@ -2501,6 +2536,11 @@
           "type": "note",
           "kind": "tip",
           "html": "Основания: <a href=\"https://man.openbsd.org/OpenBSD-7.6/ssh\" target=\"_blank\" rel=\"noopener noreferrer\">OpenBSD 7.6, ssh(1): команда и проверка ключей</a>; <a href=\"https://man.openbsd.org/OpenBSD-7.6/sshd\" target=\"_blank\" rel=\"noopener noreferrer\">sshd(8): authorized_keys и -t</a>; <a href=\"https://man.openbsd.org/OpenBSD-7.6/sshd_config\" target=\"_blank\" rel=\"noopener noreferrer\">sshd_config(5): методы входа</a>; <a href=\"https://github.com/openssh/openssh-portable/blob/V_9_6_P1/sshd_config.5\" target=\"_blank\" rel=\"noopener noreferrer\">Portable OpenSSH 9.6p1: UsePAM</a>; <a href=\"https://tailscale.com/docs/features/tailscale-ssh\" target=\"_blank\" rel=\"noopener noreferrer\">отдельная модель Tailscale SSH</a>. Различия платформ и эффективной конфигурации существенны; примеры не являются универсальным готовым конфигом."
+        },
+        {
+          "type": "lab-ref",
+          "lab": "vpn-tunnels",
+          "scenario": "missing-route"
         }
       ]
     },
@@ -2882,6 +2922,11 @@
           "html": "Подставим числа без перехода через границу 32-битного счётчика. SYN клиента имеет <code>seq=100</code>, ответ сервера — <code>seq=700, ack=101</code>, подтверждение клиента — <code>ack=701</code>. Следующие пять клиентских байтов получают номера 101…105. Если непрерывно получены все пять, ответный ACK равен 106 — номеру следующего ожидаемого байта, а не последнего полученного."
         },
         {
+          "type": "lab-ref",
+          "lab": "https-journey",
+          "scenario": "normal"
+        },
+        {
           "type": "self-check",
           "prompt": "При начальном SYN seq=900 клиент после установления отправил 10 байтов, без FIN и иных новых данных. Каким ACK подтверждаются они все?",
           "answer": "911. SYN занял 900, данные — 901…910, следующий ожидаемый номер — 911. Не следует складывать клиентский и серверный начальные номера: у направлений независимая нумерация."
@@ -2969,6 +3014,11 @@
           "type": "note",
           "kind": "tip",
           "html": "Основания: <a href=\"https://www.rfc-editor.org/rfc/rfc2018.html#section-1\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 2018: назначение SACK</a>; <a href=\"https://www.rfc-editor.org/rfc/rfc5681.html#section-3.2\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 5681 §3.2: duplicate ACK и fast retransmit</a>; <a href=\"https://www.rfc-editor.org/rfc/rfc6298.html#section-2\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 6298 §2: расчёт RTO</a>. Здесь объясняется принцип; схема не задаёт единственный алгоритм восстановления для любой ОС."
+        },
+        {
+          "type": "lab",
+          "lab": "tcp-delivery",
+          "scenario": "ordered"
         }
       ]
     },
@@ -3109,6 +3159,11 @@
           "type": "note",
           "kind": "tip",
           "html": "Основания: <a href=\"https://www.rfc-editor.org/rfc/rfc9293.html#section-3.6\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 9293 §3.6: нормальное и одновременное завершение</a>; <a href=\"https://man7.org/linux/man-pages/man2/recv.2.html\" target=\"_blank\" rel=\"noopener noreferrer\">Linux recv(2): нулевой результат</a>; <a href=\"https://man7.org/linux/man-pages/man2/shutdown.2.html\" target=\"_blank\" rel=\"noopener noreferrer\">Linux shutdown(2): направления</a>. Состояние протокола и владение fd — разные уровни наблюдения."
+        },
+        {
+          "type": "lab-ref",
+          "lab": "tcp-delivery",
+          "scenario": "close"
         }
       ]
     },
@@ -3329,6 +3384,11 @@
           "type": "note",
           "kind": "tip",
           "html": "Основания: <a href=\"https://www.rfc-editor.org/rfc/rfc9293.html#section-3.7.4\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 9293 §3.7.4: Нейгл</a>; <a href=\"https://www.rfc-editor.org/rfc/rfc2018.html\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 2018: сведения SACK</a>; <a href=\"https://man7.org/linux/man-pages/man7/tcp.7.html\" target=\"_blank\" rel=\"noopener noreferrer\">Linux tcp(7): TCP_NODELAY</a>. Это модель состояния обмена, не утверждение, что любая реализация всегда копирует буфер в конкретную структуру памяти одинаковым способом."
+        },
+        {
+          "type": "lab-ref",
+          "lab": "tcp-delivery",
+          "scenario": "reordered"
         }
       ]
     },
@@ -6770,6 +6830,11 @@
         {
           "type": "text",
           "html": "Transcript — история сообщений рукопожатия, с которой связаны доказательства. HKDF — механизм получения разных секретов из исходного материала с контекстом. MAC в Finished означает криптографический код проверки целостности, а не MAC-адрес Ethernet. Эти названия нужны для понимания разделения задач; собственную криптографическую реализацию ради сетевой сессии писать не требуется."
+        },
+        {
+          "type": "lab-ref",
+          "lab": "https-journey",
+          "scenario": "bad-cert"
         },
         {
           "type": "self-check",

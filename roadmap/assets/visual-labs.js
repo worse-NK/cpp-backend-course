@@ -29,6 +29,16 @@
     const focusedMode=document.activeElement&&document.activeElement.dataset.mode;
     if($("programDialog").open)$("programDialog").close();
     const p=new URLSearchParams(location.hash.slice(1));
+    // Preserve old packet-path bookmarks using the registered local destination,
+    // never a URL supplied in the fragment.
+    const migrated=catalog.find(item=>item.id==="packetpath"&&item.id===p.get("lab")&&item.file!=="visual_labs.html");
+    if(migrated){
+      stop();
+      const entry=migrated.entries.find(e=>e.station===p.get("from")&&e.section===p.get("section"));
+      const scenario=migrated.scenarios.includes(p.get("scenario"))?p.get("scenario"):migrated.scenarios[0];
+      location.replace(window.courseLabHref(migrated.id,scenario,entry&&entry.station,entry&&entry.section));
+      return;
+    }
     const requested=catalog.find(item=>item.id===p.get("lab")&&item.file==="visual_labs.html");
     if(!requested){catalogPage();return;}
     lab=requested;context=lab.entries.find(e=>e.station===p.get("from")&&e.section===p.get("section"))||null;

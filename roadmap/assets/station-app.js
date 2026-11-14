@@ -514,6 +514,15 @@
       h("small", null, sameTab ? "После опыта можно вернуться к этому разделу и закрепить тему." : "В новой вкладке · возврат к этому разделу внутри лаборатории"));
   }
 
+  function LabReference(props) {
+    var lab = (window.COURSE_LABS || []).find(function (item) { return item.id === props.block.lab; });
+    var primary = lab && lab.entries.find(function (entry) { return entry.primary === true; });
+    if (!primary) return null;
+    return h("p", { className: "course-lab-reference" }, "Этот механизм можно проследить в лаборатории ",
+      h("a", { href: primary.file + "#section=" + encodeURIComponent(primary.section) }, "«" + lab.title + "»"),
+      ". Ссылка ведёт к её основному месту в учебнике.");
+  }
+
   function ServiceWorkshopEntry() {
     var stage = { station8: "local", station9: "database", station10: "vm" }[meta.id];
     if (!stage) return null;
@@ -818,6 +827,9 @@
         section.blocks.map(function (block, index) {
           if (block.type === "lab") {
             return h(LabBlock, { block: block, section: section, key: index });
+          }
+          if (block.type === "lab-ref") {
+            return h(LabReference, { block: block, section: section, key: index });
           }
           if (block.type === "sql-trainer") {
             var trainerUrl = "sql_trainer.html#" + encodeURIComponent(block.exercise);

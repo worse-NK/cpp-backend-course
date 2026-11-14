@@ -34,11 +34,23 @@ class BuildTests(unittest.TestCase):
                 self.assertNotIn(b'https://unpkg.com', content)
                 self.assertNotIn(b'rel="manifest"', content)
 
+    def test_https_journey_is_included_with_the_same_local_runtime(self):
+        page = self.files['roadmap/https_journey_lab.html'].decode()
+        for asset in ('https-journey-model.js', 'https-journey-lab.js', 'https-journey-lab.css'):
+            target = 'roadmap/assets/' + asset
+            self.assertIn(target, self.files)
+            self.assertEqual(self.files[target], (build.PROJECT / target).read_bytes())
+            self.assertIn('assets/' + asset, page)
+        self.assertIn('generated/visual-labs.data.js', page)
+        self.assertNotIn('roadmap/templates/https_journey_lab.html', self.files)
+        self.assertNotRegex(page, r'<(?:script|link|img)\b[^>]+(?:src|href)="https?://')
+
     def test_no_pwa_server_or_source_files(self):
         self.assertFalse(any(name in self.files for name in ('sw.js', 'manifest.webmanifest', 'pwa.js', 'offline.html')))
         for name in self.files:
             self.assertNotIn('/content/', name)
             self.assertNotIn('/tools/', name)
+            self.assertNotIn('/templates/', name)
             self.assertFalse(name.endswith(('.deb', '.img', '.qcow2', '.env')))
         self.assertNotIn(b'serviceWorker.register', self.files['desktop-ui.js'])
 

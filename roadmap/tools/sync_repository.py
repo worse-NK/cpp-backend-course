@@ -122,6 +122,8 @@ def collect_repository_files() -> dict[str, bytes]:
         "content/cheatsheet.json", "content/glossary.json", "content/visual-labs.json",
         "content/cpp-examples.json",
         "content/service-workshop/route.json", "assets/sql-lab-worker.js",
+        "templates/https_journey_lab.html",
+        "templates/network_lab.html",
         "vendor/sqljs/sql-asm.js", "vendor/sqljs/README.md",
     }
     sources.update("tests/" + name for name in (

@@ -4,6 +4,7 @@ import hashlib
 import json
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -46,6 +47,10 @@ class RepositoryInventory(unittest.TestCase):
                      'roadmap/tools/build_stations.py', 'roadmap/tools/cpp_examples.py',
                      'roadmap/tools/course_theme.py',
                      'roadmap/tools/build_sql_lab.py',
+                     'roadmap/tools/build_https_journey.py',
+                     'roadmap/templates/https_journey_lab.html',
+                     'roadmap/tools/test_https_journey_model.js',
+                     'roadmap/tools/test_https_journey_ui.js',
                      'roadmap/tools/checkpoint_data.py',
                      'roadmap/tools/validate_materials.py',
                      'roadmap/tools/test_publication.py',
@@ -70,6 +75,26 @@ class RepositoryInventory(unittest.TestCase):
         self.assertNotIn('desktop-course/icons/contact-sheet.png', self.files)
         self.assertFalse(any(name.startswith(('desktop-course/release/', 'desktop-course/.toolchain/'))
                              for name in self.files))
+
+    def test_https_lab_rebuilds_from_the_collected_sources_without_workspace_files(self):
+        names = (
+            'roadmap/templates/https_journey_lab.html',
+            'roadmap/tools/build_https_journey.py',
+            'roadmap/tools/web_security.py',
+            'roadmap/https_journey_lab.html',
+        )
+        with tempfile.TemporaryDirectory(prefix='course-https-source-roundtrip-') as folder:
+            project = Path(folder)
+            for name in names:
+                target = project / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(self.files[name])
+            result = subprocess.run(
+                [sys.executable, str(project / 'roadmap/tools/build_https_journey.py'), '--check'],
+                cwd=project.parent, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                timeout=15,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_repository_docs_and_entrypoints_are_not_web_distribution_docs(self):
         for name in repository.PROJECT_SOURCES:
@@ -120,7 +145,7 @@ class RepositoryInventory(unittest.TestCase):
     def test_deployment_remains_source_free(self):
         files, _ = publication.collect()
         for name in files:
-            self.assertFalse(set(Path(name).parts) & {'content', 'tools', 'tests', '__pycache__'})
+            self.assertFalse(set(Path(name).parts) & {'content', 'tools', 'tests', 'templates', '__pycache__'})
         self.assertTrue('roadmap/content/station0.json' in self.files)
         self.assertFalse('roadmap/content/station0.json' in files)
 

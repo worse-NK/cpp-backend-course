@@ -139,7 +139,7 @@ def validate(data: dict, path: Path) -> None:
             if not isinstance(raw_block, dict):
                 raise ValueError(f"{block_where}: expected an object")
             block_type = raw_block.get("type")
-            if block_type == "lab":
+            if block_type in {"lab", "lab-ref"}:
                 block = require_keys(raw_block, {"type", "lab", "scenario"}, block_where)
                 catalog = load_json(CONTENT / "visual-labs.json")["labs"]
                 lab = next((lab for lab in catalog if lab["id"] == block["lab"]), None)
@@ -148,6 +148,12 @@ def validate(data: dict, path: Path) -> None:
                     and e["scenario"] == block["scenario"] for e in lab["entries"]
                 ):
                     raise ValueError(f"{block_where}: unknown lab or misplaced entry")
+                entry = next(e for e in lab["entries"] if e["station"] == station_id
+                             and e["section"] == section_id and e["scenario"] == block["scenario"])
+                if "primary" in entry and (block_type == "lab") != entry["primary"]:
+                    raise ValueError(f"{block_where}: only the primary entry may create a lab card")
+                if block_type == "lab-ref" and not any(e.get("primary") for e in lab["entries"]):
+                    raise ValueError(f"{block_where}: reference has no primary lab location")
             elif block_type == "sql-trainer":
                 block = require_keys(raw_block, {"type", "exercise"}, block_where)
                 if meta["number"] != 9 or block["exercise"] not in {
