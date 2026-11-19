@@ -10,6 +10,12 @@ from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 
+def station_order(path):
+    # Directory enumeration order differs between checkouts. Keep 9A SQL
+    # before 9B, the primary station before its branches, and 7Б before 7В.
+    number, _, branch = path.stem.removeprefix('station').partition('-')
+    return int(number), (-1 if branch == 'sql' else 1 if branch else 0), branch
+
 def render():
     labs = {lab['id']: lab for lab in json.loads((ROOT / 'content/visual-labs.json').read_text())['labs']}
     parts = ['''<!doctype html><html lang="ru"><meta charset="utf-8">
@@ -34,7 +40,7 @@ li{margin:10px 0;overflow-wrap:anywhere}.muted{color:#56616e}nav{display:flex;fl
 </ul>
 <p class="muted">Это указатель ссылок из теории, а не отметка о завершённой построчной экспертизе. Наличие ссылки не доказывает корректность каждого утверждения. Если прямой ссылки нет, это явно отмечено: такой раздел нельзя считать проверенным только по этому указателю.</p>
 <nav>''']
-    paths = sorted((ROOT / 'content').glob('station*.json'), key=lambda p: (int(p.stem[7:].split('-')[0]), -1 if '-sql' in p.stem else 1 if '-' in p.stem else 0))
+    paths = sorted((ROOT / 'content').glob('station*.json'), key=station_order)
     for path in paths:
         parts.append(f'<a href="#{path.stem}">{html.escape(json.loads(path.read_text())["meta"]["logo"])}</a>')
     parts.append('</nav>')

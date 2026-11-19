@@ -20,7 +20,7 @@ Firefox, Python, npm или локальный HTTP-сервер. Интерне
 
 Из папки с установщиком:
 
-  sudo apt install ./cpp-backend-course-desktop_1.4.0_amd64.deb
+  sudo apt install ./cpp-backend-course-desktop_1.4.1_amd64.deb
 
 Права администратора нужны только для системной установки. Если в системе
 не хватает обычных графических библиотек, apt получит их из репозитория:
