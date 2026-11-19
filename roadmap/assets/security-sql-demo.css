@@ -142,6 +142,17 @@ label[for="search-term"] { display: block; margin-bottom: 9px; font-size: 15px; 
 .parameter-box>span { display: block; font-size: 14px; margin-bottom: 8px; }
 .parameter-box>code { display: block; font-size: 14px; color: #285d34; white-space: pre-wrap; overflow-wrap: anywhere; }
 .parameter-box p { font-size: 14px; line-height: 1.7; margin: 10px 0 0; }
+.course-page-security-sql #parameter-box:not([hidden]) { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:10px; }
+.bind-lane { align-self:stretch; display:flex; flex-direction:column; justify-content:center; padding:11px 13px; border:1px solid var(--course-line); border-radius:6px; }
+.bind-label { color:var(--course-muted); font-size:15px; }
+.bind-lane code { display:block; padding-top:5px; color:var(--course-ink); font:600 17px/1.5 var(--course-mono); white-space:pre-wrap; overflow-wrap:anywhere; }
+.bind-lane:last-of-type { border-color:var(--course-accent); }
+.course-page-security-sql #parameter-box .bind-join { margin:0; color:var(--course-accent); font-size:22px; }
+.course-page-security-sql #parameter-box p { margin:0; grid-column:1/-1; }
+@media(max-width:520px) {
+  .course-page-security-sql #parameter-box:not([hidden]) { grid-template-columns:minmax(0,1fr); gap:5px; }
+  .course-page-security-sql #parameter-box .bind-join { justify-self:center; transform:rotate(90deg); }
+}
 .boundary-note { display: flex; gap: 10px; margin-top: 15px; align-items: baseline; }
 .boundary-note p { font-size: 15px; line-height: 1.75; margin: 0; color: var(--muted); }
 .legend-swatch { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; background: #987740; }

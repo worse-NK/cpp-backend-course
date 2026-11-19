@@ -282,13 +282,25 @@
     forwardRequest(add, m, false, "smaller-"); reachServer(add, m, "smaller-"); createReply(add, m, false); returnPath(add, m, false);
   });
   function key(id) { return Object.prototype.hasOwnProperty.call(sequences, id) ? id : "routed"; }
+  var mtuExperiment = {
+    sizes: [1399, 1400, 1401],
+    send: function (size) {
+      if (mtuExperiment.sizes.indexOf(size) < 0) throw new RangeError("Unknown probe size");
+      return { size: size, payload: size - 40 - 8, lan: true, wan: size <= 1400,
+        ptb: size > 1400 ? "in-flight" : "none", estimate: 1500 };
+    },
+    receivePtb: function (state) {
+      if (!state || state.ptb !== "in-flight") return state;
+      return Object.assign({}, state, { ptb: "received", estimate: 1400 });
+    }
+  };
   var api = freeze({ id: "packetpath", title: "Как пакет проходит через маршрутизатор", summary: "IP и Ethernet, обычная пересылка, SNAT, фильтрация, TTL и ограничение размера IPv6-пакета.",
     introduction: { paragraphs: [
       "Программа на твоём компьютере обращается к серверу и ждёт ответ. Если ответа нет, непонятно, где искать причину: запрос мог не выйти из сети, попасть под запрещающее правило, оказаться слишком большим или дойти до сервера без обратного пути. Здесь проследим за маленькой диагностической проверкой по каждому участку.",
       "Наш клиент посылает контрольное сообщение, а простая серверная программа отвечает на него. Между ними один маршрутизатор. Будем отдельно смотреть адрес конечного получателя, адрес ближайшего устройства и решения на границе сетей. В разных вариантах по очереди разберём важные механизмы и сравним результат."
     ], goal: "Понимать, какие поля меняются при пересылке, зачем нужна обратная дорога и чем отличаются преобразование адресов, запрет доступа и ограничения самого пакета.",
     action: "Начни с обычной маршрутизации. Затем сравни SNAT и запрещающее правило. Отдельно пройди варианты с IPv6-размером и TTL: в них отвечает маршрутизатор, а не серверная программа." },
-    phases: phases, scenarios: scenarios, sources: sources, assumptions: assumptions,
+    phases: phases, scenarios: scenarios, sources: sources, assumptions: assumptions, mtuExperiment: mtuExperiment,
     getSteps: function (scenario) { return sequences[key(scenario)]; },
     getState: function (scenario, index) { var k = key(scenario), n = Number(index); if (!Number.isFinite(n)) n = 0; return snapshots[k][Math.max(0, Math.min(snapshots[k].length - 1, Math.floor(n)))]; },
     getTopology: function (scenario) { return key(scenario) === "pmtu6" ? topologies.ipv6 : topologies.ipv4; }

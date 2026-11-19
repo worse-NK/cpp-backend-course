@@ -123,6 +123,19 @@
       div.append(el('h3','',h.title),el('p','',h.detail));return div;
     }));
     $('result-rows').replaceChildren();
+    if(r.ownRead && r.rows.length===1){
+      const task=r.rows[0], fig=el('figure','access-pairs');
+      fig.append(el('figcaption','','Сравнил ли сервер данные Анны с карточкой №'+task.id+'?'));
+      const pairs=[['owner','Пользователь',r.ownRead.user,'Владелец',task.owner_id],['team','Выбранная команда',r.ownRead.team,'Команда записи',task.tenant_id]];
+      for(const [key,left,a,right,b] of pairs){
+        const checked=r.trace.some(t=>t.key===key&&t.state==='pass');
+        const line=el('div','access-pair'), x=el('div'), y=el('div');
+        line.dataset.checked=String(checked);
+        x.append(el('span','',left),el('strong','',a));y.append(el('span','',right),el('strong','',b));
+        line.append(x,el('b','',checked?'Сверено':'Не сверялось'),y);fig.append(line);
+      }
+      $('result-rows').append(fig);
+    }
     if(r.rows.length)$('result-rows').append(table(['Запись','Название','Команда'],r.rows.map(t=>[t.id,t.title,t.tenant_id===10?'Север (10)':'Юг (20)'])));
   }
   function run() {

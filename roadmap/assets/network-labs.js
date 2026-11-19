@@ -94,6 +94,45 @@
       return '<section class="mechanism-panel"><h4>'+esc(p.title)+'</h4>'+body+(p.note?'<p class="mechanism-note">'+esc(p.note)+'</p>':'')+'</section>';
     }).join('');
   }
+  function setupObservation() {
+    var host=$('network-observation');
+    if(!host)return null;
+    var lease=config.id==='network-setup';
+    var choices=lease?
+      [['dhcp-offer','Предложение'],['dhcp-ack','Подтверждение'],['dhcp-announce','Использование']]:
+      [['inner-office','На ноутбуке'],['outer-office','В интернете'],['gateway-decrypt','На VPN-шлюзе']];
+    $('observation-title').textContent=lease?'Когда адрес становится своим?':'Какой адрес виден в этой точке?';
+    var controls=$('observation-choices');
+    controls.innerHTML=choices.map(function(c){return '<button type="button" data-observe="'+c[0]+'">'+c[1]+'</button>';}).join('');
+    controls.querySelectorAll('[data-observe]').forEach(function(b){
+      b.addEventListener('click',function(){
+        var target=list().findIndex(function(s){return s.id===b.dataset.observe;});
+        if(target>=0){panel='explain';go(target);}
+      });
+    });
+    return function(step,state){
+      host.hidden=lease?scenario!=='dhcp':scenario!=='split'&&scenario!=='full';
+      if(host.hidden)return;
+      var snap=state.observation,picture=$('observation-picture');
+      controls.querySelectorAll('[data-observe]').forEach(function(b){
+        if(b.dataset.observe===step.id)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');
+      });
+      if(!snap){
+        picture.innerHTML='';
+        $('observation-note').textContent='Сравни один запрос к офисной странице в трёх точках пути. Кнопка переключит весь разбор на соответствующий шаг.';
+        return;
+      }
+      if(lease){
+        var labels=['Адреса ещё нет','Адрес предложен','Аренда подтверждена','Адрес используется'];
+        picture.innerHTML='<div class="lease-ticket" data-lease="'+snap.stage+'"><div><span>IPv4 ноутбука</span><strong>'+esc(snap.address||'—')+'</strong></div><b>'+labels[snap.stage]+'</b></div>';
+      }else{
+        var endpoints='<div class="lens-endpoints"><span><small>Источник</small><code>'+esc(snap.from)+'</code></span><i aria-hidden="true">→</i><span><small>Назначение</small><code>'+esc(snap.to)+'</code></span></div>';
+        picture.innerHTML='<div class="vpn-envelope" data-outside="'+snap.outside+'"><strong>'+(snap.outside?'Внешний IPv4 · после домашнего NAT':'Внутренний IPv4 · офисный пакет')+'</strong>'+endpoints+
+          (snap.outside?'<div class="vpn-udp"><span>Порты UDP: <code>'+esc(snap.udp)+'</code></span><b>Внутренний IP-пакет зашифрован</b></div>':'')+'</div>';
+      }
+      $('observation-note').textContent=snap.note;
+    };
+  }
   function details(step){
     $('step-title').textContent=step.title;
     $('explanation').innerHTML='<p class="step-summary">'+esc(step.summary)+'</p>'+step.paragraphs.map(function(p){return '<p>'+esc(p)+'</p>';}).join('')+'<div class="changed-box"><h4>Что изменилось</h4><p>'+esc(step.changed)+'</p></div><div class="visible-box"><h4>Что можно наблюдать</h4><p>'+esc(step.visible)+'</p></div><div class="step-sources">'+(step.sourceIds||[]).map(function(id){return model.sources.find(function(s){return s.id===id;});}).filter(Boolean).map(function(s){return '<a href="'+esc(s.url)+'" target="_blank" rel="noopener noreferrer">'+esc(s.title)+' ↗</a>';}).join('')+'</div>';
@@ -109,11 +148,110 @@
     $('journal').querySelectorAll('[data-journal-step]').forEach(function(b){b.addEventListener('click',function(){panel='fields';go(Number(b.dataset.journalStep),{quiet:true});reveal(true);});});
   }
   function render(animate){var step=list()[index],state=model.getState(scenario,index);$('experiment').style.setProperty('--protocol-color',color(step));$('scenario').value=scenario;$('scenario-description').textContent=model.scenarios.find(function(s){return s.id===scenario;}).description;phases(step);if(view==='network')graph(step,animate);else sequence();details(step);mechanisms(state);journal();
+    if(syncMtu) syncMtu(scenario);
+    if(syncObservation) syncObservation(step,state);
     var back=context?context.file+'#section='+encodeURIComponent(context.section):defaultBack;$('return-to-section').href=back;$('return-to-theory').href=back;
     $('message-direction').textContent=direction(step);$('message-label').textContent=isMessage(step)?step.label:step.title;$('inspect-message').disabled=!(step.fields&&step.fields.length);
     $('step-counter').textContent='Шаг '+(index+1)+' из '+list().length;$('protocol-badge').textContent=step.protocol==='local'?'Местное действие':step.protocol.toUpperCase();$('range-label').textContent=$('step-counter').textContent;$('step-range').max=String(list().length-1);$('step-range').value=String(index);$('step-range').setAttribute('aria-valuetext',step.title);$('previous').disabled=index===0;$('reset').disabled=index===0;$('next').disabled=index===list().length-1;$('next').textContent=index===list().length-1?'Опыт завершён':'Следующий шаг →';$('play').disabled=index===list().length-1;document.querySelectorAll('[data-view]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.view===view));});$('announcement').textContent=$('step-counter').textContent+'. '+step.title+'. '+step.changed;
   }
   function inspect(){stop();panel='fields';route(false);render(false);document.querySelector('[data-panel="fields"]').focus({preventScroll:true});}
+  function setupAckExperiment(experiment) {
+    var receiver = experiment.initial(), blocks = experiment.blocks;
+    $('tcp-order-bytes').innerHTML = blocks.map(function(b) {
+      return b.text.split('').map(function(letter, n) {
+        return '<span id="tcp-byte-' + (b.first + n) + '"><b>' + esc(letter) + '</b><small>' + (b.first + n) + '</small></span>';
+      }).join('');
+    }).join('');
+    $('tcp-order-choices').innerHTML = blocks.map(function(b, i) {
+      return '<button type="button" id="tcp-deliver-' + i + '" aria-label="Доставить ' + esc(b.text) +
+        ', байты ' + b.first + '–' + b.last + '"><strong>' + esc(b.text) + '</strong><span>' +
+        b.first + '–' + b.last + '</span></button>';
+    }).join('');
+    $('tcp-order-stream').innerHTML = blocks.map(function(b, i) {
+      return '<li id="tcp-order-slot-' + i + '"><strong>' + esc(b.text) +
+        '</strong><span id="tcp-order-state-' + i + '"></span></li>';
+    }).join('');
+    function show(reason) {
+      blocks.forEach(function(b, i) {
+        var tone = !receiver.received[i] ? (receiver.received.slice(i+1).some(Boolean) ? 'gap' : 'absent') : b.last < receiver.next ? 'continuous' : 'buffered';
+        $('tcp-order-slot-' + i).setAttribute('data-arrival', tone);
+        $('tcp-order-state-' + i).textContent = {absent:'Нет на сервере', gap:'Пропуск', continuous:'Без пропуска', buffered:'За пропуском'}[tone];
+        for (var byte = b.first; byte <= b.last; ++byte) $('tcp-byte-' + byte).setAttribute('data-arrival', tone);
+      });
+      $('tcp-order-tape').setAttribute('data-edge', receiver.bytes);
+      $('tcp-order-frontier').textContent = receiver.bytes === 12 ? 'Все 12 байтов подряд · далее 1013' : 'Ждём байт ' + receiver.next;
+      $('tcp-order-ack').textContent = receiver.ack === null ? '—' : 'ACK ' + receiver.ack;
+      $('tcp-order-reason').textContent = reason;
+    }
+    function reset() {
+      receiver = experiment.initial();
+      show('Ни одна часть ещё не пришла. Сервер ждёт байт ' + receiver.next + '; подтверждения данных файла пока не было.');
+    }
+    blocks.forEach(function(b, i) {
+      $('tcp-deliver-' + i).addEventListener('click', function() {
+        stop();
+        receiver = experiment.deliver(receiver, i);
+        var ack = 'ACK ' + receiver.ack + '. ';
+        var reason = {
+          duplicate: 'Копия ' + b.text + ' не добавила новых байтов. Номер подтверждения тот же.',
+          gap: b.text + ' уже на сервере, но раньше в файле есть пропуск: ещё нужен байт ' + receiver.next + '. Сервер сохранил эти буквы на потом.',
+          bridge: 'Сегмент ' + b.text + ' заполнил пропуск. Следующие буквы уже лежали в буфере, поэтому теперь от начала файла без пропуска есть ' + receiver.bytes + ' из 12 байтов.',
+          advance: 'Сегмент ' + b.text + ' пришёл по порядку. От начала файла без пропуска получено ' + receiver.bytes + ' из 12 байтов.'
+        }[receiver.effect];
+        show(ack + reason);
+      });
+    });
+    $('tcp-order-reset').addEventListener('click', function() { stop(); reset(); });
+    $('try-tcp-order').addEventListener('click', function() {
+      stop();
+      var title = $('tcp-order-title');
+      title.focus({preventScroll:true});
+      title.scrollIntoView({block:'start',behavior:reduced.matches?'auto':'smooth'});
+    });
+    reset();
+  }
+  if(model.ackExperiment && $('tcp-order-choices')) setupAckExperiment(model.ackExperiment);
+  function setupMtuExperiment(experiment) {
+    var panel=$('mtu-probe'), state=null;
+    $('mtu-choices').innerHTML=experiment.sizes.map(function(size){
+      return '<button id="mtu-send-'+size+'" type="button" aria-pressed="false">'+size+' байт</button>';
+    }).join('');
+    function paint(){
+      var pending=state && state.ptb==='in-flight', size=state ? state.size : 0;
+      experiment.sizes.forEach(function(n){$('mtu-send-'+n).setAttribute('aria-pressed', String(size===n));});
+      $('mtu-ruler').querySelectorAll('[data-cut]').forEach(function(cell){
+        var n=Number(cell.dataset.cut);
+        cell.setAttribute('data-fill',size<n?'empty':n>1400?'overflow':'fits');
+      });
+      $('mtu-lan').textContent=state?'Прошёл':'—';
+      $('mtu-wan').textContent=!state?'—':state.wan?'Прошёл':'Отброшен';
+      $('mtu-wan').setAttribute('data-verdict', !state?'':state.wan?'fits':'overflow');
+      $('mtu-estimate').textContent=(state?state.estimate:1500)+' байт';
+      $('mtu-math').textContent=state ? size+' = 40 (заголовок IPv6) + 8 (заголовок UDP) + '+state.payload+' (данные UDP), в байтах.' : '40 байт занимает заголовок IPv6, ещё 8 — заголовок UDP. Остальное место в пакете отведено данным.';
+      $('mtu-result').textContent=!state?'Как думаешь, пройдёт ли пакет ровно в 1400 байт?':
+        state.wan?(size===1400?'Ровно на границе: 1400 байт допустимы.':'Остался запас в один байт.')+' Пакет дошёл до сервера. Уведомления об ошибке нет; само по себе это не сообщает клиенту точный предел пути.':
+        pending?'Одного лишнего байта хватило: маршрутизатор отбросил весь пакет, а не отрезал его конец. В ответ отправлено Packet Too Big («пакет слишком велик»). Пока оно в пути, клиент ещё не знает о пределе 1400.':
+        'Клиент получил Packet Too Big, проверил, что уведомление относится к его пакету, и снизил оценку предела пути до 1400 байт. Исходный пакет не доставлен; новый мы ещё не отправляли.';
+      $('mtu-deliver-ptb').setAttribute('aria-disabled',String(!pending));
+    }
+    experiment.sizes.forEach(function(size){$('mtu-send-'+size).addEventListener('click',function(){
+      stop();state=experiment.send(size);paint();
+    });});
+    $('mtu-deliver-ptb').addEventListener('click',function(){
+      if(!state||state.ptb!=='in-flight')return;
+      stop();state=experiment.receivePtb(state);paint();
+    });
+    $('mtu-reset').addEventListener('click',function(){stop();state=null;paint();});
+    panel.addEventListener('toggle',function(){if(panel.open)stop();});
+    paint();
+    return function(current){
+      var visible=current==='pmtu6';
+      if(!panel.hidden&&!visible){panel.open=false;state=null;paint();}
+      panel.hidden=!visible;
+    };
+  }
+  var syncMtu=model.mtuExperiment && $('mtu-probe') ? setupMtuExperiment(model.mtuExperiment) : null;
+  var syncObservation=setupObservation();
   $('page-title').textContent=model.title;document.title=model.title+' · Сетевая лаборатория';$('lab-subtitle').textContent=model.summary;
   $('intro-paragraphs').innerHTML=model.introduction.paragraphs.map(function(p){return '<p>'+esc(p)+'</p>';}).join('');$('intro-goal').textContent=model.introduction.goal;$('intro-action').textContent=model.introduction.action;
   $('scenario').innerHTML=model.scenarios.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.title)+'</option>';}).join('');
@@ -122,6 +260,6 @@
   document.querySelectorAll('[data-view]').forEach(function(b){b.addEventListener('click',function(){stop();view=b.dataset.view;route(false);render(false);});});document.querySelectorAll('[data-panel]').forEach(function(b){b.addEventListener('click',function(){stop();panel=b.dataset.panel;route(false);render(false);});});
   $('play').addEventListener('click',function(){if(timer!==null){stop();return;}if(index===list().length-1)return;$('play').textContent='Ⅱ Пауза';$('play').setAttribute('aria-pressed','true');timer=root.setInterval(function(){go(index+1,{auto:true,replace:true});},5000);});
   document.querySelectorAll('.start-button,.skip-link').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();stop();$('experiment').scrollIntoView({block:'start',behavior:reduced.matches?'auto':'smooth'});$('experiment').focus({preventScroll:true});});});
-  root.addEventListener('hashchange',function(){stop();parse();render(false);});root.addEventListener('popstate',function(){stop();parse();render(false);});document.addEventListener('visibilitychange',function(){if(document.hidden)stop();});document.addEventListener('keydown',function(e){if(e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||e.target.closest('button,a,input,select,textarea,summary,[contenteditable="true"],#scene,.mechanism-table-wrap'))return;if(e.key==='ArrowRight'){e.preventDefault();go(index+1);}if(e.key==='ArrowLeft'){e.preventDefault();go(index-1);}});
+  root.addEventListener('hashchange',function(){stop();parse();render(false);});root.addEventListener('popstate',function(){stop();parse();render(false);});document.addEventListener('visibilitychange',function(){if(document.hidden)stop();});document.addEventListener('keydown',function(e){if(e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||e.target.closest('button,a,input,select,textarea,summary,[contenteditable="true"],#scene,.mechanism-table-wrap,.ack-workbench'))return;if(e.key==='ArrowRight'){e.preventDefault();go(index+1);}if(e.key==='ArrowLeft'){e.preventDefault();go(index-1);}});
   parse();render(false);
 }(typeof window==='undefined'?globalThis:window));

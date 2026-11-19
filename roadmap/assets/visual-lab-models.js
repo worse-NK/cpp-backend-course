@@ -51,6 +51,17 @@
     return t;
   }
 
+  // These indices refer to the state just before the operation (not to a
+  // search for a matching value afterwards). No invalid iterator is used.
+  function vectorProbe(t, target) {
+    const {step, position, kind}=t.mutation;
+    const before=t.steps[step-1].state, after=t.steps[step].state;
+    const index=target==="end"?before.values.length:Number(target);
+    const reallocated=before.buffer!==after.buffer;
+    const valid=!reallocated && index<position;
+    return {before,after,index,kind,position,reallocated,valid};
+  }
+
   function vector(mode) {
     const reserved=mode==="reserved",erase=mode==="erase";
     const code=erase?`std::vector<int> v{10, 20, 30};\nauto before = v.begin();\nauto at = v.begin() + 1;\nauto after = v.begin() + 2;\nauto next = v.erase(at);\n// before remains valid; at and after do not\n// next is the returned, valid iterator`:`std::vector<int> v;\nv.reserve(${reserved?4:2});\nv.push_back(10);\nv.push_back(20);\nint* p = &v[0];\nv.push_back(30);\n// Is p still valid? Check whether reallocation occurred.`;
@@ -59,11 +70,13 @@
     t.add(erase?0:1,"Сначала определяем условия","Начинаем после "+(erase?"инициализации vector тремя значениями":"успешного reserve")+". В модели буфер A имеет ёмкость "+s.capacity+". Ячейки показывают элементы и запас, а не точное число байтов.","reserve(N) гарантирует capacity ≥ N. Выбранная здесь ёмкость допустима, но не обязательна для каждой реализации.",s);
     if(erase){
       s.values=[10,20,30];s.pointer="all-valid";t.add(3,"Сохранили три итератора","before относится к 10, at — к 20, after — к 30. Все получены до удаления.","Итератор — не устойчивый логический идентификатор элемента.",s,"size = 3. Все три итератора пока пригодны.");
+      t.mutation={step:t.steps.length,position:1,kind:"erase"};
       s.values=[10,30];s.erased=true;s.pointer="at-after-invalid";t.add(4,"Удаляем средний элемент","erase сдвигает последующие значения. Итераторы и ссылки в точке удаления и после неё становятся недействительными; before остаётся пригоден.","Инвалидация возможна и без перераспределения памяти.",s,"size = 2. at и after недействительны; before пригоден.");
       t.add(6,"Используем результат erase","Новый итератор next возвращён самой операцией и указывает на следующий элемент 30. Старый at не становится разрешённым только потому, что по той же позиции теперь хранится 30.","После стирания продолжай обход возвращённым итератором, а не старым.",s,"next указывает на 30; старые at/after не используются.");
     }else{
       s.values=[10,20];t.add(3,"Два элемента занимают буфер","size равно 2. capacity показывает место для элементов без следующего перераспределения.","Резервные ячейки не являются уже существующими элементами vector.",s,"size = 2; capacity = "+s.capacity+" в этой модели.");
       s.pointer="valid";t.add(4,"p относится к первому элементу","Сохранили адрес v[0]. Пока буфер остаётся прежним и сам элемент не удалён, этот доступ пригоден.","Хранение p не запрещает контейнеру сменить буфер.",s,"p пригоден и относится к 10.");
+      t.mutation={step:t.steps.length,position:s.values.length,kind:"append"};
       if(!reserved){s.oldBuffer="A";s.buffer="B";s.capacity=4;s.pointer="invalid";}s.values.push(30);
       t.add(5,reserved?"Есть запас — буфер не меняется":"Запаса нет — нужен новый буфер",reserved?"Для третьего элемента достаточно capacity=4. При вставке в конец без перераспределения указатель на прежний первый элемент сохраняет пригодность.":"Новый размер превышает прежнюю ёмкость. vector получает другой буфер, переносит значения и освобождает прежнее хранилище. Все старые указатели, ссылки и итераторы на элементы инвалидируются.",reserved?"Старый end() при push_back всё равно инвалидируется; p не был итератором конца.":"Новая ёмкость 4 — выбор модели, а не гарантированный коэффициент роста vector.",s,reserved?"p всё ещё пригоден; буфер A.":"p недействителен; данные теперь в буфере B.");
       t.add(6,"Проверяем право доступа",reserved?"p можно использовать для прежнего первого элемента. Наличие запаса помогло именно в показанном сценарии вставки в конец.":"Для доступа к 10 нужно заново получить адрес из текущего vector. Старый p не разыменовываем и не пытаемся угадать результат такого обращения.","reserve не защищает от всех видов инвалидации: сравни отдельный сценарий erase.",s);
@@ -184,6 +197,19 @@
     t.add(lines.length-2,"Собираем группы по пользователю",countStar?"COUNT(*) считает строки результата JOIN. Дополненная строка Веры тоже строка: её счётчик ошибочно стал 1.":where||inner?"После предыдущего этапа остались только пары Анна–10 и Борис–12. COUNT(t.id) даёт по 1 для их групп. Строки Веры уже нет: GROUP BY и COUNT не создадут для неё отсутствующую группу с нулём.":"COUNT(t.id) учитывает только значения, отличные от NULL. У сохранённой строки Веры нет настоящей задачи, поэтому получается 0.","Числовой ноль тоже учитывается COUNT(expr). Исключается именно NULL.",s,"Групп: "+s.rows.length);
     s.stage="result";t.add(lines.length-1,"Проверяем результат по требованию",where||inner?"Получились Анна: 1 и Борис: 1. Вера отсутствует — запрос не выполнил требование показать всех пользователей.":countStar?"Все пользователи сохранились, но у Веры ложная единица. В этом запросе для задач нужен COUNT(t.id).":"Результат: Анна: 1, Борис: 1, Вера: 0. Нужный состав пользователей и смысл счётчика сохранены.","Сравни соседние варианты, затем напиши собственный запрос в SQL-тренажёре.",s,s.rows.map(r=>r.name+": "+r.count).join("; "));
     return t;
+  }
+
+  // Read the same logical rows the timeline displays. A missing report row
+  // is null, never a fabricated group with count zero.
+  function sqlRowTrail(trace,id) {
+    const stages=Object.fromEntries(trace.steps.map(e=>[e.state.stage,e.state]));
+    const user=stages.sources.users.find(u=>u.id===id);
+    return {
+      user, tasks:stages.sources.tasks.filter(t=>t.owner===id),
+      joined:stages.join.pairs.filter(p=>p.user===id),
+      filtered:(stages.where||stages.join).pairs.filter(p=>p.user===id),
+      result:stages.result.rows.find(r=>r.id===id)||null
+    };
   }
 
   function transactions(mode) {
@@ -390,5 +416,5 @@
     return t;
   }
 
-  global.CourseLabModels={ownership,temporaries,taskownership,vector,build,concurrency,concurrencyInitial,concurrencyStep,network,sql,transactions,overload,packetpath,copy};
+  global.CourseLabModels={ownership,temporaries,taskownership,vector,vectorProbe,build,concurrency,concurrencyInitial,concurrencyStep,network,sql,sqlRowTrail,transactions,overload,packetpath,copy};
 })(globalThis);

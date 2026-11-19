@@ -263,9 +263,18 @@
     scenario = mode(scenario);
     var steps = getSteps(scenario), end = normalizeIndex(steps, index);
     function reached(id) { return steps.slice(0, end + 1).some(function (s) { return s.id === id; }); }
-    var facts, panels;
+    var facts, panels, observation;
     if (scenario === "dhcp") {
       var offer = reached("dhcp-offer"), ack = reached("dhcp-ack"), checked = reached("dhcp-check-complete"), configured = reached("dhcp-announce");
+      observation = {
+        kind: "lease", address: offer ? CLIENT : null,
+        stage: configured ? 3 : ack ? 2 : offer ? 1 : 0,
+        note: configured ? "Теперь ноутбук использует адрес. Доступность сайта мы ещё не проверяли."
+          : checked ? "За время проверки конфликт не обнаружен. Следующий шаг — объявить адрес соседям."
+          : ack ? "Сервер подтвердил аренду. В этом опыте ноутбук ещё проверяет, не использует ли адрес кто-то другой."
+          : offer ? "У ноутбука есть предложение сервера, но пока нет подтверждённой аренды."
+          : "У ноутбука пока нет адреса для обычного IPv4-трафика. Первое сообщение DHCP можно отправить и без него."
+      };
       facts = [fact("IPv4 ноутбука", configured ? CLIENT + "/24" : "ещё не используется", configured ? "good" : "warn"),
         fact("Стадия DHCP", ack ? "ACK получен" : offer ? "Есть предложение" : reached("dhcp-discover") ? "Ищем сервер" : "Не начат"),
         fact("Проверка конфликта", checked ? "не выявлен по условию" : reached("dhcp-probe") ? "процедура идёт" : "ещё не завершена", checked ? "good" : "normal"),
@@ -303,7 +312,7 @@
       ] : [], "Router Lifetime не задаёт срок адреса. A не назначает шлюз. L = 0 сам по себе не равнозначен off-link."),
       note("Предел результата", "DNS в этом опыте не настроен. ND не удостоверяет личность соседа; доставка за первым маршрутизатором не показана.")];
     }
-    return deepFreeze({ facts: facts, panels: panels });
+    return deepFreeze({ facts: facts, panels: panels, observation: observation });
   }
   var api = deepFreeze({
     id: "network-setup", title: "Как компьютер получает сетевые настройки", summary: "От подключённого кабеля до адреса, маршрута и известного ближайшего соседа: DHCP, ARP и настройка IPv6.",

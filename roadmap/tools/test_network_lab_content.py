@@ -1,4 +1,5 @@
 """Teaching/link regressions for 7Б; not a privileged Linux-network acceptance test."""
+from collections import Counter
 from html import unescape
 import json
 from pathlib import Path
@@ -15,6 +16,11 @@ SOURCE = ROOT / 'content/station7-netlab.json'
 EXAMPLES = ROOT / 'examples/station7-netlab'
 GROUPS = ('lab-environment', 'ethernet-routing', 'firewall-policy',
           'ipv6-path', 'nat-observation', 'diagnostic-cases')
+EXTENDED_TOPICS = {
+    'netlab-vlan-boundaries', 'netlab-stp-loop-recovery',
+    'netlab-ospf-route-convergence', 'netlab-bgp-policy-choice',
+    'netlab-tcp-loss-slow-reader',
+}
 
 
 class NetworkLabContent(unittest.TestCase):
@@ -25,7 +31,8 @@ class NetworkLabContent(unittest.TestCase):
 
     def test_schema_and_gradual_reading_order(self):
         validate(self.data, SOURCE)
-        self.assertEqual(len(self.sections), 25)
+        self.assertGreaterEqual(len(self.sections), 30)
+        self.assertTrue(EXTENDED_TOPICS <= self.sections.keys())
         self.assertEqual(tuple(g['id'] for g in self.data['substations']), GROUPS)
         self.assertEqual(next(iter(self.sections)), 'learning-route')
         self.assertEqual(list(self.sections)[-1], 'netlab-udp-final-workbook')
@@ -82,13 +89,21 @@ class NetworkLabContent(unittest.TestCase):
 
     def test_authored_assessments_cover_every_taught_section(self):
         questions = [q for bank in self.data['quizzes'].values() for q in bank]
-        self.assertEqual(len(questions), 50)
+        # Lower bounds guard against losing material without rejecting a new,
+        # properly integrated lesson just because the station grew.
+        for bank, minimum in {'basic': 28, 'advanced': 22, 'interview': 25}.items():
+            bank_questions = self.data['quizzes'][bank]
+            self.assertGreaterEqual(len(bank_questions), minimum, bank)
+            self.assertTrue(EXTENDED_TOPICS <= {r for q in bank_questions for r in q['theoryRefs']}, bank)
+        basic_counts = Counter(q['substation'] for q in self.data['quizzes']['basic'])
         for group in GROUPS:
-            self.assertEqual(sum(q['substation'] == group for q in self.data['quizzes']['basic']), 3)
+            minimum = {'ethernet-routing': 11, 'diagnostic-cases': 5}.get(group, 3)
+            self.assertGreaterEqual(basic_counts[group], minimum, group)
         covered = {r for q in questions for r in q['theoryRefs']}
         covered.update(r for t in self.data['tasks'] for r in t['theoryRefs'])
         self.assertTrue(set(self.sections) - {'learning-route'} <= covered)
-        self.assertEqual(len(self.data['tasks']), 6)
+        self.assertGreaterEqual(len(self.data['tasks']), 9)
+        self.assertTrue(EXTENDED_TOPICS <= {r for t in self.data['tasks'] for r in t['theoryRefs']})
         self.assertEqual({t['substation'] for t in self.data['tasks']}, set(GROUPS))
         for task in self.data['tasks']:
             self.assertEqual(task['level'], 'Практика')
@@ -134,11 +149,17 @@ class NetworkLabContent(unittest.TestCase):
     def test_lab_entries_match_catalog_and_course_sections(self):
         catalog = json.loads((ROOT / 'content/visual-labs.json').read_text())
         lab = next(l for l in catalog['labs'] if l['id'] == 'packetpath')
-        actual = {(s['id'], b['scenario']) for s in self.sections.values()
-                  for b in s['blocks'] if b['type'] == 'lab' and b['lab'] == 'packetpath'}
-        expected = {(e['section'], e['scenario']) for e in lab['entries'] if e['station'] == 'station7-netlab'}
-        self.assertEqual(actual, expected)
-        self.assertEqual(len(actual), 2)
+        actual = [(s['id'], b['scenario'], b['type']) for s in self.sections.values()
+                  for b in s['blocks'] if b['type'] in ('lab', 'lab-ref') and b['lab'] == 'packetpath']
+        expected = [(e['section'], e['scenario'], 'lab' if e['primary'] else 'lab-ref')
+                    for e in lab['entries'] if e['station'] == 'station7-netlab']
+        self.assertCountEqual(actual, expected)
+        # One map node; the IPv6 lesson opens PMTU directly without showing the
+        # map node a second time or falling back to the default routing scenario.
+        self.assertEqual([item for item in actual if item[2] == 'lab'],
+                         [('netlab-packet-walk', 'routed', 'lab')])
+        self.assertIn(('netlab-ipv6-pmtu', 'pmtu6', 'lab-ref'), actual)
+        self.assertTrue({scenario for _, scenario, _ in actual} <= set(lab['scenarios']))
 
 
 if __name__ == '__main__':

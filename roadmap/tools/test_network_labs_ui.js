@@ -32,7 +32,7 @@ class Params {
 }
 
 function environment(lab, hash = '', options = {}) {
-  const document = createDOM('roadmap/templates/network_lab.html');
+  const document = createDOM('roadmap/' + lab.page);
   const proto = Object.getPrototypeOf(document.body), originalMatches = proto.matches;
   proto.matches = function (selector) {
     if (/^#[\w-]+$/.test(selector)) return this.id === selector.slice(1);
@@ -81,6 +81,68 @@ const message = step => !!(step.from && step.to);
 let states = 0, viewChecks = 0, entries = 0, losses = 0, phaseChecks = 0, rangeDescriptions = 0;
 for (const lab of available) {
   const initial = environment(lab), model = initial.model;
+  if (lab.id === 'tcp-delivery') {
+    initial.click('play');
+    initial.click('try-tcp-order');
+    assert(!initial.timers.size && initial.document.activeElement === initial.get('tcp-order-title'), 'Enter independent TCP experiment: pause playback and move focus');
+    initial.document.listeners.keydown({target:initial.document.activeElement,key:'ArrowRight',preventDefault(){throw Error('Workbench focus must not advance the guided scenario');}});
+    const control = initial.get('tcp-deliver-2'); control.focus();
+    initial.click('tcp-deliver-2');
+    assert(initial.document.activeElement === control && initial.get('tcp-order-ack').textContent === 'ACK 1001', 'Final segment arriving first keeps focus and ACK at the gap');
+    assert(initial.get('tcp-order-state-2').textContent === 'За пропуском', 'Buffer state is visible as text, not just a color');
+    assert(initial.get('tcp-byte-1001').dataset.arrival==='gap' && initial.get('tcp-byte-1009').dataset.arrival==='buffered' && initial.get('tcp-order-tape').dataset.edge==='0', 'Byte ribbon shows the hole and buffered suffix separately');
+    initial.click('tcp-deliver-0'); initial.click('tcp-deliver-1');
+    assert(initial.get('tcp-order-ack').textContent === 'ACK 1013' && initial.get('tcp-order-reason').textContent.includes('буфере'), 'Middle arrival releases last part');
+    assert(initial.get('tcp-order-tape').dataset.edge==='12' && initial.get('tcp-byte-1012').dataset.arrival==='continuous', 'Marker reaches far edge only when gap is closed');
+    initial.click('tcp-deliver-2');
+    assert(initial.get('tcp-order-reason').textContent.includes('Копия') && initial.get('tcp-order-ack').textContent === 'ACK 1013', 'Copy suppressed');
+    const firstStep = initial.get('step-counter').textContent;
+    initial.click('tcp-order-reset');
+    assert(firstStep === initial.get('step-counter').textContent && initial.get('tcp-order-ack').textContent === '—' && initial.get('tcp-order-state-2').textContent === 'Нет на сервере', 'Reset only independent receiver');
+  } else {
+    assert(!initial.document.getElementById('try-tcp-order'), 'No irrelevant TCP workbench on ' + lab.id);
+  }
+  if(lab.id==='packetpath'){
+    const panel=initial.get('mtu-probe');
+    assert(panel.hidden, 'MTU controls are scoped to IPv6 PMTU');
+    initial.scenario('pmtu6'); assert(!panel.hidden, 'Bound IPv6 scenario reveals probe');
+    initial.click('play'); initial.click('mtu-send-1399');
+    assert(!initial.timers.size && initial.get('mtu-math').textContent.includes('1351') && initial.get('mtu-wan').dataset.verdict==='fits', '1399 passes; pause playback for the probe');
+    initial.click('mtu-send-1400');
+    assert(initial.get('mtu-math').textContent.includes('1352') && initial.get('mtu-wan').dataset.verdict==='fits', 'Boundary is inclusive');
+    initial.click('mtu-deliver-ptb'); assert(initial.get('mtu-estimate').textContent==='1500 байт', 'No PTB exists for a packet that fits');
+    initial.click('mtu-send-1401');
+    assert(initial.get('mtu-wan').dataset.verdict==='overflow' && initial.get('mtu-ruler').querySelector('[data-cut="1401"]').dataset.fill==='overflow', 'Overflow on byte 1401, whole packet dropped');
+    assert(initial.get('mtu-estimate').textContent==='1500 байт' && initial.get('mtu-deliver-ptb').getAttribute('aria-disabled')==='false', 'Sender cannot see remote decision until feedback arrives');
+    initial.get('mtu-deliver-ptb').focus(); initial.click('mtu-deliver-ptb');
+    assert(initial.get('mtu-estimate').textContent==='1400 байт' && initial.get('mtu-wan').dataset.verdict==='overflow' && initial.document.activeElement===initial.get('mtu-deliver-ptb'), 'PTB updates sender only, no repair and no lost focus');
+    initial.click('mtu-reset'); assert(initial.get('mtu-wan').textContent==='—' && initial.get('mtu-estimate').textContent==='1500 байт', 'Reset independent probe');
+    initial.click('mtu-send-1401'); initial.scenario('snat'); initial.scenario('pmtu6');
+    assert(initial.get('mtu-wan').textContent==='—' && !panel.open, 'Fresh probe after leaving the relevant scenario');
+  }
+  if(lab.id==='network-setup'){
+    const e=environment(lab);
+    const snapshot=()=>e.get('observation-picture').textContent;
+    assert(snapshot().includes('Адреса ещё нет') && !snapshot().includes('192.0.2.20'),'Do not invent a lease before the offer');
+    e.click('play');
+    const button=e.choose('[data-observe="dhcp-ack"]');
+    assert(!e.timers.size && e.document.activeElement===button && button.getAttribute('aria-current')==='step','A snapshot stops autoplay and keeps keyboard focus');
+    assert(snapshot().includes('Аренда подтверждена') && !snapshot().includes('Адрес используется'),'ACK is not yet use of the IPv4 address');
+    e.choose('[data-observe="dhcp-announce"]'); assert(snapshot().includes('Адрес используется'),'First announcement enables use in this example');
+    e.window.history.back(); assert(snapshot().includes('Аренда подтверждена'),'Back restores previous snapshot');
+    e.scenario('arp'); assert(e.get('network-observation').hidden,'No lease experiment in the ARP lesson');
+  }
+  if(lab.id==='vpn-tunnels'){
+    const e=environment(lab), picture=()=>e.get('observation-picture').textContent;
+    for(const mode of ['split','full']){
+      e.scenario(mode); e.choose('[data-observe="inner-office"]');
+      assert(picture().includes('172.19.115.180') && !picture().includes('203.0.113.5'),'Inner view shows service, not tunnel endpoint');
+      e.choose('[data-observe="outer-office"]');
+      assert(picture().includes('198.51.100.10') && picture().includes('40000 → 51820') && !picture().includes('172.19.115.180'),'Internet observation excludes inner addresses; NAT already happened');
+      e.choose('[data-observe="gateway-decrypt"]'); assert(picture().includes('10.7.0.2') && picture().includes('172.19.115.180'),'Recovered addresses are the ones in the original packet');
+    }
+    e.scenario('missing-route'); assert(e.get('network-observation').hidden,'Do not depict delivery on broken route');
+  }
   assert(initial.get('page-title').textContent === model.title, lab.id + ': page title');
   assert(model.introduction.paragraphs.every(p => initial.get('intro-paragraphs').textContent.includes(p)), lab.id + ': complete visible introduction');
   assert(initial.get('intro-goal').textContent === model.introduction.goal && initial.get('intro-action').textContent === model.introduction.action, lab.id + ': goal/action');

@@ -42,6 +42,8 @@ def load_catalog():
             assert sum(entry["primary"] for entry in lab["entries"]) == 1, lab["id"]
         validate_introduction(lab)
         for entry in lab["entries"]:
+            if entry.get("primary") is not False and not (entry.get("question") or "").strip().endswith("?"):
+                raise ValueError(f"{lab['id']}: main reader entry needs an observation question")
             station = json.loads((ROOT / ("content/" + entry["station"] + ".json")).read_text())
             assert any(s["id"] == entry["section"] for s in station["theory"]), entry
             assert entry["scenario"] in lab["scenarios"], entry

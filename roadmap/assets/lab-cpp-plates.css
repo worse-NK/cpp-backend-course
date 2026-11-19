@@ -1,0 +1,69 @@
+/* A fixed specimen on a ruled drafting surface; the data around it change. */
+.cpp-plate {
+  --cp-bg:#142b30; --cp-fg:#eaf5ec; --cp-line:#517178; --cp-quiet:#b2c8c9;
+  --cp-green:#a1ebc8; --cp-blue:#a9dff5; --cp-amber:#ffda94; --cp-red:#ffbbaa;
+  margin:0 0 1.1rem; padding:clamp(.8rem,2vw,1.5rem); border:1px solid var(--cp-line);
+  border-radius:.6rem; color:var(--cp-fg); background:var(--cp-bg);
+  background-image:radial-gradient(#294147 1px,transparent 1px); background-size:12px 12px;
+  min-width:0; container-type:inline-size;
+}
+.cpp-plate figcaption {font:650 clamp(1.08rem,2vw,1.4rem)/1.3 var(--sans,sans-serif);
+  margin-bottom:1.1rem; color:var(--cp-fg); text-wrap:balance}
+.cpp-plate .cpp-plate-note {margin:.95rem 0 0; padding-top:.8rem; border-top:1px solid var(--cp-line);
+  font:400 1rem/1.55 var(--sans,sans-serif); color:var(--cp-quiet); text-align:start}
+.cpp-account {display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2.3fr) auto;
+  align-items:center; gap:.55rem; min-height:4.35rem; padding:.55rem 0}
+.cpp-account+.cpp-account {border-top:1px dashed var(--cp-line)}
+.cpp-object,.cpp-total {display:grid; justify-items:start; font:650 1.05rem/1.25 var(--mono,monospace)}
+.cpp-object {border-inline-start:3px dashed var(--cp-line); padding-inline-start:.55rem}
+.cpp-account[data-alive="true"] .cpp-object {border-inline-start:3px solid var(--cp-green)}
+.cpp-object small,.cpp-total small {font:400 .85rem/1.35 var(--sans,sans-serif); color:var(--cp-quiet)}
+.cpp-total {justify-items:center}
+.cpp-total b {border:1px solid var(--cp-line); min-width:2.3rem; text-align:center; border-radius:50%;
+  line-height:2.2rem; background:var(--cp-bg); color:var(--cp-fg)}
+.cpp-balance {display:flex; flex-wrap:wrap; align-items:center; gap:.28rem; padding:.55rem .5rem;
+  border-bottom:2px solid var(--cp-line); min-height:2.8rem}
+.cpp-balance code.cpp-slip {border-radius:.15rem; padding:.16rem .4rem; font:650 .98rem/1.45 var(--mono,monospace);
+  background:#b2e5c7; color:#17382d; box-shadow:inset 3px 0 0 #689984}
+.cpp-plus,.cpp-empty {color:var(--cp-quiet); font:.9rem/1.45 var(--sans,sans-serif)}
+.cpp-score {border-collapse:separate; border-spacing:2px 4px; width:100%; table-layout:fixed; margin:0}
+.cpp-score th,.cpp-score td {border:0; padding:0; white-space:normal; text-align:center;
+  font:650 1rem/1.5 var(--mono,monospace); vertical-align:middle}
+.cpp-score tr>:first-child {width:4.65rem; padding-inline-end:.25rem; text-align:start;
+  font-size:.92rem; color:var(--cp-fg); white-space:nowrap}
+.cpp-score thead th {font-size:.83rem; color:var(--cp-quiet)}
+.cpp-score thead th[aria-current] {color:var(--cp-fg); border-bottom:2px solid var(--cp-amber)}
+.cpp-score .cpp-cell {height:2.2rem; border-radius:2px; border-block:1px solid #506a70}
+.cpp-score .cpp-cell[data-now] {border-bottom:3px solid var(--cp-amber)}
+.cpp-cell-future {background:transparent}
+.cpp-cell-idle {background:#21383c; color:var(--cp-quiet)}
+.cpp-cell-live {background:#32644f; color:#e8fff0}
+.cpp-cell-valid,.cpp-cell-read {background:#315766; color:#d4f4ff}
+.cpp-cell-queued {background:#51412b; color:var(--cp-amber)}
+.cpp-cell-end {background:repeating-linear-gradient(130deg,#334448 0 4px,#293b3f 4px 8px); color:var(--cp-fg)}
+.cpp-cell-bad {background:repeating-linear-gradient(130deg,#4e3937 0 4px,#443431 4px 8px); color:var(--cp-red)}
+.cpp-patchbay {display:grid; grid-template-columns:minmax(0,1fr) minmax(1.4rem,.65fr) minmax(0,1.25fr);
+  align-items:center; min-width:0; padding-block:.3rem}
+.cpp-ports {display:grid; grid-template-rows:repeat(3,2.65rem)}
+.cpp-port {display:flex; align-items:center; justify-content:space-between; gap:.2rem; color:var(--cp-quiet)}
+.cpp-port code {font:600 .98rem/1.3 var(--mono,monospace); color:inherit; background:none; padding:0}
+.cpp-port i {width:.72rem; height:.72rem; flex:none; border:2px solid var(--cp-line); border-radius:50%; background:var(--cp-bg)}
+.cpp-port[data-connected="true"] {color:var(--cp-green)}
+.cpp-port[data-connected="true"] i {border-color:var(--cp-green); background:var(--cp-green)}
+.lab-scene .cpp-patchbay svg.cpp-wire {display:block; width:100%; min-width:0; max-width:none; height:7.95rem; margin:0}
+.cpp-wire path {fill:none; stroke:var(--cp-green); stroke-width:2.5; vector-effect:non-scaling-stroke}
+.cpp-target {display:grid; justify-items:center; align-content:center; padding:.4rem;
+  border:2px dashed var(--cp-line); border-radius:.45rem; background:var(--cp-bg); min-height:4.5rem;
+  font:600 1rem/1.4 var(--mono,monospace); text-align:center}
+.cpp-target span {color:var(--cp-quiet); font-size:.9rem}
+.cpp-target[data-alive="true"] {border-style:solid; border-color:var(--cp-green); box-shadow:inset 0 -.4rem #294a40}
+@container (max-width:340px) {
+  .cpp-account {grid-template-columns:minmax(0,1fr) minmax(0,1.7fr) auto; gap:.25rem}
+  .cpp-object small,.cpp-total small {font-size:.8rem}
+  .cpp-port code {font-size:.88rem}
+}
+@media (forced-colors:active) {
+  .cpp-score .cpp-cell {border:1px solid CanvasText}
+  .cpp-score .cpp-cell[data-now] {border-bottom:3px solid Highlight}
+  .cpp-wire path {stroke:CanvasText}
+}

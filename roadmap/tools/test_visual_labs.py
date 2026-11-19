@@ -89,6 +89,25 @@ class VisualLabs(unittest.TestCase):
                 actual = db.execute('\n'.join(model['code'])).fetchall()
                 expected = [(r['id'], r['name'], r['count']) for r in model['steps'][-1]['state']['rows']]
                 self.assertEqual(actual, expected, model['mode'])
+                # Query each intermediate relation independently of the JS
+                # simulator. ORDER BY is for reproducible checks, not a join guarantee.
+                lines = model['code']
+                projection = "SELECT u.id, u.name, t.id, t.done\n"
+                from_on = '\n'.join(lines[1:4])
+                predicate = '\n'.join(line for line in lines if line.startswith('WHERE'))
+                self.assertEqual([t['user']['id'] for t in model['trails']], [1, 2, 3])
+                for trail in model['trails']:
+                    uid = trail['user']['id']
+                    with self.subTest(mode=model['mode'], user=uid):
+                        tasks = db.execute('SELECT id, done FROM tasks WHERE owner_id=? ORDER BY id', (uid,)).fetchall()
+                        self.assertEqual(tasks, [(t['id'], t['done']) for t in trail['tasks']])
+                        for stage, extra in [('joined', ''), ('filtered', predicate)]:
+                            sql = projection + from_on + '\n' + extra + '\nORDER BY u.id, t.id'
+                            pairs = [r for r in db.execute(sql) if r[0] == uid]
+                            self.assertEqual(pairs, [(p['user'], p['name'], p['task'], p['done']) for p in trail[stage]])
+                        report = next((r for r in actual if r[0] == uid), None)
+                        row = trail['result']
+                        self.assertEqual(report, (row['id'], row['name'], row['count']) if row is not None else None)
 
     def test_executable_ownership_programs(self):
         expected = {'unique': 'destroy Item\n0 0\n', 'shared': '0\ndestroy Item\n1\n'}

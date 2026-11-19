@@ -1,0 +1,109 @@
+/* A field atlas: an engraved plate above a compact subject index.
+   The drawing, not a dashboard of badges, is the focal point. */
+.lab-atlas {
+  --atlas-sage:#afe7cb; --atlas-paper:#e4eee5; --atlas-ink:#16352e;
+  color:var(--course-ink); margin-inline:auto; max-width:1310px;
+}
+.atlas-cover { display:grid; grid-template-columns:minmax(0,1fr) minmax(340px,.94fr);
+  align-items:center; gap:clamp(32px,6vw,100px); padding:clamp(40px,6vw,90px) 0; }
+.atlas-type { min-width:0; }
+.atlas-eyebrow,.atlas-caption,.plate-head>span,.print-label,.atlas-item-no,.atlas-group-number {
+  font:600 .78rem/1.45 var(--mono); letter-spacing:.035em; }
+.atlas-eyebrow { display:flex; align-items:center; gap:.65rem; color:var(--atlas-sage); margin:0 0 1.8rem; }
+.atlas-eyebrow i { display:block; width:2.1rem; height:2px; background:currentColor; }
+.atlas-type h1 { font:600 clamp(2.6rem,5.9vw,5.7rem)/1.02 var(--sans); letter-spacing:-.055em; margin:0; }
+.atlas-type h1 em { display:block; color:var(--atlas-sage); font:italic normal 1.02em/1.02 Georgia,"Times New Roman",serif; }
+.atlas-deck { margin:1.8rem 0; max-width:45ch; font-size:clamp(1.04rem,1.45vw,1.26rem); line-height:1.65; color:var(--course-ink); }
+.atlas-caption { display:block; color:var(--course-muted); letter-spacing:.01em; }
+.atlas-plate { overflow:hidden; border:1px solid #546f66; border-radius:12px; background:#142725; }
+.plate-head { padding:.8rem 1.1rem; display:flex; gap:.7rem; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+.plate-head>span { color:#b9cdc4; }
+.plate-switch { display:flex; flex-wrap:wrap; gap:3px; }
+.plate-switch button { min-height:42px; background:none; color:#b9cdc4; border:1px solid transparent; border-radius:4px;
+  font:600 .9rem/1 var(--sans); padding:.55rem .75rem; }
+.plate-switch button[aria-pressed="true"] { background:#29463c; border-color:#628a75; color:#edfff3; }
+.plate-switch button:hover { color:white; border-color:#77968b; }
+.atlas-plate figure { margin:0; }
+.atlas-print { background:var(--atlas-paper); color:var(--atlas-ink); position:relative; padding:1rem 1.25rem .25rem; }
+.print-label { display:flex; justify-content:space-between; color:#36584b; border-bottom:1px solid #9eafa2;
+  padding-bottom:.5rem; font-size:.77rem; }
+.atlas-engraving { display:block; width:100%; max-height:270px; }
+.atlas-engraving path,.atlas-engraving rect,.atlas-engraving ellipse { stroke-linejoin:round; }
+.atlas-engraving .top { fill:#a6cbb8; stroke:#476959; }
+.atlas-engraving .face { fill:#355f52; stroke:#204535; }
+.atlas-engraving .new-face { fill:#567337; stroke:#425e37; }
+.atlas-engraving .side { fill:#759b80; stroke:#476959; }
+.atlas-engraving .ghost,.atlas-engraving .hatch { stroke:#688476; stroke-dasharray:4 3; }
+.atlas-engraving .ghost { fill:var(--atlas-paper); }
+.atlas-engraving .rule,.atlas-engraving .pointer,.atlas-engraving .wire,.atlas-engraving .idle,.atlas-engraving .reply { fill:none; stroke:#647d6e; }
+.atlas-engraving .pointer,.atlas-engraving .wire { stroke:#2e6554; stroke-width:2; }
+.atlas-engraving .reply { stroke:#8c5a27; stroke-dasharray:4 4; stroke-width:2; }
+.atlas-engraving .idle { stroke-dasharray:2 5; }
+.atlas-engraving text { fill:var(--atlas-ink); font:600 14px var(--mono); }
+.atlas-engraving .value,.atlas-engraving .peer { text-anchor:middle; font:bold 19px var(--mono); fill:#f5faed; }
+.atlas-engraving .peer { paint-order:stroke; stroke:#355f52; stroke-width:3px; }
+.atlas-engraving .quiet { fill:#53695c; }
+.atlas-engraving .legend,.atlas-engraving .end-label { text-anchor:middle; }
+.atlas-engraving .end-label { text-anchor:end; }
+.atlas-plate figcaption { display:grid; grid-template-columns:1fr auto; align-items:start; padding:1rem 1.1rem 1.25rem; gap:1rem;
+  min-height:8.5rem; }
+.atlas-plate figcaption h2 { font-size:1.12rem; margin:0 0 .35rem; line-height:1.25; color:#edfff3; }
+.atlas-plate figcaption p { font-size:.95rem; color:#bbcdc2; line-height:1.55; margin:0; max-width:45ch; }
+.atlas-plate figcaption a { color:#d8f4da; font-weight:650; text-decoration:underline; text-underline-offset:.22em;
+  padding:.3rem 0; white-space:nowrap; }
+.atlas-index { border-top:1px solid var(--course-line); padding:1.5rem 0 3rem; }
+.atlas-index>h2 { font-size:1.65rem; margin:0 0 1.7rem; }
+.atlas-group { --family:var(--atlas-sage); display:grid; grid-template-columns:minmax(170px,.55fr) minmax(0,2.7fr);
+  border-top:1px solid var(--course-line); gap:clamp(20px,4vw,60px); padding:1.45rem 0 2rem; }
+.atlas-group[data-family="wire"] { --family:#8dd0ef; }
+.atlas-group[data-family="record"] { --family:#e4c798; }
+.atlas-group>header { display:grid; grid-template-columns:auto 1fr; align-content:start; align-items:center; gap:.8rem; }
+.atlas-group-number { color:var(--family); }
+.atlas-mark { height:1.8rem; width:2.2rem; stroke:var(--family); stroke-width:1.5; fill:none; }
+.atlas-group h3 { grid-column:1/-1; margin:0; max-width:12ch; font-size:clamp(1.25rem,2vw,1.75rem); line-height:1.22; }
+.atlas-entries { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 clamp(20px,3vw,44px); }
+.lab-atlas .atlas-group .catalog-card { display:grid; grid-template-columns:auto minmax(0,1fr); align-content:start;
+  gap:.85rem; min-height:0; padding:1.1rem 0; background:none; border:none; border-bottom:1px solid var(--course-line); border-radius:0; }
+.atlas-item-no { margin-top:.19rem; color:var(--family); }
+.atlas-entries h4 { font-size:1.15rem; line-height:1.32; margin:0; }
+.atlas-entries h4 a { color:var(--course-ink); text-decoration:none; }
+.atlas-entries h4 a span { color:var(--family); font-size:.9em; }
+.atlas-entries h4 a:hover,.atlas-source:hover { text-decoration:underline; text-underline-offset:3px; }
+.lab-atlas .catalog-card p { color:var(--course-muted); font-size:.98rem; line-height:1.6; margin:.45rem 0; }
+.atlas-source { display:inline-block; color:var(--family); padding:.35rem 0; font-size:.9rem; }
+.lab-atlas :is(a,button):focus-visible { outline:3px solid var(--course-focus); outline-offset:3px; }
+/* Inside the generic laboratories the figure is the main column. The code
+   and observation log remain visible, rather than preceding it on phones. */
+.course-page-visual-labs .lab-bench { grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); align-items:start; gap:clamp(16px,2.6vw,40px); }
+.lab-bench .observation-column,.lab-bench .evidence-column { min-width:0; align-content:start; }
+.course-page-visual-labs .observation-column>.lab-panel:first-child { border-top:3px solid #8eb9b2; border-radius:4px 4px 9px 9px; }
+.course-page-visual-labs .observation-column>.lab-panel:first-child .lab-panel-head h2 { font-size:1.14rem; }
+.course-page-visual-labs .lab-bench .lab-controls { margin:0; position:static; box-shadow:none; gap:10px; align-self:start; }
+.course-page-visual-labs .lab-bench .lab-scrub { min-width:0; }
+.course-page-visual-labs .lab-bench .lab-code { border-radius:4px; }
+.course-page-visual-labs .lab-bench .lab-insight { background:transparent; border:none; border-left:2px solid var(--course-line);
+  border-radius:0; padding:0 clamp(14px,2vw,26px); }
+.lab-bench .lab-insight h3 { font-size:clamp(1.25rem,2vw,1.65rem); }
+.course-page-visual-labs .lab-hero h1 { max-width:21ch; line-height:1.1; letter-spacing:-.035em; text-wrap:balance; }
+@media(max-width:1100px) {
+  .course-page-visual-labs .lab-workspace.lab-bench { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:920px) {
+  .atlas-cover { gap:24px; grid-template-columns:minmax(0,.9fr) minmax(315px,1fr); }
+  .atlas-plate figcaption { grid-template-columns:1fr; gap:.65rem; }
+  .atlas-group { grid-template-columns:minmax(135px,.55fr) minmax(0,2.7fr); }
+}
+@media(max-width:720px) {
+  .atlas-cover { grid-template-columns:minmax(0,1fr); padding:2.1rem 0; }
+  .atlas-type h1 em { display:inline; } .atlas-eyebrow { margin-bottom:1rem; }
+  .atlas-deck { margin:1rem 0; } .atlas-caption { display:none; }
+  .atlas-group { grid-template-columns:1fr; gap:.7rem; }
+  .atlas-group>header { display:flex; } .atlas-group h3 { max-width:none; }
+}
+@media(max-width:540px) {
+  .atlas-engraving .legend,.atlas-engraving .coord,.atlas-engraving .label,.atlas-engraving .end-label { font-size:17px; }
+  .atlas-entries { grid-template-columns:1fr; }
+  .atlas-print { padding:.75rem .6rem .1rem; } .plate-head { padding:.5rem .7rem; }
+  .plate-switch button { padding:.5rem .65rem; min-height:44px; }
+  .atlas-plate figcaption { padding:.85rem 1rem; }
+}

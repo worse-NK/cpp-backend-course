@@ -47,6 +47,71 @@
 .step-count { color: var(--course-accent); font-size: .9rem; margin-bottom: .65rem; font-variant-numeric: tabular-nums; }
 .event-header h2 { max-width: 29ch; margin-bottom: .9rem; scroll-margin-top: 8rem; }
 .event-description { font-size: 1.08rem; max-width: 75ch; }
+.quorum-rail-tag { grid-column: 2; color: var(--course-accent); font-size: .8rem; }
+#quorum-jump { display: inline-flex; align-items: center; gap: .85rem; padding: .65rem 1rem; max-width: 100%; box-sizing: border-box; border: 1px solid var(--course-accent); border-radius: .55rem; background: var(--course-surface); font-weight: 650; text-decoration: none; line-height: 1.4; }
+#quorum-jump svg { fill: currentColor; flex: none; }
+#quorum-jump small { display: block; font-size: .82rem; font-weight: 400; color: var(--course-muted); }
+.quorum-desk { margin: 0 0 2rem; padding: clamp(1rem,3vw,1.8rem); border: 1px solid var(--course-line); border-radius: 12px; background: var(--course-surface); }
+.quorum-desk h3 { font-size: clamp(1.2rem,2vw,1.6rem); }
+#quorum-title { scroll-margin-block-start: 1rem; }
+.experiment-content:has(.quorum-desk:not([hidden])) .step-controls { position: static; }
+.quorum-desk > p { max-width: 74ch; }
+.quorum-figure { margin: 1.1rem 0; padding: clamp(.5rem,1.5vw,1.3rem); border-radius: .5rem; border: 1px solid var(--course-line); background: #14212b; }
+.quorum-map { display: block; width: 100%; max-width: 37rem; margin: .15rem auto 0; }
+.quorum-map path,.quorum-map rect,.quorum-map circle { vector-effect: non-scaling-stroke; }
+.q-out,.q-back,.q-out-tip,.q-back-tip { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.q-out,.q-out-tip { stroke: var(--course-accent); }
+.q-out,.q-back { stroke-dasharray: 4 6; }
+.q-flash { opacity: 0; fill: none; stroke-linecap: round; stroke-dasharray: 10 110; stroke-width: 4; }
+.q-write-flash { stroke: var(--course-focus); }
+.q-return-flash { stroke: var(--course-warning); }
+@media (prefers-reduced-motion: no-preference) {
+  .quorum-map [data-phase="1"] .q-write-flash,.quorum-map [data-phase="2"] .q-return-flash { animation: quorum-delivered .4s ease-out 1; }
+  @keyframes quorum-delivered { from { opacity: 1; stroke-dashoffset: 10; } 80% { opacity: 1; } to { opacity: 0; stroke-dashoffset: -100; } }
+}
+.q-back,.q-back-tip { stroke: var(--course-line); }
+.q-packet rect { fill: var(--course-accent); }
+.q-packet path { stroke: var(--course-canvas); fill: none; stroke-width: 1.7; }
+.q-receipt,.q-arrived { opacity: 0; }
+.q-receipt path,.q-arrived { fill: var(--course-warning); }
+.q-receipt .q-tick { fill: none; stroke: var(--course-canvas); stroke-width: 1.8; }
+.quorum-map [data-phase="1"] .q-out,.quorum-map [data-phase="2"] .q-out,.quorum-map [data-phase="2"] .q-back { stroke-dasharray: none; }
+.quorum-map [data-phase="1"] .q-back,.quorum-map [data-phase="2"] .q-back,.quorum-map [data-phase="1"] .q-back-tip,.quorum-map [data-phase="2"] .q-back-tip { stroke: var(--course-warning); }
+.quorum-map [data-phase="1"] .q-packet,.quorum-map [data-phase="2"] .q-packet { opacity: 0; }
+.quorum-map [data-phase="1"] .q-receipt,.quorum-map [data-phase="2"] .q-arrived { opacity: 1; }
+.q-case { fill: var(--course-surface); stroke: #78909f; stroke-width: 1.2; }
+.q-leader .q-case { stroke: var(--course-accent); stroke-width: 2; }
+.q-old,.q-new { fill: var(--course-canvas); stroke: var(--course-line); }
+.q-new { stroke-dasharray: 3 3; }
+.q-index,.q-letter { font-family: var(--course-mono); }
+.q-letter { fill: var(--course-ink); font-size: 26px; font-weight: bold; }
+.q-role { fill: var(--course-muted); font: 18px var(--course-sans); }
+.q-index { fill: var(--course-muted); text-anchor: middle; font-size: 16px; }
+@media (max-width: 480px) {
+  .quorum-map .q-index,.quorum-map .q-role { font-size: 20px; }
+  .quorum-figure { margin-inline: -.35rem; }
+}
+.q-leader .q-entry,.q-server[data-phase="1"] .q-entry,.q-server[data-phase="2"] .q-entry { fill: var(--course-canvas); font-weight: bold; }
+.q-leader .q-new,.q-server[data-phase="1"] .q-new,.q-server[data-phase="2"] .q-new { stroke: var(--course-accent); fill: var(--course-accent); stroke-dasharray: none; }
+.quorum-key { display: flex; align-items: center; gap: .3rem 1.25rem; flex-wrap: wrap; margin-top: 1rem; padding-top: .4rem; border-top: 1px solid var(--course-line); color: var(--course-muted); font-size: .87rem; }
+.quorum-key span { display: inline-flex; align-items: center; gap: .55rem; }
+.key-record { width: .85rem; height: .57rem; border-radius: 2px; background: var(--course-accent); }
+.key-ack { width: .58rem; height: .58rem; transform: rotate(45deg); background: var(--course-warning); }
+#quorum-reset { margin-inline-start: auto; padding: 0 .4rem; font: inherit; border-color: transparent; background: transparent; color: var(--course-accent); text-decoration: underline; text-underline-offset: .2em; }
+.quorum-ledgers { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,13rem),1fr)); gap: .85rem 1.4rem; margin-block: 1rem; }
+.quorum-ledger { min-width: 0; padding-block: .4rem; }
+.quorum-ledger h4,.quorum-ledger p { margin: 0; }
+.quorum-ledger p { color: var(--course-muted); font-size: .9rem; }
+.quorum-ledger ul { display: flex; gap: .4rem; margin: .8rem 0 0; padding: 0; list-style: none; }
+.quorum-ledger li { display: flex; justify-content: center; align-items: baseline; gap: .35em; padding: .05rem .55rem; color: var(--course-muted); border: 1px dashed var(--course-line); border-radius: .3rem; font-weight: 650; }
+.quorum-ledger .has-entry { color: var(--course-accent); border: 1px solid currentColor; background: var(--course-surface-raised); }
+.quorum-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; max-width: 37rem; margin: .45rem auto 0; align-items: start; }
+.quorum-controls button { justify-self: start; padding: .5rem .7rem; background: var(--course-canvas); border-color: var(--course-accent); color: var(--course-accent); line-height: 1.35; }
+.quorum-controls button:last-child { justify-self: end; }
+.quorum-controls button[data-phase="1"] { border-color: var(--course-warning); color: var(--course-warning); }
+.quorum-controls button[aria-disabled="true"] { background: transparent; color: var(--course-muted); cursor: default; }
+.quorum-desk .quorum-status { border-inline-start: 3px solid var(--course-accent); padding-inline-start: .85rem; margin-block: 1.2rem .8rem; }
+.quorum-desk > :last-child { margin-bottom: 0; }
 .section-heading { display: flex; align-items: baseline; gap: .8rem 1.4rem; justify-content: space-between; flex-wrap: wrap; }
 .section-heading span { color: var(--course-muted); font-size: .83rem; }
 .reading-note { color: var(--course-muted); font-size: .88rem; max-width: 78ch; }
@@ -139,6 +204,8 @@
   .step-controls { align-items: flex-start; padding: .8rem; }
   .step-controls-main { margin-left: auto; }
   .event-header h2 { max-width: 100%; scroll-margin-top: 13rem; }
+  /* On this step the lesson navigation otherwise covers the experiment's
+     instructions and both ledgers while the reader is comparing them. */
 }
 @media (prefers-reduced-motion: reduce) { .distributed-lab { scroll-behavior: auto; } }
 @media (max-height: 600px) { .step-controls { position: static; } .step-rail { position: static; max-height: none; } }

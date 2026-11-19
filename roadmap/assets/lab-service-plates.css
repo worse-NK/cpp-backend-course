@@ -1,0 +1,94 @@
+/* Local trace diagrams. Accent always accompanies a word, a number or a shape. */
+.svc-plate{
+  --svc-paper:#152630;--svc-panel:#1e3440;--svc-line:#496470;--svc-text:#edf4f4;
+  --svc-fog:#bed1d6;--svc-teal:#9ee3d2;--svc-amber:#ffd69b;--svc-coral:#ffb5a8;
+  container-type:inline-size;min-width:0;margin:0;padding:clamp(14px,2.4vw,26px);
+  border:1px solid var(--svc-line);border-radius:10px;background:var(--svc-paper);
+  color:var(--svc-text);font:16px/1.45 var(--course-sans,system-ui,sans-serif);
+  font-variant-numeric:tabular-nums;text-align:left;overflow-wrap:break-word
+}
+.svc-plate *,.svc-plate *::before,.svc-plate *::after{box-sizing:border-box}
+.svc-plate figcaption{color:var(--svc-text);font-size:clamp(19px,2vw,25px);font-weight:670;letter-spacing:-.025em;line-height:1.22;margin:0 0 20px}
+.svc-plate .svc-note,.svc-plate .svc-empty,.svc-plate .svc-inline{font-size:15px;color:var(--svc-fog);line-height:1.5;margin:12px 0 0}
+.svc-plate .svc-note{padding-top:12px;border-top:1px solid var(--svc-line);margin-top:18px}
+.svc-plate .svc-empty{border-inline-start:2px solid var(--svc-line);padding-inline-start:10px;margin:6px 0}
+.svc-plate .svc-inline{background:var(--svc-panel);padding:10px 12px;border-radius:4px}
+.svc-label{font-size:15px;font-weight:620;color:var(--svc-fog);margin:14px 0 6px}
+.svc-plate :is(.svc-byte b,.svc-stat strong,.svc-db-head strong,.svc-select strong,.svc-beat>b,.svc-series-title strong){
+  font-family:var(--course-mono,ui-monospace,monospace);color:var(--svc-text)}
+.svc-plate svg{display:block;width:100%;height:auto;min-width:0;max-width:none;margin:0}
+.svc-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+/* Thread A and B flank the single, shared accumulator. A mark is placed only
+   in the actor's column; the spine gives the actual value after that event. */
+.svc-registers,.svc-beat{display:grid;grid-template-columns:minmax(0,1fr) minmax(62px,.65fr) minmax(0,1fr);gap:6px}
+.svc-stat{text-align:center;padding:12px 2px 9px;border:1px solid var(--svc-line);border-radius:7px;background:var(--svc-panel)}
+.svc-stat span,.svc-stat small,.svc-select small{display:block;color:var(--svc-fog);font-size:14px;line-height:1.4}
+.svc-stat strong,.svc-select strong{display:block;font-size:32px;line-height:1.4}
+.svc-stat.svc-shared{border-color:var(--svc-teal);background:#203d40}.svc-plate .svc-shared strong{color:var(--svc-teal)}
+.svc-plate .svc-beats,.svc-plate .svc-exchange{padding:0;margin:0;list-style:none}
+.svc-beat{position:relative;align-items:center;min-height:40px;margin:0;border-bottom:1px dotted var(--svc-line);padding:4px 0}
+.svc-beat>b{position:relative;text-align:center;font-size:16px}
+.svc-beat:before{content:"";position:absolute;inset:0 auto 0 50%;border-left:1px solid var(--svc-line)}
+.svc-beat>b{background:var(--svc-paper);justify-self:center;min-width:25px;border:1px solid var(--svc-line);border-radius:50%}
+.svc-event{display:block;color:var(--svc-amber);font-size:14px;line-height:1.25}
+.svc-who-A{text-align:right}.svc-who-B{text-align:left}
+.svc-beats li:last-child{background:var(--svc-panel);border-radius:4px}
+/* Two aligned rulers, one for read calls and one for emitted records. */
+.svc-byte-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.svc-byte-grid[data-width="4"]{grid-template-columns:repeat(4,minmax(0,1fr))}
+.svc-byte{position:relative;text-align:center;min-width:0;padding:7px 0 5px;border:1px solid var(--svc-line);border-radius:4px}
+.svc-byte small{display:block;font-size:12px;line-height:1.5}
+.svc-byte b{font-size:clamp(15px,4cqw,22px);font-weight:650}
+.svc-byte.svc-buffer{border:2px solid var(--svc-amber);padding:6px 0 4px;color:var(--svc-amber)}
+.svc-byte.svc-parsed{background:#254147;color:var(--svc-teal);border-color:#658d8e}
+.svc-byte.svc-future{border-style:dashed;color:var(--svc-fog)}
+.svc-byte.prefix b{color:var(--svc-amber)}
+.svc-brace{min-width:0;border:1px solid currentColor;border-top:0;border-radius:0 0 4px 4px;text-align:center;line-height:1.4;
+  font:600 15px/1.45 var(--course-mono,ui-monospace,monospace);padding:0 0 2px}
+.svc-read{color:var(--svc-amber)}.svc-record{color:var(--svc-teal);background:#213b3e}
+.svc-brace[data-size="2"]{grid-column:span 2}.svc-brace[data-size="3"]{grid-column:span 3}
+.svc-brace[data-size="4"]{grid-column:span 4}.svc-brace[data-size="5"]{grid-column:span 5}
+.svc-brace[data-size="6"]{grid-column:span 6}.svc-brace[data-size="7"]{grid-column:span 7}
+/* Requests and responses stay on the same lane; failed delivery stops in
+   the middle. The two outside lifelines run through the complete exchange. */
+.svc-endpoints{display:flex;justify-content:space-between;gap:12px;font-weight:650;color:var(--svc-teal)}
+.svc-exchange{border-inline:2px solid var(--svc-line)}
+.svc-exchange-row{position:relative;display:grid;grid-template-columns:max-content 1fr;gap:2px 10px;align-items:center;
+  margin:0;padding:8px 12px 4px;color:var(--svc-text)}
+.svc-exchange-row span{font-size:14px;color:var(--svc-fog)}.svc-exchange-row strong{font-size:15px;line-height:1.4}
+.svc-exchange-row .svc-route,.svc-clock{grid-column:1/-1;grid-row:2;position:relative}
+.svc-route{display:block;height:13px}
+.svc-route .edge{position:absolute;inset:6px 0 auto;height:0;border-top:2px solid var(--svc-teal)}
+.svc-route .edge:after{content:"";position:absolute;top:-5px;width:8px;height:8px;border-top:2px solid var(--svc-teal);border-right:2px solid var(--svc-teal)}
+.svc-to-right .edge:after{right:0;transform:rotate(45deg)}.svc-to-left .edge:after{left:0;transform:rotate(-135deg)}
+.svc-to-lost .edge{left:50%;border-top:2px dashed var(--svc-coral)}
+.svc-to-lost .edge:after{content:"×";width:auto;height:auto;left:-6px;top:-12px;border:0;color:var(--svc-coral);font:700 20px/1 var(--course-sans,system-ui,sans-serif)}
+.svc-clock{font-style:normal;color:var(--svc-coral)}
+.svc-facts,.svc-sessions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+.svc-facts>div,.svc-session{padding:10px 12px;border-top:2px solid var(--svc-line);background:var(--svc-panel)}
+.svc-facts b,.svc-session b{display:block;font-size:15px;line-height:1.4;color:var(--svc-text)}
+.svc-facts span,.svc-session span{display:block;font-size:15px;color:var(--svc-fog);margin-top:5px}
+/* PostgreSQL: committed state gets a separate layer from session-local work. */
+.svc-db-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--svc-panel);border-left:3px solid var(--svc-teal)}
+.svc-db-head span{max-width:25ch;color:var(--svc-fog)}.svc-plate .svc-db-head strong{font-size:32px;color:var(--svc-teal);line-height:1}
+.svc-version-track{display:grid;grid-template-columns:minmax(0,1fr) minmax(85px,.8fr) minmax(0,1fr);align-items:center;text-align:center}
+.svc-select{border:1px solid var(--svc-line);border-radius:5px;background:var(--svc-panel);padding:8px 4px}
+.svc-select b{font-size:15px}.svc-commit{padding:5px;font-size:14px;color:var(--svc-fog);border-block:1px dashed var(--svc-line)}
+.svc-commit.did-commit{color:var(--svc-amber);border-color:var(--svc-amber)}
+.svc-session .svc-label{margin:0 0 5px;color:var(--svc-teal)}.svc-session{border-top-color:var(--svc-line)}
+/* The two charts use the same ordinate and aligned ticks. A dash is zero,
+   an empty column is unobserved; the grid doesn't encode an extra series. */
+.svc-series{padding-top:6px}.svc-series-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.svc-series-title b{font-size:15px;color:var(--svc-fog)}.svc-plate .svc-series-title strong{font-size:23px}
+.svc-plate .svc-series svg{min-width:0;width:100%;height:64px;overflow:visible}
+.svc-series :is(rect,line){fill:var(--svc-teal);stroke:none}.svc-series line{stroke:var(--svc-teal);stroke-width:3;vector-effect:non-scaling-stroke}
+.svc-refused rect{fill:var(--svc-coral)}.svc-refused line{stroke:var(--svc-coral)}
+.svc-series .svc-grid{fill:none;stroke:var(--svc-line);stroke-width:1;vector-effect:non-scaling-stroke}
+.svc-series .svc-shutdown{stroke:var(--svc-amber);stroke-width:2;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.svc-axis{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));text-align:center;font:14px/1.5 var(--course-mono,ui-monospace,monospace);color:var(--svc-fog)}
+@container (max-width:360px){
+  .svc-facts,.svc-sessions{grid-template-columns:1fr;gap:6px}
+  .svc-stat small,.svc-event{font-size:14px}
+  .svc-version-track{grid-template-columns:minmax(0,1fr) minmax(66px,.8fr) minmax(0,1fr)}
+  .svc-select b{display:block}.svc-byte-grid{gap:2px}
+}

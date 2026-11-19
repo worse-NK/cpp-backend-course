@@ -89,7 +89,12 @@
           <div id="view-sql" class="inspector-view" role="tabpanel" aria-labelledby="tab-sql" tabindex="0">
             <div class="code-caption"><span id="sql-caption">SQL-текст, который получит движок</span><span id="query-state">До выполнения</span></div>
             <pre class="sql-code" id="sql-code"></pre>
-            <div id="parameter-box" class="parameter-box" hidden><span>Отдельное значение параметра <code>$term</code></span><code id="parameter-value"></code><p>Кавычки здесь лишь обозначают показанную строку: это не вставка кавычек в SQL и не экранирование. Само значение передаётся отдельно от команды.</p></div>
+            <div id="parameter-box" class="parameter-box" hidden>
+              <div class="bind-lane"><span class="bind-label">Из поля поиска</span><code id="parameter-value"></code></div>
+              <span class="bind-join" aria-hidden="true">→</span>
+              <div class="bind-lane"><span class="bind-label">Параметру шаблона</span><code>$term</code></div>
+              <p>Стрелка показывает передачу значения, а не замену текста в команде. Двойные кавычки вокруг названия обозначают границы строки на рисунке; в само значение они не добавляются.</p>
+            </div>
             <div id="boundary-note" class="boundary-note"><span class="legend-swatch" aria-hidden="true"></span><p id="boundary-copy">Выделенное значение пришло из поля поиска. Сейчас обработчик вставляет его прямо в текст команды.</p></div>
           </div>
           <div id="view-cpp" class="inspector-view" role="tabpanel" aria-labelledby="tab-cpp" tabindex="0" hidden><div class="code-caption"><span id="cpp-caption">Фрагмент обработчика · C++ / SQLite</span><span>Не исполняется в браузере</span></div><pre class="cpp-code" id="cpp-code"></pre><p class="code-note" id="cpp-note"></p><a class="source-link" href="examples/security_sql_demo.cpp" download>Скачать безопасный пример на C++ ↗</a><details class="source-help"><summary>Как собрать и что выведет программа</summary><p>Нужны C++20 и заголовки с библиотекой SQLite. Все данные создаются в памяти, без доступа к серверу.</p><pre>c++ -std=c++20 security_sql_demo.cpp -lsqlite3 -o security_sql_demo

@@ -17,8 +17,10 @@
   function accessDecision(mode, context, task, request) {
     if (!['login_only','owner_only','strict'].includes(mode)) throw new Error('Unknown policy');
     const trace = [];
-    const guard = (condition,title,detail) => {
-      trace.push(event(title,condition?'pass':'deny',detail));
+    const guard = (condition,title,detail,key) => {
+      const entry=event(title,condition?'pass':'deny',detail);
+      if(key)entry.key=key;
+      trace.push(entry);
       return condition;
     };
     if (!guard(context.session_valid,'Проверка входа',context.session_valid?'По условию вход пользователя ещё действует.':'Предыдущий вход больше не даёт права выполнять запрос.')) return {allow:false,trace};
@@ -26,8 +28,8 @@
       trace.push(event('Объект и действие','unchecked','Эта реализация больше ничего не проверяет. Наличие входа не даёт права на все задачи.'));
       return {allow:true,trace};
     }
-    if (mode === 'strict' && !guard(context.tenant_id===task.tenant_id,'Команда',`На сайте выбрана команда ${context.tenant_id}; запись относится к команде ${task.tenant_id}.`)) return {allow:false,trace};
-    if (!guard(context.user_id===task.owner_id,'Владелец',`Пользователь ${context.user_id}; владелец задачи ${task.owner_id}.`)) return {allow:false,trace};
+    if (mode === 'strict' && !guard(context.tenant_id===task.tenant_id,'Команда',`На сайте выбрана команда ${context.tenant_id}; запись относится к команде ${task.tenant_id}.`,'team')) return {allow:false,trace};
+    if (!guard(context.user_id===task.owner_id,'Владелец',`Пользователь ${context.user_id}; владелец задачи ${task.owner_id}.`,'owner')) return {allow:false,trace};
     if (mode === 'owner_only') {
       trace.push(event('Действие и поля','unchecked','Этот вариант проверяет только вход и владельца. Команда и состав изменения не ограничены.'));
       return {allow:true,trace};
@@ -76,6 +78,7 @@
     }
     const match = JSON.stringify(actual)===JSON.stringify(c.expected);
     return {actual, expected:c.expected, correct:match, trace,
+      ownRead:id==='own' && actual ? {user:context.user_id,team:context.tenant_id} : null,
       label:Array.isArray(actual)?'В списке: '+(actual.join(', ')||'нет задач'):actual?'Действие разрешено':'Запрос отклонён',
       summary:match?'В этом случае результат совпал с заданным правилом.':'Результат нарушает заданное правило; ищи отсутствующую проверку, а не необычный синтаксис запроса.',
       expectation:c.expectation,

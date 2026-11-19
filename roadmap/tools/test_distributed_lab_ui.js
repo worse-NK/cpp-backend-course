@@ -67,6 +67,7 @@ for(const id of ["lost-reply","stale-read","workflow-recovery"]) {
     assert(env.get("lab-announcement").textContent.includes(scenario.steps[step].title),"Concise live announcement");
     const state=scenario.steps[step].state;
     assert(env.get("read-comparison").hidden===!state.result,"Read alternatives only where meaningful");
+    assert(env.get("quorum-desk").hidden===(scenario.steps[step].id!=="leader-persists" || id!=="lost-reply"),"Delivery desk only at its matching event");
     if(state.result)assert(env.get("read-alternatives").children.length===2,"Exactly two alternative outcomes");
     visited++;
   }
@@ -76,6 +77,25 @@ for(const id of ["lost-reply","stale-read","workflow-recovery"]) {
   env.click("previous-step");assert(env.window.location.hash.endsWith("step=0"),"Previous event");
 }
 const e=environment("#scenario=stale-read&step=9");
+const desk=environment("#scenario=lost-reply&step=2");
+desk.click("first-step"); desk.click("quorum-jump");
+assert(desk.document.activeElement===desk.get("quorum-title")&&!desk.get("quorum-desk").hidden,"Accessible shortcut from introduction");
+assert(desk.get("quorum-channels-B").getAttribute("data-phase")==="0" && desk.get("quorum-slot-B").textContent==="—","Initial outward packet has no copy at B");
+desk.click("quorum-C");
+assert(desk.get("quorum-channels-C").getAttribute("data-phase")==="1" && desk.get("quorum-slot-C").textContent==="08","C has record before its reply reaches A");
+assert(desk.get("quorum-svg-desc").textContent.includes("C: запись на диске, ответ в пути."),"Same channel state available without color or sight");
+desk.click("quorum-B");
+assert(desk.get("quorum-status").textContent.includes("3 из 3. Известно лидеру: 1 из 3"),"Both followers can persist while all replies are held");
+assert(desk.get("quorum-known").children.filter(n=>n.className==="has-entry").length===1,"Knowledge track excludes unacknowledged copies");
+desk.click("quorum-C"); desk.click("quorum-C");
+assert(desk.get("quorum-C").getAttribute("aria-disabled")==="true","Delivered acknowledgement cannot be counted again");
+assert(desk.get("quorum-channels-C").getAttribute("data-phase")==="2" && desk.get("quorum-channels-B").getAttribute("data-phase")==="1","Receiving one reply leaves the other in flight");
+assert(desk.get("quorum-status").textContent.includes("Известно лидеру: 2 из 3. A может"),"One acknowledgement suffices");
+assert(desk.get("event-title").textContent.includes("сохраняет запись 8") && desk.window.location.hash.endsWith("step=2"),"Experiment is independent of story and browser history");
+desk.click("next-step"); desk.window.history.back();
+assert(desk.get("quorum-status").textContent.includes("Известно лидеру: 2 из 3"),"Returning preserves experiment in the same visit");
+desk.click("quorum-reset");
+assert(desk.get("quorum-status").textContent.includes("1 из 3. Известно лидеру: 1 из 3"),"Experiment resets without resetting story");
 assert(!e.get("read-comparison").hidden,"Native deep-link target has comparison");
 e.click("next-step");
 e.window.history.back();

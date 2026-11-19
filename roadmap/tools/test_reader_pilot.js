@@ -350,7 +350,7 @@ for (let name; (name = directory.read_name()) !== null;) {
     assert(/<body\b[^>]*class="[^"]*\bcourse-reader\b/.test(html), 'Reader body class is enabled: ' + name);
     assert(/href="assets\/course-reader\.css(?:\?[^\"]*)?"/.test(html), 'Shared reader stylesheet exists: ' + name);
     assert(/href="assets\/course-ui\.css(?:\?[^\"]*)?"/.test(html), 'Shared foundation stylesheet exists: ' + name);
-    assert(!/fonts\.(?:googleapis|gstatic)\.com/.test(html), 'Production reader fonts work without a remote request: ' + name);
+    assert(!requestsRemoteFont(html), 'Production reader fonts work without a remote request: ' + name);
     ++shells;
 }
 const securityHTML = read('roadmap/security_labs.html');
@@ -360,7 +360,13 @@ assert(/class="skip-link"\s+href="#experiment"/.test(securityHTML), 'Lab keeps a
 const foundationCSS = read('roadmap/assets/course-ui.css');
 assert(/--course-sans:\s*ui-sans-serif,\s*system-ui/.test(foundationCSS) &&
        /--course-mono:\s*ui-monospace/.test(foundationCSS), 'Reader and laboratory share the explicit system font tokens');
-assert(!/fonts\.(?:googleapis|gstatic)\.com/.test(securityHTML), 'Security laboratory does not load a competing external font');
+function requestsRemoteFont(html) {
+    // A hostname in CSP is a permission, not a request. Preserve detection in
+    // resource links, style sheets, inline styles, CSS @import, and scripts.
+    return /fonts\.(?:googleapis|gstatic)\.com/i.test(html.replace(/<meta\b[^>]*http-equiv=["']Content-Security-Policy["'][^>]*>/gi, ''));
+}
+assert(requestsRemoteFont('<link rel="stylesheet" href="https://fonts.googleapis.com/css2">'), 'External font regressions are still detected');
+assert(!requestsRemoteFont(securityHTML), 'Security laboratory does not load a competing external font');
 print('PASS: ' + productionReaders + ' production readers, ' + nativeContents + ' native contents destinations, reader/history/focus/return contracts; ' + labEntries + ' lab entry links, ' +
       stages + ' real-controller security stages and ' + shells + ' generated shells. ' +
       'Progress and canonical content retained. DOM/React model only; no browser, layout or assistive-technology audit.');

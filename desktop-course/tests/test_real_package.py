@@ -10,7 +10,8 @@ from cdp import Desktop, ROOT
 
 
 def main():
-    package = ROOT / 'release/cpp-backend-course-desktop_1.0.0_amd64.deb'
+    version = json.loads((ROOT / 'app/package.json').read_text())['version']
+    package = ROOT / f'release/cpp-backend-course-desktop_{version}_amd64.deb'
     metadata = json.loads(package.with_name(package.name + '.json').read_text())
     assert hashlib.sha256(package.read_bytes()).hexdigest() == metadata['sha256']
     report = {'systemInstallPerformed': False, 'sandboxDisabled': False}
@@ -25,6 +26,7 @@ def main():
         site = stage / 'opt/cpp-backend-course-desktop/resources/app/site'
         manifest = json.loads((site / 'desktop-build.json').read_text())
         assert manifest['version'] == metadata['course_version']
+        assert metadata['version'] == version
         for name, record in manifest['files'].items():
             data = (site / name).read_bytes()
             assert len(data) == record['bytes'] and hashlib.sha256(data).hexdigest() == record['sha256'], name

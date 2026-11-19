@@ -1,0 +1,24 @@
+<section class="ack-workbench" aria-labelledby="tcp-order-title">
+  <p class="ack-eyebrow">Самостоятельный опыт · TCP</p>
+  <h2 id="tcp-order-title" tabindex="-1">Какую часть файла подтвердит сервер?</h2>
+  <p class="ack-intro">Весь файл из двенадцати букв уже отправлен. Теперь ты решаешь, какая из трёх частей первой попадёт на сервер. Попробуй начать с конца: если сервер получил последние четыре буквы, может ли он подтвердить весь файл?</p>
+  <div class="ack-stations">
+    <div class="ack-station">
+      <h3>1. Доставь часть файла</h3>
+      <p>Каждая кнопка доставляет ровно четыре байта. Нажми её ещё раз — придёт копия тех же байтов.</p>
+      <div class="ack-choices" id="tcp-order-choices" role="group" aria-label="Доставить выбранную часть файла"></div>
+    </div>
+    <div class="ack-station ack-result">
+      <div><h3>Ответ сервера</h3><strong class="ack-value" id="tcp-order-ack">—</strong></div>
+      <p id="tcp-order-reason" role="status" aria-atomic="true"></p>
+    </div>
+  </div>
+  <figure class="ack-receiver">
+    <figcaption><strong>2. Буфер получателя</strong><span id="tcp-order-frontier"></span></figcaption>
+    <p>Каждая буква занимает один байт. Вертикальная черта стоит там, где сервер ждёт следующий байт. Его номер сервер указывает в ответе ACK.</p>
+    <div class="ack-tape" id="tcp-order-tape" data-edge="0" aria-hidden="true"><div id="tcp-order-bytes"></div><span class="ack-edge"></span></div>
+    <ol id="tcp-order-stream" class="ack-stream" aria-label="Части файла в буфере сервера"></ol>
+  </figure>
+  <div class="ack-foot"><button id="tcp-order-reset" type="button" class="quiet-button">Начать доставку заново</button><p>Это отдельный опыт: он не меняет шаг разбора выше.</p></div>
+  <details class="ack-limits"><summary>Почему именно такой ответ?</summary><p>Первый байт файла имеет номер 1001. Число ACK в ответе означает: «Все байты до этого номера у меня есть; следующий нужен с таким номером». Оно не говорит, прочитала ли файл программа. Здесь получатель сохраняет части, пришедшие после пропуска, и сразу посылает ответ после каждой доставки. Настоящий TCP может подтверждать несколько сегментов одним ответом. <a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.4">Номера байтов в RFC 9293</a> · <a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.8.6.3">Правила отправки ACK</a>.</p></details>
+</section>

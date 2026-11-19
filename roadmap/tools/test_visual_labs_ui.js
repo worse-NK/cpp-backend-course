@@ -23,6 +23,7 @@ function createDOM(path='roadmap/visual_labs.html'){
     setAttribute(k,v){this.attrs[k]=String(v);}removeAttribute(k){delete this.attrs[k];}getAttribute(k){return this.attrs[k]??null;}
     get classList(){return {toggle:(cls,yes)=>{const old=new Set((this.attrs.class||'').split(' ').filter(Boolean));if(yes)old.add(cls);else old.delete(cls);this.attrs.class=[...old].join(' ');}};}
     addEventListener(k,f){this.listeners[k]=f;}focus(){doc.activeElement=this;}
+    scrollIntoView(options){this.scrolledIntoView=options;}
     showModal(){this.open=true;}close(){this.open=false;}
   }
   function parse(html,parent){
@@ -47,6 +48,8 @@ const win={addEventListener:(k,f)=>listeners[k]=f},location={hash:'',replace(val
 let routeHash='';Object.defineProperty(location,'hash',{get:()=>routeHash,set:value=>{routeHash=value&&!value.startsWith('#')?'#'+value:value;}});
 new Function('window',read('roadmap/generated/visual-labs.data.js'))(win);
 new Function('globalThis',read('roadmap/assets/visual-lab-models.js'))(win);
+new Function('window',read('roadmap/assets/lab-atlas.js'))(win);
+for (const name of ['lab-cpp-plates','lab-service-plates']) new Function('globalThis','window',read('roadmap/assets/'+name+'.js'))(win,win);
 new Function('window','document','location','setInterval','clearInterval','URLSearchParams',read('roadmap/assets/visual-labs.js'))(win,doc,location,(f,ms)=>{timers.set(++nextTimer,{f,ms});return nextTimer;},id=>timers.delete(id),Params);
 const get=id=>doc.getElementById(id);
 assert(doc.querySelectorAll('.catalog-card').length===win.COURSE_LABS.length,'All catalog cards, including standalone security lessons');
@@ -75,7 +78,48 @@ for(const lab of win.COURSE_LABS){if(lab.file!=='visual_labs.html')continue;for(
   get('labPlay').onclick();assert(timers.size===1,'Autoplay start');[...timers.values()][0].f();get('labPrev').onclick();assert(timers.size===0,'Manual navigation stops autoplay');
   visited++;
 }}
+for(const [scenario,target,prediction] of [['reserved','end',false],['growth','0',false],['erase','1',false]]){
+  location.hash='#lab=vector&scenario='+scenario;listeners.hashchange();
+  const input=get('vectorTarget');
+  assert(input.value===target&&get('vectorAfter').hidden,'Scenario starts with an unanswered vector challenge');
+  const memory=get('vectorBefore').querySelector('.memory-tape');
+  const before=win.CourseLabModels.vectorProbe(win.CourseLabModels.vector(scenario),target).before;
+  assert(memory.querySelectorAll('.mem-slot').length===before.capacity&&memory.querySelectorAll('[data-occupied="true"]').length===before.values.length,'Tape geometry distinguishes capacity and size');
+  assert(memory.querySelectorAll('.mem-end').length===1,'end is a boundary, not an extra slot');
+  get(prediction?'vectorNo':'vectorYes').onclick();
+  assert(get('vectorAnswer').textContent.startsWith('Не совсем.')&&!get('vectorAfter').hidden,'Wrong guess still explains result');
+  get(prediction?'vectorYes':'vectorNo').onclick();
+  assert(get('vectorAnswer').textContent.startsWith('Верно.')&&!get('vectorAfter').querySelector('.tracked'),'Invalid iterator not attached to a new element');
+  input.value='0';input.onchange();
+  assert(get('vectorAfter').hidden&&get('vectorAnswer').textContent==='','New target clears old verdict');
+  if(scenario!=='growth'){
+    get('vectorYes').onclick();
+    assert(get('vectorAnswer').textContent.startsWith('Верно.')&&get('vectorAfter').querySelector('.tracked').textContent.includes('10'),'Surviving iterator labels the same element');
+  }
+  assert(get('labPrev').disabled,'Challenge does not move the main timeline');
+}
 const sqlIntro=win.COURSE_LABS.find(lab=>lab.id==='sql').introduction;
+for(const [lab,scenario,id] of [['sql','left','sqlTraceTitle'],['vector','reserved','vectorChallengeTitle']]){
+  const hash='#lab='+lab+'&scenario='+scenario;location.hash=hash;listeners.hashchange();
+  get('jumpToExercise').onclick();assert(doc.activeElement===get(id)&&get(id).scrolledIntoView.behavior==='instant'&&location.hash===hash,'Experiment shortcut focuses without changing route');
+}
+for(const scenario of ['left','where','inner','count-star']){
+  location.hash='#lab=sql&scenario='+scenario;listeners.hashchange();
+  assert(get('sqlTraceUser').value==='3'&&get('sqlTracePrev').disabled&&get('sqlTraceLeft').textContent.includes('NULL'),'Trace starts with Vera and a NULL-extended row');
+  get('sqlTraceNext').onclick();
+  assert(get('sqlTraceStatus').textContent.includes('Фильтр'),'Filter step');
+  assert(get('labScene').querySelectorAll('.rel-person').length===3,'Initial schema displays three source rails');
+  assert(get('sqlTraceLeft').querySelector('.row-journey').querySelector('.nil')&&!get('sqlTraceLeft').querySelector('.journey-cut'),'NULL-extended record is not drawn as a missing row');
+  assert(Boolean(get('sqlTraceRight').querySelector('.journey-cut'))===(scenario!=='count-star'),'Only actually absent rows have a broken path');
+  if(scenario==='left'||scenario==='where')assert(get('sqlTraceRight').textContent.includes('Строк нет')&&get('sqlTraceRight').textContent.includes('неизвестный результат'),'WHERE discards UNKNOWN');
+  get('sqlTraceNext').onclick();
+  assert(get('sqlTraceNext').disabled&&get('sqlTraceLeft').textContent.includes('Вера: 0'),'Actual count is zero');
+  assert(get('sqlTraceRight').textContent.includes(scenario==='count-star'?'Вера: 1':'Нет строки в отчёте'),'Missing report row is not zero');
+  get('sqlTraceUser').value='1';get('sqlTraceUser').onchange();
+  assert(get('sqlTraceInput').textContent.includes('задача 11 (выполнена)')&&get('sqlTraceLeft').textContent.includes('Анна: 1'),'Changing user keeps comparison stage');
+  get('sqlTracePrev').onclick();get('sqlTracePrev').onclick();
+  assert(get('sqlTraceRight').textContent.includes('Задача 11')===(scenario==='where'||scenario==='left'),'JOIN includes completed task only when filtering later');
+}
 const originalParagraph=sqlIntro.paragraphs[0];
 sqlIntro.paragraphs[0]='A <img src=x onerror="bad()"> & a plain definition';
 location.hash='#lab=sql&scenario=left';listeners.hashchange();
@@ -173,6 +217,16 @@ for(const [from,hash,expectedModes] of [['station0','#exception',1],['station2',
   assert(buttons.filter(b=>!b.hidden).length===expectedModes,'Lifetime prerequisite profile '+from);
   assert(page.getElementById('returnToTheory').href.includes('#section='),'Lifetime exact course return');
   if(from==='station0'){
+    assert(page.getElementById('lifeNames').children.map(n=>n.textContent).join(',')==='Session,first,second','Default chart contains only this program’s objects');
+    const normal=win.LifetimeDemo.makeScenario('members',false,'none',false);
+    const print=normal.events.findIndex(e=>e.newOutput&&e.state.output.at(-1).text==='first()');
+    page.getElementById('lifeStep').oninput({target:{value:print}});
+    assert(page.getElementById('lifeOutput').textContent==='first()'&&page.getElementById('lifeEmitter').getAttribute('visibility')==='visible','Timeline selects exact console producer');
+    assert(Number(page.getElementById('stepRange').value)===print,'Both scrubbers select the same event');
+    const readyTracks=()=>page.getElementById('lifePlot').querySelectorAll('.life-ready').map(n=>['x1','x2','y1'].map(a=>n.getAttribute(a)).join(':')).join(',');
+    const declared=readyTracks();
+    page.getElementById('reverseInput').onchange({target:{checked:true}});
+    assert(readyTracks()===declared && Number(page.getElementById('lifeStep').value)===print,'Reordering the written initializer list keeps the trace and selected event');
     assert(!page.getElementById('fullSource').textContent.includes('throw '),'Exception implementation shown before exceptions');
     assert(page.getElementById('scenarioIntro').textContent===initialIntro,'Static and initialized members introduction agree');
   }
@@ -180,6 +234,10 @@ for(const [from,hash,expectedModes] of [['station0','#exception',1],['station2',
   page.listeners.keydown({target:page.getElementById('codeBody'),key:'ArrowRight',preventDefault:()=>{prevented=true;}});
   assert(!prevented,'Lifetime code must retain native keyboard scrolling');
   if(from==='station4'){
+    buttons.find(b=>b.dataset.scenario==='exception').onclick();
+    assert(page.getElementById('lifePlot').querySelectorAll('.life-fail').length===2,'No destructor span for either unfinished constructor, two failure marks');
+    assert(page.getElementById('lifePlot').querySelectorAll('.life-destroying').length===1,'Only fully constructed first is destroyed after second throws');
+    buttons.find(b=>b.dataset.scenario==='dynamic').onclick();
     const model=win.LifetimeDemo.makeScenario('dynamic');
     const destroyed=model.events.findIndex(e=>e.state.pointer==='destroyed');
     assert(destroyed>=0&&model.events[destroyed].state.storage==='allocated','Destruction precedes deallocation');

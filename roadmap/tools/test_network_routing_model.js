@@ -18,6 +18,14 @@ function size(p) { return (p.version === 6 ? 40 : 20) + 8 + p.payload; }
 function row(step, name) { var rows = []; step.fields.forEach(function (f) { rows = rows.concat(f.items); }); return rows.find(function (r) { return r[0] === name; }); }
 var phases = M.phases.map(function (p) { return p.id; }), sources = M.sources.map(function (s) { return s.id; }), count = 0;
 assert(M.id === "packetpath", "Registry id changed");
+var probe = M.mtuExperiment;
+[[1399,1351,true],[1400,1352,true],[1401,1353,false]].forEach(function (test) {
+  var before = probe.send(test[0]), after = probe.receivePtb(before);
+  assert(before.payload === test[1] && before.lan && before.wan === test[2], "Wrong hop or UDP payload for " + test[0]);
+  assert(before.estimate === 1500 && before.ptb === (before.wan ? "none" : "in-flight"), "Sender knew about undersized hop before PTB");
+  assert(after.estimate === (before.wan ? 1500 : 1400) && after.wan === before.wan && after.size === before.size, "Feedback changed the original datagram");
+  assert(probe.receivePtb(after) === after, "Impossible duplicate feedback advanced probe");
+});
 assert(M.scenarios.map(function (s) { return s.id; }).join(",") === "routed,snat,filtered,pmtu6,ttl", "Required scenarios missing");
 assert(M.introduction.paragraphs.length >= 2 && M.introduction.paragraphs.every(text) && text(M.introduction.goal) && text(M.introduction.action), "Introduction missing");
 assert(M.assumptions.length >= 9 && M.assumptions.every(text), "Model conditions missing");

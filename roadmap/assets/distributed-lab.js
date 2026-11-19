@@ -17,6 +17,35 @@
   const clear = node => node.replaceChildren();
   const say = (id, value) => { el(id).textContent = value; };
   let current = null;
+  let phases = {B:0,C:0};
+  function drawQuorum() {
+    const {stored,known,canAdvance}=model.quorumView(phases);
+    for(const [id,replicas] of [["quorum-stored",stored],["quorum-known",known]]) {
+      const list=el(id); clear(list);
+      for(const replica of ["A","B","C"]) {
+        const yes=replicas.includes(replica), chip=make("li",undefined,yes?"has-entry":"");
+        const mark=make("span",yes?"✓":"—"); mark.setAttribute("aria-hidden","true");
+        chip.append(mark,make("span",replica),make("span",yes?" — да":" — нет","sr-only"));
+        list.append(chip);
+      }
+    }
+    for(const id of ["B","C"]) {
+      const phase=phases[id], btn=el("quorum-"+id);
+      el("quorum-channels-"+id).setAttribute("data-phase",String(phase));
+      el("quorum-server-"+id).setAttribute("data-phase",String(phase));
+      say("quorum-slot-"+id,phase?"08":"—");
+      btn.textContent=["Доставить запись на "+id,"Доставить ответ "+id+" → A","Ответ "+id+" у лидера"][phase];
+      btn.setAttribute("data-phase",String(phase));
+      btn.setAttribute("aria-disabled",String(phase===2));
+    }
+    say("quorum-svg-desc","На диске A есть запись № 8. "+["B","C"].map(id=>id+": "+["запись ещё в пути.","запись на диске, ответ в пути.","запись на диске, ответ получен лидером."][phases[id]]).join(" "));
+    const verdict=canAdvance
+      ? "A может отметить запись № 8 принятой. Это ещё не означает, что команда исполнена или Анна получила ответ."
+      : stored.length>1
+        ? "Большинство уже сохранило запись этого раунда. Но A пока не получил ни одного ответа и не может отметить её принятой."
+        : "Одна копия — ещё не большинство. Доставь запись на B или C: сервер сначала сохранит её, а ответ придёт отдельно.";
+    say("quorum-status","Копий на дисках: "+stored.length+" из 3. Известно лидеру: "+known.length+" из 3. "+verdict);
+  }
   let scenarioButtons = [];
   const stateLabels = {
     created:"заказ создан", reserved:"резерв известен",
@@ -164,6 +193,7 @@
   }
   function renderIntroduction(scenario) {
     say("scenario-title",scenario.title);
+    el("quorum-jump-row").hidden=scenario.id!=="lost-reply";
     const context=el("scenario-context");clear(context);
     scenario.intro.forEach(p=>context.append(make("p",p)));
     const assumptions=el("scenario-assumptions");clear(assumptions);
@@ -179,6 +209,10 @@
       button.setAttribute("aria-label","Шаг "+(i+1)+": "+step.title);
       if(i===index)button.setAttribute("aria-current","step");
       button.append(make("span",i+1,"step-index"),make("span",step.title));
+      if(scenario.id==="lost-reply"&&step.id==="leader-persists"){
+        button.append(make("span","Опыт с доставкой","quorum-rail-tag"));
+        button.setAttribute("aria-label","Шаг "+(i+1)+": "+step.title+". Опыт с доставкой");
+      }
       button.addEventListener("click",()=>navigate(scenario.id,i,"event-title"));
       item.append(button);rail.append(item);
     });
@@ -193,6 +227,8 @@
     renderRail(scenario,route.step);
     say("step-count","Шаг "+(route.step+1)+" из "+scenario.steps.length);
     say("event-title",step.title);say("event-description",step.event);
+    el("quorum-desk").hidden=!(scenario.id==="lost-reply"&&step.id==="leader-persists");
+    if(!el("quorum-desk").hidden)drawQuorum();
     say("event-why",step.why);say("event-rule",step.rule);
     say("prediction-question",step.question+" Открыть проверку");
     say("prediction-answer",step.answer);el("prediction-check").open=false;
@@ -225,6 +261,15 @@
     scenarioButtons.push(button);choices.append(button);
   });
   el("first-step").addEventListener("click",()=>navigate(current.scenario,0,"event-title"));
+  el("quorum-jump").addEventListener("click",event=>{
+    if(event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||event.button>0)return;
+    event.preventDefault();navigate("lost-reply",2,"quorum-title");
+  });
+  for(const id of ["B","C"])el("quorum-"+id).addEventListener("click",()=>{
+    if(phases[id]>=2)return;
+    phases[id]++;drawQuorum();
+  });
+  el("quorum-reset").addEventListener("click",()=>{phases={B:0,C:0};drawQuorum();});
   el("previous-step").addEventListener("click",()=>navigate(current.scenario,current.step-1,"event-title"));
   el("next-step").addEventListener("click",()=>navigate(current.scenario,current.step+1,"event-title"));
   window.addEventListener("hashchange",sync);

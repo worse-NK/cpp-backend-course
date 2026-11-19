@@ -58,6 +58,17 @@ assert(!M.taskownership('discard-task').steps.at(-1).state.alive&&M.taskownershi
 assert(M.vector('growth').steps.at(-1).state.pointer==='invalid','Reallocation access');
 assert(M.vector('reserved').steps.at(-1).state.pointer==='valid','Reserved append access');
 assert(M.vector('erase').steps.at(-1).state.pointer==='at-after-invalid','Erase invalidation');
+for(const [scenario,expected] of Object.entries({growth:[false,false,false],reserved:[true,true,false],erase:[true,false,false,false]})){
+  const trace=M.vector(scenario);
+  const original=JSON.stringify(trace.steps);
+  expected.forEach((valid,i)=>{
+    const probe=i===expected.length-1?'end':String(i);
+    const verdict=M.vectorProbe(trace,probe);
+    assert(verdict.valid===valid,'Vector prediction '+scenario+'/'+probe);
+    assert(verdict.before.values.length===expected.length-1 && verdict.after.values.length===(scenario==='erase'?2:3),'Consistent snapshots '+scenario);
+  });
+  assert(JSON.stringify(trace.steps)===original,'Vector probe does not mutate timeline');
+}
 for(const mode of ['left','where','count-star','inner']){
   const groups=M.sql(mode).steps.find(e=>e.state.stage==='groups');
   const vera=groups.state.rows.find(r=>r.id===3);
@@ -82,5 +93,9 @@ for(let rate=0;rate<=12;rate++)for(let workers=1;workers<=8;workers++)for(const 
     if(s.phase!=='Serving')assert(s.lastAccepted===0,'Drain admitted new work');
   }queues++;
 }
-if(ARGV.includes('--json'))print(JSON.stringify(modelLabs.flatMap(l=>l.scenarios.map(mode=>({lab:l.id,mode,...M[l.id](mode)})))));
+if(ARGV.includes('--json'))print(JSON.stringify(modelLabs.flatMap(l=>l.scenarios.map(mode=>{
+  const model=M[l.id](mode);
+  const trails=l.id==='sql'?model.steps[0].state.users.map(user=>M.sqlRowTrail(model,user.id)):undefined;
+  return {lab:l.id,mode,...model,trails};
+}))));
 else print('PASS: '+total+' scenarios, all scheduler outcomes, '+partitions+' TCP partitions, ownership/vector/transaction invariants, '+queues+' queue configurations');

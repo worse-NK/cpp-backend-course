@@ -2,7 +2,7 @@
 <html lang="ru" class="course-dark">
 <head>
   <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" data-course-security="1" content="default-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; object-src &#x27;none&#x27;; script-src &#x27;self&#x27; &#x27;sha256-4AsHkTZhIqwQZsMPiW6aZDr5DCEs+QdHEwxsPYnsrtI=&#x27;; script-src-attr &#x27;none&#x27;; style-src &#x27;self&#x27; &#x27;unsafe-inline&#x27; https://fonts.googleapis.com; font-src &#x27;self&#x27; https://fonts.gstatic.com; img-src &#x27;self&#x27; data: blob:; connect-src &#x27;none&#x27;; worker-src &#x27;self&#x27; blob:; frame-src &#x27;self&#x27;; form-action &#x27;none&#x27;">
+<meta http-equiv="Content-Security-Policy" data-course-security="1" content="default-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; object-src &#x27;none&#x27;; script-src &#x27;self&#x27; &#x27;sha256-wICcoqGaRgmgp0udtGq9yDRWFnRDPOzLAcQRyMzEcu8=&#x27;; script-src-attr &#x27;none&#x27;; style-src &#x27;self&#x27; &#x27;unsafe-inline&#x27; https://fonts.googleapis.com; font-src &#x27;self&#x27; https://fonts.gstatic.com; img-src &#x27;self&#x27; data: blob:; connect-src &#x27;none&#x27;; worker-src &#x27;self&#x27; blob:; frame-src &#x27;self&#x27;; form-action &#x27;none&#x27;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Пошаговая лаборатория C++: создание объекта, порядок полей, наследование, исключения и new/delete.">
   <title>Жизнь объекта · Визуальная лаборатория C++</title>
@@ -15,6 +15,37 @@
     @media(max-width:740px){.shell{padding:0 18px}.topbar{min-height:69px}.hero{padding:26px 0 22px}.hero h1{font-size:35px}.hero p{font-size:13px;max-width:500px}.scenarios{grid-template-columns:1fr 1fr;gap:8px}.scenario{min-height:69px}.experiment{flex-direction:column;align-items:flex-start;gap:10px;padding:12px 14px;margin-bottom:15px}.experiment-copy{max-width:none;font-size:11px}.experiment-control{width:100%;justify-content:flex-start}.workspace{grid-template-columns:1fr;gap:14px}.column{gap:14px}.code-body{min-height:0;max-height:255px}.code-foot{font-size:9px}.output-lines{height:95px}.scene{min-height:290px;padding:19px}.insight{min-height:190px;padding:20px}.controls{position:sticky;bottom:10px;z-index:5;box-shadow:0 6px 30px #29423417;padding:12px;gap:13px;grid-template-columns:auto 1fr}.scrubber{grid-row:1;grid-column:1/-1}.transport{grid-column:1}.next{grid-column:2;justify-self:end}.control-help{font-size:9px}.control-help>span{display:none}.bottom-notes{grid-template-columns:1fr;gap:16px;padding-top:24px}.footer{font-size:9px}.object-name{font-size:15px}.top-link{font-size:10px}.code-line{font-size:11px}.panel-head{padding:12px 16px}.hero .eyebrow{font-size:9px}.dialog-toolbar{gap:10px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 .lab-introduction{margin:0 0 24px;padding:20px 23px;border:1px solid var(--line);border-radius:10px;background:#fff;max-width:850px}.lab-introduction h2{font-size:18px;margin:0 0 10px;letter-spacing:-.02em}.lab-introduction p{font-size:14px;line-height:1.85;margin:9px 0;color:#52624d}.lab-introduction code{font-size:12px;background:#f0f5ed;padding:1px 4px;border-radius:3px}.lab-introduction .intro-boundary{font-size:12px;color:#72806a}
+.life-chart{margin:1rem 0 .6rem;padding:.9rem .75rem;background:var(--course-canvas);border-radius:6px;color:var(--course-ink)}
+.life-chart figcaption{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;flex-wrap:wrap;font-size:1rem;font-weight:650}
+.life-chart output{color:var(--course-accent);font:600 .9rem var(--course-mono)}
+.life-grid{display:grid;grid-template-columns:max-content minmax(0,1fr);align-items:start;gap:.4rem;margin-top:.7rem}
+.life-names{padding-top:8px}.life-names span{display:flex;align-items:center;height:32px;font:600 .9rem var(--course-mono);color:var(--course-ink)}
+.life-names span+span::before{content:"";width:.5rem;border-bottom:1px solid var(--course-line);margin-right:.3rem}
+.life-plot{position:relative;min-width:0;line-height:0;border-radius:3px}
+.life-plot:focus-within{outline:2px solid var(--course-focus);outline-offset:2px}
+.life-plot svg{display:block;width:100%;overflow:visible}
+.life-plot .life-axis{stroke:#75909f;stroke-width:1;stroke-dasharray:1 5}
+.life-plot .life-tick{stroke:#75909f;stroke-width:1}
+.life-plot .life-future{fill:var(--course-canvas);opacity:.42}
+.life-plot .life-constructing{stroke:var(--course-accent);stroke-width:4;stroke-dasharray:3 2}
+.life-plot .life-ready{stroke:var(--course-success);stroke-width:9}
+.life-plot .life-destroying{stroke:var(--course-warning);stroke-width:6}
+.life-plot .life-fail{fill:none;stroke:var(--course-danger);stroke-width:2.7;stroke-linecap:round}
+.life-plot line,.life-plot path{vector-effect:non-scaling-stroke}
+.life-plot .life-position{stroke:var(--course-ink);stroke-width:1.5}.life-plot .life-handle{fill:var(--course-ink)}
+.life-plot .life-print{fill:var(--course-canvas);stroke:var(--course-ink);stroke-width:2}
+.life-signal{display:flex;align-items:baseline;gap:.35rem;flex-wrap:wrap;margin-top:.7rem;color:var(--course-muted);font-size:.91rem}
+.life-signal[data-emitter="true"]::before{content:"◇";color:var(--course-ink);font-weight:700}
+.life-signal code{color:var(--course-ink);font:600 .95rem var(--course-mono)}
+.life-key [hidden],.life-chart [hidden]{display:none}
+.life-plot input{appearance:none;position:absolute;inset:0;width:100%;height:100%;padding:0;margin:0;opacity:0;cursor:ew-resize}
+.life-plot input::-webkit-slider-thumb{appearance:none;width:14px;height:30px}
+.life-plot input::-moz-range-thumb{width:14px;height:30px;border:0}
+.life-key{display:flex;gap:.25rem .8rem;align-items:center;flex-wrap:wrap;margin-top:.65rem;color:var(--course-muted);font-size:.86rem}
+.life-key span{display:inline-flex;gap:.35rem;align-items:center}.life-key i{width:.8rem;border-top:3px dotted var(--course-accent)}.life-key .life-ok{border-top:6px solid var(--course-success)}.life-key .life-end{border-top:3px solid var(--course-warning)}.life-key b{color:var(--course-danger)}
+.life-hint{margin:.45rem 0 0;font-size:.91rem;color:var(--course-muted);line-height:1.45}
+.life-facts summary{cursor:pointer;color:var(--course-accent);padding:.55rem .1rem;min-height:44px}
+@media(max-width:480px){.life-chart{margin-inline:-.5rem;padding:.65rem .45rem}.life-names span{font-size:.82rem}}
 </style>
 <meta name="theme-color" content="#18252f">
 <link rel="stylesheet" href="assets/course-theme.css?v=4b6f4f70fb3b">
@@ -65,7 +96,14 @@
             <div class="scope-line"><span id="scopeLabel">main()</span><span id="storageLabel">автоматическая длительность хранения</span></div>
             <div class="object-shell" id="objectShell" data-state="waiting">
               <div class="object-heading"><div><div class="object-name" id="objectName">s : Session</div><div class="object-sub" id="objectSub">Полный объект</div></div><div class="object-status"><span class="status-dot"></span><span id="rootStatus">Ожидает создания</span></div></div>
-              <div class="object-parts" id="objectParts"></div>
+              <figure class="life-chart" id="lifeChart" aria-labelledby="lifeTitle">
+                <figcaption><span id="lifeTitle">Когда готовы поля и сама Session</span><output id="lifeNumber" for="lifeStep" aria-live="off"></output></figcaption>
+                <div class="life-grid"><div id="lifeNames" class="life-names"></div><div class="life-plot"><svg id="lifePlot" aria-hidden="true" focusable="false" preserveAspectRatio="none"></svg><input type="range" min="0" max="1" value="0" step="1" id="lifeStep" aria-label="Выбрать шаг на схеме создания и разрушения" aria-describedby="lifeHint"></div></div>
+                <div class="life-key"><span><i aria-hidden="true"></i>Создаётся</span><span><i class="life-ok" aria-hidden="true"></i>Готов</span><span><i class="life-end" aria-hidden="true"></i>Разрушается</span><span id="lifeErrorKey" hidden><b aria-hidden="true">×</b>Создание прервано</span></div>
+                <div id="lifeSignal" class="life-signal">Вывод на этом шаге: <code id="lifeOutput">—</code></div>
+                <p id="lifeHint" class="life-hint">Слева направо — шаги программы, не секунды. Передвинь белую метку: код и консоль покажут выбранный шаг.</p>
+              </figure>
+              <details class="life-facts"><summary>Состояние каждой части на этом шаге</summary><div class="object-parts" id="objectParts"></div></details>
             </div>
             <div id="dynamicStorage"></div>
             <p class="scene-caption" id="sceneCaption">Схема подобъектов, а не расположение байтов в памяти.</p>
@@ -243,6 +281,33 @@
     }
     return result + escape(text.slice(offset));
   }
+  const lifeX = i => 7 + 286 * i / (model.events.length - 1);
+  function layoutLife() {
+    const rows=["Session",...model.nodes], height=16+rows.length*32;
+    const read=(s,id)=>id==="Session"?s.root:s.nodes[id];
+    let drawing=model.events.map((_,i)=>'<line class="life-tick" x1="'+lifeX(i)+'" x2="'+lifeX(i)+'" y1="0" y2="'+((i%5===0||i===model.events.length-1)?7:3)+'"/>').join("");
+    rows.forEach((id,row)=>{
+      const y=24+row*32;
+      drawing+='<line class="life-axis" x1="7" x2="293" y1="'+y+'" y2="'+y+'"/>';
+      let i=0;
+      while(i<model.events.length){
+        const state=read(model.events[i].state,id),start=i++;
+        while(i<model.events.length&&read(model.events[i].state,id)===state)i++;
+        const x=lifeX(start),end=lifeX(Math.min(i,model.events.length-1));
+        if(["constructing","ready","destroying"].includes(state)){
+          drawing+='<line class="life-'+state+'" x1="'+x+'" x2="'+end+'" y1="'+y+'" y2="'+y+'"/>';
+        }else if(state==="failed"){
+          drawing+='<path class="life-fail" d="M'+(x-4)+' '+(y-4)+'l8 8m0 -8 -8 8"/>';
+        }
+      }
+    });
+    $("lifeNames").innerHTML=rows.map(id=>'<span>'+(id==="base"?"Base":id)+'</span>').join("");
+    const plot=$("lifePlot");
+    plot.setAttribute("viewBox","0 0 300 "+height);plot.setAttribute("height",height);
+    plot.innerHTML=drawing+'<rect id="lifeFuture" class="life-future" y="8" height="'+(height-8)+'"/><g id="lifeCursor"><line class="life-position" x1="0" x2="0" y1="6" y2="'+(height-5)+'"/><path class="life-handle" d="M-5 0h10v4L0 9l-5-5z"/><path id="lifeEmitter" class="life-print" d="m0-6 6 6-6 6-6-6z"/></g>';
+    $("lifeStep").max=model.events.length-1;
+    $("lifeErrorKey").hidden=!model.events.some(e=>e.state.root==="failed");
+  }
   function stop() { if (timer !== null) clearInterval(timer); timer = null; $("play").innerHTML = icons.play; $("play").setAttribute("aria-label","Автовоспроизведение"); $("play").title = "Автовоспроизведение (Пробел)"; }
   function start() {
     if (timer !== null) {stop();return;}
@@ -284,11 +349,23 @@
     $("stepRange").max=model.events.length-1;
     $("timeline").innerHTML=model.events.map((event,i)=>'<button data-event="'+i+'"><span>'+String(i+1).padStart(2,"0")+'</span><span>'+escape(event.title)+'</span><small>'+escape(event.state.phase)+'</small></button>').join("");
     $("fullSource").textContent=model.source;
+    layoutLife();
     render();
     if (["reverseInput", "failureInput"].includes(focusedControl) && $(focusedControl)) $(focusedControl).focus();
   }
   function render() {
     const event=model.events[cursor],s=event.state;
+    $("lifeCursor").setAttribute("transform","translate("+lifeX(cursor)+" 0)");
+    $("lifeFuture").setAttribute("x",lifeX(cursor));$("lifeFuture").setAttribute("width",293-lifeX(cursor));
+    const printed=event.newOutput?s.output[s.output.length-1].text:"";
+    const emitter=/^~?(first|second|Base|Session)\(\)$/.exec(printed);
+    const track=emitter?["Session",...model.nodes].indexOf(emitter[1]==="Base"?"base":emitter[1]):-1;
+    $("lifeEmitter").setAttribute("visibility",track<0?"hidden":"visible");
+    if(track>=0)$("lifeEmitter").setAttribute("transform","translate(0 "+(24+track*32)+")");
+    $("lifeSignal").dataset.emitter=String(track>=0);$("lifeOutput").textContent=printed||"—";
+    $("lifeStep").value=cursor;
+    $("lifeStep").setAttribute("aria-valuetext","Шаг "+(cursor+1)+": "+event.title+". "+["Session",...model.nodes].map(n=>(n==="base"?"Base":n)+": "+labels[n==="Session"?s.root:s.nodes[n]]).join("; "));
+    $("lifeNumber").textContent=(cursor+1)+" / "+model.events.length;
     $("objectShell").dataset.state=s.root;
     $("rootStatus").textContent=labels[s.root];
     document.querySelectorAll("[data-node]").forEach(el=>{const v=s.nodes[el.dataset.node];el.dataset.state=v;el.querySelector("[data-node-label]").textContent=labels[v];});
@@ -316,6 +393,7 @@
   document.querySelectorAll("[data-scenario]").forEach(b=>b.onclick=()=>{kind=b.dataset.scenario;reversed=false;failure=defaultFailure[kind];configure();});
   $("prev").onclick=()=>go(cursor-1);$("next").onclick=()=>go(cursor+1);$("reset").onclick=()=>go(0);$("play").onclick=start;
   $("stepRange").oninput=e=>go(Number(e.target.value));
+  $("lifeStep").oninput=e=>go(Number(e.target.value));
   $("timelineToggle").onclick=()=>{const open=$("timeline").hidden;$("timeline").hidden=!open;$("timelineToggle").setAttribute("aria-expanded",String(open));$("timelineToggle").textContent=open?"Скрыть список событий":"Показать все события";};
   $("timeline").onclick=e=>{const b=e.target.closest("[data-event]");if(b)go(Number(b.dataset.event));};
   $("outputLines").onclick=e=>{const b=e.target.closest("[data-output-event]");if(b)go(Number(b.dataset.outputEvent));};

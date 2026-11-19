@@ -28,10 +28,11 @@
   <main class="shell">
     <section class="introduction" aria-labelledby="page-title">
       <div class="intro-copy"><h1 id="page-title">Как TCP доставляет поток</h1><div id="intro-paragraphs"></div></div>
-      <div class="intro-guide"><h2>Что будем делать</h2><p id="intro-goal"></p><p id="intro-action"></p><a class="primary-button start-button" href="#experiment">К эксперименту <span aria-hidden="true">↓</span></a><span class="offline-note">Учебная модель. Реальных запросов нет.</span></div>
+      <div class="intro-guide"><h2>Что будем делать</h2><p id="intro-goal"></p><p id="intro-action"></p><a class="primary-button start-button" href="#experiment">К эксперименту <span aria-hidden="true">↓</span></a><button id="try-tcp-order" class="quiet-button" type="button">Доставить сегменты самому ↓</button><span class="offline-note">Учебная модель. Реальных запросов нет.</span></div>
     </section>
     <section id="experiment" class="experiment" tabindex="-1" aria-label="Пошаговый сетевой эксперимент">
       <div class="experiment-toolbar"><div><h2>Разбираем по шагам</h2><p id="scenario-description"></p></div><label class="scenario-label" for="scenario"><span>Вариант опыта</span><select id="scenario" name="scenario"></select></label></div>
+
       <nav id="phases" class="phases" aria-label="Части разбора; кнопка открывает первое событие выбранной темы"></nav>
       <div class="playback" aria-label="Управление экспериментом"><button id="reset" class="icon-button" type="button" aria-label="К первому шагу">↶</button><button id="previous" class="quiet-button" type="button">← Назад</button><div class="playback-progress"><label for="step-range" id="range-label">Шаг эксперимента</label><input id="step-range" name="step" type="range" min="0" max="1" value="0"></div><button id="play" class="quiet-button" type="button" aria-pressed="false" title="Следующий шаг каждые 5 секунд">▶ Авто</button><button id="next" class="primary-button" type="button">Следующий шаг →</button></div>
       <div class="workspace">
@@ -42,6 +43,31 @@
       <p class="sr-only" id="announcement" role="status" aria-live="polite" aria-atomic="true"></p>
       <section class="journal-section" aria-labelledby="journal-title"><div class="journal-heading"><div><h3 id="journal-title">История обмена</h3><p>Выбери сообщение для возврата к его полям.</p></div><span id="journal-count"></span></div><div id="journal" class="journal"></div></section>
     </section>
+<section class="ack-workbench" aria-labelledby="tcp-order-title">
+  <p class="ack-eyebrow">Самостоятельный опыт · TCP</p>
+  <h2 id="tcp-order-title" tabindex="-1">Какую часть файла подтвердит сервер?</h2>
+  <p class="ack-intro">Весь файл из двенадцати букв уже отправлен. Теперь ты решаешь, какая из трёх частей первой попадёт на сервер. Попробуй начать с конца: если сервер получил последние четыре буквы, может ли он подтвердить весь файл?</p>
+  <div class="ack-stations">
+    <div class="ack-station">
+      <h3>1. Доставь часть файла</h3>
+      <p>Каждая кнопка доставляет ровно четыре байта. Нажми её ещё раз — придёт копия тех же байтов.</p>
+      <div class="ack-choices" id="tcp-order-choices" role="group" aria-label="Доставить выбранную часть файла"></div>
+    </div>
+    <div class="ack-station ack-result">
+      <div><h3>Ответ сервера</h3><strong class="ack-value" id="tcp-order-ack">—</strong></div>
+      <p id="tcp-order-reason" role="status" aria-atomic="true"></p>
+    </div>
+  </div>
+  <figure class="ack-receiver">
+    <figcaption><strong>2. Буфер получателя</strong><span id="tcp-order-frontier"></span></figcaption>
+    <p>Каждая буква занимает один байт. Вертикальная черта стоит там, где сервер ждёт следующий байт. Его номер сервер указывает в ответе ACK.</p>
+    <div class="ack-tape" id="tcp-order-tape" data-edge="0" aria-hidden="true"><div id="tcp-order-bytes"></div><span class="ack-edge"></span></div>
+    <ol id="tcp-order-stream" class="ack-stream" aria-label="Части файла в буфере сервера"></ol>
+  </figure>
+  <div class="ack-foot"><button id="tcp-order-reset" type="button" class="quiet-button">Начать доставку заново</button><p>Это отдельный опыт: он не меняет шаг разбора выше.</p></div>
+  <details class="ack-limits"><summary>Почему именно такой ответ?</summary><p>Первый байт файла имеет номер 1001. Число ACK в ответе означает: «Все байты до этого номера у меня есть; следующий нужен с таким номером». Оно не говорит, прочитала ли файл программа. Здесь получатель сохраняет части, пришедшие после пропуска, и сразу посылает ответ после каждой доставки. Настоящий TCP может подтверждать несколько сегментов одним ответом. <a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.4">Номера байтов в RFC 9293</a> · <a href="https://www.rfc-editor.org/rfc/rfc9293.html#section-3.8.6.3">Правила отправки ACK</a>.</p></details>
+</section>
+
     <section class="afterword" aria-label="Источники и ограничения"><details><summary>Условия и границы учебной модели</summary><div id="assumptions"></div></details><details><summary>Первоисточники разбора</summary><div id="sources" class="sources"></div></details><a id="return-to-theory" href="cpp_station7_networking.html#section=tcp-loss-retransmission">Вернуться к месту лаборатории в учебнике →</a></section>
   </main>
   <footer class="shell site-footer"><a href="cpp_backend_roadmap.html">C++ / Backend</a><span>Наблюдать изменение и объяснять причину</span></footer>

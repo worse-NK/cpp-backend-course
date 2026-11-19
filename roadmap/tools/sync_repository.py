@@ -36,6 +36,8 @@ DESKTOP_SOURCES = (
     "tests/cdp.py", "tests/test_browser.py", "tests/test_build.py",
     "tests/test_desktop_identity.py", "tests/test_downloads.py",
     "tests/test_multiwindow.py", "tests/test_package.py", "tests/test_progress.py",
+    "tests/test_lab_interactions_browser.py",
+    "tests/test_lab_observations_browser.py",
     "tests/test_progress_ui.py", "tests/test_real_package.py",
     "tests/test_security.cjs", "tests/test_upgrade.cjs", "tests/test_visual.py",
 )
@@ -123,7 +125,8 @@ def collect_repository_files() -> dict[str, bytes]:
         "content/cpp-examples.json",
         "content/service-workshop/route.json", "assets/sql-lab-worker.js",
         "templates/https_journey_lab.html",
-        "templates/network_lab.html",
+        "templates/network_lab.html", "templates/tcp_order_workbench.html", "templates/packet_mtu_workbench.html",
+        "templates/network_observation.html",
         "vendor/sqljs/sql-asm.js", "vendor/sqljs/README.md",
     }
     sources.update("tests/" + name for name in (

@@ -22,6 +22,15 @@ const model = scope.CourseDistributedLab;
 const ids = ["lost-reply", "stale-read", "workflow-recovery"];
 assert(JSON.stringify(model.scenarios.map(s => s.id)) === JSON.stringify(ids), "Stable scenario ids");
 assert(JSON.stringify(model.scenarios.map(s => s.steps.length)) === "[11,11,13]", "Prepared step counts");
+for(let B=0;B<=2;B++)for(let C=0;C<=2;C++){
+  const q=model.quorumView({B,C});
+  assert(q.stored.includes("A") && q.known.includes("A"),"Leader has its own durable copy");
+  for(const [id,phase] of [["B",B],["C",C]]){
+    assert(q.stored.includes(id)===(phase>0),"Storage begins after first delivery");
+    assert(q.known.includes(id)===(phase===2),"Only receipt is evidence to the leader");
+  }
+  assert(q.canAdvance===(B===2 || C===2),"Either follower receipt proves current-term majority");
+}
 let checked = 0;
 for (const scenario of model.scenarios) {
   assert(Object.isFrozen(scenario) && Object.isFrozen(scenario.steps), "Immutable authored scenario");

@@ -8,6 +8,7 @@
   function assert(value,message){if(!value)throw Error(message);}
   const win={};
   new Function("globalThis",read("roadmap/assets/visual-lab-models.js"))(win);
+  new Function("window",read("roadmap/assets/lab-atlas.js"))(win);
   const M=win.CourseLabModels,modes=["routed","snat","filtered","pmtu6"];
   let checked=0;
   for(const mode of modes){

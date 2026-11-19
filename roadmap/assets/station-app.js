@@ -507,9 +507,11 @@
     });
     if (!entry || !window.courseLabHref) return null;
     var sameTab = meta.id === "station15" && lab.id === "security";
-    return h("aside", { className: "course-lab-entry", "aria-label": entry.title },
-      h("span", { className: "course-lab-eyebrow" }, "ВИЗУАЛЬНЫЙ ЭКСПЕРИМЕНТ"),
-      h("h3", null, entry.title), h("p", null, entry.description),
+    return h("aside", { className: "course-lab-entry experiment-invite", "aria-label": entry.title },
+      h("div", { className: "experiment-folio" },
+        h("span", { className: "experiment-index" }, "Опыт " + String(catalog.indexOf(lab)+1).padStart(2,"0")),
+        h("span", null, entry.title.replace(/^Лаборатория:\s*/,""))),
+      h("h3", null, entry.question), h("p", null, entry.description),
       h("a", { href: window.courseLabHref(lab.id, entry.scenario, meta.id, props.section.id), target: sameTab ? undefined : "_blank", rel: sameTab ? undefined : "noopener noreferrer" }, h(LabFlask), sameTab ? "Открыть лабораторию" : "Открыть лабораторию ↗"),
       h("small", null, sameTab ? "После опыта можно вернуться к этому разделу и закрепить тему." : "В новой вкладке · возврат к этому разделу внутри лаборатории"));
   }

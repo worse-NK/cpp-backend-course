@@ -427,5 +427,16 @@
     if (!scenario || !Number.isInteger(index) || index < 0 || index >= scenario.steps.length) throw new RangeError("Unknown prepared step");
     return copy(scenario.steps[index]);
   }
-  root.CourseDistributedLab = freeze({scenarios,route,snapshot});
+  // An independent experiment from the leader-persists snapshot; no elections,
+  // losses, changes of term or membership. Each delivery moves one follower
+  // from "not stored" (0) to "stored" (1), then to "acknowledged to A" (2).
+  function quorumView(phases) {
+    const stored = ["A"], known = ["A"];
+    for (const id of ["B", "C"]) {
+      if (phases[id] > 0) stored.push(id);
+      if (phases[id] === 2) known.push(id);
+    }
+    return {stored, known, canAdvance: known.length >= 2};
+  }
+  root.CourseDistributedLab = freeze({scenarios,route,snapshot,quorumView});
 })(typeof window === "undefined" ? globalThis : window);

@@ -154,6 +154,21 @@
       if (s.id === "home-task" || s.id === "home-drop") s.sourceIds.push("private-addresses");
     });
   });
+  // These three snapshots all refer to the same outbound office data packet.
+  // Never reveal inner addresses as visible on the Internet segment.
+  ["split", "full"].forEach(function (id) {
+    data[id].steps.forEach(function (step, i) {
+      var outside = step.id === "outer-office";
+      if (!outside && step.id !== "inner-office" && step.id !== "gateway-decrypt") return;
+      data[id].states[i].observation = {
+        kind: "envelope", outside: outside, from: outside ? HOME : INNER, to: outside ? GATE : OFFICE,
+        udp: outside ? "40000 → 51820" : null,
+        note: outside ? "Снаружи получатель — VPN-шлюз. Домашний NAT уже заменил внешний адрес и порт отправителя. Адрес офисной страницы находится внутри шифротекста."
+          : step.id === "inner-office" ? "До шифрования получатель пакета — офисный сервер. Адрес VPN-шлюза понадобится для отдельной, внешней доставки."
+          : "Шлюз проверил и расшифровал сообщение. Он видит адрес офисного сервера из исходного пакета; к серверу пакет ещё предстоит переслать."
+      };
+    });
+  });
   freeze(data); freeze(topology);
   var api = {
     id: "vpn-tunnels", title: "Как VPN довозит пакет до нужной сети", summary: "Два набора адресов, выбор маршрута, WireGuard, выход в интернет и потеря записи домашнего NAT.",

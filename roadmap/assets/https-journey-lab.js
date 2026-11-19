@@ -73,18 +73,51 @@
     return match+' fill="'+fills[kind]+'"'+(kind==='light'?'':' stroke="'+(kind==='line'?'#a2cce2':'#85b3cb')+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"');
   });
   function device(id, icon, x, y, w, h, title, address, active, muted) {
-    return '<g class="'+(muted?'node-muted':'')+'" transform="translate('+x+' '+y+')">'+
+    return '<g data-device="'+id+'" class="'+(muted?'node-muted':'')+'" transform="translate('+x+' '+y+')">'+
       (active?'<ellipse class="node-halo" cx="'+w/2+'" cy="'+h*.65+'" rx="'+(w*.78)+'" ry="'+(h*.7)+'"/>':'')+
       '<use href="#journey-'+icon+'" width="'+w+'" height="'+h+'"/>'+
       '<text class="node-name" x="'+w/2+'" y="'+(h+24)+'" text-anchor="middle">'+esc(title)+'</text>'+
       '<text class="node-address" x="'+w/2+'" y="'+(h+45)+'" text-anchor="middle">'+esc(address)+'</text></g>';
+  }
+  // A permanent arrow inside the route remains visible when the end is behind a
+  // device, a saved step is opened, or motion is disabled. Each DNS marker lies
+  // on its Bézier curve, aligned to the local tangent and clear of actor labels.
+  function routeSignal(step) {
+    var direct=step.from==='server'||step.to==='server';
+    var throughClient=step.from==='client'||step.to==='client';
+    var role=step.from==='resolver'?step.to:step.from;
+    var points={root:[444.75,101.5,-6.3],tld:[551.12,135.4,-16.8],authority:[567.25,161.5,-1.7]};
+    var point=direct?[530,278,0]:throughClient?[235,278,0]:points[role];
+    if(!point)return '';
+    var backward=direct||throughClient?step.to==='client':step.to==='resolver';
+    var angle=point[2]+(backward?180:0);
+    var html='<g class="journey-direction" aria-hidden="true" data-from="'+esc(step.from)+'" data-to="'+esc(step.to)+'" transform="translate('+point[0]+' '+point[1]+') rotate('+angle+')"><circle r="10"/><path d="m-3.5-4.5 5 4.5-5 4.5"/></g>';
+    if(direct){
+      // HTTP labels describe what endpoints read, never plaintext seen en route.
+      var code=step.protocol==='http'?'TLS · данные зашифрованы':step.label;
+      var w=Math.max(64,Math.min(238,code.length*8.1+28));
+      html+='<g class="journey-transit-label" aria-hidden="true" transform="translate(530 247)"><path d="M0 3v14"/><rect x="'+(-w/2)+'" y="-18" width="'+w+'" height="26" rx="6"/><text y="0" text-anchor="middle">'+esc(code)+'</text></g>';
+    }
+    return html;
+  }
+  function browserScreen(step,state) {
+    var phase=state.failed?'failed':state.rendered?'rendered':step.id==='http-response'?'received':'waiting';
+    var details={
+      received:'<path class="screen-sheet" d="M13 1h12l6 6v18H13z M25 1v7h6"/><path class="screen-ink" d="M17 13h9m-9 5h7"/>',
+      rendered:'<rect class="screen-window" x="1" y="0" width="39" height="29" rx="2"/><path class="screen-ink" d="M1 6h39"/><text class="screen-copy" x="20" y="22" text-anchor="middle">Hello!</text>',
+      failed:'<text class="screen-error" x="20" y="19" text-anchor="middle">Стоп</text>',
+      waiting:'<text class="screen-copy" x="20" y="19" text-anchor="middle">…</text>'
+    };
+    var note={received:'Документ получен',rendered:'Страница показана',failed:'Проверка не пройдена'}[phase];
+    return '<g aria-hidden="true" data-screen-state="'+phase+'"><g transform="translate(82 228) skewY(-8)">'+details[phase]+'</g>'+
+      (note?'<g class="screen-note"><path d="M101 198v14"/><text x="101" y="192" text-anchor="middle">'+note+'</text></g>':'')+'</g>';
   }
   function drawNetwork(step,state,animate) {
     var dns=step.phase==='dns';
     var hierarchy=dns && scenario!=='cached';
     var from=step.from,to=step.to,path=pathFor(from,to);
     var active=function(id){return from===id||to===id||(!from&&id==='client');};
-    var svg='<svg class="network-svg" viewBox="0 0 880 420" role="img" aria-labelledby="network-title network-description" style="--protocol-color:'+color(step)+'">'+
+    var svg='<svg class="network-svg journey-atlas" viewBox="0 0 880 420" role="img" aria-labelledby="network-title network-description" style="--protocol-color:'+color(step)+'">'+
       '<title id="network-title">'+esc(networkEvent(step)?names[from]+' → '+names[to]+': '+step.label:step.title)+'</title>'+
       '<desc id="network-description">Клиент связан с DNS-резолвером и сервером через маршрутизатор. Резолвер отдельно спрашивает корневой, com и авторитетный DNS-серверы. Линии — логические пути, не все промежуточные устройства.</desc>'+defs;
     for(var gy=35;gy<410;gy+=32) svg+='<path class="grid-line" d="M 0 '+gy+' H 880"/>';
@@ -100,9 +133,9 @@
       device('tld','record',588,60,62,76,'.com','делегирует зону',active('tld'),!hierarchy)+
       device('authority','record',718,60,62,76,'example.com','запись A',active('authority'),!hierarchy)+
       device('server','server',686,205,90,112,'Сервер сайта','203.0.113.20',active('server'),dns);
-    var screen=state.rendered?'Hello!':state.failed?'Стоп':'…';
-    svg+='<text x="104" y="248" text-anchor="middle" fill="'+(state.failed?'#f2ada5':'#c4e7f7')+'" font-size="'+(state.rendered?10:14)+'" transform="rotate(-8 104 248)">'+screen+'</text>';
-    if(path&&animate&&!reduced.matches) svg+='<g aria-hidden="true"><rect class="packet-envelope" x="-14" y="-9" width="28" height="18" rx="4"/><path class="packet-glyph" d="m-10-5 10 7 10-7"/><animateMotion dur="1.25s" repeatCount="1" fill="freeze" path="'+path+'"/></g>';
+    svg+=browserScreen(step,state);
+    if(path) svg+=routeSignal(step);
+    if(path&&animate&&!reduced.matches) svg+='<g class="journey-flight" aria-hidden="true"><rect class="packet-envelope" x="-14" y="-9" width="28" height="18" rx="4"/><path class="packet-glyph" d="m-10-5 10 7 10-7"/><animateMotion dur="1.25s" repeatCount="1" fill="freeze" path="'+path+'"/><animate attributeName="opacity" from="1" to="0" begin="1.12s" dur=".13s" fill="freeze"/></g>';
     svg+='</svg>';
     if(networkEvent(step)) svg+='<button type="button" class="scene-inspect" data-inspect="true" aria-label="Разобрать сообщение '+esc(step.label)+'"><span aria-hidden="true">▱</span> '+esc(step.label)+' <span aria-hidden="true">↗</span></button>';
     el('scene').innerHTML='<p class="scene-scroll-hint">Схему можно прокрутить вбок. Пояснение шага — ниже.</p>'+svg;

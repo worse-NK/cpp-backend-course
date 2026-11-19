@@ -171,3 +171,17 @@
   .course-lab-pilot .lesson-actions #reset { margin-left:auto; }
   .course-lab-pilot .footer { grid-template-columns:minmax(0,1fr); }
 }
+.access-pairs { padding:0; margin:1.3rem 0; }
+.access-pairs figcaption { margin-bottom:.6rem; font-weight:650; line-height:1.45; }
+.course-page-security #result-rows th:first-child { white-space:nowrap; }
+.access-pair { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--course-line); }
+.access-pair>div:last-child { text-align:end; }
+.access-pair span,.access-pair strong { display:block; }
+.access-pair span { color:var(--course-muted); font-size:15px; line-height:1.4; }
+.access-pair strong { font:600 22px/1.5 var(--course-mono); }
+.access-pair b { padding:3px 7px; font-size:14px; font-weight:550; color:var(--course-warning); border:1px dashed currentColor; border-radius:5px; }
+.access-pair[data-checked="true"] b { color:var(--course-success); border-style:solid; }
+@media(max-width:480px) {
+  .access-pair { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+  .access-pair b { grid-column:1/-1; grid-row:2; justify-self:center; }
+}

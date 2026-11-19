@@ -1,0 +1,16 @@
+<details class="mtu-probe" id="mtu-probe" hidden>
+  <summary><span>Самостоятельный опыт</span>Пройдёт ли лишний байт?</summary>
+  <div class="mtu-body">
+    <p>Компьютер посылает серверу один UDP-пакет через маршрутизатор. На первом участке помещается IP-пакет до 1500 байт, на втором — до 1400. Ты видишь оба ограничения, но отправитель пока знает только первое.</p>
+    <fieldset class="mtu-choose"><legend>Выбери полный размер IPv6-пакета и отправь его</legend><div id="mtu-choices"></div></fieldset>
+    <figure class="mtu-figure">
+      <figcaption><strong>Байты у границы: позиции 1399–1401</strong><span>Вертикальная черта — предел 1400 байт</span></figcaption>
+      <div class="mtu-ruler" id="mtu-ruler" aria-hidden="true"><span data-cut="1398">1 … 1398</span><span data-cut="1399">1399</span><span data-cut="1400">1400</span><span data-cut="1401">1401</span></div>
+      <p id="mtu-math"></p>
+    </figure>
+    <ol class="mtu-hops" aria-label="Результат по участкам"><li><span>Клиент → маршрутизатор</span><strong id="mtu-lan">—</strong></li><li><span>Маршрутизатор → сервер</span><strong id="mtu-wan">—</strong></li><li><span>Оценка предела у клиента</span><strong id="mtu-estimate">1500 байт</strong></li></ol>
+    <p id="mtu-result" role="status" aria-atomic="true"></p>
+    <div class="mtu-actions"><button type="button" id="mtu-deliver-ptb" aria-disabled="true">Доставить уведомление отправителю</button><button type="button" id="mtu-reset" class="quiet-button">Начать заново</button></div>
+    <p class="mtu-note">Каждый размер начинает новый независимый опыт. Здесь нет дополнительных заголовков IPv6, потери уведомлений или ответа от программы сервера. Это схема, не запись трафика. <a href="https://www.rfc-editor.org/rfc/rfc8200.html#section-5">Размер IPv6-пакета</a> · <a href="https://www.rfc-editor.org/rfc/rfc768.html">Заголовок UDP</a> · <a href="https://www.rfc-editor.org/rfc/rfc4443.html#section-3.2">Packet Too Big</a> · <a href="https://www.rfc-editor.org/rfc/rfc8201.html#section-4">Оценка предела пути</a>.</p>
+  </div>
+</details>

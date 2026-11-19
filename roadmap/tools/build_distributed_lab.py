@@ -16,6 +16,48 @@ def asset(name: str) -> str:
     return f"assets/{name}?v={digest}"
 
 
+def quorum_map() -> str:
+    """Two independent duplex channels. Geometry is mirrored, text is not."""
+    channels = []
+    nodes = []
+    for replica, flip, x in (("B", "", 11), ("C", ' transform="translate(480 0) scale(-1 1)"', 334)):
+        out = "M203 74V82Q203 98 186 98H73Q56 98 56 115V167"
+        back = "M104 167V142Q104 126 121 126H208Q225 126 225 109V74"
+        channels.append(f'''<g id="quorum-channels-{replica}" data-phase="0"{flip}>
+          <path class="q-out" d="{out}"/><path class="q-back" d="{back}"/>
+          <path class="q-flash q-write-flash" d="{out}" pathLength="100"/>
+          <path class="q-flash q-return-flash" d="{back}" pathLength="100"/>
+          <path class="q-out-tip" d="m52 156 4 7 4-7"/><path class="q-back-tip" d="m221 85 4-7 4 7"/>
+          <g class="q-packet" transform="translate(132 98)"><rect x="-12" y="-9" width="24" height="18" rx="3"/><path d="M-6-3H6M-6 2H2"/></g>
+          <g class="q-receipt" transform="translate(159 126)"><path d="m0-11 12 11L0 11l-12-11z"/><path class="q-tick" d="m-5 0 3 3 7-7"/></g>
+          <circle class="q-arrived" cx="225" cy="76" r="4.7"/>
+        </g>''')
+        nodes.append(f'''<g id="quorum-server-{replica}" class="q-server" transform="translate({x} 167)" data-phase="0">
+          <path class="q-case" d="M0 6 6 0h122l7 7v61H0z"/>
+          <text x="12" y="29" class="q-letter">{replica}</text><text x="44" y="26" class="q-role">копия</text>
+          <rect class="q-old" x="12" y="38" width="48" height="22" rx="3"/><text x="36" y="54" class="q-index">07</text>
+          <rect class="q-new" x="65" y="38" width="54" height="22" rx="3"/><text id="quorum-slot-{replica}" class="q-index q-entry" x="92" y="54">—</text>
+        </g>''')
+    return '''<figure class="quorum-figure">
+      <svg class="quorum-map" viewBox="0 0 480 244" role="img" aria-labelledby="quorum-svg-title quorum-svg-desc" focusable="false">
+        <title id="quorum-svg-title">Маршруты между лидером A и двумя копиями</title><desc id="quorum-svg-desc"></desc>
+        ''' + "".join(channels) + '''
+        <g class="q-server q-leader" transform="translate(175 6)">
+          <path class="q-case" d="M0 6 6 0h117l7 7v61H0z"/>
+          <text x="12" y="29" class="q-letter">A</text><text x="44" y="26" class="q-role">лидер</text>
+          <rect class="q-old" x="12" y="38" width="48" height="22" rx="3"/><text x="36" y="54" class="q-index">07</text>
+          <rect class="q-new" x="65" y="38" width="51" height="22" rx="3"/><text class="q-index q-entry" x="90" y="54">08</text>
+        </g>
+        ''' + "".join(nodes) + '''
+      </svg>
+      <div class="quorum-controls">
+        <button type="button" id="quorum-B">Доставить запись на B</button>
+        <button type="button" id="quorum-C">Доставить запись на C</button>
+      </div>
+      <figcaption class="quorum-key"><span><i class="key-record" aria-hidden="true"></i>Запись к копии</span><span><i class="key-ack" aria-hidden="true"></i>Ответ к лидеру</span><span>07, 08 — номера записей на диске</span><button type="button" id="quorum-reset">Сначала</button></figcaption>
+    </figure>'''
+
+
 def render() -> str:
     source = """<!doctype html>
 <html lang="ru" class="course-dark">
@@ -51,6 +93,7 @@ def render() -> str:
 <section id="scenario-intro" class="scenario-intro" aria-labelledby="scenario-title">
   <div class="scenario-heading"><h2 id="scenario-title" tabindex="-1"></h2><a id="theory-link" href="cpp_station16_distributed_systems.html#section=raft-log-commit">Разобрать в учебнике</a></div>
   <div id="scenario-context" class="scenario-context"></div>
+  <p id="quorum-jump-row" hidden><a id="quorum-jump" href="#scenario=lost-reply&amp;step=2"><svg width="32" height="27" viewBox="0 0 32 27" aria-hidden="true" focusable="false"><path d="M16 6v6M16 12H5v7M16 12h11v7" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="12" y="1" width="8" height="6" rx="1"/><rect x="1" y="19" width="8" height="6" rx="1"/><rect x="23" y="19" width="8" height="6" rx="1"/></svg><span>Открыть схему доставки <small>Опыт на шаге 3</small></span><span aria-hidden="true">→</span></a></p>
   <details class="assumptions"><summary>Условия именно этой истории</summary><ul id="scenario-assumptions"></ul></details>
 </section>
 <div class="experiment-layout" id="experiment" tabindex="-1">
@@ -72,6 +115,18 @@ def render() -> str:
       <h2 id="event-title" tabindex="-1"></h2>
       <p id="event-description" class="event-description"></p>
     </header>
+    <section id="quorum-desk" class="quorum-desk" role="region" aria-labelledby="quorum-title" hidden>
+      <p class="step-count">Опыт с доставкой · запись № 8</p>
+      <h3 id="quorum-title" tabindex="-1">На двух дисках — значит, лидер уже знает?</h3>
+      <p>Сервер A записал команду Анны. Теперь он рассылает её двум другим серверам, B и C. Ты выбираешь, какое сообщение дойдёт следующим. Попробуй сохранить запись на всех трёх дисках так, чтобы A по-прежнему знал только о своей копии.</p>
+      {quorum_diagram}
+      <div class="quorum-ledgers">
+        <div class="quorum-ledger"><h4>Где есть запись</h4><p>Что на самом деле лежит на дисках</p><ul id="quorum-stored"></ul></div>
+        <div class="quorum-ledger"><h4>О чём знает A</h4><p>Своя копия и полученные ответы</p><ul id="quorum-known"></ul></div>
+      </div>
+      <p id="quorum-status" class="quorum-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <p class="reading-note">Это отдельный опыт: кнопки не меняют историю ниже. Лидер не меняется; запись создана в его текущем раунде. Для такой записи достаточно большинства — двух серверов из трёх. Для записей прошлых раундов одного подсчёта копий недостаточно. <a href="https://raft.github.io/raft.pdf">Raft, § 5.3 и 5.4.2 (PDF)</a>.</p>
+    </section>
     <section class="state-area" aria-labelledby="states-title">
       <div class="section-heading"><h3 id="states-title">Состояния участников</h3><span id="state-kind"></span></div>
       <p id="state-guide" class="reading-note"></p>
@@ -110,7 +165,7 @@ def render() -> str:
 </div>
 <section class="lab-limits" aria-labelledby="limits-title">
   <h2 id="limits-title">Что мы проверяем — и чего не проверяем</h2>
-  <p>Состояния и сообщения заданы автором заранее. Они помогают проверить причинное рассуждение: отличить сохранение от применения, неизвестный исход от отказа и локальные данные от полномочий отвечать. Это не выполнение произвольного Raft, банка или внешнего API.</p>
+  <p>В трёх историях последовательность событий задана заранее. В опыте с доставкой ты сам выбираешь порядок сообщений, но меняются только копии одной записи и сведения о них у лидера. Ни один из этих режимов не запускает настоящий кластер или платёжную систему.</p>
   <p>Проверяемые локальные программы и исходные работы находятся в <a href="cpp_station16_distributed_systems.html#section=distributed-final-workbook">разборе станции 16</a>. Настоящие участники, диски, доставка и безопасность требуют отдельных испытаний в разрешённой среде.</p>
 </section>
 <noscript><p class="noscript-note">Для пошаговых снимков нужен JavaScript. Те же правила и подробные истории доступны в <a href="cpp_station16_distributed_systems.html#section=learning-route">тексте станции 16</a>.</p></noscript>
@@ -120,7 +175,7 @@ def render() -> str:
 </body>
 </html>
 """.format(theme=asset("course-theme.css"), css=asset("distributed-lab.css"),
-           model=asset("distributed-lab-model.js"), script=asset("distributed-lab.js"), flask=lab_flask_icon())
+           model=asset("distributed-lab-model.js"), script=asset("distributed-lab.js"), flask=lab_flask_icon(), quorum_diagram=quorum_map())
     from web_security import secure_html
     return secure_html(source.encode(), name='roadmap/distributed_lab.html').decode()
 

@@ -275,6 +275,14 @@ assert(phaseAbsentFromScenario.get('step-range').value === '0', 'Unavailable sce
 
 const reduced = environment('#scenario=normal&step=0', {reduced:true}); reduced.click('next');
 assert(!reduced.get('scene').querySelector('animateMotion'), 'Reduced motion suppresses traveling envelope');
+assert(reduced.get('scene').querySelector('.journey-direction').dataset.to==='resolver', 'Route has a permanent direction without movement');
+const reply = environment('#scenario=normal&step=18', {reduced:true});
+const reverseSignal = reply.get('scene').querySelector('.journey-direction');
+assert(reverseSignal.dataset.from==='server' && reverseSignal.dataset.to==='client' && reverseSignal.getAttribute('transform').includes('rotate(180)'), 'Return path arrow faces browser even on a static deep link');
+assert(reply.get('scene').querySelector('.journey-transit-label').textContent.includes('данные зашифрованы') && !reply.get('scene').querySelector('.journey-transit-label').textContent.includes('200 OK'), 'Wire label does not expose the HTTP status as plaintext');
+assert(reply.get('scene').querySelector('[data-screen-state="received"]') && !reply.get('scene').querySelector('[data-screen-state="rendered"]'), 'Received HTML is not a rendered page');
+reply.click('next');
+assert(reply.get('scene').querySelector('[data-screen-state="rendered"]') && !reply.get('scene').querySelector('.journey-direction'), 'A local render uses the received document and sends no packet');
 const motion = environment(); motion.click('next');
 assert(motion.get('scene').querySelector('animateMotion'), 'User step can show a one-shot message animation');
 

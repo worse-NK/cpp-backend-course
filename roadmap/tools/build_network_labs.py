@@ -20,6 +20,12 @@ def render(lab_id):
     source = (ROOT / 'templates/network_lab.html').read_text()
     source = source.replace('{{title}}', escape(title)).replace('{{back}}', escape(back, quote=True))
     source = source.replace('{{config}}', json.dumps({'id': lab_id}, ensure_ascii=False))
+    tcp = lab_id == 'tcp-delivery'
+    source = source.replace('{{custom_link}}', '<button id="try-tcp-order" class="quiet-button" type="button">Доставить сегменты самому ↓</button>' if tcp else '')
+    source = source.replace('{{custom_experiment}}', (ROOT / 'templates/tcp_order_workbench.html').read_text() if tcp else '')
+    source = source.replace('{{scenario_experiment}}', (ROOT / 'templates/packet_mtu_workbench.html').read_text() if lab_id == 'packetpath' else '')
+    source = source.replace('{{observation}}', (ROOT / 'templates/network_observation.html').read_text()
+                            if lab_id in ('network-setup', 'vpn-tunnels') else '')
     return secure_html(source.encode(), name=filename)
 
 

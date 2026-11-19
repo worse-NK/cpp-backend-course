@@ -85,6 +85,25 @@
     received.some(function (yes) { if (!yes) return true; count += 4; return false; });
     return START + count;
   }
+  // Same byte ranges and cumulative-ACK rule as the guided scenarios. Each
+  // transition is a fresh snapshot; a second copy never adds new stream bytes.
+  var ackExperiment = {
+    blocks: blocks,
+    initial: function () {
+      return { received: blocks.map(function () { return false; }), next: START,
+        ack: null, bytes: 0, effect: "start" };
+    },
+    deliver: function (state, part) {
+      if (!Number.isInteger(part) || part < 0 || part >= blocks.length)
+        throw new RangeError("Unknown segment");
+      var received = state.received.slice(), duplicate = received[part];
+      received[part] = true;
+      var next = contiguous(received);
+      return { received: received, next: next, ack: next, bytes: next - START,
+        effect: duplicate ? "duplicate" : next === state.next ? "gap" :
+          next > blocks[part].last + 1 ? "bridge" : "advance" };
+    }
+  };
   function stateView(m, isClose) {
     var contiguousBytes = Math.min(m.receiverNext - START, DATA.length);
     var available = Math.max(0, contiguousBytes - m.appText.length), acknowledged = Math.min(m.senderAck - START, DATA.length);
@@ -304,7 +323,7 @@
       goal: "Научиться по номерам байтов и подтверждениям понимать, что доставлено, где остался пропуск и почему приём данных TCP ещё не равен результату работы сервиса.",
       action: "Сначала пройди «Всё по порядку». Затем сравни задержку и потерю среднего сегмента. В последнем варианте закончи отправку и проверь, может ли после этого прийти ответ."
     },
-    phases: phases, scenarios: scenarios, sources: sources, assumptions: assumptions,
+    phases: phases, scenarios: scenarios, sources: sources, assumptions: assumptions, ackExperiment: ackExperiment,
     getSteps: function (scenario) { return sequences[scenarioKey(scenario)]; },
     getState: function (scenario, index) { var key = scenarioKey(scenario); return states[key][indexFor(key, index)]; },
     getTopology: function () { return topology; }

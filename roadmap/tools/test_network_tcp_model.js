@@ -36,6 +36,23 @@ function checkFrozen(value) {
   Object.keys(value).forEach(function (key) { checkFrozen(value[key]); });
 }
 assert(M.id === "tcp-delivery", "Wrong registry id");
+var sandbox = M.ackExperiment;
+var orders = [
+  [[0,1,2],[1005,1009,1013]], [[0,2,1],[1005,1005,1013]],
+  [[1,0,2],[1001,1009,1013]], [[1,2,0],[1001,1001,1013]],
+  [[2,0,1],[1001,1005,1013]], [[2,1,0],[1001,1001,1013]]
+];
+orders.forEach(function (entry) {
+  var before = sandbox.initial();
+  assert(before.ack === null && before.bytes === 0, "No ACK for file data before any arrival");
+  entry[0].forEach(function (part, i) {
+    var after = sandbox.deliver(before, part), again = sandbox.deliver(after, part);
+    assert(after.ack === entry[1][i] && after.bytes === after.ack - 1001, "Bad cumulative ACK for " + entry[0]);
+    assert(again.effect === "duplicate" && again.ack === after.ack && again.bytes === after.bytes, "Duplicated bytes");
+    assert(!before.received[part], "Changed the previous receiver snapshot");
+    before = after;
+  });
+});
 assert(M.scenarios.map(function (s) { return s.id; }).join(",") === "ordered,reordered,loss,close", "Four TCP scenarios required");
 assert(M.introduction.paragraphs.length >= 2 && M.introduction.paragraphs.every(isText), "Concrete introduction missing");
 assert(isText(M.introduction.goal) && isText(M.introduction.action), "Introduction guidance missing");
