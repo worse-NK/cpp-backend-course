@@ -872,6 +872,58 @@ window.STATION_DATA = {
           "html": "<p>В лаборатории /tmp — emptyDir. Файл course13.not-ready создаёт один конкретный экземпляр. При его удалении и создании нового Pod флаг исчезнет вместе с прежним томом. Это ожидаемое свойство временного состояния, не неисправность кэша. Если нужно распространить запрет на все экземпляры, следует выбрать другой договор, а не молча считать их файловые системы общими.</p>"
         },
         {
+          "type": "reading-figure",
+          "title": "Сохранится ли файл после перезапуска?",
+          "rows": [
+            {
+              "label": "Программа записала две копии одного файла",
+              "cells": [
+                {
+                  "value": "Слой контейнера",
+                  "note": "файл есть",
+                  "state": "included"
+                },
+                {
+                  "value": "emptyDir",
+                  "note": "файл есть",
+                  "state": "included"
+                }
+              ]
+            },
+            {
+              "label": "Контейнер перезапустился в том же Pod",
+              "cells": [
+                {
+                  "value": "Слой контейнера",
+                  "note": "файла нет",
+                  "state": "outside"
+                },
+                {
+                  "value": "emptyDir",
+                  "note": "прежний файл на месте",
+                  "state": "included"
+                }
+              ]
+            },
+            {
+              "label": "Старый Pod удалили, вместо него создали новый",
+              "cells": [
+                {
+                  "value": "Слой контейнера",
+                  "note": "файла нет",
+                  "state": "outside"
+                },
+                {
+                  "value": "emptyDir",
+                  "note": "новый пустой том",
+                  "state": "outside"
+                }
+              ]
+            }
+          ],
+          "caption": "Сравниваем именно файл, который записала программа, а не файл из образа. После перезапуска программа не создаёт его заново."
+        },
+        {
           "type": "text",
           "html": "<p>Постоянные данные подключаются отдельно. Но даже ресурс с названием PersistentVolume не отвечает за правильность транзакций и восстановление после повреждения. Время жизни файла, согласованность нескольких писателей и резервная копия — три разных задачи.</p>"
         },
@@ -1524,12 +1576,10 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20 без Kubernetes и сети: g++ -std=c++20 -Wall -Wextra -Wpedantic drain_model.cpp -o drain_model",
-          "code": "#include <cstddef>\n#include <iostream>\n#include <stdexcept>\n\n// A sequential model of an application's admission contract, not a simulator\n// of the Kubernetes control plane or a substitute for request synchronization.\nclass Admission {\n    bool draining_ = false;\n    std::size_t active_ = 0;\npublic:\n    bool enter() {\n        if (draining_) return false;\n        ++active_;\n        return true;\n    }\n    void drain() noexcept { draining_ = true; }\n    void finish() {\n        if (active_ == 0) throw std::logic_error(\"no active request\");\n        --active_;\n    }\n    bool ready() const noexcept { return !draining_; }\n    bool stopped() const noexcept { return draining_ && active_ == 0; }\n};\n\nint main() {\n    Admission gate;\n    std::cout << std::boolalpha;\n    std::cout << \"first accepted: \" << gate.enter() << '\\n';\n    gate.drain();\n    std::cout << \"ready: \" << gate.ready() << '\\n';\n    std::cout << \"second accepted: \" << gate.enter() << '\\n';\n    std::cout << \"stopped before finish: \" << gate.stopped() << '\\n';\n    gate.finish();\n    std::cout << \"stopped after finish: \" << gate.stopped() << '\\n';\n}"
-        },
-        {
-          "type": "code",
-          "caption": "Точный вывод последовательной программы",
-          "code": "first accepted: true\nready: false\nsecond accepted: false\nstopped before finish: false\nstopped after finish: true"
+          "code": "#include <cstddef>\n#include <iostream>\n#include <stdexcept>\n\n// A sequential model of an application's admission contract, not a simulator\n// of the Kubernetes control plane or a substitute for request synchronization.\nclass Admission {\n    bool draining_ = false;\n    std::size_t active_ = 0;\npublic:\n    bool enter() {\n        if (draining_) return false;\n        ++active_;\n        return true;\n    }\n    void drain() noexcept { draining_ = true; }\n    void finish() {\n        if (active_ == 0) throw std::logic_error(\"no active request\");\n        --active_;\n    }\n    bool ready() const noexcept { return !draining_; }\n    bool stopped() const noexcept { return draining_ && active_ == 0; }\n};\n\nint main() {\n    Admission gate;\n    std::cout << std::boolalpha;\n    std::cout << \"first accepted: \" << gate.enter() << '\\n';\n    gate.drain();\n    std::cout << \"ready: \" << gate.ready() << '\\n';\n    std::cout << \"second accepted: \" << gate.enter() << '\\n';\n    std::cout << \"stopped before finish: \" << gate.stopped() << '\\n';\n    gate.finish();\n    std::cout << \"stopped after finish: \" << gate.stopped() << '\\n';\n}",
+          "verifiedOutput": "first accepted: true\nready: false\nsecond accepted: false\nstopped before finish: false\nstopped after finish: true\n",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Точный вывод последовательной программы"
         },
         {
           "type": "diagram",

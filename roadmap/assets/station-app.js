@@ -87,13 +87,27 @@
     }
     var standardLabels = { "20": "C++20", "23": "C++23", "20/23": "C++20 / C++23" };
     var standardLabel = standardLabels[props.block.standard];
-    return h("div", { className: "code-wrap" + (isOutput ? " output-wrap" : ""), "data-example-id": props.block.exampleId || undefined },
-      h("div", { className: "code-toolbar" },
-        h("div", { className: "code-caption" }, props.block.caption || "Фрагмент кода",
+    var caption = props.block.caption || "Фрагмент кода";
+    var hasOutput = !isOutput && typeof props.block.verifiedOutput === "string";
+    var outputStandard = standardLabels[props.block.verifiedOutputStandard];
+    var form = isOutput ? "output" : hasOutput || /^Полная программа(?:[\s:]|$)/u.test(caption) ? "program" :
+      props.block.code.trim().split("\n").length <= 3 ? "snippet" : "extract";
+    return h("figure", { className: "code-wrap" + (isOutput ? " output-wrap" : ""), "data-code-form": form, "data-example-id": props.block.exampleId || undefined },
+      h("figcaption", { className: "code-toolbar" },
+        h("span", { className: "code-caption" }, caption,
           standardLabel && !isOutput ? h("span", { className: "code-standard", title: props.block.standard === "20/23" ? "Пример предназначен для обеих редакций языка; это не отметка о запуске на вашем компиляторе." : "Редакция языка для этого примера; доступность библиотеки проверяется отдельно." }, standardLabel) : null),
         h("button", { className: "copy-code", onClick: copy, type: "button" }, "Копировать")),
       h("pre", { className: "code-block", tabIndex: 0, "aria-label": props.block.caption || "Фрагмент кода" }, codeElement(props.block.code, { ref: codeRef }, isOutput ? "plaintext" : codeLanguage(props.block.code, props.block.caption))),
-      h("span", { className: "copy-status", role: "status" }, status[0]));
+      h("span", { className: "copy-status", role: "status" }, status[0]),
+      hasOutput ? h("details", { className: "example-result" },
+        h("summary", null, "Вывод программы" + (outputStandard ? " (" + outputStandard + ")" : "")),
+        props.block.verifiedOutputCaption ? h("p", { className: "example-result-caption" }, props.block.verifiedOutputCaption) : null,
+        typeof props.block.verifiedInput === "string" && props.block.verifiedInput.length ? h("div", { className: "example-testcase" },
+          h("span", null, "Ввод"), h("pre", null, h("samp", { translate: "no" }, props.block.verifiedInput)),
+          h("span", null, "Результат")) : null,
+        props.block.verifiedOutput.length
+          ? h("pre", { className: "example-stdout", tabIndex: 0, "aria-label": "Вывод программы" }, h("samp", { translate: "no" }, props.block.verifiedOutput))
+          : h("p", { className: "example-silent" }, "Программа ничего не печатает.")) : null);
   }
 
   function splitQuestion(text) {
@@ -392,6 +406,22 @@
         h("div", { className: "visual-item-text", dangerouslySetInnerHTML: { __html: entry.html } }));
       })),
       block.caption ? h("p", { className: "visual-caption" }, block.caption) : null);
+  }
+
+  // Print-friendly snapshots. State is always written out; the rail is a second cue.
+  function ReadingFigure(props) {
+    var block = props.block;
+    return h("figure", { className: "reading-figure" },
+      h("figcaption", null, block.title),
+      h("dl", null, block.rows.map(function (row, i) {
+        return h("div", { className: "rf-row", key: i },
+          h("dt", null, row.label),
+          h("dd", null, h("ol", { role: "list" }, row.cells.map(function (cell, j) {
+            return h("li", { key: j, className: "rf-cell rf-" + cell.state },
+              h("strong", null, cell.value), h("span", null, cell.note));
+          }))));
+      })),
+      h("p", null, block.caption));
   }
 
   function PacketBlock(props) {
@@ -795,6 +825,7 @@
     var setActive = state[1];
     var sections = props.sections;
     var section = sections[active];
+    var chapter = substations.find(function (item) { return item.id === section.substation; });
     React.useEffect(function () {
       try {
         localStorage.setItem("cpp_course_last_read_v1", JSON.stringify({ file: meta.sourceFile, section: section.id, title: section.title, station: meta.number }));
@@ -820,9 +851,16 @@
           h("a", { href: "cpp_backend_roadmap.html" }, "Курс"), h("span", { "aria-hidden": true }, "/"),
           h("span", null, "Станция " + (meta.id === "station5-linux" ? "5Б" : meta.id === "station7-netlab" ? "7Б" : meta.id === "station7-traffic" ? "7В" : meta.number === 9 ? (meta.id === "station9-sql" ? "9A" : "9B") : meta.number)), h("span", { "aria-hidden": true }, "/"),
           h("span", { "aria-current": "location" }, "Теория")),
-        h("div", { className: "kicker" }, "РАЗДЕЛ " + (active + 1) + " / " + sections.length),
-        h("h2", { className: "section-title" }, section.title),
-        h("p", { className: "section-lead" }, section.lead),
+        h("header", { className: "edition-opening" },
+          h("div", { className: "edition-locator" },
+            h("span", { className: "edition-chapter", "aria-current": "location" },
+              isWorkbook(section) ? "Разбор задачи" : chapter ? chapter.label + " · " + chapter.title : "Теория"),
+            sections.length > 1 ? h("span", { className: "edition-position" },
+              "Раздел " + (active + 1) + " из " + sections.length,
+              sections.length <= 20 ? h("span", { className: "edition-folio", "aria-hidden": true },
+                sections.map(function (item, i) { return h("i", { key: item.id, className: i === active ? "here" : "" }); })) : null) : null),
+          h("h2", { className: "section-title" }, section.title),
+          h("p", { className: "section-lead" }, section.lead)),
         meta.number === 9 && ["tables", "queries", "aggregation", "composition", "windows", "backend-sql"].indexOf(section.substation) >= 0 && section.id !== "sql-trainer" ? h("p", { className: "sql-practice-link" },
           h("a", { href: "sql_trainer.html#" + ({ "sql-language": "expression", "sql-first-query": "expression", "sql-create-basics": "insert", "sql-select-basics": "columns", "sql-filter-basics": "filter", "sql-null-basics": "null", "sql-order-basics": "sort", "sql-write-basics": "update", "sql-join-basics": "join", "worked-example": "join", "sql-aggregate-basics": "group", "aggregation": "having", "join-shapes": "left", "sql-exists": "exists", "sql-cte-union": "cte", "sql-window-rank": "window", "sql-window-frame": "frame", "sql-backend-boundaries": "upsert", "sql-report-final-workbook": "report" }[section.id] || "columns"), target: "_blank", rel: "noopener" }, "Попробовать в SQL-тренажёре ↗"),
           h("span", null, "В новой вкладке — место в учебнике сохранится")) : null,
@@ -841,11 +879,17 @@
           }
           if (block.type === "text") {
             var hasBlockContent = /<(?:table|div|ul|ol|h[2-6])(?:\s|>)/i.test(block.html);
-            return h(hasBlockContent ? "div" : "p", { className: "theory-text", key: index, dangerouslySetInnerHTML: { __html: block.html } });
+            var blockHtml = block.html;
+            if (/<table[\s>]/i.test(blockHtml) && !blockHtml.includes("table-scroll")) {
+              blockHtml = blockHtml.replace(/<table[\s>]/gi, function (opening) {
+                return '<div class="edition-table" tabindex="0" role="region" aria-label="Таблица раздела: на узком экране можно прокрутить вправо">' + opening;
+              }).replace(/<\/table>/gi, "</table></div>");
+            }
+            return h(hasBlockContent ? "div" : "p", { className: "theory-text", key: index, dangerouslySetInnerHTML: { __html: blockHtml } });
           }
           if (block.type === "self-check") {
             return h("aside", { className: "self-check", key: section.id + ":" + index },
-              h("span", { className: "kicker" }, "ПРОВЕРЬ СВОЁ ОБЪЯСНЕНИЕ"),
+              h("span", { className: "kicker" }, "Проверь своё объяснение"),
               h("p", { dangerouslySetInnerHTML: { __html: block.prompt } }),
               h("details", null, h("summary", null, "Сверить с разбором"),
                 h("div", { className: "self-check-answer", dangerouslySetInnerHTML: { __html: block.answer } })));
@@ -858,6 +902,9 @@
             return h("div", { className: "note " + (isSource ? "source-note" : (block.kind || "key")), key: index },
               h("span", { className: "note-label" }, isSource ? "ИСТОЧНИКИ И ГРАНИЦЫ ПРИМЕНЕНИЯ" : (noteLabels[block.kind] || noteLabels.key)),
               h("span", { className: "note-text", dangerouslySetInnerHTML: { __html: block.html } }));
+          }
+          if (block.type === "reading-figure") {
+            return h(ReadingFigure, { block: block, key: index });
           }
           if (block.type === "diagram") {
             return h("figure", { className: "diagram diagram-" + (block.mode || "flow"), key: index },
@@ -1436,7 +1483,7 @@
       var children = Array.prototype.slice.call(arguments);
       if (!readerPilot) return children;
       return h.apply(null, ["div", { id: "lesson-content", className: "reader-content", tabIndex: -1 },
-        h("nav", { className: "reader-breadcrumb", "aria-label": "Положение в учебнике" },
+        tab !== "theory" && h("nav", { className: "reader-breadcrumb", "aria-label": "Положение в учебнике" },
           h("a", { href: "cpp_backend_roadmap.html" }, "Курс"),
           h("span", { "aria-hidden": true }, "/"),
           h("span", null, (tab === "theory" || tab === "checkpoint") && activeSubstation ? activeSubstation.label + " · " + activeSubstation.title : "Станция " + stationDisplayNumber()),
@@ -1460,10 +1507,12 @@
         focusReading();
       } }, "Перейти к материалу") : null,
       readerPilot ? h("header", { className: "reader-header" },
-        h("a", { className: "reader-brand", href: "cpp_backend_roadmap.html" }, "C++ и backend"),
-        h("p", { className: "reading-progress" }, "Изучено " + doneSections + " из " + theory.length + " разделов"),
-        h("h1", { className: "reader-course-title" }, meta.title),
-        h("details", { className: "reader-options" }, h("summary", null, "Вид текста"),
+        h("div", { className: "edition-running-title" },
+          h("a", { className: "reader-brand", href: "cpp_backend_roadmap.html" }, "К программе курса"),
+          h("h1", { className: "reader-course-title" }, h("span", null, "Станция " + stationDisplayNumber()), " · ", meta.title)),
+        h("details", { className: "reader-options" }, h("summary", null,
+          h("span", { "aria-hidden": true, className: "edition-aa" }, "Аа"), "Вид текста"),
+          h("p", { className: "reading-progress" }, "Изучено " + doneSections + " из " + theory.length + " разделов"),
           h("div", { className: "reading-settings", role: "group", "aria-label": "Размер текста" },
             h("button", { type: "button", "aria-pressed": !textSizeState[0], onClick: function () { setLargeText(false); } }, "Обычный"),
             h("button", { type: "button", "aria-pressed": textSizeState[0], onClick: function () { setLargeText(true); } }, "Крупнее")),

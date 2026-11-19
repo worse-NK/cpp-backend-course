@@ -5,7 +5,7 @@ const page = ByteArray.toString(GLib.file_get_contents('roadmap/cpp_backend_road
 const DATA = JSON.parse(page.match(/<script id="roadmap-data" type="application\/json">([\s\S]*?)<\/script>/)[1]);
 const script = [...page.matchAll(/<script>([\s\S]*?)<\/script>/g)][0][1];
 new Function(script);
-const appSource = script.slice(script.indexOf('function App()'), script.indexOf('\nconst S ='));
+const appSource = script.slice(script.indexOf('function EditionPlate('), script.indexOf('\nconst S ='));
 function assert(value, message) { if (!value) throw new Error(message); }
 const React = {createElement: (type, props, ...children) => ({type, props:props || {}, children:children.flat(Infinity)})};
 function Stage() {}
@@ -25,40 +25,36 @@ function textOf(node) {
     if (typeof node !== 'object') return String(node);
     return (node.children || []).map(textOf).join(' ');
 }
-const preview = tree.find(n => n.props.className === 'home-preview-steps');
-assert(preview.children.length === 6, 'Preview must include the backend continuation');
-assert(textOf(tree.find(n => n.props.className === 'home-preview-top')).includes('01 — 06'), 'Preview range must match group count');
+const preview = tree.find(n => n.type === 'ol' && n.children.some(c => c.type === 'li' && c.children[0]?.props.className === 'edition-leaf'));
+assert(preview.children.length === 6 && new Set(preview.children.map(item => item.children[0].props.href)).size === 6, 'Six distinct subject links');
 preview.children.forEach(item => {
     const label = item.children[0].children[1];
-    assert(typeof label.children[0] === 'string' && label.children[0].trim(), 'No empty preview label');
+    assert(textOf(label.children[0]).trim(), 'No empty preview label');
     assert(textOf(label.children[1]).trim(), 'No empty station status');
 });
 const databasePreview = preview.children.find(n => n.children[0].props.href === '#databases-group');
 assert(textOf(databasePreview).includes('SQL и PostgreSQL') && textOf(databasePreview).includes('9A, 9B'), 'Database preview must name both available stations');
-assert(databasePreview.props.className !== 'is-planned', 'Available databases must not be marked planned');
-assert(preview.children.filter(n => n.props.className === 'is-planned').length === 0, 'Production station is available');
-const facts = tree.find(n => n.props.className === 'home-course-facts');
-assert(facts.children.length === 3, 'Course facts must contain exactly three metrics');
-assert(textOf(facts.children[0]).includes(String(DATA.stages.filter(stage => stage.station).length)), 'Available station count');
-assert(textOf(facts.children[0]).includes('готовых станций'), 'Available station label');
+assert(!/в плане/i.test(textOf(preview)), 'All displayed groups have available stations');
+const facts = tree.find(n => n.props.className === 'edition-colophon');
+const counters = facts.children.filter(c => c.type === 'strong').map(c => Number(textOf(c)));
+assert(counters.length === 2 && counters[0] === DATA.stages.filter(stage => stage.station).length, 'Station count');
 const actualSections = DATA.stages.filter(stage => stage.station).reduce((total, stage) => {
     const id = stage.station.file === 'cpp_station9_sql.html' ? 'station9-sql' : stage.station.file === 'cpp_station5_linux_systems.html' ? 'station5-linux' : stage.station.file === 'cpp_station7_linux_networks.html' ? 'station7-netlab' : stage.station.file === 'cpp_station7_traffic_analysis.html' ? 'station7-traffic' : stage.station.file.match(/^cpp_(station\d+)_/)[1];
     const content = JSON.parse(ByteArray.toString(GLib.file_get_contents('roadmap/content/' + id + '.json')[1]));
     assert(stage.station.totalSections === content.theory.length, 'Stale home metadata: ' + id);
     return total + content.theory.length;
 }, 0);
-assert(textOf(facts.children[1]).includes(String(actualSections)), 'Theory section count must match current sources');
-assert(textOf(facts.children[1]).includes('разделов теории'), 'Theory section label');
-assert(textOf(facts.children[2]).includes('C++20 / 23') && textOf(facts.children[2]).includes('различия редакций'), 'Both language editions are visible without implying that a flag supplies all library features');
+assert(counters[1] === actualSections && textOf(facts).includes('Разделов теории'), 'Labeled theory count matches sources');
+assert(textOf(tree.find(n => n.props.className === 'edition-imprint')).includes('C++20 / C++23'), 'Both editions are visible');
 assert(!/в плане/i.test(textOf(facts)), 'Course facts must not include a planned-stage metric');
 const planned = DATA.stages.find(stage => stage.id === 'production');
 const savedStation = planned.station;
 planned.station = null;
 const updated = nodes(render(null));
-const updatedFacts = updated.find(n => n.props.className === 'home-course-facts');
-assert(updatedFacts.children.length === 3 && !/в плане/i.test(textOf(updatedFacts)), 'Planned-stage metric must stay hidden when availability changes');
-assert(textOf(updatedFacts.children[0]).includes(String(DATA.stages.filter(stage => stage.station).length)), 'Available station count must follow availability');
-const plannedPreview = updated.find(n => n.props.className === 'home-preview-steps').children.find(n => n.props.className === 'is-planned');
+const updatedFacts = updated.find(n => n.props.className === 'edition-colophon');
+assert(!/в плане/i.test(textOf(updatedFacts)), 'No planned-stage metric');
+assert(Number(textOf(updatedFacts.children.find(c => c.type === 'strong'))) === DATA.stages.filter(stage => stage.station).length, 'Station count follows availability');
+const plannedPreview = updated.find(n => n.props.className === 'edition-leaf' && n.props.href === '#planned');
 assert(plannedPreview && textOf(plannedPreview).includes('В плане'), 'Preview status must follow availability');
 planned.station = savedStation;
 const stages = tree.filter(n => n.type === Stage);

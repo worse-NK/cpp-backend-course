@@ -153,7 +153,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: добавить число и прочитать его по индексу",
-          "code": "#include <iostream>\n#include <vector>\n\nint main() {\n    std::vector<int> results{10, 20};\n    results.push_back(30);\n    std::cout << results.size() << ' ' << results[2];\n}\n"
+          "code": "#include <iostream>\n#include <vector>\n\nint main() {\n    std::vector<int> results{10, 20};\n    results.push_back(30);\n    std::cout << results.size() << ' ' << results[2];\n}\n",
+          "verifiedOutput": "3 30",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -167,7 +169,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "auto может сохранить посредник, а не независимое значение",
-          "code": "#include <iostream>\n#include <vector>\nint main() {\n    std::vector<bool> bits{false};\n    auto access = bits[0]; // посредник, связанный с элементом\n    bool snapshot = bits[0]; // независимое значение\n    access = true;\n    std::cout << bits[0] << \" \" << snapshot; // 1 0\n}"
+          "code": "#include <iostream>\n#include <vector>\nint main() {\n    std::vector<bool> bits{false};\n    auto access = bits[0]; // посредник, связанный с элементом\n    bool snapshot = bits[0]; // независимое значение\n    access = true;\n    std::cout << bits[0] << \" \" << snapshot; // 1 0\n}",
+          "verifiedOutput": "1 0",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -234,7 +238,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "reserve не создаёт элементы",
-          "code": "#include <iostream>\n#include <vector>\nint main() {\n    std::vector<int> values;\n    values.reserve(4);\n    std::cout << values.size() << ' ';\n    values.push_back(10);\n    int* first = &values[0];\n    values.push_back(20);\n    std::cout << *first << ' ' << values.size(); // 0 10 2\n}"
+          "code": "#include <iostream>\n#include <vector>\nint main() {\n    std::vector<int> values;\n    values.reserve(4);\n    std::cout << values.size() << ' ';\n    values.push_back(10);\n    int* first = &values[0];\n    values.push_back(20);\n    std::cout << *first << ' ' << values.size(); // 0 10 2\n}",
+          "verifiedOutput": "0 10 2",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -334,7 +340,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23: принять только существующий индекс",
           "exampleId": "s3-signed-size",
           "standard": "20/23",
-          "code": "#include <iostream>\n#include <utility>\n#include <vector>\n\nvoid print_at(const std::vector<int>& values, int requested) {\n    using Index = std::vector<int>::size_type;\n    if (!std::in_range<Index>(requested)) {\n        std::cout << \"reject\\n\";\n        return;\n    }\n    const auto index = static_cast<Index>(requested);\n    if (index >= values.size()) {\n        std::cout << \"reject\\n\";\n        return;\n    }\n    std::cout << values[index] << '\\n';\n}\n\nint main() {\n    int index = -1;\n    unsigned count = 3;\n    std::cout << std::boolalpha\n              << (index < count) << ' '\n              << std::cmp_less(index, count) << '\\n';\n    const std::vector<int> values{10, 20, 30};\n    print_at(values, -1);\n    print_at(values, 1);\n    print_at(values, 3);\n}\n"
+          "code": "#include <iostream>\n#include <utility>\n#include <vector>\n\nvoid print_at(const std::vector<int>& values, int requested) {\n    using Index = std::vector<int>::size_type;\n    if (!std::in_range<Index>(requested)) {\n        std::cout << \"reject\\n\";\n        return;\n    }\n    const auto index = static_cast<Index>(requested);\n    if (index >= values.size()) {\n        std::cout << \"reject\\n\";\n        return;\n    }\n    std::cout << values[index] << '\\n';\n}\n\nint main() {\n    int index = -1;\n    unsigned count = 3;\n    std::cout << std::boolalpha\n              << (index < count) << ' '\n              << std::cmp_less(index, count) << '\\n';\n    const std::vector<int> values{10, 20, 30};\n    print_at(values, -1);\n    print_at(values, 1);\n    print_at(values, 3);\n}\n",
+          "verifiedOutput": "false true\nreject\n20\nreject\n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -393,7 +401,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23: вычислить шире и явно проверить переход в int",
           "exampleId": "s3-checked-narrowing",
           "standard": "20/23",
-          "code": "#include <iostream>\n#include <limits>\n#include <utility>\n\nbool to_int(long long raw, int& result) {\n    if (!std::in_range<int>(raw)) {\n        return false;\n    }\n    result = static_cast<int>(raw);\n    return true;\n}\n\nint main() {\n    static_assert(std::numeric_limits<int>::digits == 31);\n    int count = 50000;\n    int bytes_per_item = 50000;\n    long long bytes = 1LL * count * bytes_per_item;\n    std::cout << bytes << '\\n';\n    int result = 7;\n    std::cout << std::boolalpha\n              << to_int(bytes, result) << ' ' << result << '\\n';\n    std::cout << to_int(42, result) << ' ' << result << '\\n';\n}\n"
+          "code": "#include <iostream>\n#include <limits>\n#include <utility>\n\nbool to_int(long long raw, int& result) {\n    if (!std::in_range<int>(raw)) {\n        return false;\n    }\n    result = static_cast<int>(raw);\n    return true;\n}\n\nint main() {\n    static_assert(std::numeric_limits<int>::digits == 31);\n    int count = 50000;\n    int bytes_per_item = 50000;\n    long long bytes = 1LL * count * bytes_per_item;\n    std::cout << bytes << '\\n';\n    int result = 7;\n    std::cout << std::boolalpha\n              << to_int(bytes, result) << ' ' << result << '\\n';\n    std::cout << to_int(42, result) << ' ' << result << '\\n';\n}\n",
+          "verifiedOutput": "2500000000\nfalse 7\ntrue 42\n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -494,7 +504,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Порядок только по фамилии не различает номера пользователей",
-          "code": "#include <iostream>\n#include <map>\n#include <string>\nstruct User { std::string last; int id; };\nstruct ByLast {\n    bool operator()(const User& a, const User& b) const {\n        return a.last < b.last;\n    }\n};\nint main() {\n    std::map<User, int, ByLast> users;\n    users.emplace(User{\"Lee\", 1}, 10);\n    auto result = users.emplace(User{\"Lee\", 2}, 20);\n    std::cout << users.size() << ' ' << result.second\n              << ' ' << result.first->second;\n}\n// Вывод: 1 0 10"
+          "code": "#include <iostream>\n#include <map>\n#include <string>\nstruct User { std::string last; int id; };\nstruct ByLast {\n    bool operator()(const User& a, const User& b) const {\n        return a.last < b.last;\n    }\n};\nint main() {\n    std::map<User, int, ByLast> users;\n    users.emplace(User{\"Lee\", 1}, 10);\n    auto result = users.emplace(User{\"Lee\", 2}, 20);\n    std::cout << users.size() << ' ' << result.second\n              << ' ' << result.first->second;\n}\n// Вывод: 1 0 10",
+          "verifiedOutput": "1 0 10",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -630,7 +642,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Повторная вставка и явная замена — разные действия",
-          "code": "#include <iostream>\n#include <map>\n#include <string>\n\nstruct Connection {\n    int port;\n    explicit Connection(int p) : port(p) { std::cout << \"make \" << p << ' '; }\n};\n\nint main() {\n    std::map<std::string, Connection> pool;\n    auto first = pool.try_emplace(\"primary\", 80);\n    auto again = pool.try_emplace(\"primary\", 443);\n    std::cout << first.second << ' ' << again.second << ' '\n              << pool.at(\"primary\").port << '\\n';\n    pool.insert_or_assign(\"primary\", Connection{443});\n    std::cout << pool.at(\"primary\").port;\n}\n// make 80 1 0 80\n// make 443 443"
+          "code": "#include <iostream>\n#include <map>\n#include <string>\n\nstruct Connection {\n    int port;\n    explicit Connection(int p) : port(p) { std::cout << \"make \" << p << ' '; }\n};\n\nint main() {\n    std::map<std::string, Connection> pool;\n    auto first = pool.try_emplace(\"primary\", 80);\n    auto again = pool.try_emplace(\"primary\", 443);\n    std::cout << first.second << ' ' << again.second << ' '\n              << pool.at(\"primary\").port << '\\n';\n    pool.insert_or_assign(\"primary\", Connection{443});\n    std::cout << pool.at(\"primary\").port;\n}\n// make 80 1 0 80\n// make 443 443",
+          "verifiedOutput": "make 80 1 0 80\nmake 443 443",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -700,7 +714,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Заведомо плохой хеш не делает разные ключи одинаковыми",
-          "code": "#include <cstddef>\n#include <iostream>\n#include <unordered_map>\nstruct ConstantHash {\n    std::size_t operator()(int) const noexcept { return 0; }\n};\nint main() {\n    std::unordered_map<int, int, ConstantHash> values;\n    values.emplace(7, 70);\n    values.emplace(9, 90);\n    std::cout << values.size() << ' ' << values.at(7)\n              << ' ' << values.at(9); // 2 70 90\n}"
+          "code": "#include <cstddef>\n#include <iostream>\n#include <unordered_map>\nstruct ConstantHash {\n    std::size_t operator()(int) const noexcept { return 0; }\n};\nint main() {\n    std::unordered_map<int, int, ConstantHash> values;\n    values.emplace(7, 70);\n    values.emplace(9, 90);\n    std::cout << values.size() << ' ' << values.at(7)\n              << ' ' << values.at(9); // 2 70 90\n}",
+          "verifiedOutput": "2 70 90",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -782,7 +798,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "После erase продолжаем с возвращённого итератора",
-          "code": "#include <iostream>\n#include <vector>\nint main() {\n    std::vector<int> values{-2, 1, -1, 3};\n    for (auto it = values.begin(); it != values.end(); ) {\n        if (*it < 0)\n            it = values.erase(it);\n        else\n            ++it;\n    }\n    for (int value : values) std::cout << value << ' '; // 1 3\n}"
+          "code": "#include <iostream>\n#include <vector>\nint main() {\n    std::vector<int> values{-2, 1, -1, 3};\n    for (auto it = values.begin(); it != values.end(); ) {\n        if (*it < 0)\n            it = values.erase(it);\n        else\n            ++it;\n    }\n    for (int value : values) std::cout << value << ' '; // 1 3\n}",
+          "verifiedOutput": "1 3 ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "visual",
@@ -823,7 +841,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Remove не меняет размер контейнера",
-          "code": "#include <algorithm>\n#include <iostream>\n#include <vector>\nint main() {\n    std::vector<int> values{1, 2, 3, 2, 4};\n    auto endOfResult = std::remove(values.begin(), values.end(), 2);\n    std::cout << values.size() << ' '\n              << (endOfResult - values.begin()) << ' ';\n    values.erase(endOfResult, values.end());\n    for (int value : values) std::cout << value << ' '; // 5 3 1 3 4\n}"
+          "code": "#include <algorithm>\n#include <iostream>\n#include <vector>\nint main() {\n    std::vector<int> values{1, 2, 3, 2, 4};\n    auto endOfResult = std::remove(values.begin(), values.end(), 2);\n    std::cout << values.size() << ' '\n              << (endOfResult - values.begin()) << ' ';\n    values.erase(endOfResult, values.end());\n    for (int value : values) std::cout << value << ' '; // 5 3 1 3 4\n}",
+          "verifiedOutput": "5 3 1 3 4 ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -929,7 +949,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: очистить элементы и освободить старый буфер — разные действия",
-          "code": "#include <iostream>\n#include <vector>\n\nint main() {\n    std::vector<int> values{10, 20, 30};\n    const auto capacity = values.capacity();\n    values.clear();\n    values.reserve(0);\n    std::cout << values.size() << ' '\n              << (values.capacity() == capacity) << ' ' ;\n    {\n        std::vector<int> empty;\n        values.swap(empty);\n    } // прежний буфер теперь принадлежал empty и освобождён\n    std::cout << values.empty();\n}\n"
+          "code": "#include <iostream>\n#include <vector>\n\nint main() {\n    std::vector<int> values{10, 20, 30};\n    const auto capacity = values.capacity();\n    values.clear();\n    values.reserve(0);\n    std::cout << values.size() << ' '\n              << (values.capacity() == capacity) << ' ' ;\n    {\n        std::vector<int> empty;\n        values.swap(empty);\n    } // прежний буфер теперь принадлежал empty и освобождён\n    std::cout << values.empty();\n}\n",
+          "verifiedOutput": "0 1 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1055,9 +1077,36 @@ window.STATION_DATA = {
           "html": "После создания <code>it</code> разыменование читает <code>10</code>. После <code>++it</code> тот же итератор обозначает второй элемент, поэтому следующее разыменование читает <code>20</code>. Сам вектор от этих операций не изменился. В цикле объявлен другой <code>it</code>, локальный для цикла: он снова начинает с <code>10</code>, затем проходит <code>20</code> и <code>30</code>. После последнего увеличения он равен <code>end()</code>, и тело больше не выполняется."
         },
         {
-          "type": "note",
-          "kind": "warn",
-          "html": "Диапазон <code>[first, last)</code> называют полуоткрытым: позиция <code>first</code> включена, позиция <code>last</code> — нет. <code>end()</code> нельзя разыменовывать, это не последний элемент и не дополнительное значение. У пустого вектора <code>begin() == end()</code>, поэтому тот же цикл сразу завершается."
+          "type": "reading-figure",
+          "title": "Три элемента, но четыре позиции для итератора",
+          "rows": [
+            {
+              "label": "Путь от begin() до end() в нашем цикле",
+              "cells": [
+                {
+                  "value": "10",
+                  "note": "первый",
+                  "state": "included"
+                },
+                {
+                  "value": "20",
+                  "note": "второй",
+                  "state": "included"
+                },
+                {
+                  "value": "30",
+                  "note": "третий",
+                  "state": "included"
+                },
+                {
+                  "value": "end()",
+                  "note": "стоп",
+                  "state": "boundary"
+                }
+              ]
+            }
+          ],
+          "caption": "Такой диапазон называют полуоткрытым: в записи [first, last) начало включено, конец — нет. Разыменовывать end() нельзя. У пустого вектора begin() уже равен end(): цикл останавливается до первого чтения."
         },
         {
           "type": "text",
@@ -1110,7 +1159,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Поиск не создаёт специального «пустого элемента»",
-          "code": "#include <algorithm>\n#include <iostream>\n#include <vector>\nint main() {\n    std::vector<int> values{5, 2, 8, 2};\n    auto found = std::find(values.begin(), values.end(), 8);\n    if (found != values.end()) std::cout << *found << ' ';\n    auto missing = std::find(values.begin(), values.end(), 9);\n    std::cout << (missing == values.end()); // 8 1\n}"
+          "code": "#include <algorithm>\n#include <iostream>\n#include <vector>\nint main() {\n    std::vector<int> values{5, 2, 8, 2};\n    auto found = std::find(values.begin(), values.end(), 8);\n    if (found != values.end()) std::cout << *found << ' ';\n    auto missing = std::find(values.begin(), values.end(), 9);\n    std::cout << (missing == values.end()); // 8 1\n}",
+          "verifiedOutput": "8 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1140,7 +1191,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Два корректных способа получить три результата",
-          "code": "#include <algorithm>\n#include <iostream>\n#include <iterator>\n#include <vector>\nint main() {\n    std::vector<int> input{1, 2, 3};\n    std::vector<int> ready(input.size());\n    std::transform(input.begin(), input.end(), ready.begin(),\n                   [](int x) { return x * 10; });\n    std::vector<int> appended;\n    std::transform(input.begin(), input.end(), std::back_inserter(appended),\n                   [](int x) { return x * 10; });\n    std::cout << ready.size() << ' ' << appended.size() << ' '\n              << ready[1] << ' ' << appended[1]; // 3 3 20 20\n}"
+          "code": "#include <algorithm>\n#include <iostream>\n#include <iterator>\n#include <vector>\nint main() {\n    std::vector<int> input{1, 2, 3};\n    std::vector<int> ready(input.size());\n    std::transform(input.begin(), input.end(), ready.begin(),\n                   [](int x) { return x * 10; });\n    std::vector<int> appended;\n    std::transform(input.begin(), input.end(), std::back_inserter(appended),\n                   [](int x) { return x * 10; });\n    std::cout << ready.size() << ' ' << appended.size() << ' '\n              << ready[1] << ' ' << appended[1]; // 3 3 20 20\n}",
+          "verifiedOutput": "3 3 20 20",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1261,7 +1314,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Алгоритм выбираем вместе с возможностями контейнера",
-          "code": "#include <algorithm>\n#include <deque>\n#include <iostream>\n#include <list>\nint main() {\n    std::list<int> linked{3, 1, 2};\n    linked.sort();\n    std::deque<int> indexed{3, 1, 2};\n    std::sort(indexed.begin(), indexed.end());\n    std::cout << linked.front() << ' ' << indexed.front(); // 1 1\n    // std::sort(linked.begin(), linked.end()); // не компилируется\n}"
+          "code": "#include <algorithm>\n#include <deque>\n#include <iostream>\n#include <list>\nint main() {\n    std::list<int> linked{3, 1, 2};\n    linked.sort();\n    std::deque<int> indexed{3, 1, 2};\n    std::sort(indexed.begin(), indexed.end());\n    std::cout << linked.front() << ' ' << indexed.front(); // 1 1\n    // std::sort(linked.begin(), linked.end()); // не компилируется\n}",
+          "verifiedOutput": "1 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1282,7 +1337,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Проекция выбирает поле; сортировка переставляет целых User",
-          "code": "#include <algorithm>\n#include <iostream>\n#include <string>\n#include <vector>\nstruct User { int id; std::string name; };\nint main() {\n    std::vector<User> users{{3, \"c\"}, {1, \"a\"}, {2, \"b\"}};\n    std::ranges::sort(users, {}, &User::id);\n    auto found = std::ranges::find(users, 2, &User::id);\n    if (found != users.end())\n        std::cout << users.front().name << ' ' << found->name; // a b\n}"
+          "code": "#include <algorithm>\n#include <iostream>\n#include <string>\n#include <vector>\nstruct User { int id; std::string name; };\nint main() {\n    std::vector<User> users{{3, \"c\"}, {1, \"a\"}, {2, \"b\"}};\n    std::ranges::sort(users, {}, &User::id);\n    auto found = std::ranges::find(users, 2, &User::id);\n    if (found != users.end())\n        std::cout << users.front().name << ' ' << found->name; // a b\n}",
+          "verifiedOutput": "a b",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1335,7 +1392,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "C++20: ленивые стадии и накопление",
-          "code": "#include <iostream>\n#include <ranges>\n#include <vector>\nint main() {\n    std::vector<int> values{1, 2, 3, 4};\n    auto selected = values\n        | std::views::filter([](int x) { return x % 2 == 0; })\n        | std::views::transform([](int x) { return x * 10; });\n    int total = 0;\n    for (int x : selected) total += x;\n    std::cout << total; // 60\n}"
+          "code": "#include <iostream>\n#include <ranges>\n#include <vector>\nint main() {\n    std::vector<int> values{1, 2, 3, 4};\n    auto selected = values\n        | std::views::filter([](int x) { return x % 2 == 0; })\n        | std::views::transform([](int x) { return x * 10; });\n    int total = 0;\n    for (int x : selected) total += x;\n    std::cout << total; // 60\n}",
+          "verifiedOutput": "60",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1443,7 +1502,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++23: совместный обход, материализация результата и его нумерация",
           "exampleId": "s3-ranges-zip-enumerate-to",
           "standard": "23",
-          "code": "#include <iostream>\n#include <ranges>\n#include <string>\n#include <vector>\n\nint main() {\n    std::vector<std::string> names{\"cpu\", \"disk\", \"unused\"};\n    std::vector<int> values{20, 40};\n\n    for (auto&& [name, value] : std::views::zip(names, values)) {\n        ++value;\n        std::cout << name << ' ' << value << '\\n';\n    }\n\n    auto doubled = values\n        | std::views::transform([](int value) { return value * 2; })\n        | std::ranges::to<std::vector<int>>();\n\n    values[0] = 99;\n    for (auto [index, value] : std::views::enumerate(doubled)) {\n        std::cout << index << ':' << value << '\\n';\n    }\n}\n"
+          "code": "#include <iostream>\n#include <ranges>\n#include <string>\n#include <vector>\n\nint main() {\n    std::vector<std::string> names{\"cpu\", \"disk\", \"unused\"};\n    std::vector<int> values{20, 40};\n\n    for (auto&& [name, value] : std::views::zip(names, values)) {\n        ++value;\n        std::cout << name << ' ' << value << '\\n';\n    }\n\n    auto doubled = values\n        | std::views::transform([](int value) { return value * 2; })\n        | std::ranges::to<std::vector<int>>();\n\n    values[0] = 99;\n    for (auto [index, value] : std::views::enumerate(doubled)) {\n        std::cout << index << ':' << value << '\\n';\n    }\n}\n",
+          "verifiedOutput": "cpu 21\ndisk 41\n0:42\n1:82\n",
+          "verifiedOutputStandard": "23"
         },
         {
           "type": "text",
@@ -1538,7 +1599,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <algorithm>\n#include <iostream>\n#include <vector>\nint main() {\n    std::vector<int> v{0, 3, 0, 4, 5};\n    auto end = std::remove(v.begin(), v.end(), 0);\n    std::cout << v.size() << ' ' << (end - v.begin()) << '\\n';\n    v.erase(end, v.end());\n    for (int x : v) std::cout << x << ' ';\n}",
-          "caption": "Полная программа: сначала 5 3, затем 3 4 5"
+          "caption": "Полная программа: сначала 5 3, затем 3 4 5",
+          "verifiedOutput": "5 3\n3 4 5 ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1670,7 +1733,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: длина строгого непрерывного участка",
-          "code": "#include <algorithm>\n#include <cstddef>\n#include <iostream>\n#include <vector>\n\nstd::size_t longest_monotonic(const std::vector<int>& a) {\n    if (a.empty()) return 0;\n    std::size_t up = 1, down = 1, best = 1;\n    for (std::size_t i = 1; i < a.size(); ++i) {\n        up = a[i] > a[i - 1] ? up + 1 : 1;\n        down = a[i] < a[i - 1] ? down + 1 : 1;\n        best = std::max(best, std::max(up, down));\n    }\n    return best;\n}\n\nint main() {\n    std::cout << longest_monotonic({1, 2, 3, 3, 4, 5}) << ' '\n              << longest_monotonic({1, 3, 2, 0}); // 3 3\n}"
+          "code": "#include <algorithm>\n#include <cstddef>\n#include <iostream>\n#include <vector>\n\nstd::size_t longest_monotonic(const std::vector<int>& a) {\n    if (a.empty()) return 0;\n    std::size_t up = 1, down = 1, best = 1;\n    for (std::size_t i = 1; i < a.size(); ++i) {\n        up = a[i] > a[i - 1] ? up + 1 : 1;\n        down = a[i] < a[i - 1] ? down + 1 : 1;\n        best = std::max(best, std::max(up, down));\n    }\n    return best;\n}\n\nint main() {\n    std::cout << longest_monotonic({1, 2, 3, 3, 4, 5}) << ' '\n              << longest_monotonic({1, 3, 2, 0}); // 3 3\n}",
+          "verifiedOutput": "3 3",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2182,7 +2247,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Сравнение только по длине объединяет ключи одинаковой длины",
-          "code": "#include <iostream>\n#include <set>\n#include <string>\nstruct ByLength {\n    bool operator()(const std::string& a, const std::string& b) const {\n        return a.size() < b.size();\n    }\n};\nint main() {\n    std::set<std::string, ByLength> names;\n    names.insert(\"aa\");\n    auto [position, inserted] = names.insert(\"bb\");\n    names.insert(\"c\");\n    std::cout << names.size() << ' ' << inserted << ' '\n              << *position; // 2 0 aa\n}"
+          "code": "#include <iostream>\n#include <set>\n#include <string>\nstruct ByLength {\n    bool operator()(const std::string& a, const std::string& b) const {\n        return a.size() < b.size();\n    }\n};\nint main() {\n    std::set<std::string, ByLength> names;\n    names.insert(\"aa\");\n    auto [position, inserted] = names.insert(\"bb\");\n    names.insert(\"c\");\n    std::cout << names.size() << ' ' << inserted << ' '\n              << *position; // 2 0 aa\n}",
+          "verifiedOutput": "2 0 aa",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2251,7 +2318,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: устойчивость для равного приоритета",
-          "code": "#include <algorithm>\n#include <iostream>\n#include <vector>\n\nstruct Item { int priority; char label; };\n\nint main() {\n    std::vector<Item> items{{2, 'A'}, {1, 'B'}, {2, 'C'}};\n    std::stable_sort(items.begin(), items.end(),\n                     [](const Item& a, const Item& b) {\n                         return a.priority < b.priority;\n                     });\n    for (const auto& item : items) std::cout << item.label << ' '; // B A C\n}"
+          "code": "#include <algorithm>\n#include <iostream>\n#include <vector>\n\nstruct Item { int priority; char label; };\n\nint main() {\n    std::vector<Item> items{{2, 'A'}, {1, 'B'}, {2, 'C'}};\n    std::stable_sort(items.begin(), items.end(),\n                     [](const Item& a, const Item& b) {\n                         return a.priority < b.priority;\n                     });\n    for (const auto& item : items) std::cout << item.label << ' '; // B A C\n}",
+          "verifiedOutput": "B A C ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2340,7 +2409,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <iostream>\n\ntemplate<class T>\nT myMax(T a, T b) {\n    return a > b ? a : b;\n}\n\nint main() {\n    std::cout << myMax(3, 7) << ' '\n              << myMax(2.5, 1.5) << ' '\n              << myMax<int>(5, 2);\n}\n",
-          "caption": "Полная программа: 7 2.5 5"
+          "caption": "Полная программа: 7 2.5 5",
+          "verifiedOutput": "7 2.5 5",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "self-check",
@@ -2367,7 +2438,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: число меняется на 7, строка остаётся hi; вывод 7 hi",
-          "code": "#include <iostream>\n#include <string>\n#include <utility>\n\ntemplate<typename T>\nclass Box {\n    T value_;\npublic:\n    explicit Box(T value) : value_(std::move(value)) {}\n    const T& get() const { return value_; }\n    void set(T value) { value_ = std::move(value); }\n    T copy() const { return value_; }\n};\n\nint main() {\n    Box<int> number{42};\n    Box<std::string> text{std::string{\"hi\"}};\n    number.set(7);\n    std::cout << number.get() << ' ' << text.get();\n}\n// Вывод: 7 hi"
+          "code": "#include <iostream>\n#include <string>\n#include <utility>\n\ntemplate<typename T>\nclass Box {\n    T value_;\npublic:\n    explicit Box(T value) : value_(std::move(value)) {}\n    const T& get() const { return value_; }\n    void set(T value) { value_ = std::move(value); }\n    T copy() const { return value_; }\n};\n\nint main() {\n    Box<int> number{42};\n    Box<std::string> text{std::string{\"hi\"}};\n    number.set(7);\n    std::cout << number.get() << ' ' << text.get();\n}\n// Вывод: 7 hi",
+          "verifiedOutput": "7 hi",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2422,7 +2495,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Отдельная полная программа: два параметра шаблона, вывод age 30 retries 3",
-          "code": "#include <iostream>\n#include <string>\n#include <utility>\n\ntemplate<typename K, typename V>\nstruct Pair {\n    K key;\n    V value;\n    Pair(K k, V v) : key(std::move(k)), value(std::move(v)) {}\n};\n\nint main() {\n    Pair<std::string, int> entry{\"age\", 30};\n    Pair inferred{std::string{\"retries\"}, 3};\n    std::cout << entry.key << ' ' << entry.value << ' '\n              << inferred.key << ' ' << inferred.value;\n}\n// Вывод: age 30 retries 3"
+          "code": "#include <iostream>\n#include <string>\n#include <utility>\n\ntemplate<typename K, typename V>\nstruct Pair {\n    K key;\n    V value;\n    Pair(K k, V v) : key(std::move(k)), value(std::move(v)) {}\n};\n\nint main() {\n    Pair<std::string, int> entry{\"age\", 30};\n    Pair inferred{std::string{\"retries\"}, 3};\n    std::cout << entry.key << ' ' << entry.value << ' '\n              << inferred.key << ' ' << inferred.value;\n}\n// Вывод: age 30 retries 3",
+          "verifiedOutput": "age 30 retries 3",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2553,7 +2628,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23: обычный поиск и дополнение по типу аргумента",
           "exampleId": "s3-adl-call",
           "standard": "20/23",
-          "code": "#include <iostream>\n\nnamespace jobs {\nstruct Job {};\n\nvoid process(const Job&) {\n    std::cout << \"job\\n\";\n}\n}\n\nvoid process(int) {\n    std::cout << \"int\\n\";\n}\n\nint main() {\n    jobs::Job job;\n    process(job);\n    process(7);\n}\n"
+          "code": "#include <iostream>\n\nnamespace jobs {\nstruct Job {};\n\nvoid process(const Job&) {\n    std::cout << \"job\\n\";\n}\n}\n\nvoid process(int) {\n    std::cout << \"int\\n\";\n}\n\nint main() {\n    jobs::Job job;\n    process(job);\n    process(7);\n}\n",
+          "verifiedOutput": "job\nint\n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -2616,7 +2693,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23: один алгоритм для Ticket и int",
           "exampleId": "s3-adl-swap",
           "standard": "20/23",
-          "code": "#include <iostream>\n#include <utility>\n\nnamespace domain {\nclass Ticket {\n    int value_;\npublic:\n    explicit Ticket(int value) : value_(value) {}\n    int value() const { return value_; }\n\n    friend void swap(Ticket& a, Ticket& b) {\n        std::cout << \"custom\\n\";\n        std::swap(a.value_, b.value_);\n    }\n};\n}\n\ntemplate<class T>\nvoid exchange_values(T& a, T& b) {\n    using std::swap;\n    swap(a, b);\n}\n\nint main() {\n    domain::Ticket a{1}, b{2};\n    exchange_values(a, b);\n    std::cout << a.value() << ' ' << b.value() << '\\n';\n    int x = 3, y = 4;\n    exchange_values(x, y);\n    std::cout << x << ' ' << y << '\\n';\n}\n"
+          "code": "#include <iostream>\n#include <utility>\n\nnamespace domain {\nclass Ticket {\n    int value_;\npublic:\n    explicit Ticket(int value) : value_(value) {}\n    int value() const { return value_; }\n\n    friend void swap(Ticket& a, Ticket& b) {\n        std::cout << \"custom\\n\";\n        std::swap(a.value_, b.value_);\n    }\n};\n}\n\ntemplate<class T>\nvoid exchange_values(T& a, T& b) {\n    using std::swap;\n    swap(a, b);\n}\n\nint main() {\n    domain::Ticket a{1}, b{2};\n    exchange_values(a, b);\n    std::cout << a.value() << ' ' << b.value() << '\\n';\n    int x = 3, y = 4;\n    exchange_values(x, y);\n    std::cout << x << ' ' << y << '\\n';\n}\n",
+          "verifiedOutput": "custom\n2 1\n4 3\n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -2667,7 +2746,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: три перегрузки помечают выбранный способ доступа буквами L, C и R; вывод LCR",
-          "code": "#include <iostream>\n#include <utility>\nstruct Item {};\nvoid use(Item&) { std::cout << 'L'; }\nvoid use(const Item&) { std::cout << 'C'; }\nvoid use(Item&&) { std::cout << 'R'; }\ntemplate<class T>\nvoid relay(T&& item) {\n    use(std::forward<T>(item));\n}\nint main() {\n    Item normal;\n    const Item frozen;\n    relay(normal);\n    relay(frozen);\n    relay(Item{}); // LCR\n}"
+          "code": "#include <iostream>\n#include <utility>\nstruct Item {};\nvoid use(Item&) { std::cout << 'L'; }\nvoid use(const Item&) { std::cout << 'C'; }\nvoid use(Item&&) { std::cout << 'R'; }\ntemplate<class T>\nvoid relay(T&& item) {\n    use(std::forward<T>(item));\n}\nint main() {\n    Item normal;\n    const Item frozen;\n    relay(normal);\n    relay(frozen);\n    relay(Item{}); // LCR\n}",
+          "verifiedOutput": "LCR",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2766,7 +2847,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++23: явный объект и вывод const через Self",
           "exampleId": "s3-explicit-object-access",
           "standard": "23",
-          "code": "#include <iostream>\n#include <type_traits>\n\nclass Number {\n    int value_ = 5;\npublic:\n    int read(this const Number& self) {\n        return self.value_;\n    }\n\n    template<class Self>\n    auto& value(this Self& self) {\n        return self.value_;\n    }\n};\n\nint main() {\n    Number number;\n    const Number frozen;\n    static_assert(std::is_same_v<decltype(number.value()), int&>);\n    static_assert(std::is_same_v<decltype(frozen.value()), const int&>);\n    number.value() = 9;\n    std::cout << number.read() << ' ' << frozen.value() << '\\n';\n}\n"
+          "code": "#include <iostream>\n#include <type_traits>\n\nclass Number {\n    int value_ = 5;\npublic:\n    int read(this const Number& self) {\n        return self.value_;\n    }\n\n    template<class Self>\n    auto& value(this Self& self) {\n        return self.value_;\n    }\n};\n\nint main() {\n    Number number;\n    const Number frozen;\n    static_assert(std::is_same_v<decltype(number.value()), int&>);\n    static_assert(std::is_same_v<decltype(frozen.value()), const int&>);\n    number.value() = 9;\n    std::cout << number.read() << ' ' << frozen.value() << '\\n';\n}\n",
+          "verifiedOutput": "9 5\n",
+          "verifiedOutputStandard": "23"
         },
         {
           "type": "text",
@@ -2822,7 +2905,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <iostream>\nconstexpr int twice(int x) { return x * 2; }\nconsteval int fixed(int x) { return x * 2; }\nconstinit int counter = twice(3);\nint main() {\n    constexpr int a = twice(4);\n    static_assert(a == 8);\n    int b = fixed(5);\n    ++counter;\n    std::cout << a << ' ' << b << ' ' << counter;\n}",
-          "caption": "Полная программа C++20: a равно 8, b равно 10, counter после увеличения равен 7"
+          "caption": "Полная программа C++20: a равно 8, b равно 10, counter после увеличения равен 7",
+          "verifiedOutput": "8 10 7",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2861,7 +2946,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <iostream>\n#include <type_traits>\ntemplate<class T> int read_value(T value) {\n    if constexpr (std::is_pointer_v<T>) return *value;\n    else return value;\n}\nint main() {\n    int n = 7;\n    std::cout << read_value(n) << ' ' << read_value(&n);\n}",
-          "caption": "Отдельная полная программа: число и указатель читаются разными ветками, вывод 7 7"
+          "caption": "Отдельная полная программа: число и указатель читаются разными ветками, вывод 7 7",
+          "verifiedOutput": "7 7",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2912,7 +2999,10 @@ window.STATION_DATA = {
           "caption": "Полная программа C++23. При вводе 7 выводит 42 14",
           "exampleId": "s3-if-consteval",
           "standard": "23",
-          "code": "#include <iostream>\n\nconsteval int compile_twice(int value) {\n    return value * 2;\n}\n\nconstexpr int twice(int value) {\n    if consteval {\n        return compile_twice(value);\n    } else {\n        return value * 2;\n    }\n}\n\nint main() {\n    constexpr int prepared = twice(21);\n    static_assert(prepared == 42);\n    int input = 0;\n    if (!(std::cin >> input) || input < 0 || input > 100) {\n        std::cerr << \"expected 0..100\\n\";\n        return 1;\n    }\n    std::cout << prepared << ' ' << twice(input) << '\\n';\n}\n"
+          "code": "#include <iostream>\n\nconsteval int compile_twice(int value) {\n    return value * 2;\n}\n\nconstexpr int twice(int value) {\n    if consteval {\n        return compile_twice(value);\n    } else {\n        return value * 2;\n    }\n}\n\nint main() {\n    constexpr int prepared = twice(21);\n    static_assert(prepared == 42);\n    int input = 0;\n    if (!(std::cin >> input) || input < 0 || input > 100) {\n        std::cerr << \"expected 0..100\\n\";\n        return 1;\n    }\n    std::cout << prepared << ' ' << twice(input) << '\\n';\n}\n",
+          "verifiedOutput": "42 14\n",
+          "verifiedOutputStandard": "23",
+          "verifiedInput": "7\n"
         },
         {
           "type": "text",
@@ -2969,7 +3059,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <iostream>\n#include <string>\n#include <cstddef>\ntemplate<class T>\nauto length(const T& x) -> decltype(x.size(), std::size_t{}) {\n    return x.size();\n}\nstd::size_t length(...) { return 0; }\nint main() {\n    std::cout << length(std::string(\"abc\")) << ' ' << length(5);\n}",
-          "caption": "Полная программа: 3 0"
+          "caption": "Полная программа: 3 0",
+          "verifiedOutput": "3 0",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3031,7 +3123,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <concepts>\n#include <iterator>\n#include <cstddef>\n#include <iostream>\nstruct Numbers {\n    Numbers(std::size_t, const int&) { std::cout << \"count \"; }\n    template<std::input_iterator It>\n    Numbers(It, It) { std::cout << \"range\"; }\n};\nint main() {\n    int a[] = {1, 2};\n    Numbers x(3, 5);\n    Numbers y(a, a + 2);\n}",
-          "caption": "Полная программа C++20: count range"
+          "caption": "Полная программа C++20: count range",
+          "verifiedOutput": "count range",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3048,7 +3142,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <concepts>\n#include <cstddef>\n#include <iostream>\n#include <string>\ntemplate<class T>\nconcept HasSize = requires(const T& x) {\n    { x.size() } -> std::convertible_to<std::size_t>;\n};\ntemplate<HasSize T>\nstd::size_t length(const T& x) { return x.size(); }\nstd::size_t length(...) { return 0; }\nint main() {\n    std::cout << length(std::string(\"abc\")) << ' ' << length(5);\n}",
-          "caption": "Та же задача с concept: полная программа C++20, вывод 3 0"
+          "caption": "Та же задача с concept: полная программа C++20, вывод 3 0",
+          "verifiedOutput": "3 0",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3114,7 +3210,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23: фабрика и сумма, включая пустой пакет",
           "exampleId": "s3-pack-fold",
           "standard": "20/23",
-          "code": "#include <concepts>\n#include <iostream>\n#include <memory>\n#include <string>\n#include <utility>\n\nstruct Record {\n    int id;\n    std::string label;\n    Record(int number, std::string text)\n        : id(number), label(std::move(text)) {}\n};\n\ntemplate<class T, class... Args>\nstd::unique_ptr<T> build(Args&&... args) {\n    return std::make_unique<T>(std::forward<Args>(args)...);\n}\n\ntemplate<std::signed_integral... Ints>\nlong long total(Ints... values) {\n    return (0LL + ... + values);\n}\n\nint main() {\n    std::cout << total() << ' ' << total(2, 3, 4) << '\\n';\n    auto record = build<Record>(7, std::string{\"ready\"});\n    std::cout << record->id << ' ' << record->label << '\\n';\n}\n"
+          "code": "#include <concepts>\n#include <iostream>\n#include <memory>\n#include <string>\n#include <utility>\n\nstruct Record {\n    int id;\n    std::string label;\n    Record(int number, std::string text)\n        : id(number), label(std::move(text)) {}\n};\n\ntemplate<class T, class... Args>\nstd::unique_ptr<T> build(Args&&... args) {\n    return std::make_unique<T>(std::forward<Args>(args)...);\n}\n\ntemplate<std::signed_integral... Ints>\nlong long total(Ints... values) {\n    return (0LL + ... + values);\n}\n\nint main() {\n    std::cout << total() << ' ' << total(2, 3, 4) << '\\n';\n    auto record = build<Record>(7, std::string{\"ready\"});\n    std::cout << record->id << ' ' << record->label << '\\n';\n}\n",
+          "verifiedOutput": "0 9\n7 ready\n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -3164,7 +3262,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23: три определения класса и две перегрузки функции",
           "exampleId": "s3-template-specialization",
           "standard": "20/23",
-          "code": "#include <iostream>\n\ntemplate<class T>\nstruct Kind {\n    static const char* name() { return \"value\"; }\n};\n\ntemplate<class T>\nstruct Kind<T*> {\n    static const char* name() { return \"pointer\"; }\n};\n\ntemplate<>\nstruct Kind<void*> {\n    static const char* name() { return \"void pointer\"; }\n};\n\ntemplate<class T>\nconst char* route(T) { return \"template\"; }\n\nconst char* route(int) { return \"overload\"; }\n\nint main() {\n    std::cout << Kind<int>::name() << ' '\n              << Kind<double*>::name() << ' '\n              << Kind<void*>::name() << '\\n';\n    std::cout << route(7) << ' ' << route(7.0) << ' '\n              << route<>(7) << '\\n';\n}\n"
+          "code": "#include <iostream>\n\ntemplate<class T>\nstruct Kind {\n    static const char* name() { return \"value\"; }\n};\n\ntemplate<class T>\nstruct Kind<T*> {\n    static const char* name() { return \"pointer\"; }\n};\n\ntemplate<>\nstruct Kind<void*> {\n    static const char* name() { return \"void pointer\"; }\n};\n\ntemplate<class T>\nconst char* route(T) { return \"template\"; }\n\nconst char* route(int) { return \"overload\"; }\n\nint main() {\n    std::cout << Kind<int>::name() << ' '\n              << Kind<double*>::name() << ' '\n              << Kind<void*>::name() << '\\n';\n    std::cout << route(7) << ' ' << route(7.0) << ' '\n              << route<>(7) << '\\n';\n}\n",
+          "verifiedOutput": "value pointer void pointer\noverload template template\n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -3221,7 +3321,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <functional>\n#include <iostream>\nstruct Item {\n    int value = 4;\n    int add(int n) const { return value + n; }\n};\nint main() {\n    Item x;\n    std::invoke(&Item::value, x) = 9;\n    std::cout << std::invoke(&Item::add, x, 5);\n}",
-          "caption": "Полная программа C++17 и новее: сначала value становится 9, затем add(5) даёт 14"
+          "caption": "Полная программа C++17 и новее: сначала value становится 9, затем add(5) даёт 14",
+          "verifiedOutput": "14",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3247,7 +3349,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <functional>\n#include <iostream>\n\nstruct Meter {\n    int value = 4;\n    int read() const { return value; }\n    int read(int extra) const { return value + extra; }\n};\n\nint main() {\n    Meter meter;\n    using Method = int (Meter::*)(int) const;\n    auto chosen = static_cast<Method>(&Meter::read);\n    std::cout << std::invoke(chosen, meter, 5);\n}\n",
-          "caption": "Отдельная полная программа: выбор read(int) const, вывод 9"
+          "caption": "Отдельная полная программа: выбор read(int) const, вывод 9",
+          "verifiedOutput": "9",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3260,7 +3364,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <iostream>\n\nint main() {\n    int value = 1;\n    auto own = [value]() mutable { return ++value; };\n    auto borrowed = [&value]() { return ++value; };\n    std::cout << own() << ' ';\n    std::cout << value << ' ';\n    std::cout << borrowed() << ' ';\n    std::cout << value;\n}\n",
-          "caption": "Отдельная полная программа: копия и внешний объект меняются независимо, вывод 2 1 2 2"
+          "caption": "Отдельная полная программа: копия и внешний объект меняются независимо, вывод 2 1 2 2",
+          "verifiedOutput": "2 1 2 2",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3315,7 +3421,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++23: единоличный владелец внутри вызываемой оболочки",
           "exampleId": "s3-move-only-callable",
           "standard": "23",
-          "code": "#include <functional>\n#include <iostream>\n#include <memory>\n#include <utility>\n\nint main() {\n    auto owner = std::make_unique<int>(7);\n    std::move_only_function<int(int)> task =\n        [value = std::move(owner)](int increment) {\n            return *value + increment;\n        };\n\n    auto queued = std::move(task);\n    std::cout << bool(owner) << ' '\n              << queued(5) << ' ' << queued(1) << '\\n';\n}\n"
+          "code": "#include <functional>\n#include <iostream>\n#include <memory>\n#include <utility>\n\nint main() {\n    auto owner = std::make_unique<int>(7);\n    std::move_only_function<int(int)> task =\n        [value = std::move(owner)](int increment) {\n            return *value + increment;\n        };\n\n    auto queued = std::move(task);\n    std::cout << bool(owner) << ' '\n              << queued(5) << ' ' << queued(1) << '\\n';\n}\n",
+          "verifiedOutput": "0 12 8\n",
+          "verifiedOutputStandard": "23"
         },
         {
           "type": "text",
@@ -3528,7 +3636,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Наличие значения не отменяет вычисление аргумента",
-          "code": "#include <iostream>\n#include <optional>\nint fallback() {\n    std::cout << \"fallback \";\n    return 99;\n}\nint main() {\n    std::optional<int> value = 7;\n    std::cout << value.value_or(fallback());\n}\n// Вывод: fallback 7"
+          "code": "#include <iostream>\n#include <optional>\nint fallback() {\n    std::cout << \"fallback \";\n    return 99;\n}\nint main() {\n    std::optional<int> value = 7;\n    std::cout << value.value_or(fallback());\n}\n// Вывод: fallback 7",
+          "verifiedOutput": "fallback 7",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3566,7 +3676,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23: format создаёт строку, cout выводит её",
           "exampleId": "s3-format-message",
           "standard": "20/23",
-          "code": "#include <format>\n#include <iostream>\n#include <string>\n\nint main() {\n    std::string name = \"parse\";\n    int id = 7;\n    std::string message = std::format(\"task {}: id={:04}\", name, id);\n    std::cout << message << '\\n';\n}\n"
+          "code": "#include <format>\n#include <iostream>\n#include <string>\n\nint main() {\n    std::string name = \"parse\";\n    int id = 7;\n    std::string message = std::format(\"task {}: id={:04}\", name, id);\n    std::cout << message << '\\n';\n}\n",
+          "verifiedOutput": "task parse: id=0007\n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -3585,7 +3697,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++23: тот же текст сразу выводится через println",
           "exampleId": "s3-print-message",
           "standard": "23",
-          "code": "#include <print>\n\nint main() {\n    std::println(\"task {}: id={:04}\", \"parse\", 7);\n}\n"
+          "code": "#include <print>\n\nint main() {\n    std::println(\"task {}: id={:04}\", \"parse\", 7);\n}\n",
+          "verifiedOutput": "task parse: id=0007\n",
+          "verifiedOutputStandard": "23"
         },
         {
           "type": "text",
@@ -3632,7 +3746,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Копируется представление, а не элементы массива",
-          "code": "#include <array>\n#include <cstddef>\n#include <iostream>\n#include <span>\n\nunsigned checksum(std::span<const std::byte> bytes) {\n    unsigned sum = 0;\n    for (std::byte value : bytes) sum += std::to_integer<unsigned>(value);\n    return sum; // простая учебная сумма, не криптографическая проверка\n}\n\nint main() {\n    std::array<std::byte, 4> packet{\n        std::byte{1}, std::byte{2}, std::byte{3}, std::byte{4}};\n    std::span<const std::byte> view = packet;\n    auto middle = view.subspan(1, 2);\n    std::cout << checksum(view) << ' ' << checksum(middle) << ' ';\n    packet[1] = std::byte{9};\n    std::cout << checksum(middle);\n}\n// Вывод: 10 5 12"
+          "code": "#include <array>\n#include <cstddef>\n#include <iostream>\n#include <span>\n\nunsigned checksum(std::span<const std::byte> bytes) {\n    unsigned sum = 0;\n    for (std::byte value : bytes) sum += std::to_integer<unsigned>(value);\n    return sum; // простая учебная сумма, не криптографическая проверка\n}\n\nint main() {\n    std::array<std::byte, 4> packet{\n        std::byte{1}, std::byte{2}, std::byte{3}, std::byte{4}};\n    std::span<const std::byte> view = packet;\n    auto middle = view.subspan(1, 2);\n    std::cout << checksum(view) << ' ' << checksum(middle) << ' ';\n    packet[1] = std::byte{9};\n    std::cout << checksum(middle);\n}\n// Вывод: 10 5 12",
+          "verifiedOutput": "10 5 12",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3662,7 +3778,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Представление части строки и независимая копия",
-          "code": "#include <iostream>\n#include <string>\n#include <string_view>\n\nint main() {\n    std::string text = \"catdog\";\n    std::string_view first{text.data(), 3};\n    std::string copy{first};\n    text[0] = 'b';\n    std::cout << first << ' ' << copy << ' ' << first.size();\n    // first.data() не следует передавать как отдельную C-строку:\n    // функция, читающая до '\\0', увидела бы здесь \"batdog\".\n}\n// Вывод: bat cat 3"
+          "code": "#include <iostream>\n#include <string>\n#include <string_view>\n\nint main() {\n    std::string text = \"catdog\";\n    std::string_view first{text.data(), 3};\n    std::string copy{first};\n    text[0] = 'b';\n    std::cout << first << ' ' << copy << ' ' << first.size();\n    // first.data() не следует передавать как отдельную C-строку:\n    // функция, читающая до '\\0', увидела бы здесь \"batdog\".\n}\n// Вывод: bat cat 3",
+          "verifiedOutput": "bat cat 3",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3679,7 +3797,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Проверка текущей альтернативы и обработка всех допустимых типов",
-          "code": "#include <iostream>\n#include <string>\n#include <variant>\n\nusing Value = std::variant<int, std::string>;\n\nint main() {\n    Value value = 42;\n    std::visit([](const auto& item) { std::cout << item << ' '; }, value);\n    value = std::string{\"ready\"};\n\n    std::cout << (std::get_if<int>(&value) == nullptr) << ' ';\n    std::visit([](const auto& item) { std::cout << item; }, value);\n}\n// Вывод: 42 1 ready"
+          "code": "#include <iostream>\n#include <string>\n#include <variant>\n\nusing Value = std::variant<int, std::string>;\n\nint main() {\n    Value value = 42;\n    std::visit([](const auto& item) { std::cout << item << ' '; }, value);\n    value = std::string{\"ready\"};\n\n    std::cout << (std::get_if<int>(&value) == nullptr) << ' ';\n    std::visit([](const auto& item) { std::cout << item; }, value);\n}\n// Вывод: 42 1 ready",
+          "verifiedOutput": "42 1 ready",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3724,7 +3844,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Собственная строка и наблюдение за чужими символами",
-          "code": "#include <iostream>\n#include <string>\n#include <string_view>\nint main() {\n    std::string owner = \"cat\";\n    std::string copy = owner;\n    std::string_view view = owner;\n    owner[0] = 'b';\n    std::cout << copy << ' ' << view; // cat bat\n}"
+          "code": "#include <iostream>\n#include <string>\n#include <string_view>\nint main() {\n    std::string owner = \"cat\";\n    std::string copy = owner;\n    std::string_view view = owner;\n    owner[0] = 'b';\n    std::cout << copy << ' ' << view; // cat bat\n}",
+          "verifiedOutput": "cat bat",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3781,7 +3903,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Ленивое преобразование читает текущий элемент; полная программа C++20",
-          "code": "#include <iostream>\n#include <ranges>\n#include <vector>\nint main() {\n    std::vector<int> values{2, 4};\n    auto scaled = values | std::views::transform([](int x) { return x * 10; });\n    std::cout << *scaled.begin() << ' ';\n    values[0] = 3;\n    std::cout << *scaled.begin(); // 20 30\n}"
+          "code": "#include <iostream>\n#include <ranges>\n#include <vector>\nint main() {\n    std::vector<int> values{2, 4};\n    auto scaled = values | std::views::transform([](int x) { return x * 10; });\n    std::cout << *scaled.begin() << ' ';\n    values[0] = 3;\n    std::cout << *scaled.begin(); // 20 30\n}",
+          "verifiedOutput": "20 30",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3949,7 +4073,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23: пересчёт единиц и разность двух точек",
           "exampleId": "s3-chrono-units",
           "standard": "20/23",
-          "code": "#include <chrono>\n#include <iostream>\n\nint main() {\n    using namespace std::chrono;\n    using namespace std::chrono_literals;\n\n    auto budget = 1500ms + 1s;\n    std::cout << duration_cast<milliseconds>(budget).count() << \" ms\\n\";\n    std::cout << duration_cast<seconds>(1500ms).count() << ' '\n              << ceil<seconds>(1500ms).count() << '\\n';\n\n    using Point = time_point<steady_clock, milliseconds>;\n    Point start{1000ms};\n    auto end = start + 1500ms;\n    std::cout << duration_cast<milliseconds>(end - start).count() << '\\n';\n}\n"
+          "code": "#include <chrono>\n#include <iostream>\n\nint main() {\n    using namespace std::chrono;\n    using namespace std::chrono_literals;\n\n    auto budget = 1500ms + 1s;\n    std::cout << duration_cast<milliseconds>(budget).count() << \" ms\\n\";\n    std::cout << duration_cast<seconds>(1500ms).count() << ' '\n              << ceil<seconds>(1500ms).count() << '\\n';\n\n    using Point = time_point<steady_clock, milliseconds>;\n    Point start{1000ms};\n    auto end = start + 1500ms;\n    std::cout << duration_cast<milliseconds>(end - start).count() << '\\n';\n}\n",
+          "verifiedOutput": "2500 ms\n1 2\n1500\n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -4011,7 +4137,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23: один срок, три проверки остатка",
           "exampleId": "s3-chrono-deadline",
           "standard": "20/23",
-          "code": "#include <chrono>\n#include <iostream>\n\nusing namespace std::chrono_literals;\nusing Point = std::chrono::time_point<std::chrono::steady_clock,\n                                      std::chrono::milliseconds>;\n\nstd::chrono::milliseconds remaining(Point now, Point deadline) {\n    return now < deadline ? deadline - now : 0ms;\n}\n\nint main() {\n    Point start{0ms};\n    const auto deadline = start + 100ms;\n    std::cout << remaining(start + 30ms, deadline).count() << ' '\n              << remaining(start + 90ms, deadline).count() << ' '\n              << remaining(start + 105ms, deadline).count() << '\\n';\n}\n"
+          "code": "#include <chrono>\n#include <iostream>\n\nusing namespace std::chrono_literals;\nusing Point = std::chrono::time_point<std::chrono::steady_clock,\n                                      std::chrono::milliseconds>;\n\nstd::chrono::milliseconds remaining(Point now, Point deadline) {\n    return now < deadline ? deadline - now : 0ms;\n}\n\nint main() {\n    Point start{0ms};\n    const auto deadline = start + 100ms;\n    std::cout << remaining(start + 30ms, deadline).count() << ' '\n              << remaining(start + 90ms, deadline).count() << ' '\n              << remaining(start + 105ms, deadline).count() << '\\n';\n}\n",
+          "verifiedOutput": "70 10 0\n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -4091,7 +4219,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Сохраняем сумму окна; полная программа для четырёх заданных чисел",
-          "code": "#include <cstddef>\n#include <deque>\n#include <iostream>\n#include <initializer_list>\nint main() {\n    const std::size_t limit = 3;\n    std::deque<double> window;\n    double sum = 0;\n    for (double value : {2.0, 4.0, 8.0, 10.0}) {\n        if (window.size() == limit) {\n            sum -= window.front();\n            window.pop_front();\n        }\n        window.push_back(value);\n        sum += value;\n        std::cout << sum << '/' << window.size() << ' ';\n    }\n} // 2/1 6/2 14/3 22/3"
+          "code": "#include <cstddef>\n#include <deque>\n#include <iostream>\n#include <initializer_list>\nint main() {\n    const std::size_t limit = 3;\n    std::deque<double> window;\n    double sum = 0;\n    for (double value : {2.0, 4.0, 8.0, 10.0}) {\n        if (window.size() == limit) {\n            sum -= window.front();\n            window.pop_front();\n        }\n        window.push_back(value);\n        sum += value;\n        std::cout << sum << '/' << window.size() << ' ';\n    }\n} // 2/1 6/2 14/3 22/3",
+          "verifiedOutput": "2/1 6/2 14/3 22/3 ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -4136,7 +4266,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Открытая левая граница: удаляем метки не больше cutoff; полная программа",
-          "code": "#include <deque>\n#include <iostream>\nint main() {\n    std::deque<int> events{100, 101, 399};\n    const int now = 400;\n    const int cutoff = now - 300;\n    while (!events.empty() && events.front() <= cutoff)\n        events.pop_front();\n    std::cout << events.size(); // 2\n}"
+          "code": "#include <deque>\n#include <iostream>\nint main() {\n    std::deque<int> events{100, 101, 399};\n    const int now = 400;\n    const int cutoff = now - 300;\n    while (!events.empty() && events.front() <= cutoff)\n        events.pop_front();\n    std::cout << events.size(); // 2\n}",
+          "verifiedOutput": "2",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -4214,7 +4346,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Перед повторным использованием номеров очищаем метки; полная программа",
-          "code": "#include <cstddef>\n#include <iostream>\n#include <limits>\n#include <vector>\nclass LazyValues {\n    struct Cell { int value = 0; unsigned tag = 0; };\n    std::vector<Cell> cells_;\n    unsigned generation_ = 1;\n    int global_ = 0;\npublic:\n    explicit LazyValues(std::size_t size) : cells_(size) {}\n    int get(std::size_t i) const {\n        const auto& cell = cells_.at(i);\n        return cell.tag == generation_ ? cell.value : global_;\n    }\n    void set(std::size_t i, int value) {\n        auto& cell = cells_.at(i);\n        cell.value = value;\n        cell.tag = generation_;\n    }\n    void setAll(int value) {\n        if (generation_ == std::numeric_limits<unsigned>::max()) {\n            for (auto& cell : cells_) cell.tag = 0;\n            generation_ = 1;\n        } else {\n            ++generation_;\n        }\n        global_ = value;\n    }\n};\nint main() {\n    LazyValues values(3);\n    values.set(1, 7);\n    values.setAll(5);\n    values.set(2, 9);\n    std::cout << values.get(1) << ' ' << values.get(2) << ' ';\n    values.setAll(4);\n    std::cout << values.get(1) << ' ' << values.get(2); // 5 9 4 4\n}"
+          "code": "#include <cstddef>\n#include <iostream>\n#include <limits>\n#include <vector>\nclass LazyValues {\n    struct Cell { int value = 0; unsigned tag = 0; };\n    std::vector<Cell> cells_;\n    unsigned generation_ = 1;\n    int global_ = 0;\npublic:\n    explicit LazyValues(std::size_t size) : cells_(size) {}\n    int get(std::size_t i) const {\n        const auto& cell = cells_.at(i);\n        return cell.tag == generation_ ? cell.value : global_;\n    }\n    void set(std::size_t i, int value) {\n        auto& cell = cells_.at(i);\n        cell.value = value;\n        cell.tag = generation_;\n    }\n    void setAll(int value) {\n        if (generation_ == std::numeric_limits<unsigned>::max()) {\n            for (auto& cell : cells_) cell.tag = 0;\n            generation_ = 1;\n        } else {\n            ++generation_;\n        }\n        global_ = value;\n    }\n};\nint main() {\n    LazyValues values(3);\n    values.set(1, 7);\n    values.setAll(5);\n    values.set(2, 9);\n    std::cout << values.get(1) << ' ' << values.get(2) << ' ';\n    values.setAll(4);\n    std::cout << values.get(1) << ' ' << values.get(2); // 5 9 4 4\n}",
+          "verifiedOutput": "5 9 4 4",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -4257,7 +4391,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Один слот: создание в существующей памяти и явное разрушение; полная программа",
-          "code": "#include <cstddef>\n#include <iostream>\n#include <memory>\n#include <new>\nstruct Item {\n    int id;\n    explicit Item(int value) : id(value) { std::cout << '+' << id << ' '; }\n    ~Item() { std::cout << '-' << id << ' '; }\n};\nint main() {\n    alignas(Item) std::byte slot[sizeof(Item)];\n    Item* live = nullptr;\n    live = ::new (static_cast<void*>(slot)) Item(7);\n    std::cout << live->id << ' ';\n    std::destroy_at(live);\n    live = nullptr;\n} // +7 7 -7"
+          "code": "#include <cstddef>\n#include <iostream>\n#include <memory>\n#include <new>\nstruct Item {\n    int id;\n    explicit Item(int value) : id(value) { std::cout << '+' << id << ' '; }\n    ~Item() { std::cout << '-' << id << ' '; }\n};\nint main() {\n    alignas(Item) std::byte slot[sizeof(Item)];\n    Item* live = nullptr;\n    live = ::new (static_cast<void*>(slot)) Item(7);\n    std::cout << live->id << ' ';\n    std::destroy_at(live);\n    live = nullptr;\n} // +7 7 -7",
+          "verifiedOutput": "+7 7 -7 ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -4564,17 +4700,15 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа · C++20 · main.cpp",
-          "code": "#include <algorithm>\n#include <cstddef>\n#include <iostream>\n#include <map>\n#include <utility>\n#include <vector>\n\nusing Frequency = std::pair<int, std::size_t>;\n\nstd::vector<Frequency> top_codes(const std::vector<int>& input,\n                                 std::size_t k) {\n    if (k == 0) return {};\n    std::map<int, std::size_t> counts;\n    for (int code : input) ++counts[code];\n    std::vector<Frequency> result;\n    result.reserve(counts.size());\n    for (const auto& [code, count] : counts) {\n        result.push_back({code, count});\n    }\n    std::sort(result.begin(), result.end(),\n        [](const Frequency& a, const Frequency& b) {\n            if (a.second != b.second) return a.second > b.second;\n            return a.first < b.first;\n        });\n    if (result.size() > k) result.resize(k);\n    return result;\n}\n\nint main() {\n    const std::vector<int> input{503, 404, 503, 500, 404, 503, 401};\n    for (const auto& [code, count] : top_codes(input, 3)) {\n        std::cout << code << ' ' << count << '\\n';\n    }\n    std::cout << \"empty: \" << top_codes({}, 3).size() << '\\n';\n    std::cout << \"zero k: \" << top_codes(input, 0).size() << '\\n';\n}\n"
+          "code": "#include <algorithm>\n#include <cstddef>\n#include <iostream>\n#include <map>\n#include <utility>\n#include <vector>\n\nusing Frequency = std::pair<int, std::size_t>;\n\nstd::vector<Frequency> top_codes(const std::vector<int>& input,\n                                 std::size_t k) {\n    if (k == 0) return {};\n    std::map<int, std::size_t> counts;\n    for (int code : input) ++counts[code];\n    std::vector<Frequency> result;\n    result.reserve(counts.size());\n    for (const auto& [code, count] : counts) {\n        result.push_back({code, count});\n    }\n    std::sort(result.begin(), result.end(),\n        [](const Frequency& a, const Frequency& b) {\n            if (a.second != b.second) return a.second > b.second;\n            return a.first < b.first;\n        });\n    if (result.size() > k) result.resize(k);\n    return result;\n}\n\nint main() {\n    const std::vector<int> input{503, 404, 503, 500, 404, 503, 401};\n    for (const auto& [code, count] : top_codes(input, 3)) {\n        std::cout << code << ' ' << count << '\\n';\n    }\n    std::cout << \"empty: \" << top_codes({}, 3).size() << '\\n';\n    std::cout << \"zero k: \" << top_codes(input, 0).size() << '\\n';\n}\n",
+          "verifiedOutput": "503 3\n404 2\n401 1\nempty: 0\nzero k: 0\n",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Ожидаемый вывод полной программы"
         },
         {
           "type": "code",
           "caption": "Необязательный запуск вне учебника: Linux/macOS с g++",
           "code": "g++ -std=c++20 -Wall -Wextra -pedantic  main.cpp -o example\n./example\n"
-        },
-        {
-          "type": "code",
-          "caption": "Ожидаемый вывод полной программы",
-          "code": "503 3\n404 2\n401 1\nempty: 0\nzero k: 0\n"
         },
         {
           "type": "text",
@@ -4625,7 +4759,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Подсчёт частот слов — реальный сценарий",
-          "code": "#include <utility>\n#include <iostream>\n#include <vector>\n#include <map>\n#include <algorithm>\n#include <string>\n\nint main() {\n    std::vector<std::string> words = {\n        \"apple\", \"banana\", \"apple\", \"cherry\", \"banana\", \"apple\"\n    };\n\n    // 1) считаем частоты через map (ключ — слово, значение — счётчик)\n    std::map<std::string, int> freq;\n    for (const auto& w : words) {\n        ++freq[w];          // operator[] создаёт ключ с 0, затем ++\n    }\n\n    // 2) переносим в vector пар, чтобы сортировать по частоте\n    std::vector<std::pair<std::string, int>> sorted(freq.begin(), freq.end());\n\n    // 3) сортируем по убыванию частоты (лямбда-компаратор)\n    std::sort(sorted.begin(), sorted.end(),\n              [](const auto& a, const auto& b) { return a.second > b.second; });\n\n    // 4) выводим через structured bindings\n    for (const auto& [word, count] : sorted) {\n        std::cout << word << \": \" << count << \"\\n\";\n    }\n    // apple: 3 / banana: 2 / cherry: 1\n}"
+          "code": "#include <utility>\n#include <iostream>\n#include <vector>\n#include <map>\n#include <algorithm>\n#include <string>\n\nint main() {\n    std::vector<std::string> words = {\n        \"apple\", \"banana\", \"apple\", \"cherry\", \"banana\", \"apple\"\n    };\n\n    // 1) считаем частоты через map (ключ — слово, значение — счётчик)\n    std::map<std::string, int> freq;\n    for (const auto& w : words) {\n        ++freq[w];          // operator[] создаёт ключ с 0, затем ++\n    }\n\n    // 2) переносим в vector пар, чтобы сортировать по частоте\n    std::vector<std::pair<std::string, int>> sorted(freq.begin(), freq.end());\n\n    // 3) сортируем по убыванию частоты (лямбда-компаратор)\n    std::sort(sorted.begin(), sorted.end(),\n              [](const auto& a, const auto& b) { return a.second > b.second; });\n\n    // 4) выводим через structured bindings\n    for (const auto& [word, count] : sorted) {\n        std::cout << word << \": \" << count << \"\\n\";\n    }\n    // apple: 3 / banana: 2 / cherry: 1\n}",
+          "verifiedOutput": "apple: 3\nbanana: 2\ncherry: 1\n",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",

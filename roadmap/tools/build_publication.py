@@ -44,7 +44,7 @@ PAGES = (
     'network_setup_lab.html', 'vpn_tunnels_lab.html',
 )
 ASSETS = (
-    'home.css', 'station.css', 'station-app.js', 'cheatsheet.css', 'cheatsheet.js',
+    'home.css', 'edition-home.css', 'edition-reader.css', 'station.css', 'station-app.js', 'cheatsheet.css', 'cheatsheet.js',
     'course-ui.css', 'course-reader.css', 'station-map.css', 'station-map-joints.css',
     'course-theme.css', 'course-dark-surfaces.css', 'course-dark-reader.css', 'course-code.js', 'course-code.css',
     'database-intro.css', 'database-route.js', 'sql-lab-core.js', 'sql-lab.css',

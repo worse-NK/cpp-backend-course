@@ -47,8 +47,10 @@ class SqlEditorial(unittest.TestCase):
     def test_schema_identity_and_all_sections(self):
         validate(self.data, SOURCE)
         self.assertEqual(self.data['meta']['storeKey'], 'cpp_station9_sql_progress_v1')
-        self.assertEqual(len(self.sections), 26)
-        self.assertEqual([len(x) for x in self.data['quizzes'].values()], [29,8,10])
+        self.assertIn('sql-relationship-design', self.sections)
+        self.assertEqual(len(self.sections), 27)
+        self.assertEqual({k: len(v) for k, v in self.data['quizzes'].items()},
+                         {'basic': 31, 'advanced': 10, 'interview': 10})
 
     def test_each_section_has_revealable_reasoning_and_valid_fragments(self):
         count = 0
@@ -110,10 +112,11 @@ class SqlEditorial(unittest.TestCase):
         db.execute('DELETE FROM tasks')
         self.assertEqual(run_script(db,sql)[0],[(1,'Анна',0,None),(2,'Борис',0,None),(3,'Вера',0,None)])
 
-    def test_five_checkpoint_questions_per_module(self):
+    def test_checkpoint_coverage_includes_the_relationship_design_extension(self):
         plan=json.loads((ROOT/'content/checkpoints/station9-sql.json').read_text())
         self.assertEqual(len(plan['modules']),6)
-        self.assertTrue(all(len(qs)==5 for qs in plan['modules'].values()))
+        for module, questions in plan['modules'].items():
+            self.assertEqual(len(questions), 7 if module == 'tables' else 5, module)
 
     def test_postgresql_sqlite_and_parameter_contracts_are_not_conflated(self):
         for word in ('PostgreSQL','SQLite','char_length','length','foreign_keys=ON'):

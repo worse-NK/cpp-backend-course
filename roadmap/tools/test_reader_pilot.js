@@ -18,7 +18,14 @@ function settle(env) {
 }
 function expectPosition(view, module, label, stationLabel = 'Станция 15') {
     const breadcrumbs = withClass(view.appTree, 'reader-breadcrumb');
-    assert(breadcrumbs.length === 1, 'One reader breadcrumb in every pilot view');
+    if (label === 'Теория') {
+        const locator = withClass(view.tree, 'edition-chapter');
+        assert(!breadcrumbs.length && locator.length === 1, 'One chapter locator in the article opening; no duplicate above it');
+        assert(text(locator[0]).includes(module ? module.title : label) && locator[0].props['aria-current'] === 'location',
+               'Theory exposes the real current chapter, including deep links');
+        return;
+    }
+    assert(breadcrumbs.length === 1, 'One breadcrumb in each exercise view');
     assert(text(breadcrumbs[0]).includes(module ? module.title : stationLabel),
            'Breadcrumb identifies the chapter or station-wide scope');
     assert(text(breadcrumbs[0]).includes(label), 'Breadcrumb identifies the active view: ' + label);

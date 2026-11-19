@@ -259,7 +259,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "protected не открывает поле любого объекта базы",
-          "code": "struct Base {\nprotected:\n    int value = 0;\n};\nstruct Derived : Base {\n    void update(Derived& peer, Base& base) {\n        value = 1;       // OK: через this\n        peer.value = 2;  // OK: через Derived&\n        // base.value = 3; // ошибка доступа через Base&\n        (void)base;\n    }\n};\nint main() { Derived a, b; a.update(b, b); }"
+          "code": "struct Base {\nprotected:\n    int value = 0;\n};\nstruct Derived : Base {\n    void update(Derived& peer, Base& base) {\n        value = 1;       // OK: через this\n        peer.value = 2;  // OK: через Derived&\n        // base.value = 3; // ошибка доступа через Base&\n        (void)base;\n    }\n};\nint main() { Derived a, b; a.update(b, b); }",
+          "verifiedOutput": "",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -483,7 +485,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Порядок вызовов",
-          "code": "#include <iostream>\n\nclass Base {\npublic:\n    Base()  { std::cout << \"Base ctor\\n\"; }\n    ~Base() { std::cout << \"Base dtor\\n\"; }\n};\nclass Derived : public Base {\npublic:\n    Derived()  { std::cout << \"Derived ctor\\n\"; }\n    ~Derived() { std::cout << \"Derived dtor\\n\"; }\n};\n\nint main() {\n    Derived d;\n}\n// Base ctor      <- сначала база\n// Derived ctor   <- потом наследник\n// Derived dtor   <- уничтожение в обратном порядке\n// Base dtor"
+          "code": "#include <iostream>\n\nclass Base {\npublic:\n    Base()  { std::cout << \"Base ctor\\n\"; }\n    ~Base() { std::cout << \"Base dtor\\n\"; }\n};\nclass Derived : public Base {\npublic:\n    Derived()  { std::cout << \"Derived ctor\\n\"; }\n    ~Derived() { std::cout << \"Derived dtor\\n\"; }\n};\n\nint main() {\n    Derived d;\n}\n// Base ctor      <- сначала база\n// Derived ctor   <- потом наследник\n// Derived dtor   <- уничтожение в обратном порядке\n// Base dtor",
+          "verifiedOutput": "Base ctor\nDerived ctor\nDerived dtor\nBase dtor\n",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -586,7 +590,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: два пути к Root дают два независимых поля value",
-          "code": "#include <iostream>\nstruct Root { int value = 0; };\nstruct Left : Root {};\nstruct Right : Root {};\nstruct Diamond : Left, Right {};\nint main() {\n    Diamond d;\n    d.Left::value = 1;\n    d.Right::value = 2;\n    std::cout << d.Left::value << ' ' << d.Right::value; // 1 2\n    // d.value = 3; // ошибка: не выбран путь к Root\n    // Root* p = &d; // ошибка: преобразование неоднозначно\n}"
+          "code": "#include <iostream>\nstruct Root { int value = 0; };\nstruct Left : Root {};\nstruct Right : Root {};\nstruct Diamond : Left, Right {};\nint main() {\n    Diamond d;\n    d.Left::value = 1;\n    d.Right::value = 2;\n    std::cout << d.Left::value << ' ' << d.Right::value; // 1 2\n    // d.value = 3; // ошибка: не выбран путь к Root\n    // Root* p = &d; // ошибка: преобразование неоднозначно\n}",
+          "verifiedOutput": "1 2",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -630,7 +636,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: виртуальный Root создаёт полный Diamond",
-          "code": "#include <iostream>\nstruct Root {\n    explicit Root(int id) { std::cout << \"Root\" << id << ' '; }\n    ~Root() { std::cout << \"~Root \"; }\n};\nstruct Left : virtual Root {\n    Left() : Root(1) { std::cout << \"Left \"; }\n    ~Left() { std::cout << \"~Left \"; }\n};\nstruct Right : virtual Root {\n    Right() : Root(2) { std::cout << \"Right \"; }\n    ~Right() { std::cout << \"~Right \"; }\n};\nstruct Diamond : Left, Right {\n    Diamond() : Root(42), Left(), Right() { std::cout << \"Diamond \"; }\n    ~Diamond() { std::cout << \"~Diamond \"; }\n};\nint main() { Diamond d; }"
+          "code": "#include <iostream>\nstruct Root {\n    explicit Root(int id) { std::cout << \"Root\" << id << ' '; }\n    ~Root() { std::cout << \"~Root \"; }\n};\nstruct Left : virtual Root {\n    Left() : Root(1) { std::cout << \"Left \"; }\n    ~Left() { std::cout << \"~Left \"; }\n};\nstruct Right : virtual Root {\n    Right() : Root(2) { std::cout << \"Right \"; }\n    ~Right() { std::cout << \"~Right \"; }\n};\nstruct Diamond : Left, Right {\n    Diamond() : Root(42), Left(), Right() { std::cout << \"Diamond \"; }\n    ~Diamond() { std::cout << \"~Diamond \"; }\n};\nint main() { Diamond d; }",
+          "verifiedOutput": "Root42 Left Right Diamond ~Diamond ~Right ~Left ~Root ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -909,7 +917,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Аргумент по умолчанию и виртуальная реализация",
-          "code": "#include <iostream>\nstruct Base {\n    virtual void show(int n = 1) { std::cout << \"B\" << n << ' '; }\n    virtual ~Base() = default;\n};\nstruct Derived : Base {\n    void show(int n = 2) override { std::cout << \"D\" << n << ' '; }\n};\nint main() {\n    Derived d;\n    Base& b = d;\n    b.show();\n    d.show();\n    d.Base::show();\n}"
+          "code": "#include <iostream>\nstruct Base {\n    virtual void show(int n = 1) { std::cout << \"B\" << n << ' '; }\n    virtual ~Base() = default;\n};\nstruct Derived : Base {\n    void show(int n = 2) override { std::cout << \"D\" << n << ' '; }\n};\nint main() {\n    Derived d;\n    Base& b = d;\n    b.show();\n    d.show();\n    d.Base::show();\n}",
+          "verifiedOutput": "D1 D2 B1 ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1012,7 +1022,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Using возвращает базовые перегрузки в набор кандидатов",
-          "code": "#include <iostream>\nstruct Base {\n    void f(int) { std::cout << \"Bi \"; }\n};\nstruct Derived : Base {\n    using Base::f;\n    void f(double) { std::cout << \"Dd \"; }\n};\nint main() {\n    Derived d;\n    d.f(1);\n    d.f(1.5);\n    d.Base::f(1); // Bi Dd Bi\n}"
+          "code": "#include <iostream>\nstruct Base {\n    void f(int) { std::cout << \"Bi \"; }\n};\nstruct Derived : Base {\n    using Base::f;\n    void f(double) { std::cout << \"Dd \"; }\n};\nint main() {\n    Derived d;\n    d.f(1);\n    d.f(1.5);\n    d.Base::f(1); // Bi Dd Bi\n}",
+          "verifiedOutput": "Bi Dd Bi ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1033,7 +1045,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: ref-квалификатор и const проверяются до виртуального выбора",
-          "code": "#include <iostream>\nstruct Access {\n    void edit() & { std::cout << 'E'; }\n    void read() const & { std::cout << 'R'; }\n};\nint main() {\n    Access named;\n    named.edit();\n    named.read();\n    Access{}.read();\n    // Access{}.edit(); // ошибка: временный объект не подходит для edit() &\n} // ERR\n"
+          "code": "#include <iostream>\nstruct Access {\n    void edit() & { std::cout << 'E'; }\n    void read() const & { std::cout << 'R'; }\n};\nint main() {\n    Access named;\n    named.edit();\n    named.read();\n    Access{}.read();\n    // Access{}.edit(); // ошибка: временный объект не подходит для edit() &\n} // ERR\n",
+          "verifiedOutput": "ERR",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1075,7 +1089,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: публичный вызов через базу выбирает private-переопределение",
-          "code": "#include <iostream>\nstruct Base {\n    virtual void run() { std::cout << 'B'; }\n    virtual ~Base() = default;\n};\nclass Derived : public Base {\n    void run() override { std::cout << 'D'; }\n};\nint main() {\n    Derived d;\n    Base& api = d;\n    api.run();       // D: доступ проверен по Base::run\n    // d.run();      // ошибка доступа к Derived::run\n}\n"
+          "code": "#include <iostream>\nstruct Base {\n    virtual void run() { std::cout << 'B'; }\n    virtual ~Base() = default;\n};\nclass Derived : public Base {\n    void run() override { std::cout << 'D'; }\n};\nint main() {\n    Derived d;\n    Base& api = d;\n    api.run();       // D: доступ проверен по Base::run\n    // d.run();      // ошибка доступа к Derived::run\n}\n",
+          "verifiedOutput": "D",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1329,7 +1345,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Сначала тело Derived, затем его поля, затем Base",
-          "code": "#include <iostream>\n#include <memory>\nstruct Member {\n    ~Member() { std::cout << 'M'; }\n};\nstruct Base {\n    virtual ~Base() { std::cout << 'B'; }\n};\nstruct Derived : Base {\n    Member member;\n    ~Derived() override { std::cout << 'D'; }\n};\nint main() {\n    std::unique_ptr<Base> owner = std::make_unique<Derived>();\n} // DMB"
+          "code": "#include <iostream>\n#include <memory>\nstruct Member {\n    ~Member() { std::cout << 'M'; }\n};\nstruct Base {\n    virtual ~Base() { std::cout << 'B'; }\n};\nstruct Derived : Base {\n    Member member;\n    ~Derived() override { std::cout << 'D'; }\n};\nint main() {\n    std::unique_ptr<Base> owner = std::make_unique<Derived>();\n} // DMB",
+          "verifiedOutput": "DMB",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1374,7 +1392,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Если удаление через базу запрещено, запрет можно проверить компилятором",
-          "code": "struct Base {\nprotected:\n    ~Base() = default;\n};\nstruct Derived : Base {};\nint main() {\n    Derived d; // допустимо: Derived разрушает свою базовую часть\n    Base* view = &d;\n    (void)view;\n    // delete view; // ошибка доступа; кроме того, d не получен через new\n}"
+          "code": "struct Base {\nprotected:\n    ~Base() = default;\n};\nstruct Derived : Base {};\nint main() {\n    Derived d; // допустимо: Derived разрушает свою базовую часть\n    Base* view = &d;\n    (void)view;\n    // delete view; // ошибка доступа; кроме того, d не получен через new\n}",
+          "verifiedOutput": "",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1400,7 +1420,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Чисто виртуальный деструктор с определением",
-          "code": "#include <iostream>\nstruct Base {\n    virtual ~Base() = 0;\n};\nBase::~Base() { std::cout << \"B\"; }\nstruct Derived : Base {\n    ~Derived() override { std::cout << \"D\"; }\n};\nint main() { Derived d; } // DB"
+          "code": "#include <iostream>\nstruct Base {\n    virtual ~Base() = 0;\n};\nBase::~Base() { std::cout << \"B\"; }\nstruct Derived : Base {\n    ~Derived() override { std::cout << \"D\"; }\n};\nint main() { Derived d; } // DB",
+          "verifiedOutput": "DB",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1431,7 +1453,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Копия и ссылка ведут к разным объектам",
-          "code": "#include <iostream>\nstruct Base {\n    int id = 1;\n    virtual char kind() const { return 'B'; }\n    virtual ~Base() = default;\n};\nstruct Derived : Base {\n    int extra = 9;\n    char kind() const override { return 'D'; }\n};\nint main() {\n    Derived original;\n    Base copy = original;\n    Base& view = original;\n    copy.id = 7;\n    std::cout << copy.kind() << view.kind() << ' '\n              << original.id << ' ' << copy.id; // BD 1 7\n}"
+          "code": "#include <iostream>\nstruct Base {\n    int id = 1;\n    virtual char kind() const { return 'B'; }\n    virtual ~Base() = default;\n};\nstruct Derived : Base {\n    int extra = 9;\n    char kind() const override { return 'D'; }\n};\nint main() {\n    Derived original;\n    Base copy = original;\n    Base& view = original;\n    copy.id = 7;\n    std::cout << copy.kind() << view.kind() << ' '\n              << original.id << ' ' << copy.id; // BD 1 7\n}",
+          "verifiedOutput": "BD 1 7",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1509,7 +1533,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Копирование сначала выбирает реализацию, затем создаёт объект",
-          "code": "#include <iostream>\n#include <memory>\nstruct Value {\n    virtual int get() const = 0;\n    virtual void set(int) = 0;\n    virtual std::unique_ptr<Value> clone() const = 0;\n    virtual ~Value() = default;\n};\nstruct Number final : Value {\n    int value = 7;\n    int get() const override { return value; }\n    void set(int x) override { value = x; }\n    std::unique_ptr<Value> clone() const override {\n        return std::make_unique<Number>(*this);\n    }\n};\nint main() {\n    Number original;\n    const Value& view = original;\n    auto copy = view.clone();\n    copy->set(8);\n    std::cout << original.get() << ' ' << copy->get(); // 7 8\n}"
+          "code": "#include <iostream>\n#include <memory>\nstruct Value {\n    virtual int get() const = 0;\n    virtual void set(int) = 0;\n    virtual std::unique_ptr<Value> clone() const = 0;\n    virtual ~Value() = default;\n};\nstruct Number final : Value {\n    int value = 7;\n    int get() const override { return value; }\n    void set(int x) override { value = x; }\n    std::unique_ptr<Value> clone() const override {\n        return std::make_unique<Number>(*this);\n    }\n};\nint main() {\n    Number original;\n    const Value& view = original;\n    auto copy = view.clone();\n    copy->set(8);\n    std::cout << original.get() << ' ' << copy->get(); // 7 8\n}",
+          "verifiedOutput": "7 8",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1574,7 +1600,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Клиент зависит от операции, владелец остаётся снаружи",
-          "code": "#include <iostream>\nstruct Sink {\n    virtual void write(int value) = 0;\n    virtual ~Sink() = default;\n};\nstruct LastValue final : Sink {\n    int last = 0;\n    void write(int value) override { last = value; }\n};\nclass Recorder {\n    Sink& sink_;\npublic:\n    explicit Recorder(Sink& sink) : sink_(sink) {}\n    void record(int value) { sink_.write(value); }\n};\nint main() {\n    LastValue sink;\n    Recorder recorder{sink};\n    recorder.record(7);\n    std::cout << sink.last; // 7\n}"
+          "code": "#include <iostream>\nstruct Sink {\n    virtual void write(int value) = 0;\n    virtual ~Sink() = default;\n};\nstruct LastValue final : Sink {\n    int last = 0;\n    void write(int value) override { last = value; }\n};\nclass Recorder {\n    Sink& sink_;\npublic:\n    explicit Recorder(Sink& sink) : sink_(sink) {}\n    void record(int value) { sink_.write(value); }\n};\nint main() {\n    LastValue sink;\n    Recorder recorder{sink};\n    recorder.record(7);\n    std::cout << sink.last; // 7\n}",
+          "verifiedOutput": "7",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1661,7 +1689,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Adapter: перевести send(text) в emit(data, length); полная программа",
-          "code": "#include <cstddef>\n#include <iostream>\n#include <string_view>\n\nstruct Sender {\n    virtual bool send(std::string_view text) = 0;\n    virtual ~Sender() = default;\n};\nstruct LegacyPrinter {\n    bool emit(const char* data, std::size_t length) {\n        for (std::size_t i = 0; i < length; ++i)\n            std::cout << data[i];\n        return true;\n    }\n};\nclass PrinterAdapter final : public Sender {\n    LegacyPrinter& printer_;\npublic:\n    explicit PrinterAdapter(LegacyPrinter& printer) : printer_(printer) {}\n    bool send(std::string_view text) override {\n        return printer_.emit(text.data(), text.size());\n    }\n};\nint main() {\n    LegacyPrinter printer;\n    PrinterAdapter adapter{printer};\n    Sender& sender = adapter;\n    bool accepted = sender.send(\"Hi\");\n    std::cout << ' ' << accepted; // Hi 1\n}"
+          "code": "#include <cstddef>\n#include <iostream>\n#include <string_view>\n\nstruct Sender {\n    virtual bool send(std::string_view text) = 0;\n    virtual ~Sender() = default;\n};\nstruct LegacyPrinter {\n    bool emit(const char* data, std::size_t length) {\n        for (std::size_t i = 0; i < length; ++i)\n            std::cout << data[i];\n        return true;\n    }\n};\nclass PrinterAdapter final : public Sender {\n    LegacyPrinter& printer_;\npublic:\n    explicit PrinterAdapter(LegacyPrinter& printer) : printer_(printer) {}\n    bool send(std::string_view text) override {\n        return printer_.emit(text.data(), text.size());\n    }\n};\nint main() {\n    LegacyPrinter printer;\n    PrinterAdapter adapter{printer};\n    Sender& sender = adapter;\n    bool accepted = sender.send(\"Hi\");\n    std::cout << ' ' << accepted; // Hi 1\n}",
+          "verifiedOutput": "Hi 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1770,7 +1800,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Общая проверка перед разной реализацией",
-          "code": "#include <iostream>\n#include <string_view>\nclass Sender {\npublic:\n    bool send(std::string_view text) {\n        if (text.empty()) return false;\n        return do_send(text);\n    }\n    virtual ~Sender() = default;\nprivate:\n    virtual bool do_send(std::string_view text) = 0;\n};\nclass ConsoleSender : public Sender {\n    bool do_send(std::string_view text) override {\n        std::cout << text;\n        return true;\n    }\n};\nint main() {\n    ConsoleSender concrete;\n    Sender& sender = concrete;\n    std::cout << sender.send(\"\") << ' ';\n    bool sent = sender.send(\"hello\");\n    std::cout << ' ' << sent; // весь вывод: 0 hello 1\n}"
+          "code": "#include <iostream>\n#include <string_view>\nclass Sender {\npublic:\n    bool send(std::string_view text) {\n        if (text.empty()) return false;\n        return do_send(text);\n    }\n    virtual ~Sender() = default;\nprivate:\n    virtual bool do_send(std::string_view text) = 0;\n};\nclass ConsoleSender : public Sender {\n    bool do_send(std::string_view text) override {\n        std::cout << text;\n        return true;\n    }\n};\nint main() {\n    ConsoleSender concrete;\n    Sender& sender = concrete;\n    std::cout << sender.send(\"\") << ' ';\n    bool sent = sender.send(\"hello\");\n    std::cout << ' ' << sent; // весь вывод: 0 hello 1\n}",
+          "verifiedOutput": "0 hello 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1861,7 +1893,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: TcpConnection поддерживает tune, LocalConnection — нет",
-          "code": "#include <iostream>\n#include <typeinfo>\n\nstruct Connection { virtual ~Connection() = default; };\nstruct TcpConnection : Connection {\n    void tune() { std::cout << \"tcp \"; }\n};\nstruct LocalConnection : Connection {};\n\nvoid tuneIfTcp(Connection& connection) {\n    if (auto* tcp = dynamic_cast<TcpConnection*>(&connection)) {\n        tcp->tune();\n    } else {\n        std::cout << \"not-tcp \";\n    }\n}\n\nint main() {\n    TcpConnection tcp;\n    LocalConnection local;\n    tuneIfTcp(tcp);\n    tuneIfTcp(local);\n    try {\n        Connection& base = local;\n        auto& required = dynamic_cast<TcpConnection&>(base);\n        required.tune();\n    } catch (const std::bad_cast&) {\n        std::cout << \"bad_cast\";\n    }\n}\n// Вывод: tcp not-tcp bad_cast"
+          "code": "#include <iostream>\n#include <typeinfo>\n\nstruct Connection { virtual ~Connection() = default; };\nstruct TcpConnection : Connection {\n    void tune() { std::cout << \"tcp \"; }\n};\nstruct LocalConnection : Connection {};\n\nvoid tuneIfTcp(Connection& connection) {\n    if (auto* tcp = dynamic_cast<TcpConnection*>(&connection)) {\n        tcp->tune();\n    } else {\n        std::cout << \"not-tcp \";\n    }\n}\n\nint main() {\n    TcpConnection tcp;\n    LocalConnection local;\n    tuneIfTcp(tcp);\n    tuneIfTcp(local);\n    try {\n        Connection& base = local;\n        auto& required = dynamic_cast<TcpConnection&>(base);\n        required.tune();\n    } catch (const std::bad_cast&) {\n        std::cout << \"bad_cast\";\n    }\n}\n// Вывод: tcp not-tcp bad_cast",
+          "verifiedOutput": "tcp not-tcp bad_cast",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1923,7 +1957,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: Reader и Closer принадлежат одному File",
-          "code": "#include <iostream>\n\nstruct Reader { virtual ~Reader() = default; };\nstruct Closer {\n    virtual ~Closer() = default;\n    virtual void close() = 0;\n};\nstruct File : Reader, Closer {\n    void close() override { std::cout << \"closed \"; }\n};\nstruct Memory : Reader {};\n\nint main() {\n    File file;\n    Memory memory;\n    Reader* first = &file;\n    Reader* second = &memory;\n\n    if (auto* closer = dynamic_cast<Closer*>(first)) {\n        closer->close();\n    }\n    std::cout << (dynamic_cast<Closer*>(second) == nullptr);\n}\n// Вывод: closed 1"
+          "code": "#include <iostream>\n\nstruct Reader { virtual ~Reader() = default; };\nstruct Closer {\n    virtual ~Closer() = default;\n    virtual void close() = 0;\n};\nstruct File : Reader, Closer {\n    void close() override { std::cout << \"closed \"; }\n};\nstruct Memory : Reader {};\n\nint main() {\n    File file;\n    Memory memory;\n    Reader* first = &file;\n    Reader* second = &memory;\n\n    if (auto* closer = dynamic_cast<Closer*>(first)) {\n        closer->close();\n    }\n    std::cout << (dynamic_cast<Closer*>(second) == nullptr);\n}\n// Вывод: closed 1",
+          "verifiedOutput": "closed 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1950,7 +1986,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: typeid указателя, полиморфного объекта и обычной базы",
-          "code": "#include <iostream>\n#include <typeinfo>\n\nstruct Base { virtual ~Base() = default; };\nstruct Derived : Base {};\nstruct Plain {};\nstruct PlainDerived : Plain {};\n\nint main() {\n    Derived object;\n    Base* p = &object;\n    PlainDerived plain;\n    Plain& plainBase = plain;\n\n    std::cout << (typeid(p) == typeid(Base*)) << ' '\n              << (typeid(*p) == typeid(Derived)) << ' '\n              << (typeid(plainBase) == typeid(Plain)) << ' ';\n    p = nullptr;\n    try {\n        (void)typeid(*p);\n    } catch (const std::bad_typeid&) {\n        std::cout << \"bad_typeid\";\n    }\n}\n// Вывод: 1 1 1 bad_typeid"
+          "code": "#include <iostream>\n#include <typeinfo>\n\nstruct Base { virtual ~Base() = default; };\nstruct Derived : Base {};\nstruct Plain {};\nstruct PlainDerived : Plain {};\n\nint main() {\n    Derived object;\n    Base* p = &object;\n    PlainDerived plain;\n    Plain& plainBase = plain;\n\n    std::cout << (typeid(p) == typeid(Base*)) << ' '\n              << (typeid(*p) == typeid(Derived)) << ' '\n              << (typeid(plainBase) == typeid(Plain)) << ' ';\n    p = nullptr;\n    try {\n        (void)typeid(*p);\n    } catch (const std::bad_typeid&) {\n        std::cout << \"bad_typeid\";\n    }\n}\n// Вывод: 1 1 1 bad_typeid",
+          "verifiedOutput": "1 1 1 bad_typeid",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1967,7 +2005,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: typeid не всегда выполняет действие внутри скобок",
-          "code": "#include <iostream>\n#include <typeinfo>\n\nint calls = 0;\nstruct Base { virtual ~Base() = default; };\nstruct Derived : Base {};\n\nBase& touch(Base& object) {\n    ++calls;\n    return object;\n}\n\nint main() {\n    (void)typeid(++calls);\n    std::cout << calls << ' ';\n\n    Derived object;\n    (void)typeid(touch(object));\n    std::cout << calls;\n}\n// Вывод: 0 1"
+          "code": "#include <iostream>\n#include <typeinfo>\n\nint calls = 0;\nstruct Base { virtual ~Base() = default; };\nstruct Derived : Base {};\n\nBase& touch(Base& object) {\n    ++calls;\n    return object;\n}\n\nint main() {\n    (void)typeid(++calls);\n    std::cout << calls << ' ';\n\n    Derived object;\n    (void)typeid(touch(object));\n    std::cout << calls;\n}\n// Вывод: 0 1",
+          "verifiedOutput": "0 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2038,7 +2078,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: явные обработчики закрытого набора",
-          "code": "#include <iostream>\n#include <variant>\n\nstruct Connected {};\nstruct Data { int size; };\nstruct Closed {};\n\nstruct Describe {\n    void operator()(const Connected&) const { std::cout << \"connected\"; }\n    void operator()(const Data& data) const { std::cout << \"data \" << data.size; }\n    void operator()(const Closed&) const { std::cout << \"closed\"; }\n};\n\nint main() {\n    std::variant<Connected, Data, Closed> event = Data{3};\n    std::visit(Describe{}, event); // data 3\n}\n"
+          "code": "#include <iostream>\n#include <variant>\n\nstruct Connected {};\nstruct Data { int size; };\nstruct Closed {};\n\nstruct Describe {\n    void operator()(const Connected&) const { std::cout << \"connected\"; }\n    void operator()(const Data& data) const { std::cout << \"data \" << data.size; }\n    void operator()(const Closed&) const { std::cout << \"closed\"; }\n};\n\nint main() {\n    std::variant<Connected, Data, Closed> event = Data{3};\n    std::visit(Describe{}, event); // data 3\n}\n",
+          "verifiedOutput": "data 3",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2216,17 +2258,15 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа · C++20 · main.cpp",
-          "code": "#include <iostream>\n#include <memory>\n\nstruct Member {\n    Member() { std::cout << \"Member constructor\\n\"; }\n    ~Member() { std::cout << \"Member destructor\\n\"; }\n};\n\nclass Base {\npublic:\n    Base() {\n        std::cout << \"Base constructor\\n\";\n        run();\n    }\n    virtual void run() const { std::cout << \"Base run\\n\"; }\n    virtual ~Base() { std::cout << \"Base destructor\\n\"; }\n};\n\nclass Derived final : public Base {\n    Member member_;\npublic:\n    Derived() { std::cout << \"Derived constructor\\n\"; }\n    void run() const override { std::cout << \"Derived run\\n\"; }\n    ~Derived() override { std::cout << \"Derived destructor\\n\"; }\n};\n\nint main() {\n    std::cout << \"before scope\\n\";\n    {\n        std::unique_ptr<Base> p = std::make_unique<Derived>();\n        std::cout << \"ready\\n\";\n        p->run();\n    }\n    std::cout << \"after scope\\n\";\n}\n"
+          "code": "#include <iostream>\n#include <memory>\n\nstruct Member {\n    Member() { std::cout << \"Member constructor\\n\"; }\n    ~Member() { std::cout << \"Member destructor\\n\"; }\n};\n\nclass Base {\npublic:\n    Base() {\n        std::cout << \"Base constructor\\n\";\n        run();\n    }\n    virtual void run() const { std::cout << \"Base run\\n\"; }\n    virtual ~Base() { std::cout << \"Base destructor\\n\"; }\n};\n\nclass Derived final : public Base {\n    Member member_;\npublic:\n    Derived() { std::cout << \"Derived constructor\\n\"; }\n    void run() const override { std::cout << \"Derived run\\n\"; }\n    ~Derived() override { std::cout << \"Derived destructor\\n\"; }\n};\n\nint main() {\n    std::cout << \"before scope\\n\";\n    {\n        std::unique_ptr<Base> p = std::make_unique<Derived>();\n        std::cout << \"ready\\n\";\n        p->run();\n    }\n    std::cout << \"after scope\\n\";\n}\n",
+          "verifiedOutput": "before scope\nBase constructor\nBase run\nMember constructor\nDerived constructor\nready\nDerived run\nDerived destructor\nMember destructor\nBase destructor\nafter scope\n",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Ожидаемый вывод полной программы"
         },
         {
           "type": "code",
           "caption": "Необязательный запуск вне учебника: Linux/macOS с g++",
           "code": "g++ -std=c++20 -Wall -Wextra -pedantic  main.cpp -o example\n./example\n"
-        },
-        {
-          "type": "code",
-          "caption": "Ожидаемый вывод полной программы",
-          "code": "before scope\nBase constructor\nBase run\nMember constructor\nDerived constructor\nready\nDerived run\nDerived destructor\nMember destructor\nBase destructor\nafter scope\n"
         },
         {
           "type": "text",
@@ -2314,7 +2354,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: две фигуры, общий вызов и явное владение",
-          "code": "#include <iostream>\n#include <vector>\n#include <memory>\n#include <string>\n\nclass Shape {                              // абстрактный базовый класс\npublic:\n    virtual double area() const = 0;       // чисто виртуальная\n    virtual std::string name() const = 0;\n    virtual ~Shape() = default;            // ВИРТУАЛЬНЫЙ деструктор\n};\n\nclass Circle : public Shape {              // наследник\n    double r;\npublic:\n    Circle(double radius) : r(radius) {}\n    double area() const override { return 3.14159 * r * r; }\n    std::string name() const override { return \"круг\"; }\n};\n\nclass Rectangle : public Shape {\n    double w, h;\npublic:\n    Rectangle(double w_, double h_) : w(w_), h(h_) {}\n    double area() const override { return w * h; }\n    std::string name() const override { return \"прямоугольник\"; }\n};\n\n// полиморфный код: работает с любыми Shape через ссылку\ndouble totalArea(const std::vector<std::unique_ptr<Shape>>& shapes) {\n    double sum = 0;\n    for (const auto& s : shapes) {\n        const double current = s->area();\n        std::cout << s->name() << \": \" << current << \"\\n\";\n        sum += current;\n    }\n    return sum;\n}\n\nint main() {\n    std::vector<std::unique_ptr<Shape>> shapes;\n    shapes.push_back(std::make_unique<Circle>(2.0));\n    shapes.push_back(std::make_unique<Rectangle>(3.0, 4.0));\n\n    const double sum = totalArea(shapes);\n    std::cout << \"итого: \" << sum << \"\\n\";\n}   // unique_ptr + virtual ~Shape -> всё корректно освобождается"
+          "code": "#include <iostream>\n#include <vector>\n#include <memory>\n#include <string>\n\nclass Shape {                              // абстрактный базовый класс\npublic:\n    virtual double area() const = 0;       // чисто виртуальная\n    virtual std::string name() const = 0;\n    virtual ~Shape() = default;            // ВИРТУАЛЬНЫЙ деструктор\n};\n\nclass Circle : public Shape {              // наследник\n    double r;\npublic:\n    Circle(double radius) : r(radius) {}\n    double area() const override { return 3.14159 * r * r; }\n    std::string name() const override { return \"круг\"; }\n};\n\nclass Rectangle : public Shape {\n    double w, h;\npublic:\n    Rectangle(double w_, double h_) : w(w_), h(h_) {}\n    double area() const override { return w * h; }\n    std::string name() const override { return \"прямоугольник\"; }\n};\n\n// полиморфный код: работает с любыми Shape через ссылку\ndouble totalArea(const std::vector<std::unique_ptr<Shape>>& shapes) {\n    double sum = 0;\n    for (const auto& s : shapes) {\n        const double current = s->area();\n        std::cout << s->name() << \": \" << current << \"\\n\";\n        sum += current;\n    }\n    return sum;\n}\n\nint main() {\n    std::vector<std::unique_ptr<Shape>> shapes;\n    shapes.push_back(std::make_unique<Circle>(2.0));\n    shapes.push_back(std::make_unique<Rectangle>(3.0, 4.0));\n\n    const double sum = totalArea(shapes);\n    std::cout << \"итого: \" << sum << \"\\n\";\n}   // unique_ptr + virtual ~Shape -> всё корректно освобождается",
+          "verifiedOutput": "круг: 12.5664\nпрямоугольник: 12\nитого: 24.5664\n",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",

@@ -265,7 +265,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Запуск потока",
-          "code": "#include <thread>\n#include <iostream>\n\nvoid work() { std::cout << \"работа в потоке\\n\"; }\n\nint main() {\n    std::thread t(work);   // новый поток уже создан и может исполняться\n    // scheduler сам выбирает, какой поток получит CPU первым\n    t.join();\n    std::cout << \"main завершён\\n\";\n}"
+          "code": "#include <thread>\n#include <iostream>\n\nvoid work() { std::cout << \"работа в потоке\\n\"; }\n\nint main() {\n    std::thread t(work);   // новый поток уже создан и может исполняться\n    // scheduler сам выбирает, какой поток получит CPU первым\n    t.join();\n    std::cout << \"main завершён\\n\";\n}",
+          "verifiedOutput": "работа в потоке\nmain завершён\n",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -446,7 +448,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "RAII и join: вывод AWDE при успешном запуске и выводе",
-          "code": "#include <iostream>\n#include <thread>\n\nstruct Report {\n    ~Report() { std::cout << 'D'; }\n};\n\nint main() {\n    std::cout << 'A';\n    {\n        Report report;\n        std::jthread worker([] { std::cout << 'W'; });\n    }\n    std::cout << 'E';\n}"
+          "code": "#include <iostream>\n#include <thread>\n\nstruct Report {\n    ~Report() { std::cout << 'D'; }\n};\n\nint main() {\n    std::cout << 'A';\n    {\n        Report report;\n        std::jthread worker([] { std::cout << 'W'; });\n    }\n    std::cout << 'E';\n}",
+          "verifiedOutput": "AWDE",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1785,7 +1789,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Повтор после неуспеха: вывод 0 7 1 8",
-          "code": "#include <atomic>\n#include <iostream>\n\nint main() {\n    std::atomic<int> value{7};\n    int expected = 5;\n    bool first = value.compare_exchange_strong(expected, expected + 1);\n    std::cout << first << ' ' << expected << ' ';\n    bool second = value.compare_exchange_strong(expected, expected + 1);\n    std::cout << second << ' ' << value.load();\n}"
+          "code": "#include <atomic>\n#include <iostream>\n\nint main() {\n    std::atomic<int> value{7};\n    int expected = 5;\n    bool first = value.compare_exchange_strong(expected, expected + 1);\n    std::cout << first << ' ' << expected << ' ';\n    bool second = value.compare_exchange_strong(expected, expected + 1);\n    std::cout << second << ' ' << value.load();\n}",
+          "verifiedOutput": "0 7 1 8",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1875,7 +1881,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Публикация результата: вывод 42",
-          "code": "#include <atomic>\n#include <iostream>\n#include <thread>\n\nint main() {\n    int payload = 0;\n    std::atomic<int> state{0};\n    std::jthread producer([&] {\n        payload = 42;\n        state.store(1, std::memory_order_release);\n        state.notify_one();\n    });\n    state.wait(0, std::memory_order_acquire);\n    std::cout << payload;\n}"
+          "code": "#include <atomic>\n#include <iostream>\n#include <thread>\n\nint main() {\n    int payload = 0;\n    std::atomic<int> state{0};\n    std::jthread producer([&] {\n        payload = 42;\n        state.store(1, std::memory_order_release);\n        state.notify_one();\n    });\n    state.wait(0, std::memory_order_acquire);\n    std::cout << payload;\n}",
+          "verifiedOutput": "42",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1910,7 +1918,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "atomic_ref: атомарная фаза закончилась до обычного чтения",
-          "code": "#include <atomic>\n#include <cstdint>\n#include <iostream>\n\nint main() {\n    alignas(std::atomic_ref<std::uint64_t>::required_alignment)\n        std::uint64_t requests = 0;\n    {\n        std::atomic_ref<std::uint64_t> count(requests);\n        count.fetch_add(2, std::memory_order_relaxed);\n        std::cout << count.load() << ' ';\n        // std::cout << requests; // так обращаться здесь нельзя\n    }\n    std::cout << requests; // 2: ссылающихся atomic_ref уже нет\n}"
+          "code": "#include <atomic>\n#include <cstdint>\n#include <iostream>\n\nint main() {\n    alignas(std::atomic_ref<std::uint64_t>::required_alignment)\n        std::uint64_t requests = 0;\n    {\n        std::atomic_ref<std::uint64_t> count(requests);\n        count.fetch_add(2, std::memory_order_relaxed);\n        std::cout << count.load() << ' ';\n        // std::cout << requests; // так обращаться здесь нельзя\n    }\n    std::cout << requests; // 2: ссылающихся atomic_ref уже нет\n}",
+          "verifiedOutput": "2 2",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2097,7 +2107,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Разделение счётчиков: чтение только после завершения работников",
-          "code": "#include <array>\n#include <cstdint>\n#include <iostream>\n#include <new>\n#include <cstddef>\n#include <thread>\n\n#if defined(__cpp_lib_hardware_interference_size) && \\\n    __cpp_lib_hardware_interference_size >= 201603L\nconstexpr std::size_t counter_spacing = std::hardware_destructive_interference_size;\n#else\nconstexpr std::size_t counter_spacing = 64; // учебный fallback, не замер кэша\n#endif\n\nstruct alignas(counter_spacing) Shard {\n    std::uint64_t value = 0;\n};\n\nint main() {\n    std::array<Shard, 2> counts{};\n    {\n        std::jthread a([&] { for (int i=0; i<1000; ++i) ++counts[0].value; });\n        std::jthread b([&] { for (int i=0; i<1000; ++i) ++counts[1].value; });\n    } // оба join уже завершились\n    std::cout << counts[0].value + counts[1].value; // 2000\n}"
+          "code": "#include <array>\n#include <cstdint>\n#include <iostream>\n#include <new>\n#include <cstddef>\n#include <thread>\n\n#if defined(__cpp_lib_hardware_interference_size) && \\\n    __cpp_lib_hardware_interference_size >= 201603L\nconstexpr std::size_t counter_spacing = std::hardware_destructive_interference_size;\n#else\nconstexpr std::size_t counter_spacing = 64; // учебный fallback, не замер кэша\n#endif\n\nstruct alignas(counter_spacing) Shard {\n    std::uint64_t value = 0;\n};\n\nint main() {\n    std::array<Shard, 2> counts{};\n    {\n        std::jthread a([&] { for (int i=0; i<1000; ++i) ++counts[0].value; });\n        std::jthread b([&] { for (int i=0; i<1000; ++i) ++counts[1].value; });\n    } // оба join уже завершились\n    std::cout << counts[0].value + counts[1].value; // 2000\n}",
+          "verifiedOutput": "2000",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "note",
@@ -2266,17 +2278,15 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: граничные случаи и обмен между двумя потоками",
-          "code": "#include <array>\n#include <atomic>\n#include <cstddef>\n#include <iostream>\n#include <stdexcept>\n#include <thread>\n\ntemplate<std::size_t Slots>\nclass SpscIntQueue {\n    static_assert(Slots >= 2);\n    static_assert(std::atomic<std::size_t>::is_always_lock_free,\n                  \"This example requires lock-free size_t atomics\");\n    std::array<int, Slots> data_{};\n    std::atomic<std::size_t> read_{0};\n    std::atomic<std::size_t> write_{0};\n    static std::size_t next(std::size_t i) noexcept {\n        return i + 1 == Slots ? 0 : i + 1;\n    }\npublic:\n    // Exactly one producer calls this method.\n    bool try_push(int value) noexcept {\n        const auto w = write_.load(std::memory_order_relaxed);\n        const auto following = next(w);\n        if (following == read_.load(std::memory_order_acquire))\n            return false;\n        data_[w] = value;\n        write_.store(following, std::memory_order_release);\n        return true;\n    }\n    // Exactly one consumer calls this method.\n    bool try_pop(int& value) noexcept {\n        const auto r = read_.load(std::memory_order_relaxed);\n        if (r == write_.load(std::memory_order_acquire))\n            return false;\n        value = data_[r];\n        read_.store(next(r), std::memory_order_release);\n        return true;\n    }\n};\n\nvoid check(bool value, const char* message) {\n    if (!value) throw std::runtime_error(message);\n}\nint main() {\n    try {\n        SpscIntQueue<4> small; // usable capacity = 3\n        int value = -1;\n        check(!small.try_pop(value) && value == -1, \"empty\");\n        check(small.try_push(10), \"push 10\");\n        check(small.try_push(20), \"push 20\");\n        check(small.try_push(30), \"push 30\");\n        check(!small.try_push(40), \"full\");\n        check(small.try_pop(value) && value == 10, \"pop 10\");\n        check(small.try_push(40), \"wrap\");\n        for (int expected : {20, 30, 40})\n            check(small.try_pop(value) && value == expected, \"FIFO\");\n        check(!small.try_pop(value), \"empty again\");\n\n        SpscIntQueue<128> queue;\n        constexpr int count = 100000;\n        bool ordered = true; // written only by consumer, read after join\n        {\n            std::jthread producer([&](std::stop_token stop) {\n                for (int i = 0; i < count; ++i) {\n                    while (!queue.try_push(i)) {\n                        if (stop.stop_requested()) return;\n                        std::this_thread::yield();\n                    }\n                }\n            });\n            std::jthread consumer([&] {\n                for (int expected = 0; expected < count; ++expected) {\n                    int item = -1;\n                    while (!queue.try_pop(item)) std::this_thread::yield();\n                    if (item != expected) ordered = false;\n                }\n            });\n            producer.join();\n            consumer.join();\n        } // both threads joined before accessing ordered / destroying queue\n        check(ordered, \"concurrent FIFO\");\n        std::cout << \"boundary checks passed\\nFIFO 100000 passed\\n\";\n    } catch (const std::exception& e) {\n        std::cerr << e.what() << '\\n';\n        return 1;\n    }\n}\n"
+          "code": "#include <array>\n#include <atomic>\n#include <cstddef>\n#include <iostream>\n#include <stdexcept>\n#include <thread>\n\ntemplate<std::size_t Slots>\nclass SpscIntQueue {\n    static_assert(Slots >= 2);\n    static_assert(std::atomic<std::size_t>::is_always_lock_free,\n                  \"This example requires lock-free size_t atomics\");\n    std::array<int, Slots> data_{};\n    std::atomic<std::size_t> read_{0};\n    std::atomic<std::size_t> write_{0};\n    static std::size_t next(std::size_t i) noexcept {\n        return i + 1 == Slots ? 0 : i + 1;\n    }\npublic:\n    // Exactly one producer calls this method.\n    bool try_push(int value) noexcept {\n        const auto w = write_.load(std::memory_order_relaxed);\n        const auto following = next(w);\n        if (following == read_.load(std::memory_order_acquire))\n            return false;\n        data_[w] = value;\n        write_.store(following, std::memory_order_release);\n        return true;\n    }\n    // Exactly one consumer calls this method.\n    bool try_pop(int& value) noexcept {\n        const auto r = read_.load(std::memory_order_relaxed);\n        if (r == write_.load(std::memory_order_acquire))\n            return false;\n        value = data_[r];\n        read_.store(next(r), std::memory_order_release);\n        return true;\n    }\n};\n\nvoid check(bool value, const char* message) {\n    if (!value) throw std::runtime_error(message);\n}\nint main() {\n    try {\n        SpscIntQueue<4> small; // usable capacity = 3\n        int value = -1;\n        check(!small.try_pop(value) && value == -1, \"empty\");\n        check(small.try_push(10), \"push 10\");\n        check(small.try_push(20), \"push 20\");\n        check(small.try_push(30), \"push 30\");\n        check(!small.try_push(40), \"full\");\n        check(small.try_pop(value) && value == 10, \"pop 10\");\n        check(small.try_push(40), \"wrap\");\n        for (int expected : {20, 30, 40})\n            check(small.try_pop(value) && value == expected, \"FIFO\");\n        check(!small.try_pop(value), \"empty again\");\n\n        SpscIntQueue<128> queue;\n        constexpr int count = 100000;\n        bool ordered = true; // written only by consumer, read after join\n        {\n            std::jthread producer([&](std::stop_token stop) {\n                for (int i = 0; i < count; ++i) {\n                    while (!queue.try_push(i)) {\n                        if (stop.stop_requested()) return;\n                        std::this_thread::yield();\n                    }\n                }\n            });\n            std::jthread consumer([&] {\n                for (int expected = 0; expected < count; ++expected) {\n                    int item = -1;\n                    while (!queue.try_pop(item)) std::this_thread::yield();\n                    if (item != expected) ordered = false;\n                }\n            });\n            producer.join();\n            consumer.join();\n        } // both threads joined before accessing ordered / destroying queue\n        check(ordered, \"concurrent FIFO\");\n        std::cout << \"boundary checks passed\\nFIFO 100000 passed\\n\";\n    } catch (const std::exception& e) {\n        std::cerr << e.what() << '\\n';\n        return 1;\n    }\n}\n",
+          "verifiedOutput": "boundary checks passed\nFIFO 100000 passed\n",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Ожидаемый вывод"
         },
         {
           "type": "code",
           "caption": "Сборка и запуск; timeout — внешняя страховка тестового процесса на Linux",
           "code": "g++ -std=c++20 -O2 -Wall -Wextra -pedantic -pthread spsc.cpp -o spsc\ntimeout 10s ./spsc"
-        },
-        {
-          "type": "code",
-          "caption": "Ожидаемый вывод",
-          "code": "boundary checks passed\nFIFO 100000 passed"
         },
         {
           "type": "text",
@@ -2686,7 +2696,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Исключение не завершает once_flag: вывод 1E2",
-          "code": "#include <iostream>\n#include <mutex>\n#include <stdexcept>\n\nint main() {\n    std::once_flag flag;\n    int attempts = 0;\n    auto init = [&] {\n        std::cout << ++attempts;\n        if (attempts == 1) throw std::runtime_error(\"retry\");\n    };\n    for (int i = 0; i < 3; ++i) {\n        try { std::call_once(flag, init); }\n        catch (const std::runtime_error&) { std::cout << 'E'; }\n    }\n}"
+          "code": "#include <iostream>\n#include <mutex>\n#include <stdexcept>\n\nint main() {\n    std::once_flag flag;\n    int attempts = 0;\n    auto init = [&] {\n        std::cout << ++attempts;\n        if (attempts == 1) throw std::runtime_error(\"retry\");\n    };\n    for (int i = 0; i < 3; ++i) {\n        try { std::call_once(flag, init); }\n        catch (const std::runtime_error&) { std::cout << 'E'; }\n    }\n}",
+          "verifiedOutput": "1E2",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2790,7 +2802,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <condition_variable>\n#include <iostream>\n#include <mutex>\n#include <stop_token>\n\nint main() {\n    std::mutex m;\n    std::condition_variable_any cv;\n    std::stop_source source;\n    source.request_stop();\n    std::unique_lock lock(m);\n    bool result = cv.wait(lock, source.get_token(), [] { return true; });\n    std::cout << result << ' ' << lock.owns_lock();\n}",
-          "caption": "Остановка уже запрошена, но предикат истинен: вывод 1 1"
+          "caption": "Остановка уже запрошена, но предикат истинен: вывод 1 1",
+          "verifiedOutput": "1 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3040,7 +3054,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "packaged_task: задача, которую можно передать",
-          "code": "#include <future>\n#include <iostream>\n#include <thread>\n\nint compute(int x) { return x * 2; }\n\nint main() {\n    std::packaged_task<int(int)> task(compute);   // обернули функцию\n    std::future<int> f = task.get_future();       // взяли future\n\n    std::jthread t(std::move(task), 21);   // передали задачу в поток\n    t.join();\n\n    std::cout << f.get();   // 42\n}"
+          "code": "#include <future>\n#include <iostream>\n#include <thread>\n\nint compute(int x) { return x * 2; }\n\nint main() {\n    std::packaged_task<int(int)> task(compute);   // обернули функцию\n    std::future<int> f = task.get_future();       // взяли future\n\n    std::jthread t(std::move(task), 21);   // передали задачу в поток\n    t.join();\n\n    std::cout << f.get();   // 42\n}",
+          "verifiedOutput": "42",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -3106,7 +3122,10 @@ window.STATION_DATA = {
           "caption": "Полная программа · C++23: очередь без потоков, чтобы видеть только владение и вызов",
           "exampleId": "s6-move-only-task-queue",
           "standard": "23",
-          "code": "#include <deque>\n#include <functional>\n#include <iostream>\n#include <memory>\n#include <utility>\n\n#if !defined(__cpp_lib_move_only_function) || __cpp_lib_move_only_function < 202110L\n#error \"This example requires C++23 move_only_function\"\n#endif\n\nint main() {\n    using Task = std::move_only_function<void()>;\n    std::deque<Task> pending;\n\n    auto input = std::make_unique<int>(42);\n    pending.emplace_back([owned = std::move(input)] {\n        std::cout << \"job \" << *owned << '\\n';\n    });\n    std::cout << \"source \" << (input ? \"owns\" : \"empty\") << '\\n';\n\n    while (!pending.empty()) {\n        Task task = std::move(pending.front());\n        pending.pop_front();\n        if (task) task();\n    }\n\n    Task repeat = [count = 0]() mutable {\n        std::cout << \"call \" << ++count << '\\n';\n    };\n    repeat();\n    repeat();\n}"
+          "code": "#include <deque>\n#include <functional>\n#include <iostream>\n#include <memory>\n#include <utility>\n\n#if !defined(__cpp_lib_move_only_function) || __cpp_lib_move_only_function < 202110L\n#error \"This example requires C++23 move_only_function\"\n#endif\n\nint main() {\n    using Task = std::move_only_function<void()>;\n    std::deque<Task> pending;\n\n    auto input = std::make_unique<int>(42);\n    pending.emplace_back([owned = std::move(input)] {\n        std::cout << \"job \" << *owned << '\\n';\n    });\n    std::cout << \"source \" << (input ? \"owns\" : \"empty\") << '\\n';\n\n    while (!pending.empty()) {\n        Task task = std::move(pending.front());\n        pending.pop_front();\n        if (task) task();\n    }\n\n    Task repeat = [count = 0]() mutable {\n        std::cout << \"call \" << ++count << '\\n';\n    };\n    repeat();\n    repeat();\n}",
+          "verifiedOutput": "source empty\njob 42\ncall 1\ncall 2\n",
+          "verifiedOutputStandard": "23",
+          "verifiedOutputCaption": "Ожидаемый вывод"
         },
         {
           "type": "text",
@@ -3115,11 +3134,6 @@ window.STATION_DATA = {
         {
           "type": "text",
           "html": "После <code>if (task)</code> вызывается лямбда, которая читает свой ресурс. В конце итерации локальная оболочка уничтожает лямбду, а её unique_ptr освобождает число. Если очередь уничтожить до вызова, находящаяся в ней задача тоже освободит данные, но полезная обработка не произойдёт. Владение ресурсом и обещание выполнить работу — разные обязанности."
-        },
-        {
-          "type": "code",
-          "caption": "Ожидаемый вывод",
-          "code": "source empty\njob 42\ncall 1\ncall 2"
         },
         {
           "type": "text",
@@ -3203,7 +3217,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Исключение тоже результат: вывод 1 E 0",
-          "code": "#include <future>\n#include <iostream>\n#include <stdexcept>\n\nint main() {\n    std::promise<int> provider;\n    auto result = provider.get_future();\n    provider.set_exception(std::make_exception_ptr(std::runtime_error(\"failed\")));\n    std::cout << result.valid() << ' ';\n    result.wait(); // ждёт готовность, но не извлекает исключение\n    try { (void)result.get(); }\n    catch (const std::runtime_error&) { std::cout << \"E \"; }\n    std::cout << result.valid();\n}"
+          "code": "#include <future>\n#include <iostream>\n#include <stdexcept>\n\nint main() {\n    std::promise<int> provider;\n    auto result = provider.get_future();\n    provider.set_exception(std::make_exception_ptr(std::runtime_error(\"failed\")));\n    std::cout << result.valid() << ' ';\n    result.wait(); // ждёт готовность, но не извлекает исключение\n    try { (void)result.get(); }\n    catch (const std::runtime_error&) { std::cout << \"E \"; }\n    std::cout << result.valid();\n}",
+          "verifiedOutput": "1 E 0",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "note",
@@ -3312,16 +3328,14 @@ window.STATION_DATA = {
           "caption": "Полная программа · C++20: два ручных продолжения, безопасное завершение и передача исключения",
           "exampleId": "s6-coroutine-lifecycle",
           "standard": "20/23",
-          "code": "#include <coroutine>\n#include <exception>\n#include <iostream>\n#include <stdexcept>\n#include <string>\n#include <utility>\n\nclass StepTask {\npublic:\n    struct promise_type {\n        std::exception_ptr error;\n\n        StepTask get_return_object() noexcept {\n            return StepTask{\n                std::coroutine_handle<promise_type>::from_promise(*this)};\n        }\n        std::suspend_always initial_suspend() const noexcept { return {}; }\n        std::suspend_always final_suspend() const noexcept { return {}; }\n        void return_void() const noexcept {}\n        void unhandled_exception() noexcept { error = std::current_exception(); }\n    };\n\nprivate:\n    using Handle = std::coroutine_handle<promise_type>;\n    Handle handle_;\n    explicit StepTask(Handle handle) noexcept : handle_(handle) {}\n\npublic:\n    StepTask(const StepTask&) = delete;\n    StepTask& operator=(const StepTask&) = delete;\n    StepTask(StepTask&& other) noexcept\n        : handle_(std::exchange(other.handle_, {})) {}\n    StepTask& operator=(StepTask&&) = delete;\n\n    ~StepTask() {\n        if (handle_) handle_.destroy();\n    }\n\n    bool done() const { return !handle_ || handle_.done(); }\n\n    bool resume() {\n        if (done()) return false;\n        handle_.resume();\n        if (handle_.promise().error)\n            std::rethrow_exception(handle_.promise().error);\n        return !handle_.done();\n    }\n};\n\nStepTask report(std::string name) {\n    std::cout << \"begin \" << name << '\\n';\n    co_await std::suspend_always{};\n    std::cout << \"end \" << name << '\\n';\n    co_return;\n}\n\nStepTask fail() {\n    throw std::runtime_error(\"boom\");\n    co_return;\n}\n\nint main() {\n    auto work = report(std::string{\"weekly\"});\n    std::cout << \"created\\n\";\n    work.resume();\n    std::cout << \"caller\\n\";\n    work.resume();\n    std::cout << std::boolalpha << \"done \" << work.done() << '\\n';\n    std::cout << \"again \" << work.resume() << '\\n';\n\n    try {\n        auto bad = fail();\n        bad.resume();\n    } catch (const std::runtime_error& error) {\n        std::cout << \"caught \" << error.what() << '\\n';\n    }\n}"
+          "code": "#include <coroutine>\n#include <exception>\n#include <iostream>\n#include <stdexcept>\n#include <string>\n#include <utility>\n\nclass StepTask {\npublic:\n    struct promise_type {\n        std::exception_ptr error;\n\n        StepTask get_return_object() noexcept {\n            return StepTask{\n                std::coroutine_handle<promise_type>::from_promise(*this)};\n        }\n        std::suspend_always initial_suspend() const noexcept { return {}; }\n        std::suspend_always final_suspend() const noexcept { return {}; }\n        void return_void() const noexcept {}\n        void unhandled_exception() noexcept { error = std::current_exception(); }\n    };\n\nprivate:\n    using Handle = std::coroutine_handle<promise_type>;\n    Handle handle_;\n    explicit StepTask(Handle handle) noexcept : handle_(handle) {}\n\npublic:\n    StepTask(const StepTask&) = delete;\n    StepTask& operator=(const StepTask&) = delete;\n    StepTask(StepTask&& other) noexcept\n        : handle_(std::exchange(other.handle_, {})) {}\n    StepTask& operator=(StepTask&&) = delete;\n\n    ~StepTask() {\n        if (handle_) handle_.destroy();\n    }\n\n    bool done() const { return !handle_ || handle_.done(); }\n\n    bool resume() {\n        if (done()) return false;\n        handle_.resume();\n        if (handle_.promise().error)\n            std::rethrow_exception(handle_.promise().error);\n        return !handle_.done();\n    }\n};\n\nStepTask report(std::string name) {\n    std::cout << \"begin \" << name << '\\n';\n    co_await std::suspend_always{};\n    std::cout << \"end \" << name << '\\n';\n    co_return;\n}\n\nStepTask fail() {\n    throw std::runtime_error(\"boom\");\n    co_return;\n}\n\nint main() {\n    auto work = report(std::string{\"weekly\"});\n    std::cout << \"created\\n\";\n    work.resume();\n    std::cout << \"caller\\n\";\n    work.resume();\n    std::cout << std::boolalpha << \"done \" << work.done() << '\\n';\n    std::cout << \"again \" << work.resume() << '\\n';\n\n    try {\n        auto bad = fail();\n        bad.resume();\n    } catch (const std::runtime_error& error) {\n        std::cout << \"caught \" << error.what() << '\\n';\n    }\n}",
+          "verifiedOutput": "created\nbegin weekly\ncaller\nend weekly\ndone true\nagain false\ncaught boom\n",
+          "verifiedOutputStandard": "20/23",
+          "verifiedOutputCaption": "Ожидаемый вывод: порядок задаётся прямыми вызовами, не планировщиком потоков"
         },
         {
           "type": "text",
           "html": "Вызов <code>report</code> подготавливает состояние и возвращает StepTask, но из-за <code>initial_suspend</code> тело ещё не печатает begin. Поэтому первой видна строка created. Первый <code>work.resume()</code> запускает тело: печатается begin weekly, затем co_await приостанавливает функцию. Управление вернулось в main, который печатает caller. Второй resume продолжает после co_await: печатается end weekly, тело завершается и остаётся на final_suspend."
-        },
-        {
-          "type": "code",
-          "caption": "Ожидаемый вывод: порядок задаётся прямыми вызовами, не планировщиком потоков",
-          "code": "created\nbegin weekly\ncaller\nend weekly\ndone true\nagain false\ncaught boom"
         },
         {
           "type": "text",
@@ -3375,12 +3389,10 @@ window.STATION_DATA = {
           "caption": "Полная программа · C++23: создание диапазона отдельно от производства значений",
           "exampleId": "s6-generator-sequence",
           "standard": "23",
-          "code": "#include <generator>\n#include <iostream>\n\n#if !defined(__cpp_lib_generator) || __cpp_lib_generator < 202207L\n#error \"This example requires C++23 generator\"\n#endif\n\nstd::generator<int> job_ids() {\n    for (int id = 10; id < 13; ++id) {\n        std::cout << \"produce \" << id << '\\n';\n        co_yield id;\n    }\n}\n\nint main() {\n    auto values = job_ids();\n    std::cout << \"created\\n\";\n    for (int id : values) {\n        std::cout << \"value \" << id << '\\n';\n    }\n}"
-        },
-        {
-          "type": "code",
-          "caption": "Ожидаемый вывод: производство и потребление чередуются",
-          "code": "created\nproduce 10\nvalue 10\nproduce 11\nvalue 11\nproduce 12\nvalue 12"
+          "code": "#include <generator>\n#include <iostream>\n\n#if !defined(__cpp_lib_generator) || __cpp_lib_generator < 202207L\n#error \"This example requires C++23 generator\"\n#endif\n\nstd::generator<int> job_ids() {\n    for (int id = 10; id < 13; ++id) {\n        std::cout << \"produce \" << id << '\\n';\n        co_yield id;\n    }\n}\n\nint main() {\n    auto values = job_ids();\n    std::cout << \"created\\n\";\n    for (int id : values) {\n        std::cout << \"value \" << id << '\\n';\n    }\n}",
+          "verifiedOutput": "created\nproduce 10\nvalue 10\nproduce 11\nvalue 11\nproduce 12\nvalue 12\n",
+          "verifiedOutputStandard": "23",
+          "verifiedOutputCaption": "Ожидаемый вывод: производство и потребление чередуются"
         },
         {
           "type": "text",
@@ -4733,12 +4745,10 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полный пример C++20: согласованная версия и старый читатель",
-          "code": "#include <atomic>\n#include <cstdint>\n#include <iostream>\n#include <limits>\n#include <memory>\n#include <mutex>\n#include <stdexcept>\n#include <utility>\n\nstruct Config {\n    std::uint64_t version;\n    int soft_limit;\n    int hard_limit;\n};\n\nclass ConfigStore {\n    std::mutex writers_;\n    std::atomic<std::shared_ptr<const Config>> current_{\n        std::make_shared<const Config>(Config{1, 10, 20})};\npublic:\n    std::shared_ptr<const Config> read() const {\n        return current_.load(std::memory_order_acquire);\n    }\n\n    void increase_limits(int step) {\n        if (step < 0) throw std::invalid_argument(\"negative step\");\n        std::lock_guard lock(writers_);\n        const auto before = current_.load(std::memory_order_acquire);\n        if (step > std::numeric_limits<int>::max() - before->hard_limit ||\n            before->version == std::numeric_limits<std::uint64_t>::max())\n            throw std::overflow_error(\"config limit\");\n        auto next = std::make_shared<const Config>(Config{\n            before->version + 1,\n            before->soft_limit + step,\n            before->hard_limit + step});\n        current_.store(std::move(next), std::memory_order_release);\n    }\n};\n\nint main() {\n    ConfigStore store;\n    auto old_reader = store.read();\n    std::weak_ptr<const Config> old_lifetime = old_reader;\n\n    store.increase_limits(20);\n    const auto new_reader = store.read();\n    std::cout << \"old: v\" << old_reader->version << ' '\n              << old_reader->soft_limit << '/' << old_reader->hard_limit << '\\n';\n    std::cout << \"new: v\" << new_reader->version << ' '\n              << new_reader->soft_limit << '/' << new_reader->hard_limit << '\\n';\n    std::cout << std::boolalpha\n              << \"old retained: \" << !old_lifetime.expired() << '\\n';\n    old_reader.reset();\n    std::cout << \"old released: \" << old_lifetime.expired() << '\\n';\n    return 0;\n}"
-        },
-        {
-          "type": "code",
-          "caption": "Точный вывод программы",
-          "code": "old: v1 10/20\nnew: v2 30/40\nold retained: true\nold released: true"
+          "code": "#include <atomic>\n#include <cstdint>\n#include <iostream>\n#include <limits>\n#include <memory>\n#include <mutex>\n#include <stdexcept>\n#include <utility>\n\nstruct Config {\n    std::uint64_t version;\n    int soft_limit;\n    int hard_limit;\n};\n\nclass ConfigStore {\n    std::mutex writers_;\n    std::atomic<std::shared_ptr<const Config>> current_{\n        std::make_shared<const Config>(Config{1, 10, 20})};\npublic:\n    std::shared_ptr<const Config> read() const {\n        return current_.load(std::memory_order_acquire);\n    }\n\n    void increase_limits(int step) {\n        if (step < 0) throw std::invalid_argument(\"negative step\");\n        std::lock_guard lock(writers_);\n        const auto before = current_.load(std::memory_order_acquire);\n        if (step > std::numeric_limits<int>::max() - before->hard_limit ||\n            before->version == std::numeric_limits<std::uint64_t>::max())\n            throw std::overflow_error(\"config limit\");\n        auto next = std::make_shared<const Config>(Config{\n            before->version + 1,\n            before->soft_limit + step,\n            before->hard_limit + step});\n        current_.store(std::move(next), std::memory_order_release);\n    }\n};\n\nint main() {\n    ConfigStore store;\n    auto old_reader = store.read();\n    std::weak_ptr<const Config> old_lifetime = old_reader;\n\n    store.increase_limits(20);\n    const auto new_reader = store.read();\n    std::cout << \"old: v\" << old_reader->version << ' '\n              << old_reader->soft_limit << '/' << old_reader->hard_limit << '\\n';\n    std::cout << \"new: v\" << new_reader->version << ' '\n              << new_reader->soft_limit << '/' << new_reader->hard_limit << '\\n';\n    std::cout << std::boolalpha\n              << \"old retained: \" << !old_lifetime.expired() << '\\n';\n    old_reader.reset();\n    std::cout << \"old released: \" << old_lifetime.expired() << '\\n';\n    return 0;\n}",
+          "verifiedOutput": "old: v1 10/20\nnew: v2 30/40\nold retained: true\nold released: true\n",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Точный вывод программы"
         },
         {
           "type": "text",
@@ -5255,17 +5265,15 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа · C++20 · main.cpp",
-          "code": "#include <array>\n#include <condition_variable>\n#include <cstddef>\n#include <iostream>\n#include <mutex>\n#include <optional>\n#include <thread>\n\nclass Queue {\n    static constexpr std::size_t capacity = 2;\n    std::array<int, capacity> data_{};\n    std::size_t head_ = 0;\n    std::size_t size_ = 0;\n    bool closed_ = false;\n    std::mutex mutex_;\n    std::condition_variable not_empty_;\n    std::condition_variable not_full_;\npublic:\n    bool push(int value) {\n        std::unique_lock lock(mutex_);\n        not_full_.wait(lock, [&] { return closed_ || size_ < capacity; });\n        if (closed_) return false;\n        data_[(head_ + size_) % capacity] = value;\n        ++size_;\n        lock.unlock();\n        not_empty_.notify_one();\n        return true;\n    }\n    std::optional<int> pop() {\n        std::unique_lock lock(mutex_);\n        not_empty_.wait(lock, [&] { return closed_ || size_ != 0; });\n        if (size_ == 0) return std::nullopt;\n        int value = data_[head_];\n        head_ = (head_ + 1) % capacity;\n        --size_;\n        lock.unlock();\n        not_full_.notify_one();\n        return value;\n    }\n    void close() {\n        {\n            std::lock_guard lock(mutex_);\n            closed_ = true;\n        }\n        not_empty_.notify_all();\n        not_full_.notify_all();\n    }\n};\n\nstruct CloseOnExit {\n    Queue& queue;\n    ~CloseOnExit() { queue.close(); }\n};\n\nint main() {\n    Queue queue;\n    int sum = 0;\n    std::jthread worker([&] {\n        while (auto value = queue.pop()) sum += *value;\n    });\n    CloseOnExit close_on_exit{queue};\n    for (int value = 1; value <= 5; ++value) queue.push(value);\n    queue.close();\n    worker.join();\n    std::cout << \"sum: \" << sum << '\\n';\n    std::cout << std::boolalpha << \"push after close: \" << queue.push(6) << '\\n';\n    std::cout << \"empty after drain: \" << !queue.pop().has_value() << '\\n';\n}\n"
+          "code": "#include <array>\n#include <condition_variable>\n#include <cstddef>\n#include <iostream>\n#include <mutex>\n#include <optional>\n#include <thread>\n\nclass Queue {\n    static constexpr std::size_t capacity = 2;\n    std::array<int, capacity> data_{};\n    std::size_t head_ = 0;\n    std::size_t size_ = 0;\n    bool closed_ = false;\n    std::mutex mutex_;\n    std::condition_variable not_empty_;\n    std::condition_variable not_full_;\npublic:\n    bool push(int value) {\n        std::unique_lock lock(mutex_);\n        not_full_.wait(lock, [&] { return closed_ || size_ < capacity; });\n        if (closed_) return false;\n        data_[(head_ + size_) % capacity] = value;\n        ++size_;\n        lock.unlock();\n        not_empty_.notify_one();\n        return true;\n    }\n    std::optional<int> pop() {\n        std::unique_lock lock(mutex_);\n        not_empty_.wait(lock, [&] { return closed_ || size_ != 0; });\n        if (size_ == 0) return std::nullopt;\n        int value = data_[head_];\n        head_ = (head_ + 1) % capacity;\n        --size_;\n        lock.unlock();\n        not_full_.notify_one();\n        return value;\n    }\n    void close() {\n        {\n            std::lock_guard lock(mutex_);\n            closed_ = true;\n        }\n        not_empty_.notify_all();\n        not_full_.notify_all();\n    }\n};\n\nstruct CloseOnExit {\n    Queue& queue;\n    ~CloseOnExit() { queue.close(); }\n};\n\nint main() {\n    Queue queue;\n    int sum = 0;\n    std::jthread worker([&] {\n        while (auto value = queue.pop()) sum += *value;\n    });\n    CloseOnExit close_on_exit{queue};\n    for (int value = 1; value <= 5; ++value) queue.push(value);\n    queue.close();\n    worker.join();\n    std::cout << \"sum: \" << sum << '\\n';\n    std::cout << std::boolalpha << \"push after close: \" << queue.push(6) << '\\n';\n    std::cout << \"empty after drain: \" << !queue.pop().has_value() << '\\n';\n}\n",
+          "verifiedOutput": "sum: 15\npush after close: false\nempty after drain: true\n",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Ожидаемый вывод полной программы"
         },
         {
           "type": "code",
           "caption": "Необязательный запуск вне учебника: Linux/macOS с g++",
           "code": "g++ -std=c++20 -Wall -Wextra -pedantic -pthread main.cpp -o example\n./example\n"
-        },
-        {
-          "type": "code",
-          "caption": "Ожидаемый вывод полной программы",
-          "code": "sum: 15\npush after close: false\nempty after drain: true\n"
         },
         {
           "type": "text",

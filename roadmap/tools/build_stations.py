@@ -211,6 +211,29 @@ def validate(data: dict, path: Path) -> None:
                     require_text(item["html"], f"{item_where}.html")
                 if "caption" in raw_block:
                     require_text(raw_block["caption"], f"{block_where}.caption")
+            elif block_type == "reading-figure":
+                block = require_keys(raw_block, {"type", "title", "rows", "caption"}, block_where)
+                require_text(block["title"], f"{block_where}.title")
+                require_text(block["caption"], f"{block_where}.caption")
+                rows = block["rows"]
+                if not isinstance(rows, list) or not 1 <= len(rows) <= 4:
+                    raise ValueError(f"{block_where}.rows: expected 1–4 snapshots")
+                columns = None
+                for i, raw_row in enumerate(rows, 1):
+                    row = require_keys(raw_row, {"label", "cells"}, f"{block_where}.rows[{i}]")
+                    require_text(row["label"], f"{block_where}.rows[{i}].label")
+                    cells = row["cells"]
+                    if (not isinstance(cells, list) or not 2 <= len(cells) <= 4 or
+                            (columns is not None and len(cells) != columns)):
+                        raise ValueError(f"{block_where}: use 2–4 aligned cells per snapshot")
+                    columns = len(cells)
+                    for j, raw_cell in enumerate(cells, 1):
+                        where_cell = f"{block_where}.rows[{i}].cells[{j}]"
+                        cell = require_keys(raw_cell, {"value", "note", "state"}, where_cell)
+                        require_text(cell["value"], f"{where_cell}.value")
+                        require_text(cell["note"], f"{where_cell}.note")
+                        if cell["state"] not in ("included", "outside", "boundary"):
+                            raise ValueError(f"{where_cell}.state: unknown figure state")
             elif block_type == "visual":
                 allowed = (
                     {"type", "variant", "title", "items"},
@@ -485,7 +508,7 @@ def html_for(data: dict) -> str:
 {extra_css}
 {reader_css}
 </head>
-<body{' class="course-reader course-dark course-map map-trail"' if reader_pilot else ''}>
+<body{' class="course-reader course-dark course-map map-trail edition-reader"' if reader_pilot else ''}>
   <div id="root"><div class="fatal">Загрузка станции…</div></div>
   <noscript><div class="fatal">Для интерактивной станции нужен JavaScript.</div></noscript>
 {'<script src="assets/database-route.js"></script>' if meta['number'] == 9 else ''}
@@ -504,7 +527,7 @@ def html_for(data: dict) -> str:
     html = decorate_html(html, surfaces=False)
     # The approved smooth route is shared by every station. Keep it last so its
     # SVG bridges replace the original border-based connectors at all sizes.
-    final_css = ["course-code.css", "course-dark-reader.css", "station-map.css", "station-map-joints.css"]
+    final_css = ["course-code.css", "course-dark-reader.css", "station-map.css", "station-map-joints.css", "edition-reader.css"]
     last_styles = "\n".join(
         f'<link rel="stylesheet" href="assets/{name}?v={hashlib.sha256((ROADMAP / "assets" / name).read_bytes()).hexdigest()[:12]}">'
         for name in final_css

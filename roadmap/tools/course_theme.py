@@ -75,7 +75,12 @@ def decorate_html(source, *, surfaces=True, page=None):
     source = re.sub(r'\s*<link\b[^>]*href=[\"\x27]assets/course-(?:theme|dark-surfaces)\.css(?:\?[^\"\x27]*)?[\"\x27][^>]*>', '', source, flags=re.I)
     source = re.sub(r'\s*<meta\b(?=[^>]*\bname=[\"\x27]theme-color[\"\x27])[^>]*>', '', source, flags=re.I)
     assets = ['course-theme.css'] + (['course-dark-surfaces.css'] if surfaces else [])
-    links = ['<meta name="theme-color" content="#18252f">']
+    theme_color = '#18252f'
+    if page == 'home':
+        source = re.sub(r'\s*<link\b[^>]*href="assets/edition-home\.css(?:\?[^"]*)?"[^>]*>', '', source)
+        assets.append('edition-home.css')
+        theme_color = '#192730'
+    links = [f'<meta name="theme-color" content="{theme_color}">']
     for asset in assets:
         version = hashlib.sha256((ROOT / 'assets' / asset).read_bytes()).hexdigest()[:12]
         links.append(f'<link rel="stylesheet" href="assets/{asset}?v={version}">')

@@ -19,8 +19,8 @@ assert(boundary >= 0, 'Reading model boundary changed');
 let model = helper.slice(0, boundary);
 model = replaceOnce(model, "const appSource = read('roadmap/assets/station-app.js');",
     'const appSource = read(' + JSON.stringify(appPath) + ');');
-model = replaceOnce(model, 'matchMedia:() => ({matches:!!options.reducedMotion}),',
-    "matchMedia:query => ({matches:query.includes('min-width') ? options.desktop !== false : !!options.reducedMotion}),");
+model = replaceOnce(model, 'matchMedia:() => ({matches:!!options.reducedMotion,',
+    "matchMedia:query => ({matches:query.includes('min-width') ? options.desktop !== false : !!options.reducedMotion,");
 model = replaceOnce(model, '    win.history = history;', `
     const previewBacking = {}, previewWrites = [], productionAccesses = [];
     win.COURSE_DESIGN_VARIANT = options.variant || 'editorial';
@@ -140,6 +140,10 @@ for (const variant of variants) {
     const nav = env.mount(env.api.SubstationNav,env.nav().props);
     let navTree = nav.render();
     expectContents(navTree,variant,true);
+    if (originalVariants.includes(variant)) {
+        const expand = nodes(navTree).find(n => n.props['data-map-module'] === data.substations[0].id);
+        expand.props.onClick(); navTree = nav.render();
+    }
     const lessonLink = nodes(navTree).find(node => node.type === 'a' && node.props.href === '#section=why-oop');
     nativeLinkChecks(lessonLink,env,variant + ': contents section');
     if (alternativeVariants.includes(variant)) {
@@ -321,6 +325,10 @@ for (const variant of variants) {
     let mobileTree = mobileContents.render();
     const mobileDisclosure = expectContents(mobileTree,variant,false);
     mobileDisclosure.props.onToggle({currentTarget:{open:true}}); mobileTree = mobileContents.render();
+    if (originalVariants.includes(variant)) {
+        nodes(mobileTree).find(n => n.props['data-map-module'] === data.substations[0].id).props.onClick();
+        mobileTree = mobileContents.render();
+    }
     const openDisclosure = originalVariants.includes(variant) ? mobileTree : findClass(mobileTree,'experiment-index');
     assert(openDisclosure.props.open && nodes(mobileTree).some(node => node.type === 'a' && node.props.href === '#section=why-oop'),
         variant + ': native details can reveal the same complete linked contents');
@@ -339,10 +347,12 @@ assertIsolated(denied); denied.dispose();
 
 const generated = {};
 new Function('window',read('roadmap/generated/station0-design-preview.data.js'))(generated);
+const production = {};
+new Function('window',read('roadmap/generated/station0.data.js'))(production);
 assert(generated.STATION_DATA, 'Preview data has the expected renderer entry point');
 for (const key of ['meta','theory','quizzes','tasks','substations','readingOrder','checkpoints']) {
     if (key === 'meta') continue;
-    assert(JSON.stringify(generated.STATION_DATA[key]) === JSON.stringify(canonical[key]),
+    assert(JSON.stringify(generated.STATION_DATA[key]) === JSON.stringify(production.STATION_DATA[key]),
         'Generated preview data preserves the full real station0 ' + key);
 }
 assert(generated.STATION_DATA.meta.id === 'station0' && generated.STATION_DATA.meta.number === 0,

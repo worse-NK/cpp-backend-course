@@ -117,6 +117,7 @@ for (const [standard,label] of [['20','C++20'],['23','C++23'],['20/23','C++20 / 
     assert(badges.length === 1 && text(badges[0]) === label, 'Visible edition badge: ' + standard);
     assert(badges[0].props.title.includes('не отметка') || badges[0].props.title.includes('проверяется отдельно'), 'Edition badge does not pretend to certify the current compiler');
     assert(tree.props['data-example-id'] === 'edition-fixture' && source(codeNode(tree)) === raw, 'Stable ID and exact authored source survive edition rendering');
+    assert(!nodes(tree).some(n => hasClass(n, 'example-result')), 'A program without verified output never gains a guessed result');
     owner.dispose();
 }
 editions.dispose();
@@ -147,12 +148,20 @@ const copyEnv = environment(data, '', {highlighter:library,navigator:{clipboard:
     copied.push(raw); return {then(resolve) { resolve(); }};
 }}}});
 const raw = fixtures[1] + '\n\t// exact final bytes\n';
-const owner = copyEnv.mount(copyEnv.api.CodeBlock,{block:{type:'code',caption:'C++ example',code:raw}});
+const sampleOutput = 'see <left> & <right>\n\n';
+const owner = copyEnv.mount(copyEnv.api.CodeBlock,{block:{type:'code',caption:'C++ example',code:raw,verifiedOutput:sampleOutput,verifiedOutputStandard:'23'}});
 let tree = owner.render(); button(tree,'Копировать').props.onClick(); tree = owner.render();
 assert(copied.length === 1 && copied[0] === raw, 'Copy uses authored bytes, never token markup or reconstructed text');
 const status = nodes(tree).find(node => hasClass(node,'copy-status'));
 assert(status && status.props.role === 'status' && text(status) === 'Скопировано', 'Copy success has live semantic feedback');
-owner.dispose(); copyEnv.preserved(); copyEnv.dispose();
+const drawer = nodes(tree).find(n => hasClass(n, 'example-result'));
+assert(drawer && drawer.type === 'details' && !drawer.props.open, 'Reader can reveal the answer on demand');
+assert(nodes(drawer).some(n => n.type === 'summary' && text(n) === 'Вывод программы (C++23)'), 'Runtime edition labels scoped output');
+assert(nodes(drawer).some(n => n.type === 'samp' && !n.props.dangerouslySetInnerHTML && text(n) === sampleOutput),
+       'Result is literal text even with angle brackets, whitespace or markup');
+const silent = copyEnv.mount(copyEnv.api.CodeBlock,{block:{type:'code', code:'int main() {}', verifiedOutput:''}});
+assert(text(silent.render()).includes('Программа ничего не печатает.'), 'Verified empty output and unspecified output are distinct');
+silent.dispose(); owner.dispose(); copyEnv.preserved(); copyEnv.dispose();
 
 // The same helper is used by actual assessment components, rather than only
 // the theory renderer. Neither token markup nor theme may alter their data.

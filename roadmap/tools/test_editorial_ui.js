@@ -41,7 +41,7 @@ const fragments = source.slice(source.indexOf('  function backendLabEntry('), so
     + source.slice(source.indexOf('  function codeElement('), source.indexOf('  function splitQuestion('))
     + source.slice(source.indexOf('  function Theory('), source.indexOf('  function QuizPicker('));
 const components = new Function('React', 'window', 'document', 'navigator', 'localStorage',
-    'var h=React.createElement, useState=React.useState, data=window.STATION_DATA, meta=data.meta, theory=data.theory, noteLabels={tip:"СОВЕТ",key:"ГЛАВНОЕ"}; function isWorkbook(s){return /(?:-final-workbook|clock-worked-example)$/.test(s.id);}'
+    'var h=React.createElement, useState=React.useState, data=window.STATION_DATA, meta=data.meta, theory=data.theory, substations=data.substations, noteLabels={tip:"СОВЕТ",key:"ГЛАВНОЕ"}; function isWorkbook(s){return /(?:-final-workbook|clock-worked-example)$/.test(s.id);}'
     + fragments + ';return {CodeBlock,Theory};')(
         globalThis.React, fakeWindow, globalThis.document, globalThis.navigator, globalThis.localStorage);
 function find(node, predicate) {

@@ -2486,7 +2486,7 @@
           "items": [
             {
               "t": "Outbox → confirm → receipt",
-              "rule": "После confirm до sent_at возможна повторная публикация; после consumer COMMIT до ack — повторная выдача. Receipt+эффект фиксируются вместе. redelivered не заменяет event_id. <a href=\"cpp_station11_messaging.html#section=outbox-real-chain-lab\">Сквозной запускаемый стенд ↗</a>"
+              "rule": "После confirm до sent_at возможна повторная публикация; после consumer COMMIT до ack — повторная выдача. Receipt+эффект фиксируются вместе. redelivered не заменяет event_id. <a href=\"cpp_station11_messaging.html#section=outbox-real-chain-lab\">Сквозной запускаемый стенд ↗</a>; <a href=\"https://www.rabbitmq.com/docs/reliability\" target=\"_blank\" rel=\"noopener noreferrer\">RabbitMQ: повторная выдача и флаг redelivered ↗</a>."
             }
           ]
         }

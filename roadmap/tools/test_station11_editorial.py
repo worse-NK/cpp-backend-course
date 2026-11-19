@@ -69,12 +69,14 @@ class Station11(unittest.TestCase):
         self.assertEqual(DATA['meta']['storeKey'], 'cpp_station11_progress_v1')
         self.assertEqual(DATA['meta']['sourceFile'], 'cpp_station11_messaging.html')
         self.assertEqual([m['id'] for m in DATA['substations']], MODULES)
-        self.assertEqual(len(DATA['theory']), 32)
+        self.assertEqual(len(DATA['theory']), 33)
+        self.assertEqual(section('outbox-real-chain-lab')['substation'], 'messaging-labs')
         self.assertEqual({k: len(v) for k, v in DATA['quizzes'].items()},
-                         {'basic': 32, 'advanced': 24, 'interview': 16})
-        self.assertEqual(len(DATA['tasks']), 10)
+                         {'basic': 34, 'advanced': 26, 'interview': 17})
+        self.assertEqual(len(DATA['tasks']), 11)
         for module in MODULES:
-            self.assertEqual(sum(s['substation'] == module for s in DATA['theory']), 4)
+            self.assertEqual(sum(s['substation'] == module for s in DATA['theory']),
+                             5 if module == 'messaging-labs' else 4)
             self.assertGreaterEqual(sum(q['substation'] == module
                                         for q in DATA['quizzes']['basic']), 2)
             self.assertTrue(any(t['substation'] == module for t in DATA['tasks']))
@@ -85,7 +87,8 @@ class Station11(unittest.TestCase):
         all_final = {normalize_prompt(q['q']) for qs in DATA['quizzes'].values() for q in qs}
         seen = set()
         for module in MODULES:
-            self.assertEqual(len(resolved['checkpoints'][module]), 5)
+            self.assertEqual(len(resolved['checkpoints'][module]),
+                             7 if module == 'messaging-labs' else 5)
             for q in plan['modules'][module]:
                 self.assertNotIn('bank', q)
                 stem = normalize_prompt(q['q'])
@@ -121,7 +124,7 @@ class Station11(unittest.TestCase):
             markers = [(i, j) for i, s in enumerate(sections)
                        for j, b in enumerate(s['blocks'])
                        if b['type'] == 'note' and 'Контрольная точка' in b.get('html', '')]
-            self.assertEqual(markers, [(3, len(sections[-1]['blocks']) - 1)])
+            self.assertEqual(markers, [(len(sections) - 1, len(sections[-1]['blocks']) - 1)])
 
     def test_no_systematic_extreme_length_answer_key(self):
         # Statistical tripwire only: it does not establish meaningful distractors.
@@ -136,7 +139,7 @@ class Station11(unittest.TestCase):
                     hits += chosen == extreme(lengths) and lengths.count(chosen) == 1
                 self.assertLessEqual(hits / len(questions), .5, (name, extreme.__name__, hits))
         self.assertEqual(Counter(q['answer'] for q in DATA['quizzes']['basic']),
-                         Counter({0: 8, 1: 8, 2: 8, 3: 8}))
+                         Counter({0: 9, 1: 9, 2: 8, 3: 8}))
 
     def test_cpp_workbook_matches_download_and_output(self):
         codes = [b['code'] for b in section('messaging-final-workbook')['blocks']
@@ -258,13 +261,13 @@ int main() {
         self.assertIn('no_ack=true', prose('rabbit-redelivery-lab'))
         self.assertIn('не', prose('messaging-local-lab'))
         self.assertEqual(sum(t['title'].startswith('Лаборатория: ')
-                             for t in DATA['tasks'] if t['level'] == 'Практика'), 3)
+                             for t in DATA['tasks'] if t['level'] == 'Практика'), 4)
 
     def test_cheatsheet_group_and_section_anchors(self):
         catalog = json.loads((ROOT / 'content/cheatsheet.json').read_text())
         group = next(g for g in catalog['stations'] if g['num'] == '11')
         self.assertEqual(group['num'], '11')
-        self.assertEqual(len(group['sections']), 8)
+        self.assertEqual(len(group['sections']), 9)
         ids = {s['id'] for s in DATA['theory']}
         for s in group['sections']:
             for item in s['items']:

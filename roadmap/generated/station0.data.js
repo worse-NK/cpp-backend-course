@@ -126,7 +126,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: отдельные шаги расходования попытки и чтения остатка",
-          "code": "#include <iostream>\n\nclass Attempts {\nprivate:\n    int remaining_ = 3;\n\npublic:\n    bool try_use() {\n        if (remaining_ == 0) {\n            return false;\n        }\n\n        --remaining_;\n        return true;\n    }\n\n    int remaining() const {\n        return remaining_;\n    }\n};\n\nint main() {\n    Attempts login;\n    bool used = login.try_use();\n    int left = login.remaining();\n\n    std::cout << used << ' ' << left << '\\n';\n    return 0;\n}"
+          "code": "#include <iostream>\n\nclass Attempts {\nprivate:\n    int remaining_ = 3;\n\npublic:\n    bool try_use() {\n        if (remaining_ == 0) {\n            return false;\n        }\n\n        --remaining_;\n        return true;\n    }\n\n    int remaining() const {\n        return remaining_;\n    }\n};\n\nint main() {\n    Attempts login;\n    bool used = login.try_use();\n    int left = login.remaining();\n\n    std::cout << used << ' ' << left << '\\n';\n    return 0;\n}",
+          "verifiedOutput": "1 2\n",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -311,7 +313,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: пополнение проверяет вход до изменения баланса",
-          "code": "#include <iostream>\n#include <limits>\n\nclass Account {\nprivate:\n    int balance = 0;        // спрятано: снаружи не достать\n\npublic:\n    bool deposit(int sum) { // открытый метод\n        if (sum <= 0 || sum > std::numeric_limits<int>::max() - balance)\n            return false;\n        balance += sum;\n        return true;\n    }\n    int getBalance() const {\n        return balance;\n    }\n};\n\nint main() {\n    Account acc;\n    acc.deposit(100);          // OK — через публичный метод\n    std::cout << acc.getBalance(); // 100\n    // acc.balance = -999;     // ОШИБКА: balance приватный\n}"
+          "code": "#include <iostream>\n#include <limits>\n\nclass Account {\nprivate:\n    int balance = 0;        // спрятано: снаружи не достать\n\npublic:\n    bool deposit(int sum) { // открытый метод\n        if (sum <= 0 || sum > std::numeric_limits<int>::max() - balance)\n            return false;\n        balance += sum;\n        return true;\n    }\n    int getBalance() const {\n        return balance;\n    }\n};\n\nint main() {\n    Account acc;\n    acc.deposit(100);          // OK — через публичный метод\n    std::cout << acc.getBalance(); // 100\n    // acc.balance = -999;     // ОШИБКА: balance приватный\n}",
+          "verifiedOutput": "100",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -380,7 +384,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Два объекта и одно дополнительное имя",
-          "code": "#include <iostream>\nstruct Point { int x = 0; int y = 0; };\n\nint main() {\n    Point first{2, 5};\n    Point second = first;\n    Point& alias = first;\n    second.x = 8;\n    alias.y = 9;\n    std::cout << first.x << ' ' << first.y << '\\n';\n    std::cout << second.x << ' ' << second.y;\n}"
+          "code": "#include <iostream>\nstruct Point { int x = 0; int y = 0; };\n\nint main() {\n    Point first{2, 5};\n    Point second = first;\n    Point& alias = first;\n    second.x = 8;\n    alias.y = 9;\n    std::cout << first.x << ' ' << first.y << '\\n';\n    std::cout << second.x << ' ' << second.y;\n}",
+          "verifiedOutput": "2 9\n8 5",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -457,7 +463,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Два объекта, одни методы, независимые значения",
-          "code": "#include <iostream>\nclass Lamp {\n    bool on_ = false;\npublic:\n    void turnOn() { on_ = true; }\n    bool isOn() const { return on_; }\n};\nint main() {\n    Lamp desk;\n    Lamp hall;\n    desk.turnOn();\n    std::cout << desk.isOn() << ' ' << hall.isOn(); // 1 0\n}"
+          "code": "#include <iostream>\nclass Lamp {\n    bool on_ = false;\npublic:\n    void turnOn() { on_ = true; }\n    bool isOn() const { return on_; }\n};\nint main() {\n    Lamp desk;\n    Lamp hall;\n    desk.turnOn();\n    std::cout << desk.isOn() << ' ' << hall.isOn(); // 1 0\n}",
+          "verifiedOutput": "1 0",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -652,7 +660,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: один объект, доступ по имени и по адресу",
-          "code": "#include <iostream>\n\nstruct Point {\n    int x = 0;\n};\n\nint main() {\n    Point point;\n    Point* pointer = &point;\n    pointer->x = 5;\n    std::cout << point.x << ' ' << (*pointer).x; // 5 5\n}"
+          "code": "#include <iostream>\n\nstruct Point {\n    int x = 0;\n};\n\nint main() {\n    Point point;\n    Point* pointer = &point;\n    pointer->x = 5;\n    std::cout << point.x << ' ' << (*pointer).x; // 5 5\n}",
+          "verifiedOutput": "5 5",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -673,7 +683,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Сначала метод только меняет поле, без возвращения ссылки и цепочек",
-          "code": "#include <iostream>\n\nclass Point {\n    int x = 0;\npublic:\n    void setX(int value) {\n        this->x = value;\n    }\n    int getX() const { return x; }\n};\n\nint main() {\n    Point a, b;\n    a.setX(3);\n    b.setX(7);\n    std::cout << a.getX() << ' ' << b.getX(); // 3 7\n}"
+          "code": "#include <iostream>\n\nclass Point {\n    int x = 0;\npublic:\n    void setX(int value) {\n        this->x = value;\n    }\n    int getX() const { return x; }\n};\n\nint main() {\n    Point a, b;\n    a.setX(3);\n    b.setX(7);\n    std::cout << a.getX() << ' ' << b.getX(); // 3 7\n}",
+          "verifiedOutput": "3 7",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -739,7 +751,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Параметр x и поле x имеют разные роли",
-          "code": "#include <iostream>\nclass Point {\n    int x = 0;\npublic:\n    Point& setX(int x) {\n        this->x = x;\n        return *this;\n    }\n    int getX() const { return x; }\n};\nint main() {\n    Point a, b;\n    a.setX(3).setX(4);\n    b.setX(7);\n    std::cout << a.getX() << ' ' << b.getX() << ' ';\n    Point copy = a.setX(9);\n    copy.setX(10);\n    std::cout << a.getX() << ' ' << copy.getX(); // 4 7 9 10\n}"
+          "code": "#include <iostream>\nclass Point {\n    int x = 0;\npublic:\n    Point& setX(int x) {\n        this->x = x;\n        return *this;\n    }\n    int getX() const { return x; }\n};\nint main() {\n    Point a, b;\n    a.setX(3).setX(4);\n    b.setX(7);\n    std::cout << a.getX() << ' ' << b.getX() << ' ';\n    Point copy = a.setX(9);\n    copy.setX(10);\n    std::cout << a.getX() << ' ' << copy.getX(); // 4 7 9 10\n}",
+          "verifiedOutput": "4 7 9 10",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -818,7 +832,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: создаём диапазон и читаем обе границы",
-          "code": "#include <iostream>\n\nclass Interval {\n    int low_;\n    int high_;\npublic:\n    Interval(int low, int high) : low_(low), high_(high) {}\n    int low() const { return low_; }\n    int high() const { return high_; }\n};\n\nint main() {\n    Interval window{10, 20};\n    std::cout << window.low() << ' ' << window.high(); // 10 20\n}"
+          "code": "#include <iostream>\n\nclass Interval {\n    int low_;\n    int high_;\npublic:\n    Interval(int low, int high) : low_(low), high_(high) {}\n    int low() const { return low_; }\n    int high() const { return high_; }\n};\n\nint main() {\n    Interval window{10, 20};\n    std::cout << window.low() << ' ' << window.high(); // 10 20\n}",
+          "verifiedOutput": "10 20",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -931,7 +947,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: список записан в обратном порядке намеренно",
-          "code": "#include <iostream>\n\nint mark(const char* name, int value) {\n    std::cout << name << ' ';\n    return value;\n}\n\nstruct Interval {\n    int low_;\n    int high_;\n    Interval()\n        : high_(mark(\"high\", 20)), low_(mark(\"low\", 10)) {\n        std::cout << \"body \" << low_ << ' ' << high_;\n    }\n};\n\nint main() {\n    Interval window;\n}"
+          "code": "#include <iostream>\n\nint mark(const char* name, int value) {\n    std::cout << name << ' ';\n    return value;\n}\n\nstruct Interval {\n    int low_;\n    int high_;\n    Interval()\n        : high_(mark(\"high\", 20)), low_(mark(\"low\", 10)) {\n        std::cout << \"body \" << low_ << ' ' << high_;\n    }\n};\n\nint main() {\n    Interval window;\n}",
+          "verifiedOutput": "low high body 10 20",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1192,7 +1210,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа без explicit: функция принимает Limit, а вызов передаёт 5",
-          "code": "#include <iostream>\n\nstruct Limit {\n    int value;\n    Limit(int n) : value(n) {}\n};\n\nvoid show(Limit limit) {\n    std::cout << limit.value;\n}\n\nint main() {\n    show(5); // печатает 5\n}"
+          "code": "#include <iostream>\n\nstruct Limit {\n    int value;\n    Limit(int n) : value(n) {}\n};\n\nvoid show(Limit limit) {\n    std::cout << limit.value;\n}\n\nint main() {\n    show(5); // печатает 5\n}",
+          "verifiedOutput": "5",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1205,7 +1225,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа с explicit: создаём Limit явно перед передачей",
-          "code": "#include <iostream>\n\nstruct Limit {\n    int value;\n    explicit Limit(int n) : value(n) {}\n};\n\nvoid show(Limit limit) {\n    std::cout << limit.value;\n}\n\nint main() {\n    // show(5);       // ошибка: неявное int -> Limit запрещено\n    Limit direct{5};  // допустимо: явно создаём Limit\n    show(direct);     // передаём уже созданный Limit\n    // show(Limit{5}); // тоже допустимо\n}"
+          "code": "#include <iostream>\n\nstruct Limit {\n    int value;\n    explicit Limit(int n) : value(n) {}\n};\n\nvoid show(Limit limit) {\n    std::cout << limit.value;\n}\n\nint main() {\n    // show(5);       // ошибка: неявное int -> Limit запрещено\n    Limit direct{5};  // допустимо: явно создаём Limit\n    show(direct);     // передаём уже созданный Limit\n    // show(Limit{5}); // тоже допустимо\n}",
+          "verifiedOutput": "5",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1420,7 +1442,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: три объекта сообщают о создании и разрушении",
-          "code": "#include <iostream>\nstruct Trace {\n    const char* name;\n    explicit Trace(const char* n) : name(n) {\n        std::cout << \"+\" << name << ' ';\n    }\n    ~Trace() { std::cout << \"-\" << name << ' '; }\n};\nint main() {\n    Trace outer{\"outer\"};\n    {\n        Trace first{\"first\"};\n        Trace second{\"second\"};\n    }\n    std::cout << \"after \";\n}"
+          "code": "#include <iostream>\nstruct Trace {\n    const char* name;\n    explicit Trace(const char* n) : name(n) {\n        std::cout << \"+\" << name << ' ';\n    }\n    ~Trace() { std::cout << \"-\" << name << ' '; }\n};\nint main() {\n    Trace outer{\"outer\"};\n    {\n        Trace first{\"first\"};\n        Trace second{\"second\"};\n    }\n    std::cout << \"after \";\n}",
+          "verifiedOutput": "+outer +first +second -second -first after -outer ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1552,7 +1576,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: создание, копирование, присваивание и разрушение оставляют разные сообщения",
-          "code": "#include <iostream>\nstruct Number {\n    int value;\n    explicit Number(int n) : value(n) { std::cout << \"make \"; }\n    Number(const Number& other) : value(other.value) {\n        std::cout << \"copy \";\n    }\n    Number& operator=(const Number& other) {\n        value = other.value;\n        std::cout << \"assign \";\n        return *this;\n    }\n    ~Number() { std::cout << \"drop\" << value << ' '; }\n};\nint main() {\n    Number a{1};\n    Number b = a;\n    Number c{3};\n    c = a;\n}"
+          "code": "#include <iostream>\nstruct Number {\n    int value;\n    explicit Number(int n) : value(n) { std::cout << \"make \"; }\n    Number(const Number& other) : value(other.value) {\n        std::cout << \"copy \";\n    }\n    Number& operator=(const Number& other) {\n        value = other.value;\n        std::cout << \"assign \";\n        return *this;\n    }\n    ~Number() { std::cout << \"drop\" << value << ' '; }\n};\nint main() {\n    Number a{1};\n    Number b = a;\n    Number c{3};\n    c = a;\n}",
+          "verifiedOutput": "make copy make assign drop1 drop1 drop1 ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1664,7 +1690,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: один счётчик выдач доступен до создания билетов и после разрушения одного из них",
-          "code": "#include <iostream>\nclass Ticket {\n    inline static int issued_ = 0;\npublic:\n    Ticket() { ++issued_; }\n    static int issued() { return issued_; }\n};\nint main() {\n    std::cout << Ticket::issued() << ' ';\n    Ticket first;\n    {\n        Ticket second;\n        std::cout << Ticket::issued() << ' ';\n    }\n    std::cout << Ticket::issued(); // 0 2 2\n}"
+          "code": "#include <iostream>\nclass Ticket {\n    inline static int issued_ = 0;\npublic:\n    Ticket() { ++issued_; }\n    static int issued() { return issued_; }\n};\nint main() {\n    std::cout << Ticket::issued() << ' ';\n    Ticket first;\n    {\n        Ticket second;\n        std::cout << Ticket::issued() << ' ';\n    }\n    std::cout << Ticket::issued(); // 0 2 2\n}",
+          "verifiedOutput": "0 2 2",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1711,7 +1739,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: самостоятельная функция печатает закрытые координаты Point",
-          "code": "#include <iostream>\nclass Point {\n    int x_, y_;\npublic:\n    Point(int x, int y) : x_(x), y_(y) {}\n    friend std::ostream& operator<<(std::ostream& out, const Point& p) {\n        return out << '(' << p.x_ << \", \" << p.y_ << ')';\n    }\n};\nint main() { std::cout << Point{2, 5}; } // (2, 5)"
+          "code": "#include <iostream>\nclass Point {\n    int x_, y_;\npublic:\n    Point(int x, int y) : x_(x), y_(y) {}\n    friend std::ostream& operator<<(std::ostream& out, const Point& p) {\n        return out << '(' << p.x_ << \", \" << p.y_ << ')';\n    }\n};\nint main() { std::cout << Point{2, 5}; } // (2, 5)",
+          "verifiedOutput": "(2, 5)",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1830,7 +1860,10 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Готовая модель с проверяемыми переходами",
-          "code": "#include <iostream>\n#include <stdexcept>\nclass Quota {\n    int limit_;\n    int used_ = 0;\npublic:\n    explicit Quota(int limit) : limit_(limit) {\n        if (limit < 0) throw std::invalid_argument(\"negative limit\");\n    }\n    bool reserve(int count) {\n        if (count <= 0 || count > limit_ - used_) return false;\n        used_ += count;\n        return true;\n    }\n    bool release(int count) {\n        if (count <= 0 || count > used_) return false;\n        used_ -= count;\n        return true;\n    }\n    int remaining() const { return limit_ - used_; }\n};\nint main() {\n    Quota quota{10};\n    std::cout << quota.reserve(4) << ' ';\n    std::cout << quota.reserve(7) << ' ';\n    quota.release(1);\n    Quota copy = quota;\n    copy.reserve(2);\n    std::cout << quota.remaining() << ' ' << copy.remaining(); // 1 0 7 5\n}"
+          "code": "#include <iostream>\n#include <stdexcept>\nclass Quota {\n    int limit_;\n    int used_ = 0;\npublic:\n    explicit Quota(int limit) : limit_(limit) {\n        if (limit < 0) throw std::invalid_argument(\"negative limit\");\n    }\n    bool reserve(int count) {\n        if (count <= 0 || count > limit_ - used_) return false;\n        used_ += count;\n        return true;\n    }\n    bool release(int count) {\n        if (count <= 0 || count > used_) return false;\n        used_ -= count;\n        return true;\n    }\n    int remaining() const { return limit_ - used_; }\n};\nint main() {\n    Quota quota{10};\n    std::cout << quota.reserve(4) << ' ';\n    std::cout << quota.reserve(7) << ' ';\n    quota.release(1);\n    Quota copy = quota;\n    copy.reserve(2);\n    std::cout << quota.remaining() << ' ' << copy.remaining(); // 1 0 7 5\n}",
+          "verifiedOutput": "1 0 7 5",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Точный вывод: два результата reserve, затем остатки двух планов"
         },
         {
           "type": "text",
@@ -1875,11 +1908,6 @@ window.STATION_DATA = {
         {
           "type": "text",
           "html": "<strong>9. Создаём второй вариант плана.</strong> В <code>Quota copy = quota;</code> слева объявляется новый объект: это копирование при создании, а не присваивание уже существующему объекту. Компилятор копирует оба целых поля: у <code>copy</code> свои <code>limit_ == 10</code> и <code>used_ == 3</code>. Начальное <code>used_ = 0</code> при таком копировании не применяется заново. Вызов <code>copy.reserve(2)</code> увеличивает занятое количество только копии до 5. У <code>quota</code> остаётся 3, поэтому последние числа вывода — остатки <code>7</code> и <code>5</code>."
-        },
-        {
-          "type": "code",
-          "caption": "Точный вывод: два результата reserve, затем остатки двух планов",
-          "code": "1 0 7 5"
         },
         {
           "type": "text",
@@ -2036,7 +2064,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Сравнение всех полей в C++20",
-          "code": "#include <iostream>\nstruct Point {\n    int x;\n    int y;\n    bool operator==(const Point&) const = default;\n};\nint main() {\n    Point a{2, 5};\n    Point b{2, 5};\n    Point c{2, 6};\n    std::cout << (a == b) << ' ' << (a == c) << ' ' << (&a == &b);\n}"
+          "code": "#include <iostream>\nstruct Point {\n    int x;\n    int y;\n    bool operator==(const Point&) const = default;\n};\nint main() {\n    Point a{2, 5};\n    Point b{2, 5};\n    Point c{2, 6};\n    std::cout << (a == b) << ' ' << (a == c) << ' ' << (&a == &b);\n}",
+          "verifiedOutput": "1 0 0",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2197,17 +2227,15 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: clock.cpp, C++20, только стандартная библиотека",
-          "code": "#include <iostream>\n\nclass Clock {\n    int hours_ = 0;\n    int minutes_ = 0;\n    int seconds_ = 0;\npublic:\n    Clock() = default;\n\n    bool try_set(int h, int m, int s) {\n        if (h < 0 || h >= 24 ||\n            m < 0 || m >= 60 ||\n            s < 0 || s >= 60) {\n            return false;\n        }\n        hours_ = h;\n        minutes_ = m;\n        seconds_ = s;\n        return true;\n    }\n\n    void tick() {\n        ++seconds_;\n        if (seconds_ < 60) return;\n        seconds_ = 0;\n        ++minutes_;\n        if (minutes_ < 60) return;\n        minutes_ = 0;\n        ++hours_;\n        if (hours_ == 24) hours_ = 0;\n    }\n\n    int hours() const { return hours_; }\n    int minutes() const { return minutes_; }\n    int seconds() const { return seconds_; }\n};\n\nvoid print(const char* label, const Clock& clock) {\n    std::cout << label << clock.hours() << ':'\n              << clock.minutes() << ':' << clock.seconds() << '\\n';\n}\n\nint main() {\n    std::cout << std::boolalpha;\n    Clock clock;\n    print(\"start: \", clock);\n    std::cout << \"set: \" << clock.try_set(23, 59, 58) << '\\n';\n    Clock copy = clock;\n    clock.tick();\n    print(\"original: \", clock);\n    print(\"copy: \", copy);\n    clock.tick();\n    print(\"midnight: \", clock);\n    std::cout << \"bad set: \" << clock.try_set(12, 80, 10) << '\\n';\n    print(\"after refusal: \", clock);\n    copy.tick();\n    print(\"copy after tick: \", copy);\n    copy = clock;\n    print(\"copy after assignment: \", copy);\n}\n"
+          "code": "#include <iostream>\n\nclass Clock {\n    int hours_ = 0;\n    int minutes_ = 0;\n    int seconds_ = 0;\npublic:\n    Clock() = default;\n\n    bool try_set(int h, int m, int s) {\n        if (h < 0 || h >= 24 ||\n            m < 0 || m >= 60 ||\n            s < 0 || s >= 60) {\n            return false;\n        }\n        hours_ = h;\n        minutes_ = m;\n        seconds_ = s;\n        return true;\n    }\n\n    void tick() {\n        ++seconds_;\n        if (seconds_ < 60) return;\n        seconds_ = 0;\n        ++minutes_;\n        if (minutes_ < 60) return;\n        minutes_ = 0;\n        ++hours_;\n        if (hours_ == 24) hours_ = 0;\n    }\n\n    int hours() const { return hours_; }\n    int minutes() const { return minutes_; }\n    int seconds() const { return seconds_; }\n};\n\nvoid print(const char* label, const Clock& clock) {\n    std::cout << label << clock.hours() << ':'\n              << clock.minutes() << ':' << clock.seconds() << '\\n';\n}\n\nint main() {\n    std::cout << std::boolalpha;\n    Clock clock;\n    print(\"start: \", clock);\n    std::cout << \"set: \" << clock.try_set(23, 59, 58) << '\\n';\n    Clock copy = clock;\n    clock.tick();\n    print(\"original: \", clock);\n    print(\"copy: \", copy);\n    clock.tick();\n    print(\"midnight: \", clock);\n    std::cout << \"bad set: \" << clock.try_set(12, 80, 10) << '\\n';\n    print(\"after refusal: \", clock);\n    copy.tick();\n    print(\"copy after tick: \", copy);\n    copy = clock;\n    print(\"copy after assignment: \", copy);\n}\n",
+          "verifiedOutput": "start: 0:0:0\nset: true\noriginal: 23:59:59\ncopy: 23:59:58\nmidnight: 0:0:0\nbad set: false\nafter refusal: 0:0:0\ncopy after tick: 23:59:59\ncopy after assignment: 0:0:0\n",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Точный вывод программы; восстанови его перед чтением следующего шага"
         },
         {
           "type": "code",
           "caption": "Необязательный запуск вне учебника: команды для Linux/macOS с установленным g++",
           "code": "g++ -std=c++20 -Wall -Wextra -pedantic clock.cpp -o clock\n./clock"
-        },
-        {
-          "type": "code",
-          "caption": "Точный вывод программы; восстанови его перед чтением следующего шага",
-          "code": "start: 0:0:0\nset: true\noriginal: 23:59:59\ncopy: 23:59:58\nmidnight: 0:0:0\nbad set: false\nafter refusal: 0:0:0\ncopy after tick: 23:59:59\ncopy after assignment: 0:0:0"
         },
         {
           "type": "text",

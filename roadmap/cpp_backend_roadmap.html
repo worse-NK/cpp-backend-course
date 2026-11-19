@@ -2,7 +2,7 @@
 <html lang="ru" class="course-dark">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" data-course-security="1" content="default-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; object-src &#x27;none&#x27;; script-src &#x27;self&#x27; &#x27;sha256-Nmsy/i9kvCtNzh9jX6D2G2hdwEXvbHoBPbJLqj6cQu8=&#x27; &#x27;sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z&#x27; &#x27;sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1&#x27;; script-src-attr &#x27;none&#x27;; style-src &#x27;self&#x27; &#x27;unsafe-inline&#x27; https://fonts.googleapis.com; font-src &#x27;self&#x27; https://fonts.gstatic.com; img-src &#x27;self&#x27; data: blob:; connect-src &#x27;none&#x27;; worker-src &#x27;self&#x27; blob:; frame-src &#x27;self&#x27;; form-action &#x27;none&#x27;">
+<meta http-equiv="Content-Security-Policy" data-course-security="1" content="default-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; object-src &#x27;none&#x27;; script-src &#x27;self&#x27; &#x27;sha256-MlMTB+E00FbRpjF9bQmWv9k7scjyTZWLNx/Nht7hOac=&#x27; &#x27;sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z&#x27; &#x27;sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1&#x27;; script-src-attr &#x27;none&#x27;; style-src &#x27;self&#x27; &#x27;unsafe-inline&#x27; https://fonts.googleapis.com; font-src &#x27;self&#x27; https://fonts.gstatic.com; img-src &#x27;self&#x27; data: blob:; connect-src &#x27;none&#x27;; worker-src &#x27;self&#x27; blob:; frame-src &#x27;self&#x27;; form-action &#x27;none&#x27;">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Курс · C++ и backend-разработка</title>
 <link rel="stylesheet" href="assets/home.css?v=20261022-facts" />
@@ -29,11 +29,12 @@
   .fade-in { animation: fadeIn 0.25s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 </style>
-<meta name="theme-color" content="#18252f">
+<meta name="theme-color" content="#192730">
 <link rel="stylesheet" href="assets/course-theme.css?v=4b6f4f70fb3b">
 <link rel="stylesheet" href="assets/course-dark-surfaces.css?v=a50d1a13466e">
+<link rel="stylesheet" href="assets/edition-home.css?v=f86fe5bf2abd">
 </head>
-<body class="course-dark course-support course-page-home">
+<body class="course-dark course-support course-page-home reading-edition-home">
 <div id="root"></div>
 <script id="roadmap-data" type="application/json">
 {
@@ -1205,19 +1206,19 @@ function Stage({ stage, index, done, expanded, onToggleDone, onToggleExpand, isL
         window.addEventListener("focus", onFocus);
         return () => window.removeEventListener("focus", onFocus);
     }, [expanded, stage.station]);
-    return (React.createElement("div", { style: S.stageRow },
-        React.createElement("div", { style: S.rail },
-            React.createElement("button", { style: Object.assign(Object.assign({}, S.node), { borderColor: accent, background: done ? accent : C.paper, color: done ? "#18252f" : accent }), onClick: onToggleDone, "aria-pressed": done, "aria-label": (done ? "Снять отметку: " : "Отметить пройденным: ") + stage.title, title: done ? "Пройдено" : "Отметить пройденным" }, done ? React.createElement(Icon.check, null) : React.createElement("span", { style: S.nodeNum }, stage.optional ? "+" : index + 1)),
+    return (React.createElement("div", { style: S.stageRow, className: "edition-stage" },
+        React.createElement("div", { style: S.rail, className: "edition-stage-rail" },
+            React.createElement("button", { style: Object.assign(Object.assign({}, S.node), { borderColor: accent, background: done ? accent : C.paper, color: done ? "#18252f" : accent }), onClick: onToggleDone, "aria-pressed": done, "aria-label": (done ? "Снять отметку: " : "Отметить пройденным: ") + stage.title, title: done ? "Пройдено" : "Отметить пройденным" }, done ? React.createElement(Icon.check, null) : React.createElement("span", { style: S.nodeNum }, stage.optional ? "+" : "○")),
             !isLast && React.createElement("div", { style: Object.assign(Object.assign({}, S.railLine), { background: done ? accent : C.line }) })),
-        React.createElement("div", { style: Object.assign(Object.assign({}, S.stageCard), (done ? S.stageCardDone : {})) },
-            React.createElement("button", { style: S.stageHead, "aria-expanded": expanded, onClick: onToggleExpand },
-                React.createElement("div", { style: S.stageHeadLeft },
-                    React.createElement("div", { style: S.stageHeadTop },
-                        React.createElement("span", { style: Object.assign(Object.assign({}, S.phaseTag), { color: accent, background: accent + "1A" }) }, stage.phase),
+        React.createElement("div", { className: "edition-stage-sheet", "data-done": done || undefined, style: Object.assign(Object.assign({}, S.stageCard), (done ? S.stageCardDone : {})) },
+            React.createElement("h4", {className:"edition-stage-heading"}, React.createElement("button", { className:"edition-stage-toggle", style:S.stageHead, "aria-expanded":expanded, onClick:onToggleExpand },
+                React.createElement("span", { style: S.stageHeadLeft },
+                    React.createElement("span", { style: S.stageHeadTop },
+                        stage.optional && React.createElement("span", {className:"edition-optional"}, "По желанию"),
                         stage.station && (React.createElement("span", { style: Object.assign(Object.assign({}, S.stationTag), { color: accent, borderColor: accent + "55" }) }, stage.station.label))),
-                    React.createElement("h3", { style: S.stageTitle }, stage.title)),
+                    React.createElement("span", {className:"edition-stage-title", style:S.stageTitle}, stage.title)),
                 React.createElement("span", { style: Object.assign(Object.assign({}, S.chevronWrap), { transform: expanded ? "rotate(180deg)" : "none" }) },
-                    React.createElement(Icon.chevron, null))),
+                    React.createElement(Icon.chevron, {"aria-hidden":true})))),
             React.createElement("p", { style: S.stageGoal }, stage.goal),
             !expanded && stage.station && React.createElement("a", { className: "home-station-link", href: stage.station.file }, "Открыть станцию →"),
             stage.station && stationProgress && !expanded && (React.createElement("div", { style: { padding: "0 16px 14px" } },
@@ -1265,6 +1266,24 @@ function Stage({ stage, index, done, expanded, onToggleDone, onToggleExpand, isL
                 stage.milestone && React.createElement(MilestoneCard, { milestone: stage.milestone, accent: accent }),
                 React.createElement("button", { style: Object.assign(Object.assign({}, S.doneBtn), (done ? S.doneBtnOn : { background: accent })), "aria-pressed": done, onClick: onToggleDone }, done ? "✓ Этап пройден — снять отметку" : "Отметить этап пройденным"))))));
 }
+
+function EditionPlate({topic}) {
+    const h = React.createElement;
+    const engravings = {
+        foundation: "M4 5h12v9H4z M19 5h9v9h-9z M4 17h24v4H4z",
+        engineering: "M2 4h8v5H2z M2 16h8v5H2z M22 10h8v5h-8z M10 6.5h5v12h-5 M15 12.5h7",
+        backend: "M2 6h7v6H2z M21 12h8v6h-8z M9 9h14l-3-3 M21 15H8l3 3",
+        "databases-group": "M3 6q12-7 24 0q-12 7-24 0z M3 6v12q12 7 24 0V6 M3 12q12 7 24 0",
+        planned: "M2 17h5l4-11 4 15 4-11 3 7h7",
+        "backend-extension": "M2 9h6v6H2z M13 2h6v6h-6z M24 9h6v6h-6z M13 17h6v6h-6z M8 10l5-5 M19 5l5 5 M24 14l-5 5 M13 20l-5-6"
+    };
+    return h("svg", {className:"edition-plate", viewBox:"0 0 88 48", width:88, height:48, "aria-hidden":true, focusable:false},
+        h("path", {className:"plate-leaf", d:"M4 26 43 5l41 12-39 22z"}),
+        h("path", {className:"plate-cut", d:"M4 26v4l41 13 39-22v-4M45 39v4"}),
+        h("path", {className:"plate-track", d:"M47 29l24-13"}),
+        h("path", {className:"plate-mark", transform:"matrix(1 .3 -1 .55 41 10)", d:engravings[topic] || engravings.foundation}));
+}
+
 function App() {
     const [lastRead, setLastRead] = useState(null);
     useEffect(() => {
@@ -1322,47 +1341,45 @@ function App() {
     ];
     const previewTitles = {
         foundation: "Язык и ресурсы", engineering: "Сборка, Linux и потоки",
-        backend: "Сети и API", "databases-group": "SQL и PostgreSQL", planned: "Эксплуатация сервиса", "backend-extension": "Брокеры, платформа, диагностика и безопасность"
+        backend: "Сети и API", "databases-group": "SQL и PostgreSQL", planned: "Эксплуатация сервиса", "backend-extension": "Распределённые системы и платформа"
     };
     return h("div", { className: "course-home-page" },
         h("a", { className: "home-skip", href: "#curriculum" }, "Перейти к программе"),
         h("header", { className: "home-topbar" },
-            h("a", { className: "home-brand", href: "cpp_backend_roadmap.html", "aria-label": "C++ Backend — главная" }, h("span", { className: "home-brand-mark" }, "C++"), h("span", null, "BACKEND", h("small", null, "Открытый учебный маршрут"))),
+            h("a", { className: "home-brand", href: "cpp_backend_roadmap.html", "aria-label": "C++ Backend — главная" }, h("span", { className: "home-brand-mark" }, "C++"), h("span", null, "C++ и бэкенд")),
             h("nav", { "aria-label": "Навигация по главной" }, h("a", { href: "#curriculum" }, "Программа"), h("a", { href: "#library" }, "Материалы"), h("a", { href: "sources.html" }, "Источники"))),
         h("main", null,
-            h("section", { className: "home-hero", "aria-labelledby": "course-title" },
-                h("div", { className: "home-hero-copy" },
-                    h("p", { className: "home-eyebrow" }, "C++20 / C++23 · ТЕОРИЯ · РАЗБОРЫ · ПРАКТИКА"),
-                    h("h1", { id: "course-title" }, "Понять C++.", h("br"), h("span", null, "Построить backend.")),
-                    h("p", { className: "home-description" }, "Научимся писать C++-программы, которые принимают запросы, работают с данными и взаимодействуют по сети. Начнём с классов и памяти, затем разберём устройство серверов, работу под нагрузкой и поиск причин сбоев. С теорией, разборами задач и лабораториями."),
-                    h("div", { className: "home-actions" },
-                        h("a", { className: "home-primary", href: lastRead ? lastRead.file + "#section=" + encodeURIComponent(lastRead.section) : "cpp_station0_oop_basics.html" }, lastRead ? "Продолжить обучение →" : "Начать с основ →"),
-                        h("a", { className: "home-secondary", href: "#curriculum" }, "Посмотреть программу ↓")),
-                    lastRead ? h("p", { className: "home-resume" }, "Последний раздел: ", h("strong", null, lastRead.title)) : h("p", { className: "home-resume" }, "Для начала достаточно базовых знаний C или C++.")),
-                h("aside", { className: "home-route-preview", "aria-label": "Логика обучения" },
-                    h("div", { className: "home-preview-top" }, h("span", null, "ОДИН МАРШРУТ"), h("span", null, "01 — " + String(groups.length).padStart(2, "0"))),
-                    h("h2", null, "От объекта", h("br"), " до сервиса"),
-                    h("ol", { className: "home-preview-steps" }, groups.map((group, i) => h("li", { key: group.id, className: group.indices.every(index => !DATA.stages[index].station) ? "is-planned" : "" },
-                        h("a", { href: "#" + group.id }, h("span", { className: "home-step-number" }, String(i + 1).padStart(2, "0")), h("span", null, previewTitles[group.id] || group.title, h("small", null, groupStatus(group))))))),
-                    h("p", { className: "home-preview-foot" }, "Каждый следующий этап опирается на предыдущий."))),
-            h("section", { className: "home-course-facts", "aria-label": "Содержание курса" },
-                h("div", null, h("strong", null, ready.length), h("span", null, "готовых станций")),
-                h("div", null, h("strong", null, ready.reduce((sum, stage) => sum + stage.station.totalSections, 0)), h("span", null, "разделов теории")),
-                h("div", null, h("strong", null, "C++20 / 23"), h("span", null, "общая основа и различия редакций"))),
-            h("details", { className: "home-prerequisites" }, h("summary", null, "Подойдёт ли мне курс и что нужно для начала?"), h("p", null, DATA.intro)),
-            h("section", { id: "curriculum", className: "home-curriculum", "aria-labelledby": "curriculum-title" },
-                h("div", { className: "home-section-heading" }, h("div", null, h("p", { className: "home-eyebrow" }, "ПРОГРАММА"), h("h2", { id: "curriculum-title" }, "Шаг за шагом, без пробелов.")), h("p", null, "Раскройте станцию, чтобы увидеть темы, материалы и итоговый проект.")),
+
+            h("section", { className: "edition-cover", "aria-labelledby": "course-title" },
+                h("div", { className: "edition-cover-copy" },
+                    h("p", { className: "edition-imprint" }, "Практический учебник", h("span", null, "C++20 / C++23")),
+                    h("h1", { id: "course-title" }, "От объекта", h("br"), "до сервиса"),
+                    h("p", { className: "edition-deck" }, "Сначала напишем класс и разберёмся, кому принадлежит память. Затем проследим, как сервер принимает запрос, обращается к базе и возвращает ответ."),
+                    h("div", { className: "edition-actions" },
+                        h("a", { className: "edition-primary home-primary", href: lastRead ? lastRead.file + "#section=" + encodeURIComponent(lastRead.section) : "cpp_station0_oop_basics.html" }, lastRead ? "Продолжить чтение" : "Открыть станцию 0", h("span", {"aria-hidden":true}, " →")),
+                        h("a", { className: "edition-secondary", href: "#curriculum" }, "К программе")),
+                    lastRead && h("p", { className: "edition-resume" }, "Последний раздел: ", lastRead.title),
+                    h("details", { className: "edition-entry" }, h("summary", null, "Что нужно знать до начала"), h("p", null, DATA.intro))),
+                h("nav", {className:"edition-index", "aria-labelledby":"edition-index-title"},
+                    h("div", {className:"edition-index-head"}, h("h2", {id:"edition-index-title"}, "Разделы курса")),
+                    h("ol", null, groups.map(group => h("li", {key:group.id},
+                        h("a", {className:"edition-leaf", href:"#"+group.id}, h(EditionPlate, {topic:group.id}),
+                            h("span", {className:"edition-leaf-text"}, h("strong",null,previewTitles[group.id] || group.title), h("small",null,groupStatus(group))),
+                            h("span", {className:"edition-turn","aria-hidden":true}, "↘"))))),
+                    h("p", {className:"edition-colophon"}, "Станций: ", h("strong",null,ready.length), h("span",{"aria-hidden":true}," / "), "Разделов теории: ", h("strong",null,ready.reduce((sum,stage)=>sum+stage.station.totalSections,0))))),
+            h("section", { id: "curriculum", tabIndex:-1, className: "home-curriculum", "aria-labelledby": "curriculum-title" },
+                h("div", { className: "home-section-heading" }, h("div", null, h("h2", { id: "curriculum-title" }, "Программа курса")), h("p", null, "Раскройте станцию, чтобы увидеть темы, материалы и итоговый проект.")),
                 h("div", { className: "home-route-tools" },
                     h("span", null, "Ваши отметки: ", h("strong", null, doneCount + " / " + requiredStages.length), " основных этапов · 7В — по желанию"),
                     h("div", null, h("button", { onClick: expandAll }, "Раскрыть всё"), h("button", { onClick: collapseAll }, "Свернуть всё"))),
-                groups.map(group => h("section", { id: group.id, className: "home-course-group" + (group.indices.every(index => !DATA.stages[index].station) ? " home-planned" : ""), key: group.id, "aria-labelledby": group.id + "-title" },
+                groups.map(group => h("section", { id: group.id, tabIndex:-1, className: "home-course-group" + (group.indices.every(index => !DATA.stages[index].station) ? " home-planned" : ""), key: group.id, "aria-labelledby": group.id + "-title" },
                     h("div", { className: "home-group-intro" }, h("p", { className: "home-eyebrow" }, group.label), h("h3", { id: group.id + "-title" }, group.title), h("p", null, group.description)),
                     h("div", { className: "home-group-stages" }, group.indices.map(i => h(Stage, { key: DATA.stages[i].id, stage: DATA.stages[i], index: i, done: !!store[DATA.stages[i].id], expanded: !!expanded[i], onToggleDone: () => toggleDone(DATA.stages[i].id), onToggleExpand: () => toggleExpand(i), isLast: i === group.indices[group.indices.length - 1] }))))),
                 h("div", { className: "home-reset-row" }, h("small", null, "Отметки сохраняются в этом браузере. Они не заменяют проверку знаний."), h("button", { onClick: resetAll }, "Сбросить отметки"))),
             h("section", { id: "library", className: "home-library", "aria-labelledby": "library-title" },
-                h("div", { className: "home-section-heading" }, h("div", null, h("p", { className: "home-eyebrow" }, "ПОД РУКОЙ"), h("h2", { id: "library-title" }, "Вернуться. Вспомнить. Проверить."))),
+                h("div", { className: "home-section-heading" }, h("div", null, h("h2", { id: "library-title" }, "Материалы под рукой"))),
                 h("div", { className: "home-library-grid" }, DATA.bonusFiles.map((item, i) => h("a", { href: item.file, className: "home-library-card", key: item.file },
-                    h("span", { className: "home-library-number", "aria-hidden": true }, "0" + (i + 1) + " ↗"), h("h3", null, item.label), h("p", null, item.desc), h("span", { className: "home-library-open" }, "Открыть материал →"))))),
+                    h("span", { className: "edition-material-arrow", "aria-hidden": true }, "↗"), h("h3", null, item.label), h("p", null, item.desc))))),
             h("details", { className: "home-prerequisites home-outcome" }, h("summary", null, "Как оценивать результат обучения"), h("p", null, DATA.closing))),
         h("footer", { className: "home-footer" }, h("span", null, "C++ / BACKEND"), h("span", null, "Учебник для вдумчивой практики"), h("a", { href: "sources.html" }, "Источники и границы материала")));
 

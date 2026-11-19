@@ -1394,7 +1394,10 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <iostream>\n#include <optional>\n#include <stdexcept>\n\n// A deterministic teaching model, not a Redis or PostgreSQL implementation.\nstruct Card { int price; unsigned version; };\nstruct Entry { Card card; int expires_at_ms; };\n\nclass Cache {\n    unsigned floor_ = 0;\n    std::optional<Entry> entry_;\npublic:\n    void invalidate(unsigned version) {\n        if (version > floor_) floor_ = version;\n        entry_.reset();\n    }\n    bool fill(Card card, int now_ms, int ttl_ms, bool check_version) {\n        if (ttl_ms <= 0) throw std::invalid_argument(\"positive TTL required\");\n        if (check_version && card.version < floor_) return false;\n        entry_ = Entry{card, now_ms + ttl_ms};\n        return true;\n    }\n    std::optional<Card> get(int now_ms) const {\n        if (!entry_ || now_ms >= entry_->expires_at_ms) return std::nullopt;\n        return entry_->card;\n    }\n};\n\nint main() {\n    const Card loaded_before_write{100, 1};\n    const Card authoritative_now{120, 2};\n    Cache ttl_only;\n    ttl_only.invalidate(authoritative_now.version);       // Writer at t=20.\n    ttl_only.fill(loaded_before_write, 30, 50, false);     // Delayed reader.\n    const auto old = ttl_only.get(40);\n    if (!old || old->price != 100) return 1;\n    std::cout << \"TTL-only: \" << old->price\n              << \", origin: \" << authoritative_now.price << '\\n';\n\n    Cache with_floor;\n    with_floor.invalidate(authoritative_now.version);\n    const bool accepted = with_floor.fill(loaded_before_write, 30, 50, true);\n    if (accepted || with_floor.get(40)) return 2;\n    with_floor.fill(authoritative_now, 40, 50, true);\n    std::cout << \"old fill accepted: \" << std::boolalpha << accepted << '\\n';\n    std::cout << \"reloaded: \" << with_floor.get(40)->price << '\\n';\n    std::cout << \"at expiry: \" << with_floor.get(90).has_value() << '\\n';\n    if (!with_floor.get(89) || with_floor.get(90)) return 3;\n    bool rejected_invalid_ttl = false;\n    try { with_floor.fill(authoritative_now, 40, 0, true); }\n    catch (const std::invalid_argument&) { rejected_invalid_ttl = true; }\n    if (!rejected_invalid_ttl) return 4;\n}\n",
-          "caption": "Полная C++20-программа cache_model.cpp; не требует Redis или сторонних библиотек"
+          "caption": "Полная C++20-программа cache_model.cpp; не требует Redis или сторонних библиотек",
+          "verifiedOutput": "TTL-only: 100, origin: 120\nold fill accepted: false\nreloaded: 120\nat expiry: false\n",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Точный вывод этой последовательной программы"
         },
         {
           "type": "text",
@@ -1407,11 +1410,6 @@ window.STATION_DATA = {
         {
           "type": "text",
           "html": "В конце программы находятся проверки, которые не печатают дополнительный результат: в момент 89 запись ещё должна быть доступна, а в 90 — уже нет. Отдельный try/catch проверяет отказ fill при нулевом TTL. Если нужного исключения нет или граница сработала неправильно, main возвращает ненулевой код: ctest сможет заметить ошибку даже при похожем выводе."
-        },
-        {
-          "type": "code",
-          "code": "TTL-only: 100, origin: 120\nold fill accepted: false\nreloaded: 120\nat expiry: false",
-          "caption": "Точный вывод этой последовательной программы"
         },
         {
           "type": "text",

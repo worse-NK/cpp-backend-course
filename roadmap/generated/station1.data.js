@@ -248,7 +248,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Уборка привязана к локальному объекту",
-          "code": "#include <iostream>\nclass Slot {\n    int& occupied_;\npublic:\n    explicit Slot(int& occupied) : occupied_(occupied) { ++occupied_; }\n    ~Slot() { --occupied_; }\n    Slot(const Slot&) = delete;\n    Slot& operator=(const Slot&) = delete;\n};\nvoid process(int& occupied, bool stop_early) {\n    Slot slot{occupied};\n    if (stop_early) return;\n    std::cout << \"work \";\n}\nint main() {\n    int occupied = 0;\n    process(occupied, true);\n    std::cout << occupied; // 0\n}"
+          "code": "#include <iostream>\nclass Slot {\n    int& occupied_;\npublic:\n    explicit Slot(int& occupied) : occupied_(occupied) { ++occupied_; }\n    ~Slot() { --occupied_; }\n    Slot(const Slot&) = delete;\n    Slot& operator=(const Slot&) = delete;\n};\nvoid process(int& occupied, bool stop_early) {\n    Slot slot{occupied};\n    if (stop_early) return;\n    std::cout << \"work \";\n}\nint main() {\n    int occupied = 0;\n    process(occupied, true);\n    std::cout << occupied; // 0\n}",
+          "verifiedOutput": "0",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -372,7 +374,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Объект переживает локальное имя, которым его создали",
-          "code": "#include <iostream>\n#include <memory>\n#include <utility>\n\nstruct Item {\n    int value;\n    explicit Item(int n) : value(n) { std::cout << \"+ \"; }\n    ~Item() { std::cout << \"- \"; }\n};\n\nint main() {\n    std::unique_ptr<Item> owner;\n    {\n        auto local = std::make_unique<Item>(7);\n        owner = std::move(local);\n        std::cout << \"inner \";\n    }\n    std::cout << owner->value << ' ';\n    owner.reset();\n    std::cout << \"done\";\n}\n// Вывод: + inner 7 - done"
+          "code": "#include <iostream>\n#include <memory>\n#include <utility>\n\nstruct Item {\n    int value;\n    explicit Item(int n) : value(n) { std::cout << \"+ \"; }\n    ~Item() { std::cout << \"- \"; }\n};\n\nint main() {\n    std::unique_ptr<Item> owner;\n    {\n        auto local = std::make_unique<Item>(7);\n        owner = std::move(local);\n        std::cout << \"inner \";\n    }\n    std::cout << owner->value << ' ';\n    owner.reset();\n    std::cout << \"done\";\n}\n// Вывод: + inner 7 - done",
+          "verifiedOutput": "+ inner 7 - done",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -452,7 +456,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Прямое связывание и возврат ссылки через функцию — не одно и то же",
-          "code": "#include <iostream>\n\nstruct Trace {\n    char tag;\n    explicit Trace(char value) : tag(value) {\n        std::cout << '+' << tag << ' ';\n    }\n    ~Trace() { std::cout << '-' << tag << ' '; }\n};\n\nconst Trace& pass(const Trace& value) {\n    std::cout << \"pass \";\n    return value;\n}\n\nint main() {\n    const Trace& local = Trace{'L'};\n    std::cout << local.tag << ' ';\n    const Trace& borrowed = pass(Trace{'P'});\n    // borrowed уже висячая. Ничего через неё не читаем.\n    std::cout << \"after \";\n}\n// Вывод: +L L +P pass -P after -L"
+          "code": "#include <iostream>\n\nstruct Trace {\n    char tag;\n    explicit Trace(char value) : tag(value) {\n        std::cout << '+' << tag << ' ';\n    }\n    ~Trace() { std::cout << '-' << tag << ' '; }\n};\n\nconst Trace& pass(const Trace& value) {\n    std::cout << \"pass \";\n    return value;\n}\n\nint main() {\n    const Trace& local = Trace{'L'};\n    std::cout << local.tag << ' ';\n    const Trace& borrowed = pass(Trace{'P'});\n    // borrowed уже висячая. Ничего через неё не читаем.\n    std::cout << \"after \";\n}\n// Вывод: +L L +P pass -P after -L",
+          "verifiedOutput": "+L L +P pass -P after -L ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -509,12 +515,10 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: локальный Job и обычный ранний return",
-          "code": "#include <iostream>\n\nstruct Part {\n    Part() { std::cout << \"Part \"; }\n    ~Part() { std::cout << \"~Part \"; }\n};\nstruct Job {\n    Part part;\n    int id;\n    explicit Job(int value) : part(), id(value) {\n        std::cout << \"Job\" << id << ' ';\n    }\n    ~Job() { std::cout << \"~Job \"; }\n};\nvoid work(bool early) {\n    Job job{7};\n    std::cout << \"work \";\n    if (early) return;\n    std::cout << \"tail \";\n}\nint main() {\n    std::cout << \"before \";\n    work(true);\n    std::cout << \"after\\n\";\n}\n"
-        },
-        {
-          "type": "code",
-          "caption": "Ожидаемый вывод",
-          "code": "before Part Job7 work ~Job ~Part after"
+          "code": "#include <iostream>\n\nstruct Part {\n    Part() { std::cout << \"Part \"; }\n    ~Part() { std::cout << \"~Part \"; }\n};\nstruct Job {\n    Part part;\n    int id;\n    explicit Job(int value) : part(), id(value) {\n        std::cout << \"Job\" << id << ' ';\n    }\n    ~Job() { std::cout << \"~Job \"; }\n};\nvoid work(bool early) {\n    Job job{7};\n    std::cout << \"work \";\n    if (early) return;\n    std::cout << \"tail \";\n}\nint main() {\n    std::cout << \"before \";\n    work(true);\n    std::cout << \"after\\n\";\n}\n",
+          "verifiedOutput": "before Part Job7 work ~Job ~Part after\n",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Ожидаемый вывод"
         },
         {
           "type": "text",
@@ -789,7 +793,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: ссылка читает текущее число, а не сохранённый снимок",
-          "code": "#include <iostream>\nint main() {\n    int value = 7;\n    const int& view = value;\n    value = 9;\n    std::cout << view; // 9\n    // view = 10;      // ошибка компиляции\n}"
+          "code": "#include <iostream>\nint main() {\n    int value = 7;\n    const int& view = value;\n    value = 9;\n    std::cout << view; // 9\n    // view = 10;      // ошибка компиляции\n}",
+          "verifiedOutput": "9",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -904,7 +910,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: сначала читаем Job, затем отдаём владельца",
-          "code": "#include <iostream>\n#include <memory>\n#include <utility>\n\nstruct Job {\n    int id = 7;\n    ~Job() { std::cout << \"destroy \"; }\n};\n\nvoid inspect(const Job& job) { std::cout << job.id << ' '; }\n\nvoid consume(std::unique_ptr<Job> job) {\n    std::cout << \"consume \" << job->id << ' ';\n}\n\nint main() {\n    auto job = std::make_unique<Job>();\n    inspect(*job);\n    consume(std::move(job));\n    std::cout << std::boolalpha << static_cast<bool>(job);\n}\n// Вывод: 7 consume 7 destroy false"
+          "code": "#include <iostream>\n#include <memory>\n#include <utility>\n\nstruct Job {\n    int id = 7;\n    ~Job() { std::cout << \"destroy \"; }\n};\n\nvoid inspect(const Job& job) { std::cout << job.id << ' '; }\n\nvoid consume(std::unique_ptr<Job> job) {\n    std::cout << \"consume \" << job->id << ' ';\n}\n\nint main() {\n    auto job = std::make_unique<Job>();\n    inspect(*job);\n    consume(std::move(job));\n    std::cout << std::boolalpha << static_cast<bool>(job);\n}\n// Вывод: 7 consume 7 destroy false",
+          "verifiedOutput": "7 consume 7 destroy false",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -934,7 +942,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: ссылка сама не владеет, но функция создаёт совладельца",
-          "code": "#include <iostream>\n#include <memory>\n\nstruct Job { int id = 7; };\n\nstd::shared_ptr<Job> saved;\n\nvoid maybeRetain(const std::shared_ptr<Job>& job) {\n    saved = job;  // копируем shared_ptr, а не Job\n    job->id = 9;  // const относится к указателю, не к объекту Job\n    // job.reset(); // нельзя менять сам указатель через const-ссылку\n}\n\nint main() {\n    auto job = std::make_shared<Job>();\n    maybeRetain(job);\n    std::cout << job.use_count() << ' ' << job->id << ' ';\n    job.reset();\n    std::cout << saved.use_count() << ' ' << saved->id;\n}\n// Вывод: 2 9 1 9"
+          "code": "#include <iostream>\n#include <memory>\n\nstruct Job { int id = 7; };\n\nstd::shared_ptr<Job> saved;\n\nvoid maybeRetain(const std::shared_ptr<Job>& job) {\n    saved = job;  // копируем shared_ptr, а не Job\n    job->id = 9;  // const относится к указателю, не к объекту Job\n    // job.reset(); // нельзя менять сам указатель через const-ссылку\n}\n\nint main() {\n    auto job = std::make_shared<Job>();\n    maybeRetain(job);\n    std::cout << job.use_count() << ' ' << job->id << ' ';\n    job.reset();\n    std::cout << saved.use_count() << ' ' << saved->id;\n}\n// Вывод: 2 9 1 9",
+          "verifiedOutput": "2 9 1 9",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -955,7 +965,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: User хранит собственную строку, не ссылку на исходную",
-          "code": "#include <iostream>\n#include <string>\n#include <utility>\n\nclass User {\n    std::string name_;\npublic:\n    explicit User(std::string name) : name_(std::move(name)) {}\n    const std::string& name() const { return name_; }\n};\n\nint main() {\n    std::string source = \"Ada\";\n    User first{source};\n    source = \"Grace\";\n    User second{std::move(source)};\n    std::cout << first.name() << ' ' << second.name();\n}\n// Вывод: Ada Grace"
+          "code": "#include <iostream>\n#include <string>\n#include <utility>\n\nclass User {\n    std::string name_;\npublic:\n    explicit User(std::string name) : name_(std::move(name)) {}\n    const std::string& name() const { return name_; }\n};\n\nint main() {\n    std::string source = \"Ada\";\n    User first{source};\n    source = \"Grace\";\n    User second{std::move(source)};\n    std::cout << first.name() << ' ' << second.name();\n}\n// Вывод: Ada Grace",
+          "verifiedOutput": "Ada Grace",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1258,7 +1270,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Объект исчезает раньше последнего weak_ptr",
-          "code": "#include <iostream>\n#include <memory>\nstruct Item {\n    ~Item() { std::cout << \"destroy \"; }\n};\nint main() {\n    std::weak_ptr<Item> weak;\n    {\n        auto a = std::make_shared<Item>();\n        auto b = a;\n        weak = a;\n        std::cout << a.use_count() << ' ';\n        a.reset();\n        std::cout << b.use_count() << ' ';\n    }\n    std::cout << weak.expired() << ' ';\n    auto held = weak.lock();\n    std::cout << bool(held); // 2 1 destroy 1 0\n}"
+          "code": "#include <iostream>\n#include <memory>\nstruct Item {\n    ~Item() { std::cout << \"destroy \"; }\n};\nint main() {\n    std::weak_ptr<Item> weak;\n    {\n        auto a = std::make_shared<Item>();\n        auto b = a;\n        weak = a;\n        std::cout << a.use_count() << ' ';\n        a.reset();\n        std::cout << b.use_count() << ' ';\n    }\n    std::cout << weak.expired() << ' ';\n    auto held = weak.lock();\n    std::cout << bool(held); // 2 1 destroy 1 0\n}",
+          "verifiedOutput": "2 1 destroy 1 0",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1325,7 +1339,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Получаем владельца той же группы, а не второй контроль над адресом",
-          "code": "#include <memory>\nstruct Session : std::enable_shared_from_this<Session> {\n    std::shared_ptr<Session> self() { return shared_from_this(); }\n};\nint main() {\n    auto first = std::make_shared<Session>();\n    auto second = first->self();\n    return first.use_count() == 2 ? 0 : 1;\n}"
+          "code": "#include <memory>\nstruct Session : std::enable_shared_from_this<Session> {\n    std::shared_ptr<Session> self() { return shared_from_this(); }\n};\nint main() {\n    auto first = std::make_shared<Session>();\n    auto second = first->self();\n    return first.use_count() == 2 ? 0 : 1;\n}",
+          "verifiedOutput": "",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1366,7 +1382,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <cstddef>\n#include <iostream>\n#include <memory>\n#include <new>\n\nstruct X {\n    int value;\n    explicit X(int n) : value(n) { std::cout << \"C \"; }\n    ~X() { std::cout << \"D\"; }\n};\nint main() {\n    alignas(X) std::byte slot[sizeof(X)];\n    X* p = ::new (static_cast<void*>(slot)) X(7);\n    std::cout << p->value << ' ';\n    std::destroy_at(p);\n}",
-          "caption": "Полная программа C++20: C 7 D"
+          "caption": "Полная программа C++20: C 7 D",
+          "verifiedOutput": "C 7 D",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1477,7 +1495,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23. Вывод: 7 42 42",
           "code": "#include <cstring>\n#include <iostream>\n\nint main() {\n    unsigned int value = 42;\n    unsigned char saved[sizeof(value)];\n    std::memcpy(saved, &value, sizeof(value));\n\n    unsigned int copy = 0;\n    std::memcpy(&copy, &value, sizeof(value));\n    value = 7;\n    std::cout << value << ' ' << copy << ' ';\n\n    std::memcpy(&value, saved, sizeof(value));\n    std::cout << value << '\\n';\n}\n",
           "exampleId": "s1-object-bytes-roundtrip",
-          "standard": "20/23"
+          "standard": "20/23",
+          "verifiedOutput": "7 42 42\n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -1554,7 +1574,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23. Вывод: 3 1 9",
           "code": "#include <cstring>\n#include <iostream>\n#include <type_traits>\n\nstruct Reading {\n    unsigned int samples;\n    double value;\n};\nstatic_assert(std::is_trivially_copyable_v<Reading>);\n\nint main() {\n    Reading original{3, 1.5};\n    Reading copy{0, 0.0};\n    std::memcpy(&copy, &original, sizeof(Reading));\n\n    original.samples = 9;\n    std::cout << copy.samples << ' '\n              << (copy.value == 1.5) << ' '\n              << original.samples << '\\n';\n}\n",
           "exampleId": "s1-trivially-copyable-record",
-          "standard": "20/23"
+          "standard": "20/23",
+          "verifiedOutput": "3 1 9\n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -1595,7 +1617,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23 при sizeof(BytePair) == 2. Вывод: 3 9 7",
           "code": "#include <bit>\n#include <iostream>\n#include <type_traits>\n\nstruct BytePair {\n    unsigned char first;\n    unsigned char second;\n};\nstatic_assert(std::is_trivially_copyable_v<BytePair>);\nstatic_assert(sizeof(BytePair) == 2);\n\nint main() {\n    unsigned char raw[2] = {3, 9};\n    const BytePair pair = std::bit_cast<BytePair>(raw);\n    raw[0] = 7;\n\n    std::cout << static_cast<unsigned int>(pair.first) << ' '\n              << static_cast<unsigned int>(pair.second) << ' '\n              << static_cast<unsigned int>(raw[0]) << '\\n';\n}\n",
           "exampleId": "s1-bit-cast-byte-pair",
-          "standard": "20/23"
+          "standard": "20/23",
+          "verifiedOutput": "3 9 7\n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -1656,7 +1680,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <iostream>\n#include <memory>\nstruct Record { int value = 42; };\nint main() {\n    auto owner = std::make_shared<Record>();\n    std::shared_ptr<int> field(owner, &owner->value);\n    owner.reset();\n    std::cout << *field << ' ' << field.use_count();\n}",
-          "caption": "Полная программа: 42 1"
+          "caption": "Полная программа: 42 1",
+          "verifiedOutput": "42 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1883,7 +1909,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Сначала только разрешение, затем передача владения",
-          "code": "#include <iostream>\n#include <memory>\n#include <utility>\nint main() {\n    auto source = std::make_unique<int>(7);\n    (void)std::move(source);\n    std::cout << bool(source) << ' ';\n    auto destination = std::move(source);\n    std::cout << bool(source) << ' ' << *destination; // 1 0 7\n}"
+          "code": "#include <iostream>\n#include <memory>\n#include <utility>\nint main() {\n    auto source = std::make_unique<int>(7);\n    (void)std::move(source);\n    std::cout << bool(source) << ' ';\n    auto destination = std::move(source);\n    std::cout << bool(source) << ' ' << *destination; // 1 0 7\n}",
+          "verifiedOutput": "1 0 7",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1939,7 +1967,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Имя параметра остаётся lvalue, даже если его тип — T&&",
-          "code": "#include <iostream>\n#include <utility>\nstruct Item {};\nvoid inspect(Item&)  { std::cout << 'L'; }\nvoid inspect(Item&&) { std::cout << 'R'; }\nvoid relay(Item&& item) {\n    inspect(item);\n    inspect(std::move(item));\n}\nint main() { relay(Item{}); } // LR"
+          "code": "#include <iostream>\n#include <utility>\nstruct Item {};\nvoid inspect(Item&)  { std::cout << 'L'; }\nvoid inspect(Item&&) { std::cout << 'R'; }\nvoid relay(Item&& item) {\n    inspect(item);\n    inspect(std::move(item));\n}\nint main() { relay(Item{}); } // LR",
+          "verifiedOutput": "LR",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2049,7 +2079,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Правило нуля: поля уже реализуют нужное поведение",
-          "code": "#include <iostream>\n#include <memory>\n#include <utility>\n#include <vector>\n\nstruct Values {\n    std::vector<int> data{7};\n};\n\nstruct OwnerA {\n    std::unique_ptr<int> p = std::make_unique<int>(7);\n};\n\nint main() {\n    Values a;\n    Values b = a;\n    b.data[0] = 9;\n\n    OwnerA first;\n    OwnerA second = std::move(first);\n    // OwnerA third = second; // ошибка: unique_ptr нельзя скопировать\n    std::cout << a.data[0] << ' ' << b.data[0] << ' '\n              << static_cast<bool>(first.p) << ' ' << *second.p;\n}\n// Вывод: 7 9 0 7"
+          "code": "#include <iostream>\n#include <memory>\n#include <utility>\n#include <vector>\n\nstruct Values {\n    std::vector<int> data{7};\n};\n\nstruct OwnerA {\n    std::unique_ptr<int> p = std::make_unique<int>(7);\n};\n\nint main() {\n    Values a;\n    Values b = a;\n    b.data[0] = 9;\n\n    OwnerA first;\n    OwnerA second = std::move(first);\n    // OwnerA third = second; // ошибка: unique_ptr нельзя скопировать\n    std::cout << a.data[0] << ' ' << b.data[0] << ' '\n              << static_cast<bool>(first.p) << ' ' << *second.p;\n}\n// Вывод: 7 9 0 7",
+          "verifiedOutput": "7 9 0 7",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2104,7 +2136,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Построение из rvalue не доказывает наличие move-конструктора",
-          "code": "#include <iostream>\n#include <type_traits>\n#include <utility>\n\nstruct CopyOnly {\n    CopyOnly() = default;\n    CopyOnly(const CopyOnly&) { std::cout << \"copy\"; }\n    ~CopyOnly() = default;\n};\n\nstatic_assert(std::is_move_constructible_v<CopyOnly>);\n\nint main() {\n    CopyOnly first;\n    CopyOnly second(std::move(first));\n}\n// Вывод: copy"
+          "code": "#include <iostream>\n#include <type_traits>\n#include <utility>\n\nstruct CopyOnly {\n    CopyOnly() = default;\n    CopyOnly(const CopyOnly&) { std::cout << \"copy\"; }\n    ~CopyOnly() = default;\n};\n\nstatic_assert(std::is_move_constructible_v<CopyOnly>);\n\nint main() {\n    CopyOnly first;\n    CopyOnly second(std::move(first));\n}\n// Вывод: copy",
+          "verifiedOutput": "copy",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2157,7 +2191,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Копия и перемещение запрещены, но прямой возврат допустим",
-          "code": "#include <iostream>\nstruct Token {\n    Token() { std::cout << 'N'; }\n    Token(const Token&) = delete;\n    Token(Token&&) = delete;\n    ~Token() { std::cout << 'D'; }\n};\nToken make() { return Token{}; }\nint main() { Token result = make(); } // ND"
+          "code": "#include <iostream>\nstruct Token {\n    Token() { std::cout << 'N'; }\n    Token(const Token&) = delete;\n    Token(Token&&) = delete;\n    ~Token() { std::cout << 'D'; }\n};\nToken make() { return Token{}; }\nint main() { Token result = make(); } // ND",
+          "verifiedOutput": "ND",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2263,7 +2299,9 @@ window.STATION_DATA = {
           "caption": "Полная программа: в C++23 вывод 9; в C++20 ожидается ошибка компиляции в return job",
           "exampleId": "s1-implicit-move-reference",
           "standard": "20/23",
-          "code": "#include <iostream>\n#include <utility>\n\nstruct Job { int id; };\n\nJob&& relay(Job&& job) {\n    return job;\n}\n\nint main() {\n    Job original{7};\n    Job&& alias = relay(std::move(original));\n    alias.id = 9;\n    std::cout << original.id << '\\n';\n}\n"
+          "code": "#include <iostream>\n#include <utility>\n\nstruct Job { int id; };\n\nJob&& relay(Job&& job) {\n    return job;\n}\n\nint main() {\n    Job original{7};\n    Job&& alias = relay(std::move(original));\n    alias.id = 9;\n    std::cout << original.id << '\\n';\n}\n",
+          "verifiedOutput": "9\n",
+          "verifiedOutputStandard": "23"
         },
         {
           "type": "text",
@@ -2412,7 +2450,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++23: временный Batch живёт до конца цикла; без нужной поддержки сборка остановится",
           "exampleId": "s1-range-for-temporary23",
           "standard": "23",
-          "code": "#include <iostream>\n#include <vector>\n\n#if !defined(__cpp_range_based_for) || __cpp_range_based_for < 202211L\n#error \"C++23 range-for temporary lifetime support required\"\n#endif\n\nstruct Batch {\n    std::vector<int> values{10, 20, 30};\n    const std::vector<int>& rows() const { return values; }\n};\nBatch make_batch() { return {}; }\n\nint main() {\n    for (int value : make_batch().rows()) {\n        std::cout << value << ' ';\n    }\n    std::cout << '\\n';\n}\n"
+          "code": "#include <iostream>\n#include <vector>\n\n#if !defined(__cpp_range_based_for) || __cpp_range_based_for < 202211L\n#error \"C++23 range-for temporary lifetime support required\"\n#endif\n\nstruct Batch {\n    std::vector<int> values{10, 20, 30};\n    const std::vector<int>& rows() const { return values; }\n};\nBatch make_batch() { return {}; }\n\nint main() {\n    for (int value : make_batch().rows()) {\n        std::cout << value << ' ';\n    }\n    std::cout << '\\n';\n}\n",
+          "verifiedOutput": "10 20 30 \n",
+          "verifiedOutputStandard": "23"
         },
         {
           "type": "note",
@@ -2440,7 +2480,9 @@ window.STATION_DATA = {
           "caption": "Полная программа C++20/23: владелец явно объявлен в начале цикла",
           "exampleId": "s1-range-for-named-owner",
           "standard": "20/23",
-          "code": "#include <iostream>\n#include <vector>\n\nstruct Batch {\n    std::vector<int> values{10, 20, 30};\n    const std::vector<int>& rows() const { return values; }\n};\nBatch make_batch() { return {}; }\n\nint main() {\n    for (Batch batch = make_batch(); int value : batch.rows()) {\n        std::cout << value << ' ';\n    }\n    std::cout << '\\n';\n}\n"
+          "code": "#include <iostream>\n#include <vector>\n\nstruct Batch {\n    std::vector<int> values{10, 20, 30};\n    const std::vector<int>& rows() const { return values; }\n};\nBatch make_batch() { return {}; }\n\nint main() {\n    for (Batch batch = make_batch(); int value : batch.rows()) {\n        std::cout << value << ' ';\n    }\n    std::cout << '\\n';\n}\n",
+          "verifiedOutput": "10 20 30 \n",
+          "verifiedOutputStandard": "20/23"
         },
         {
           "type": "text",
@@ -2495,7 +2537,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Лямбда с собственным числом",
-          "code": "#include <iostream>\nauto make_counter() {\n    int start = 10;\n    return [start]() mutable { return ++start; };\n}\nint main() {\n    auto counter = make_counter();\n    std::cout << counter() << ' ' << counter(); // 11 12\n}"
+          "code": "#include <iostream>\nauto make_counter() {\n    int start = 10;\n    return [start]() mutable { return ++start; };\n}\nint main() {\n    auto counter = make_counter();\n    std::cout << counter() << ' ' << counter(); // 11 12\n}",
+          "verifiedOutput": "11 12",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2602,7 +2646,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Наблюдаем реальную операцию, а не наличие std::move",
-          "code": "#include <iostream>\n#include <utility>\nstruct Item {\n    Item() = default;\n    Item(const Item&) { std::cout << \"copy \"; }\n    Item(Item&&) noexcept { std::cout << \"move \"; }\n};\nint main() {\n    Item a;\n    std::move(a);           // ни copy, ни move\n    Item b = std::move(a);  // move\n    const Item c;\n    Item d = std::move(c);  // copy\n}"
+          "code": "#include <iostream>\n#include <utility>\nstruct Item {\n    Item() = default;\n    Item(const Item&) { std::cout << \"copy \"; }\n    Item(Item&&) noexcept { std::cout << \"move \"; }\n};\nint main() {\n    Item a;\n    std::move(a);           // ни copy, ни move\n    Item b = std::move(a);  // move\n    const Item c;\n    Item d = std::move(c);  // copy\n}",
+          "verifiedOutput": "move copy ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2802,17 +2848,15 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа · C++20 · main.cpp",
-          "code": "#include <iostream>\n#include <memory>\n#include <utility>\n\nstruct Job {\n    int id;\n    explicit Job(int value) : id(value) {\n        std::cout << \"create \" << id << '\\n';\n    }\n    ~Job() { std::cout << \"destroy \" << id << '\\n'; }\n};\n\nbool submit(std::unique_ptr<Job> job) {\n    if (!job || job->id <= 0) return false;\n    std::cout << \"run \" << job->id << '\\n';\n    return true;\n}\n\nint main() {\n    std::cout << std::boolalpha;\n    auto owner = std::make_unique<Job>(7);\n    Job* observer = owner.get();\n    std::cout << \"observe \" << observer->id << '\\n';\n    const bool result = submit(std::move(owner));\n    std::cout << \"accepted \" << result << \", empty \" << !owner << '\\n';\n    auto rejected = std::make_unique<Job>(0);\n    const bool second = submit(std::move(rejected));\n    std::cout << \"accepted \" << second << \", empty \" << !rejected << '\\n';\n    std::cout << \"empty submit \" << submit(nullptr) << '\\n';\n}\n"
+          "code": "#include <iostream>\n#include <memory>\n#include <utility>\n\nstruct Job {\n    int id;\n    explicit Job(int value) : id(value) {\n        std::cout << \"create \" << id << '\\n';\n    }\n    ~Job() { std::cout << \"destroy \" << id << '\\n'; }\n};\n\nbool submit(std::unique_ptr<Job> job) {\n    if (!job || job->id <= 0) return false;\n    std::cout << \"run \" << job->id << '\\n';\n    return true;\n}\n\nint main() {\n    std::cout << std::boolalpha;\n    auto owner = std::make_unique<Job>(7);\n    Job* observer = owner.get();\n    std::cout << \"observe \" << observer->id << '\\n';\n    const bool result = submit(std::move(owner));\n    std::cout << \"accepted \" << result << \", empty \" << !owner << '\\n';\n    auto rejected = std::make_unique<Job>(0);\n    const bool second = submit(std::move(rejected));\n    std::cout << \"accepted \" << second << \", empty \" << !rejected << '\\n';\n    std::cout << \"empty submit \" << submit(nullptr) << '\\n';\n}\n",
+          "verifiedOutput": "create 7\nobserve 7\nrun 7\ndestroy 7\naccepted true, empty true\ncreate 0\ndestroy 0\naccepted false, empty true\nempty submit false\n",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Ожидаемый вывод полной программы"
         },
         {
           "type": "code",
           "caption": "Необязательный запуск вне учебника: Linux/macOS с g++",
           "code": "g++ -std=c++20 -Wall -Wextra -pedantic  main.cpp -o example\n./example\n"
-        },
-        {
-          "type": "code",
-          "caption": "Ожидаемый вывод полной программы",
-          "code": "create 7\nobserve 7\nrun 7\ndestroy 7\naccepted true, empty true\ncreate 0\ndestroy 0\naccepted false, empty true\nempty submit false\n"
         },
         {
           "type": "text",

@@ -38,6 +38,7 @@ DESKTOP_SOURCES = (
     "tests/test_multiwindow.py", "tests/test_package.py", "tests/test_progress.py",
     "tests/test_lab_interactions_browser.py",
     "tests/test_lab_observations_browser.py",
+    "tests/test_reading_edition_browser.py",
     "tests/test_progress_ui.py", "tests/test_real_package.py",
     "tests/test_security.cjs", "tests/test_upgrade.cjs", "tests/test_visual.py",
 )
@@ -122,7 +123,7 @@ def collect_repository_files() -> dict[str, bytes]:
     check_release(files, stations)
     sources = {
         "content/cheatsheet.json", "content/glossary.json", "content/visual-labs.json",
-        "content/cpp-examples.json",
+        "content/cpp-examples.json", "content/listing-outputs.json",
         "content/service-workshop/route.json", "assets/sql-lab-worker.js",
         "templates/https_journey_lab.html",
         "templates/network_lab.html", "templates/tcp_order_workbench.html", "templates/packet_mtu_workbench.html",

@@ -867,6 +867,53 @@ window.STATION_DATA = {
           "html": "Если commit выполнен до фиксации нужного эффекта, падение может пропустить эффект. Если после — повторить доставку. Рекомендуемая дисциплина для переносимого повтора: завершить выбранный эффект с его защитой, затем подтвердить позицию и обработать возможную ошибку commit."
         },
         {
+          "type": "reading-figure",
+          "title": "Запись 40 уже учтена в базе. С чего группа начнёт после сбоя?",
+          "rows": [
+            {
+              "label": "Следующую позицию не сохранили: у группы по-прежнему 40",
+              "cells": [
+                {
+                  "value": "40",
+                  "note": "получим повторно",
+                  "state": "boundary"
+                },
+                {
+                  "value": "41",
+                  "note": "ещё не обработана",
+                  "state": "outside"
+                },
+                {
+                  "value": "42",
+                  "note": "ещё не обработана",
+                  "state": "outside"
+                }
+              ]
+            },
+            {
+              "label": "После записи в базу успели сохранить позицию 41",
+              "cells": [
+                {
+                  "value": "40",
+                  "note": "повтора нет",
+                  "state": "outside"
+                },
+                {
+                  "value": "41",
+                  "note": "продолжим отсюда",
+                  "state": "boundary"
+                },
+                {
+                  "value": "42",
+                  "note": "следом за 41",
+                  "state": "outside"
+                }
+              ]
+            }
+          ],
+          "caption": "Обе строки — варианты одного опыта: записи 40–42 по-прежнему есть в одном разделе Kafka, а приложение успело обработать только 40. В первом случае повторится доставка, но списывать деньги или начислять баллы за ту же запись второй раз нельзя."
+        },
+        {
           "type": "text",
           "html": "У librdkafka есть отдельные действия store offset и commit offset. Store может только запомнить следующую позицию в памяти клиента для поздней фиксации. Настройка enable.auto.offset.store=true по умолчанию делает это при выдаче сообщения приложению, а не после вашей транзакции."
         },
@@ -1642,12 +1689,10 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: delivery_model.cpp",
-          "code": "// C++20, no network. A single-threaded model, not a durable storage engine.\n#include <iostream>\n#include <limits>\n#include <set>\n#include <stdexcept>\n#include <string>\n#include <utility>\n#include <vector>\n\nstruct Event {\n    std::string id;\n    int amount;\n};\n\nclass Ledger {\n    struct State {\n        int total = 0;\n        std::set<std::string> receipts;\n        void swap(State& other) noexcept {\n            std::swap(total, other.total);\n            receipts.swap(other.receipts);\n        }\n    } state_;\npublic:\n    bool apply(const Event& event) {\n        if (state_.receipts.contains(event.id)) return false;\n        if (event.amount < 0 ||\n            event.amount > std::numeric_limits<int>::max() - state_.total)\n            throw std::invalid_argument(\"amount outside the teaching contract\");\n        State prepared = state_;             // Failure here changes nothing.\n        prepared.receipts.insert(event.id);   // Receipt and effect in one state.\n        prepared.total += event.amount;\n        state_.swap(prepared);                // Non-throwing commit of the model.\n        return true;\n    }\n    int total() const noexcept { return state_.total; }\n    std::size_t receipt_count() const noexcept { return state_.receipts.size(); }\n};\n\nint main() {\n    const std::vector<Event> log{{\"evt-101\", 3}, {\"evt-102\", 4}};\n    Ledger store;\n    std::size_t next = 0;\n    const bool first = store.apply(log.at(next));\n    std::cout << \"delivery \" << next << ' ' << (first ? \"applied\" : \"duplicate\")\n              << \" total=\" << store.total() << '\\n';\n    // The worker loses its acknowledgement. The independent store survives.\n    const bool replay = store.apply(log.at(next));\n    std::cout << \"restart \" << next << ' ' << (replay ? \"applied\" : \"duplicate\")\n              << \" total=\" << store.total() << '\\n';\n    ++next;                                  // Commit the next unread position.\n    const bool second = store.apply(log.at(next));\n    std::cout << \"delivery \" << next << ' ' << (second ? \"applied\" : \"duplicate\")\n              << \" total=\" << store.total() << '\\n';\n    ++next;\n    std::cout << \"next=\" << next << \" receipts=\" << store.receipt_count() << '\\n';\n    if (!first || replay || !second || store.total() != 7 || next != 2 ||\n        store.receipt_count() != 2) return 1;\n    const int before = store.total();\n    try { store.apply({\"bad\", -1}); return 2; }\n    catch (const std::invalid_argument&) {}\n    if (store.total() != before || store.receipt_count() != 2) return 3;\n}\n"
-        },
-        {
-          "type": "code",
-          "caption": "Точный вывод программы",
-          "code": "delivery 0 applied total=3\nrestart 0 duplicate total=3\ndelivery 1 applied total=7\nnext=2 receipts=2"
+          "code": "// C++20, no network. A single-threaded model, not a durable storage engine.\n#include <iostream>\n#include <limits>\n#include <set>\n#include <stdexcept>\n#include <string>\n#include <utility>\n#include <vector>\n\nstruct Event {\n    std::string id;\n    int amount;\n};\n\nclass Ledger {\n    struct State {\n        int total = 0;\n        std::set<std::string> receipts;\n        void swap(State& other) noexcept {\n            std::swap(total, other.total);\n            receipts.swap(other.receipts);\n        }\n    } state_;\npublic:\n    bool apply(const Event& event) {\n        if (state_.receipts.contains(event.id)) return false;\n        if (event.amount < 0 ||\n            event.amount > std::numeric_limits<int>::max() - state_.total)\n            throw std::invalid_argument(\"amount outside the teaching contract\");\n        State prepared = state_;             // Failure here changes nothing.\n        prepared.receipts.insert(event.id);   // Receipt and effect in one state.\n        prepared.total += event.amount;\n        state_.swap(prepared);                // Non-throwing commit of the model.\n        return true;\n    }\n    int total() const noexcept { return state_.total; }\n    std::size_t receipt_count() const noexcept { return state_.receipts.size(); }\n};\n\nint main() {\n    const std::vector<Event> log{{\"evt-101\", 3}, {\"evt-102\", 4}};\n    Ledger store;\n    std::size_t next = 0;\n    const bool first = store.apply(log.at(next));\n    std::cout << \"delivery \" << next << ' ' << (first ? \"applied\" : \"duplicate\")\n              << \" total=\" << store.total() << '\\n';\n    // The worker loses its acknowledgement. The independent store survives.\n    const bool replay = store.apply(log.at(next));\n    std::cout << \"restart \" << next << ' ' << (replay ? \"applied\" : \"duplicate\")\n              << \" total=\" << store.total() << '\\n';\n    ++next;                                  // Commit the next unread position.\n    const bool second = store.apply(log.at(next));\n    std::cout << \"delivery \" << next << ' ' << (second ? \"applied\" : \"duplicate\")\n              << \" total=\" << store.total() << '\\n';\n    ++next;\n    std::cout << \"next=\" << next << \" receipts=\" << store.receipt_count() << '\\n';\n    if (!first || replay || !second || store.total() != 7 || next != 2 ||\n        store.receipt_count() != 2) return 1;\n    const int before = store.total();\n    try { store.apply({\"bad\", -1}); return 2; }\n    catch (const std::invalid_argument&) {}\n    if (store.total() != before || store.receipt_count() != 2) return 3;\n}\n",
+          "verifiedOutput": "delivery 0 applied total=3\nrestart 0 duplicate total=3\ndelivery 1 applied total=7\nnext=2 receipts=2\n",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Точный вывод программы"
         },
         {
           "type": "note",

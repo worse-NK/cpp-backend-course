@@ -95,5 +95,7 @@ def with_checkpoints(data: dict, directory: Path | None = None) -> dict:
     training = {kind: data['quizzes'].get(kind, []) for kind in ('basic', 'advanced')}
     training_version = hashlib.sha256(json.dumps(
         training, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:12]
-    return dict(data, checkpoints=resolved, checkpointVersion=versions,
+    from build_listing_outputs import reading_sections
+    return dict(data, theory=reading_sections(data["meta"]["id"], data["theory"]),
+                checkpoints=resolved, checkpointVersion=versions,
                 trainingVersion=training_version)

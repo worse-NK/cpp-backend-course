@@ -140,7 +140,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: найденный ноль не равен отсутствию",
-          "code": "#include <iostream>\n#include <optional>\n#include <initializer_list>\n#include <string_view>\n\nstd::optional<int> findLimit(std::string_view name) {\n    if (name == \"connections\") return 0;\n    return std::nullopt;\n}\n\nint main() {\n    for (std::string_view name : {\"connections\", \"workers\"}) {\n        auto limit = findLimit(name);\n        if (limit) std::cout << *limit << '\\n';\n        else std::cout << \"отсутствует\\n\";\n    }\n}"
+          "code": "#include <iostream>\n#include <optional>\n#include <initializer_list>\n#include <string_view>\n\nstd::optional<int> findLimit(std::string_view name) {\n    if (name == \"connections\") return 0;\n    return std::nullopt;\n}\n\nint main() {\n    for (std::string_view name : {\"connections\", \"workers\"}) {\n        auto limit = findLimit(name);\n        if (limit) std::cout << *limit << '\\n';\n        else std::cout << \"отсутствует\\n\";\n    }\n}",
+          "verifiedOutput": "0\nотсутствует\n",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -423,7 +425,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: деление на ноль переводит управление в catch",
-          "code": "#include <iostream>\n#include <stdexcept>\n\ndouble divide(int a, int b) {\n    if (b == 0)\n        throw std::runtime_error(\"деление на ноль\");  // бросаем\n    return static_cast<double>(a) / b;\n}\n\nint main() {\n    try {\n        double r = divide(10, 0);   // здесь выбросится исключение\n        std::cout << r;             // сюда НЕ дойдём\n    } catch (const std::runtime_error& e) {   // ловим\n        std::cout << \"ошибка: \" << e.what();   // \"ошибка: деление на ноль\"\n    }\n}"
+          "code": "#include <iostream>\n#include <stdexcept>\n\ndouble divide(int a, int b) {\n    if (b == 0)\n        throw std::runtime_error(\"деление на ноль\");  // бросаем\n    return static_cast<double>(a) / b;\n}\n\nint main() {\n    try {\n        double r = divide(10, 0);   // здесь выбросится исключение\n        std::cout << r;             // сюда НЕ дойдём\n    } catch (const std::runtime_error& e) {   // ловим\n        std::cout << \"ошибка: \" << e.what();   // \"ошибка: деление на ноль\"\n    }\n}",
+          "verifiedOutput": "ошибка: деление на ноль",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -484,7 +488,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: обработка по типу, пояснение через what()",
-          "code": "#include <iostream>\n#include <stdexcept>\n\nint packet_size(int requested) {\n    if (requested <= 0)\n        throw std::invalid_argument(\"packet size must be positive\");\n    return requested;\n}\n\nint main() {\n    try {\n        std::cout << packet_size(0);\n    } catch (const std::invalid_argument& error) {\n        std::cout << error.what();\n    }\n}\n"
+          "code": "#include <iostream>\n#include <stdexcept>\n\nint packet_size(int requested) {\n    if (requested <= 0)\n        throw std::invalid_argument(\"packet size must be positive\");\n    return requested;\n}\n\nint main() {\n    try {\n        std::cout << packet_size(0);\n    } catch (const std::invalid_argument& error) {\n        std::cout << error.what();\n    }\n}\n",
+          "verifiedOutput": "packet size must be positive",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -582,7 +588,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: «release caught» — очистка произошла до catch",
-          "code": "#include <iostream>\n#include <memory>\n#include <stdexcept>\n\nstruct Buffer {\n    ~Buffer() { std::cout << \"release \"; }\n};\n\nvoid fail() {\n    auto buffer = std::make_unique<Buffer>();\n    throw std::runtime_error(\"processing failed\");\n}\n\nint main() {\n    try { fail(); }\n    catch (const std::runtime_error&) { std::cout << \"caught\"; }\n}\n"
+          "code": "#include <iostream>\n#include <memory>\n#include <stdexcept>\n\nstruct Buffer {\n    ~Buffer() { std::cout << \"release \"; }\n};\n\nvoid fail() {\n    auto buffer = std::make_unique<Buffer>();\n    throw std::runtime_error(\"processing failed\");\n}\n\nint main() {\n    try { fail(); }\n    catch (const std::runtime_error&) { std::cout << \"caught\"; }\n}\n",
+          "verifiedOutput": "release caught",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -614,7 +622,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: +O +A +B -B -A caught after -O (вывод работает успешно)",
-          "code": "#include <iostream>\n#include <stdexcept>\nstruct Guard {\n    char name;\n    explicit Guard(char n) : name(n) { std::cout << '+' << name << ' '; }\n    ~Guard() { std::cout << '-' << name << ' '; }\n};\nvoid load() {\n    Guard a{'A'};\n    {\n        Guard b{'B'};\n        throw std::runtime_error(\"bad input\");\n        std::cout << \"never \";\n    }\n    std::cout << \"also never \";\n}\nint main() {\n    Guard outer{'O'};\n    try {\n        load();\n        std::cout << \"success \";\n    } catch (const std::runtime_error&) {\n        std::cout << \"caught \";\n    }\n    std::cout << \"after \";\n}"
+          "code": "#include <iostream>\n#include <stdexcept>\nstruct Guard {\n    char name;\n    explicit Guard(char n) : name(n) { std::cout << '+' << name << ' '; }\n    ~Guard() { std::cout << '-' << name << ' '; }\n};\nvoid load() {\n    Guard a{'A'};\n    {\n        Guard b{'B'};\n        throw std::runtime_error(\"bad input\");\n        std::cout << \"never \";\n    }\n    std::cout << \"also never \";\n}\nint main() {\n    Guard outer{'O'};\n    try {\n        load();\n        std::cout << \"success \";\n    } catch (const std::runtime_error&) {\n        std::cout << \"caught \";\n    }\n    std::cout << \"after \";\n}",
+          "verifiedOutput": "+O +A +B -B -A caught after -O ",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -708,7 +718,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: throw; сохраняет ParseError, вывод — inner parse",
-          "code": "#include <iostream>\n#include <stdexcept>\nstruct ParseError : std::runtime_error {\n    using std::runtime_error::runtime_error;\n};\nint main() {\n    try {\n        try {\n            throw ParseError{\"bad input\"};\n        } catch (const std::runtime_error& error) {\n            std::cout << \"inner \";\n            (void)error;\n            throw;\n        }\n    } catch (const ParseError&) {\n        std::cout << \"parse\";\n    } catch (const std::runtime_error&) {\n        std::cout << \"runtime\";\n    }\n}"
+          "code": "#include <iostream>\n#include <stdexcept>\nstruct ParseError : std::runtime_error {\n    using std::runtime_error::runtime_error;\n};\nint main() {\n    try {\n        try {\n            throw ParseError{\"bad input\"};\n        } catch (const std::runtime_error& error) {\n            std::cout << \"inner \";\n            (void)error;\n            throw;\n        }\n    } catch (const ParseError&) {\n        std::cout << \"parse\";\n    } catch (const std::runtime_error&) {\n        std::cout << \"runtime\";\n    }\n}",
+          "verifiedOutput": "inner parse",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -827,7 +839,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: причина используется после конца первого catch",
-          "code": "#include <exception>\n#include <iostream>\n#include <stdexcept>\n\nint main() {\n    std::exception_ptr failure;\n    try { throw std::runtime_error(\"load failed\"); }\n    catch (...) { failure = std::current_exception(); }\n\n    std::cout << \"saved \";\n    if (failure) {\n        try { std::rethrow_exception(failure); }\n        catch (const std::runtime_error& error) {\n            std::cout << error.what();\n        }\n    }\n}\n"
+          "code": "#include <exception>\n#include <iostream>\n#include <stdexcept>\n\nint main() {\n    std::exception_ptr failure;\n    try { throw std::runtime_error(\"load failed\"); }\n    catch (...) { failure = std::current_exception(); }\n\n    std::cout << \"saved \";\n    if (failure) {\n        try { std::rethrow_exception(failure); }\n        catch (const std::runtime_error& error) {\n            std::cout << error.what();\n        }\n    }\n}\n",
+          "verifiedOutput": "saved load failed",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -876,7 +890,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: Resource — учебный ресурс; вывод A B ~A ctor-catch outer",
-          "code": "#include <iostream>\n#include <stdexcept>\n\nstruct Resource {\n    char name;\n    Resource(char label, bool fail) : name(label) {\n        std::cout << name << ' ';\n        if (fail) throw std::runtime_error(\"resource failed\");\n    }\n    ~Resource() { std::cout << '~' << name << ' '; }\n};\n\nclass Session {\n    Resource first_;\n    Resource second_;\npublic:\n    explicit Session(bool failSecond) try\n        : first_('A', false), second_('B', failSecond) {\n        std::cout << \"body \";\n    } catch (const std::runtime_error&) {\n        std::cout << \"ctor-catch \";\n        throw;\n    }\n\n    ~Session() { std::cout << \"~Session \"; }\n};\n\nint main() {\n    try {\n        Session session{true};\n    } catch (const std::runtime_error&) {\n        std::cout << \"outer\";\n    }\n}\n// Вывод: A B ~A ctor-catch outer"
+          "code": "#include <iostream>\n#include <stdexcept>\n\nstruct Resource {\n    char name;\n    Resource(char label, bool fail) : name(label) {\n        std::cout << name << ' ';\n        if (fail) throw std::runtime_error(\"resource failed\");\n    }\n    ~Resource() { std::cout << '~' << name << ' '; }\n};\n\nclass Session {\n    Resource first_;\n    Resource second_;\npublic:\n    explicit Session(bool failSecond) try\n        : first_('A', false), second_('B', failSecond) {\n        std::cout << \"body \";\n    } catch (const std::runtime_error&) {\n        std::cout << \"ctor-catch \";\n        throw;\n    }\n\n    ~Session() { std::cout << \"~Session \"; }\n};\n\nint main() {\n    try {\n        Session session{true};\n    } catch (const std::runtime_error&) {\n        std::cout << \"outer\";\n    }\n}\n// Вывод: A B ~A ctor-catch outer",
+          "verifiedOutput": "A B ~A ctor-catch outer",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -972,7 +988,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "code": "#include <iostream>\nstruct X {\n    inline static int next = 0;\n    int id = next++;\n    X() {\n        std::cout << \"C\" << id << ' ';\n        if (id == 2) throw 7;\n    }\n    ~X() { std::cout << \"D\" << id << ' '; }\n};\nint main() {\n    try { X values[4]; }\n    catch (int) { std::cout << \"caught \" << X::next; }\n}",
-          "caption": "Полная программа C++20: C0 C1 C2 D1 D0 caught 3 (вывод работает успешно)"
+          "caption": "Полная программа C++20: C0 C1 C2 D1 D0 caught 3 (вывод работает успешно)",
+          "verifiedOutput": "C0 C1 C2 D1 D0 caught 3",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1044,7 +1062,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: учебный договор Output, не файловый API ОС; вывод caught 0 1",
-          "code": "#include <iostream>\n#include <stdexcept>\n\nclass Output {\n    bool open_ = true;\n    bool failOnClose_;\n    bool& cleanupFailed_;\n\n    bool release() noexcept {\n        if (!open_) return true;\n        open_ = false;\n        return !failOnClose_;\n    }\npublic:\n    Output(bool fail, bool& diagnostic)\n        : failOnClose_(fail), cleanupFailed_(diagnostic) {}\n    Output(const Output&) = delete;\n    Output& operator=(const Output&) = delete;\n\n    bool isOpen() const noexcept { return open_; }\n\n    void close() {\n        if (!release()) throw std::runtime_error(\"close failed\");\n    }\n\n    ~Output() noexcept {\n        if (!release()) cleanupFailed_ = true;\n    }\n};\n\nint main() {\n    bool cleanupFailed = false;\n    {\n        Output explicitClose{true, cleanupFailed};\n        try { explicitClose.close(); }\n        catch (const std::runtime_error&) { std::cout << \"caught \"; }\n        std::cout << explicitClose.isOpen() << ' ';\n    }\n    {\n        Output fallback{true, cleanupFailed};\n    }\n    std::cout << cleanupFailed;\n}\n// Вывод: caught 0 1"
+          "code": "#include <iostream>\n#include <stdexcept>\n\nclass Output {\n    bool open_ = true;\n    bool failOnClose_;\n    bool& cleanupFailed_;\n\n    bool release() noexcept {\n        if (!open_) return true;\n        open_ = false;\n        return !failOnClose_;\n    }\npublic:\n    Output(bool fail, bool& diagnostic)\n        : failOnClose_(fail), cleanupFailed_(diagnostic) {}\n    Output(const Output&) = delete;\n    Output& operator=(const Output&) = delete;\n\n    bool isOpen() const noexcept { return open_; }\n\n    void close() {\n        if (!release()) throw std::runtime_error(\"close failed\");\n    }\n\n    ~Output() noexcept {\n        if (!release()) cleanupFailed_ = true;\n    }\n};\n\nint main() {\n    bool cleanupFailed = false;\n    {\n        Output explicitClose{true, cleanupFailed};\n        try { explicitClose.close(); }\n        catch (const std::runtime_error&) { std::cout << \"caught \"; }\n        std::cout << explicitClose.isOpen() << ' ';\n    }\n    {\n        Output fallback{true, cleanupFailed};\n    }\n    std::cout << cleanupFailed;\n}\n// Вывод: caught 0 1",
+          "verifiedOutput": "caught 0 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1107,7 +1127,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: внутри catch уже обработано исключение, вывод caught 1 0",
-          "code": "#include <exception>\n#include <iostream>\n\nclass ScopeProbe {\n    int before_ = std::uncaught_exceptions();\n    bool& unwound_;\npublic:\n    explicit ScopeProbe(bool& result) : unwound_(result) {}\n    ScopeProbe(const ScopeProbe&) = delete;\n    ScopeProbe& operator=(const ScopeProbe&) = delete;\n    ~ScopeProbe() noexcept {\n        unwound_ = std::uncaught_exceptions() > before_;\n    }\n};\n\nint main() {\n    bool innerUnwound = false, outerUnwound = false;\n    {\n        ScopeProbe outer{outerUnwound};\n        try {\n            ScopeProbe inner{innerUnwound};\n            throw 1;\n        } catch (...) {\n            std::cout << \"caught \";\n        }\n    }\n    std::cout << innerUnwound << ' ' << outerUnwound;\n}\n// Вывод: caught 1 0"
+          "code": "#include <exception>\n#include <iostream>\n\nclass ScopeProbe {\n    int before_ = std::uncaught_exceptions();\n    bool& unwound_;\npublic:\n    explicit ScopeProbe(bool& result) : unwound_(result) {}\n    ScopeProbe(const ScopeProbe&) = delete;\n    ScopeProbe& operator=(const ScopeProbe&) = delete;\n    ~ScopeProbe() noexcept {\n        unwound_ = std::uncaught_exceptions() > before_;\n    }\n};\n\nint main() {\n    bool innerUnwound = false, outerUnwound = false;\n    {\n        ScopeProbe outer{outerUnwound};\n        try {\n            ScopeProbe inner{innerUnwound};\n            throw 1;\n        } catch (...) {\n            std::cout << \"caught \";\n        }\n    }\n    std::cout << innerUnwound << ' ' << outerUnwound;\n}\n// Вывод: caught 1 0",
+          "verifiedOutput": "caught 1 0",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1191,7 +1213,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Обе реализации сохраняют инвариант, но только вторая сохраняет старое значение",
-          "code": "#include <iostream>\n#include <stdexcept>\n\nclass Range {\n    int low_ = 1, high_ = 5;\npublic:\n    void replaceBasic(int low, int high) {\n        low_ = low;\n        high_ = low;\n        if (high < low) throw std::invalid_argument(\"reversed range\");\n        high_ = high;\n    }\n\n    void replaceStrong(int low, int high) {\n        if (high < low) throw std::invalid_argument(\"reversed range\");\n        low_ = low;\n        high_ = high;\n    }\n\n    int low() const noexcept { return low_; }\n    int high() const noexcept { return high_; }\n};\n\nint main() {\n    Range basic, strong;\n    try { basic.replaceBasic(9, 3); }\n    catch (const std::invalid_argument&) {}\n    try { strong.replaceStrong(9, 3); }\n    catch (const std::invalid_argument&) {}\n    std::cout << basic.low() << ' ' << basic.high() << \" / \"\n              << strong.low() << ' ' << strong.high();\n}\n// Вывод: 9 9 / 1 5"
+          "code": "#include <iostream>\n#include <stdexcept>\n\nclass Range {\n    int low_ = 1, high_ = 5;\npublic:\n    void replaceBasic(int low, int high) {\n        low_ = low;\n        high_ = low;\n        if (high < low) throw std::invalid_argument(\"reversed range\");\n        high_ = high;\n    }\n\n    void replaceStrong(int low, int high) {\n        if (high < low) throw std::invalid_argument(\"reversed range\");\n        low_ = low;\n        high_ = high;\n    }\n\n    int low() const noexcept { return low_; }\n    int high() const noexcept { return high_; }\n};\n\nint main() {\n    Range basic, strong;\n    try { basic.replaceBasic(9, 3); }\n    catch (const std::invalid_argument&) {}\n    try { strong.replaceStrong(9, 3); }\n    catch (const std::invalid_argument&) {}\n    std::cout << basic.low() << ' ' << basic.high() << \" / \"\n              << strong.low() << ' ' << strong.high();\n}\n// Вывод: 9 9 / 1 5",
+          "verifiedOutput": "9 9 / 1 5",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1283,7 +1307,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: бросок обработан внутри небросающей функции",
-          "code": "#include <iostream>\n\nint readOrDefault(bool fail) noexcept {\n    try {\n        if (fail) throw 7;\n        return 42;\n    } catch (int) {\n        return 0;\n    }\n}\n\nint main() {\n    std::cout << readOrDefault(false) << ' '\n              << readOrDefault(true);\n}\n// Вывод: 42 0"
+          "code": "#include <iostream>\n\nint readOrDefault(bool fail) noexcept {\n    try {\n        if (fail) throw 7;\n        return 42;\n    } catch (int) {\n        return 0;\n    }\n}\n\nint main() {\n    std::cout << readOrDefault(false) << ' '\n              << readOrDefault(true);\n}\n// Вывод: 42 0",
+          "verifiedOutput": "42 0",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1409,7 +1435,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: искусственный отказ до фиксации оставляет прежнюю пару",
-          "code": "#include <iostream>\n#include <stdexcept>\n#include <string>\n\nstruct State {\n    std::string host;\n    std::string token;\n};\n\nvoid replace(State& current, const std::string& host,\n             const std::string& token, bool reject) {\n    State next{host, token};\n    if (reject) throw std::invalid_argument(\"rejected\");\n    current.host.swap(next.host);\n    current.token.swap(next.token);\n}\n\nint main() {\n    State current{\"old-host\", \"old-token\"};\n    try { replace(current, \"new-host\", \"new-token\", true); }\n    catch (const std::invalid_argument&) {}\n    std::cout << current.host << ' ' << current.token << \" / \";\n    replace(current, \"new-host\", \"new-token\", false);\n    std::cout << current.host << ' ' << current.token;\n}\n// При успешных выделениях памяти вывод:\n// old-host old-token / new-host new-token"
+          "code": "#include <iostream>\n#include <stdexcept>\n#include <string>\n\nstruct State {\n    std::string host;\n    std::string token;\n};\n\nvoid replace(State& current, const std::string& host,\n             const std::string& token, bool reject) {\n    State next{host, token};\n    if (reject) throw std::invalid_argument(\"rejected\");\n    current.host.swap(next.host);\n    current.token.swap(next.token);\n}\n\nint main() {\n    State current{\"old-host\", \"old-token\"};\n    try { replace(current, \"new-host\", \"new-token\", true); }\n    catch (const std::invalid_argument&) {}\n    std::cout << current.host << ' ' << current.token << \" / \";\n    replace(current, \"new-host\", \"new-token\", false);\n    std::cout << current.host << ' ' << current.token;\n}\n// При успешных выделениях памяти вывод:\n// old-host old-token / new-host new-token",
+          "verifiedOutput": "old-host old-token / new-host new-token",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1451,7 +1479,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Одна публикация для двух согласованных контейнеров",
-          "code": "#include <iostream>\n#include <map>\n#include <memory>\n#include <stdexcept>\n#include <string>\n#include <utility>\n#include <vector>\n\nclass Registry {\n    struct State {\n        std::vector<std::string> names;\n        std::map<std::string, std::size_t> index;\n    };\n    std::unique_ptr<State> state_ = std::make_unique<State>();\npublic:\n    void replace(std::vector<std::string> incoming) {\n        auto next = std::make_unique<State>();\n        next->names = std::move(incoming);\n        for (std::size_t i = 0; i < next->names.size(); ++i) {\n            const auto& name = next->names[i];\n            if (name.empty()) throw std::invalid_argument(\"empty name\");\n            if (!next->index.emplace(name, i).second)\n                throw std::invalid_argument(\"duplicate name\");\n        }\n        state_.swap(next);\n    }\n\n    bool contains(const std::string& name) const {\n        return state_->index.contains(name);\n    }\n};\n\nint main() {\n    Registry registry;\n    registry.replace({\"old\"});\n    try { registry.replace({\"new\", \"new\"}); }\n    catch (const std::invalid_argument&) {}\n    std::cout << registry.contains(\"old\") << ' '\n              << registry.contains(\"new\") << \" / \";\n    registry.replace({\"new\"});\n    std::cout << registry.contains(\"old\") << ' '\n              << registry.contains(\"new\");\n}\n// Вывод: 1 0 / 0 1"
+          "code": "#include <iostream>\n#include <map>\n#include <memory>\n#include <stdexcept>\n#include <string>\n#include <utility>\n#include <vector>\n\nclass Registry {\n    struct State {\n        std::vector<std::string> names;\n        std::map<std::string, std::size_t> index;\n    };\n    std::unique_ptr<State> state_ = std::make_unique<State>();\npublic:\n    void replace(std::vector<std::string> incoming) {\n        auto next = std::make_unique<State>();\n        next->names = std::move(incoming);\n        for (std::size_t i = 0; i < next->names.size(); ++i) {\n            const auto& name = next->names[i];\n            if (name.empty()) throw std::invalid_argument(\"empty name\");\n            if (!next->index.emplace(name, i).second)\n                throw std::invalid_argument(\"duplicate name\");\n        }\n        state_.swap(next);\n    }\n\n    bool contains(const std::string& name) const {\n        return state_->index.contains(name);\n    }\n};\n\nint main() {\n    Registry registry;\n    registry.replace({\"old\"});\n    try { registry.replace({\"new\", \"new\"}); }\n    catch (const std::invalid_argument&) {}\n    std::cout << registry.contains(\"old\") << ' '\n              << registry.contains(\"new\") << \" / \";\n    registry.replace({\"new\"});\n    std::cout << registry.contains(\"old\") << ' '\n              << registry.contains(\"new\");\n}\n// Вывод: 1 0 / 0 1",
+          "verifiedOutput": "1 0 / 0 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1523,7 +1553,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Откат добавленного хвоста; гарантия относится к значениям, не к capacity",
-          "code": "#include <cstddef>\n#include <iostream>\n#include <stdexcept>\n#include <vector>\n\nclass AppendTransaction {\n    std::vector<int>& values_;\n    std::size_t before_;\n    bool committed_ = false;\npublic:\n    explicit AppendTransaction(std::vector<int>& values) noexcept\n        : values_(values), before_(values.size()) {}\n    AppendTransaction(const AppendTransaction&) = delete;\n    AppendTransaction& operator=(const AppendTransaction&) = delete;\n\n    void add(int value) { values_.push_back(value); }\n    void commit() noexcept { committed_ = true; }\n\n    ~AppendTransaction() noexcept {\n        if (!committed_) {\n            while (values_.size() > before_) values_.pop_back();\n        }\n    }\n};\n\nvoid appendPair(std::vector<int>& values, bool fail) {\n    AppendTransaction transaction{values};\n    transaction.add(2);\n    if (fail) throw std::runtime_error(\"cancelled\");\n    transaction.add(3);\n    transaction.commit();\n}\n\nint main() {\n    std::vector<int> values{1};\n    try { appendPair(values, true); }\n    catch (const std::runtime_error&) {}\n    std::cout << values.size() << \" / \";\n    appendPair(values, false);\n    std::cout << values.size();\n    for (int value : values) std::cout << ' ' << value;\n}\n// Вывод: 1 / 3 1 2 3"
+          "code": "#include <cstddef>\n#include <iostream>\n#include <stdexcept>\n#include <vector>\n\nclass AppendTransaction {\n    std::vector<int>& values_;\n    std::size_t before_;\n    bool committed_ = false;\npublic:\n    explicit AppendTransaction(std::vector<int>& values) noexcept\n        : values_(values), before_(values.size()) {}\n    AppendTransaction(const AppendTransaction&) = delete;\n    AppendTransaction& operator=(const AppendTransaction&) = delete;\n\n    void add(int value) { values_.push_back(value); }\n    void commit() noexcept { committed_ = true; }\n\n    ~AppendTransaction() noexcept {\n        if (!committed_) {\n            while (values_.size() > before_) values_.pop_back();\n        }\n    }\n};\n\nvoid appendPair(std::vector<int>& values, bool fail) {\n    AppendTransaction transaction{values};\n    transaction.add(2);\n    if (fail) throw std::runtime_error(\"cancelled\");\n    transaction.add(3);\n    transaction.commit();\n}\n\nint main() {\n    std::vector<int> values{1};\n    try { appendPair(values, true); }\n    catch (const std::runtime_error&) {}\n    std::cout << values.size() << \" / \";\n    appendPair(values, false);\n    std::cout << values.size();\n    for (int value : values) std::cout << ' ' << value;\n}\n// Вывод: 1 / 3 1 2 3",
+          "verifiedOutput": "1 / 3 1 2 3",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1581,7 +1613,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Проверка свойства не вызывает work",
-          "code": "#include <iostream>\nint calls = 0;\nvoid work() { ++calls; }\nvoid safe() noexcept {}\nint main() {\n    std::cout << noexcept(work()) << ' ' << calls << ' '\n              << noexcept(safe()); // 0 0 1\n}"
+          "code": "#include <iostream>\nint calls = 0;\nvoid work() { ++calls; }\nvoid safe() noexcept {}\nint main() {\n    std::cout << noexcept(work()) << ' ' << calls << ' '\n              << noexcept(safe()); // 0 0 1\n}",
+          "verifiedOutput": "0 0 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1629,7 +1663,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Потенциально бросающее перемещение уступает доступной копии",
-          "code": "#include <iostream>\n#include <utility>\nstruct Item {\n    Item() = default;\n    Item(const Item&) { std::cout << 'C'; }\n    Item(Item&&) noexcept(false) { std::cout << 'M'; }\n};\nint main() {\n    Item source;\n    Item first(std::move_if_noexcept(source));\n    Item second(std::move(source)); // CM\n}"
+          "code": "#include <iostream>\n#include <utility>\nstruct Item {\n    Item() = default;\n    Item(const Item&) { std::cout << 'C'; }\n    Item(Item&&) noexcept(false) { std::cout << 'M'; }\n};\nint main() {\n    Item source;\n    Item first(std::move_if_noexcept(source));\n    Item second(std::move(source)); // CM\n}",
+          "verifiedOutput": "CM",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1660,7 +1696,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: свойство проверяет способ создания, а не наличие метода с определённым названием",
-          "code": "#include <iostream>\n#include <type_traits>\n#include <utility>\n\nstruct CopyOnly {\n    CopyOnly() = default;\n    CopyOnly(const CopyOnly&) noexcept { std::cout << 'C'; }\n};\n\nint main() {\n    static_assert(std::is_nothrow_move_constructible_v<CopyOnly>);\n    CopyOnly source;\n    CopyOnly result(std::move(source));\n}\n// Вывод: C"
+          "code": "#include <iostream>\n#include <type_traits>\n#include <utility>\n\nstruct CopyOnly {\n    CopyOnly() = default;\n    CopyOnly(const CopyOnly&) noexcept { std::cout << 'C'; }\n};\n\nint main() {\n    static_assert(std::is_nothrow_move_constructible_v<CopyOnly>);\n    CopyOnly source;\n    CopyOnly result(std::move(source));\n}\n// Вывод: C",
+          "verifiedOutput": "C",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1709,7 +1747,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Модель двух состояний в одной программе; настоящей сети здесь нет",
-          "code": "#include <iostream>\n#include <stdexcept>\n\nclass RemoteModel {\n    bool created_ = false;\npublic:\n    void create() {\n        created_ = true;\n        throw std::runtime_error(\"reply lost\");\n    }\n    bool created() const noexcept { return created_; }\n};\n\nint main() {\n    RemoteModel server;\n    bool confirmed = false;\n    try {\n        server.create();\n        confirmed = true;\n    } catch (const std::runtime_error&) {\n    }\n    std::cout << confirmed << ' ' << server.created();\n}\n// Вывод: 0 1"
+          "code": "#include <iostream>\n#include <stdexcept>\n\nclass RemoteModel {\n    bool created_ = false;\npublic:\n    void create() {\n        created_ = true;\n        throw std::runtime_error(\"reply lost\");\n    }\n    bool created() const noexcept { return created_; }\n};\n\nint main() {\n    RemoteModel server;\n    bool confirmed = false;\n    try {\n        server.create();\n        confirmed = true;\n    } catch (const std::runtime_error&) {\n    }\n    std::cout << confirmed << ' ' << server.created();\n}\n// Вывод: 0 1",
+          "verifiedOutput": "0 1",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1849,7 +1889,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная небольшая программа: строка в памяти вместо файла",
-          "code": "#include <iostream>\n#include <sstream>\n#include <string>\n\nint main() {\n    std::istringstream input(\"MemTotal: 1024 kB\");\n    std::string key, number, unit;\n    input >> key >> number >> unit;\n    std::cout << key << \" | \" << number << \" | \" << unit;\n}\n// Вывод: MemTotal: | 1024 | kB"
+          "code": "#include <iostream>\n#include <sstream>\n#include <string>\n\nint main() {\n    std::istringstream input(\"MemTotal: 1024 kB\");\n    std::string key, number, unit;\n    input >> key >> number >> unit;\n    std::cout << key << \" | \" << number << \" | \" << unit;\n}\n// Вывод: MemTotal: | 1024 | kB",
+          "verifiedOutput": "MemTotal: | 1024 | kB",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -1862,7 +1904,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа: неудача преобразования не превращается в число 0",
-          "code": "#include <charconv>\n#include <iostream>\n#include <string_view>\n#include <system_error>\n\nint main() {\n    std::string_view text = \"abc\";\n    int value = 7;\n    auto [ptr, ec] = std::from_chars(\n        text.data(), text.data() + text.size(), value);\n    std::cout << (ec == std::errc::invalid_argument) << ' '\n              << (ptr == text.data()) << ' ' << value;\n}\n// Вывод: 1 1 7"
+          "code": "#include <charconv>\n#include <iostream>\n#include <string_view>\n#include <system_error>\n\nint main() {\n    std::string_view text = \"abc\";\n    int value = 7;\n    auto [ptr, ec] = std::from_chars(\n        text.data(), text.data() + text.size(), value);\n    std::cout << (ec == std::errc::invalid_argument) << ' '\n              << (ptr == text.data()) << ' ' << value;\n}\n// Вывод: 1 1 7",
+          "verifiedOutput": "1 1 7",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2082,7 +2126,10 @@ window.STATION_DATA = {
           "caption": "Полная программа · C++23: четыре метода expected на одной настройке",
           "exampleId": "s4-expected-chain",
           "standard": "23",
-          "code": "#include <charconv>\n#include <expected>\n#include <iostream>\n#include <string>\n#include <string_view>\n#include <system_error>\n\n#if !defined(__cpp_lib_expected) || __cpp_lib_expected < 202211L\n#error \"This example requires C++23 expected monadic operations\"\n#endif\n\nenum class ParseError { empty, invalid, integer_range, trailing, port_range };\nstruct Port { unsigned value; };\n\nstd::expected<int, ParseError> parse_int(std::string_view text) {\n    if (text.empty()) return std::unexpected(ParseError::empty);\n    int value = 0;\n    const auto end = text.data() + text.size();\n    const auto [ptr, ec] = std::from_chars(text.data(), end, value);\n    if (ec == std::errc::invalid_argument)\n        return std::unexpected(ParseError::invalid);\n    if (ec == std::errc::result_out_of_range)\n        return std::unexpected(ParseError::integer_range);\n    if (ptr != end) return std::unexpected(ParseError::trailing);\n    return value;\n}\n\nstd::expected<int, ParseError> check_port(int value) {\n    if (value < 1 || value > 65535)\n        return std::unexpected(ParseError::port_range);\n    return value;\n}\n\nstd::expected<Port, ParseError> parse_port(std::string_view text) {\n    return parse_int(text)\n        .and_then(check_port)\n        .transform([](int value) { return Port{static_cast<unsigned>(value)}; });\n}\n\nstd::string explain(ParseError error) {\n    switch (error) {\n    case ParseError::empty: return \"empty\";\n    case ParseError::invalid: return \"invalid\";\n    case ParseError::integer_range: return \"integer range\";\n    case ParseError::trailing: return \"trailing\";\n    case ParseError::port_range: return \"port range\";\n    }\n    return \"unknown\";\n}\n\nvoid show(std::string_view text) {\n    auto result = parse_port(text)\n        .or_else([](ParseError error) -> std::expected<Port, ParseError> {\n            if (error == ParseError::empty) return Port{8080};\n            return std::unexpected(error);\n        })\n        .transform_error(explain);\n\n    std::cout << (text.empty() ? \"<empty>\" : text) << \": \";\n    if (result) std::cout << \"port \" << result->value << '\\n';\n    else std::cout << \"error \" << result.error() << '\\n';\n}\n\nint main() {\n    show(\"8080\");\n    show(\"\");\n    show(\"70000\");\n    show(\"80x\");\n}"
+          "code": "#include <charconv>\n#include <expected>\n#include <iostream>\n#include <string>\n#include <string_view>\n#include <system_error>\n\n#if !defined(__cpp_lib_expected) || __cpp_lib_expected < 202211L\n#error \"This example requires C++23 expected monadic operations\"\n#endif\n\nenum class ParseError { empty, invalid, integer_range, trailing, port_range };\nstruct Port { unsigned value; };\n\nstd::expected<int, ParseError> parse_int(std::string_view text) {\n    if (text.empty()) return std::unexpected(ParseError::empty);\n    int value = 0;\n    const auto end = text.data() + text.size();\n    const auto [ptr, ec] = std::from_chars(text.data(), end, value);\n    if (ec == std::errc::invalid_argument)\n        return std::unexpected(ParseError::invalid);\n    if (ec == std::errc::result_out_of_range)\n        return std::unexpected(ParseError::integer_range);\n    if (ptr != end) return std::unexpected(ParseError::trailing);\n    return value;\n}\n\nstd::expected<int, ParseError> check_port(int value) {\n    if (value < 1 || value > 65535)\n        return std::unexpected(ParseError::port_range);\n    return value;\n}\n\nstd::expected<Port, ParseError> parse_port(std::string_view text) {\n    return parse_int(text)\n        .and_then(check_port)\n        .transform([](int value) { return Port{static_cast<unsigned>(value)}; });\n}\n\nstd::string explain(ParseError error) {\n    switch (error) {\n    case ParseError::empty: return \"empty\";\n    case ParseError::invalid: return \"invalid\";\n    case ParseError::integer_range: return \"integer range\";\n    case ParseError::trailing: return \"trailing\";\n    case ParseError::port_range: return \"port range\";\n    }\n    return \"unknown\";\n}\n\nvoid show(std::string_view text) {\n    auto result = parse_port(text)\n        .or_else([](ParseError error) -> std::expected<Port, ParseError> {\n            if (error == ParseError::empty) return Port{8080};\n            return std::unexpected(error);\n        })\n        .transform_error(explain);\n\n    std::cout << (text.empty() ? \"<empty>\" : text) << \": \";\n    if (result) std::cout << \"port \" << result->value << '\\n';\n    else std::cout << \"error \" << result.error() << '\\n';\n}\n\nint main() {\n    show(\"8080\");\n    show(\"\");\n    show(\"70000\");\n    show(\"80x\");\n}",
+          "verifiedOutput": "8080: port 8080\n<empty>: port 8080\n70000: error port range\n80x: error trailing\n",
+          "verifiedOutputStandard": "23",
+          "verifiedOutputCaption": "Ожидаемый вывод полной программы"
         },
         {
           "type": "text",
@@ -2095,11 +2142,6 @@ window.STATION_DATA = {
         {
           "type": "text",
           "html": "Затем <code>transform_error(explain)</code> заменяет перечисление причины на строку. Для успешного результата <code>explain</code> вообще не вызывается; для ошибки меняется только её представление, а не смысл «операция не выполнена». В результате переменная <code>result</code> имеет тип <code>expected&lt;Port, std::string&gt;</code>. Отличие от <code>or_else</code>: <code>transform_error</code> возвращает саму новую причину, а не expected."
-        },
-        {
-          "type": "code",
-          "caption": "Ожидаемый вывод полной программы",
-          "code": "8080: port 8080\n<empty>: port 8080\n70000: error port range\n80x: error trailing"
         },
         {
           "type": "note",
@@ -2146,7 +2188,10 @@ window.STATION_DATA = {
           "caption": "Полная программа · C++23: имя, приветствие и исключение из преобразования",
           "exampleId": "s4-optional-chain",
           "standard": "23",
-          "code": "#include <iostream>\n#include <optional>\n#include <stdexcept>\n#include <string>\n#include <utility>\n\n#if !defined(__cpp_lib_optional) || __cpp_lib_optional < 202110L\n#error \"This example requires C++23 optional monadic operations\"\n#endif\n\nstd::optional<std::string> greeting(std::optional<std::string> name) {\n    return std::move(name)\n        .and_then([](std::string value) -> std::optional<std::string> {\n            if (value.empty()) return std::nullopt;\n            return value;\n        })\n        .transform([](const std::string& value) { return \"Hello, \" + value; })\n        .or_else([] { return std::optional<std::string>{\"Hello, guest\"}; });\n}\n\nint main() {\n    std::cout << *greeting(std::string{\"Ada\"}) << '\\n';\n    std::cout << *greeting(std::string{}) << '\\n';\n    std::cout << *greeting(std::nullopt) << '\\n';\n\n    try {\n        auto result = std::optional<int>{1}.transform([](int) -> int {\n            throw std::runtime_error(\"callback\");\n        });\n        (void)result;\n    } catch (const std::runtime_error& error) {\n        std::cout << \"caught \" << error.what() << '\\n';\n    }\n}"
+          "code": "#include <iostream>\n#include <optional>\n#include <stdexcept>\n#include <string>\n#include <utility>\n\n#if !defined(__cpp_lib_optional) || __cpp_lib_optional < 202110L\n#error \"This example requires C++23 optional monadic operations\"\n#endif\n\nstd::optional<std::string> greeting(std::optional<std::string> name) {\n    return std::move(name)\n        .and_then([](std::string value) -> std::optional<std::string> {\n            if (value.empty()) return std::nullopt;\n            return value;\n        })\n        .transform([](const std::string& value) { return \"Hello, \" + value; })\n        .or_else([] { return std::optional<std::string>{\"Hello, guest\"}; });\n}\n\nint main() {\n    std::cout << *greeting(std::string{\"Ada\"}) << '\\n';\n    std::cout << *greeting(std::string{}) << '\\n';\n    std::cout << *greeting(std::nullopt) << '\\n';\n\n    try {\n        auto result = std::optional<int>{1}.transform([](int) -> int {\n            throw std::runtime_error(\"callback\");\n        });\n        (void)result;\n    } catch (const std::runtime_error& error) {\n        std::cout << \"caught \" << error.what() << '\\n';\n    }\n}",
+          "verifiedOutput": "Hello, Ada\nHello, guest\nHello, guest\ncaught callback\n",
+          "verifiedOutputStandard": "23",
+          "verifiedOutputCaption": "Ожидаемый вывод"
         },
         {
           "type": "text",
@@ -2155,11 +2200,6 @@ window.STATION_DATA = {
         {
           "type": "text",
           "html": "Вызовы <code>*greeting(...)</code> в main допустимы благодаря договору нашей функции: при обычном возврате завершающий <code>or_else</code> даёт значение и для пустого входа. Это не общее свойство произвольной цепочки optional. Если запасная функция вернёт <code>nullopt</code>, перед разыменованием снова понадобится проверка состояния."
-        },
-        {
-          "type": "code",
-          "caption": "Ожидаемый вывод",
-          "code": "Hello, Ada\nHello, guest\nHello, guest\ncaught callback"
         },
         {
           "type": "text",
@@ -2380,7 +2420,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: внешний контекст и вложенная причина",
-          "code": "#include <exception>\n#include <iostream>\n#include <stdexcept>\nvoid repository() {\n    throw std::runtime_error(\"storage unavailable\");\n}\nvoid service() {\n    try { repository(); }\n    catch (...) {\n        std::throw_with_nested(std::runtime_error(\"load profile\"));\n    }\n}\nvoid explain(const std::exception& error) {\n    std::cout << error.what();\n    auto nested = dynamic_cast<const std::nested_exception*>(&error);\n    if (nested && nested->nested_ptr()) {\n        std::cout << \" -> \";\n        try { nested->rethrow_nested(); }\n        catch (const std::exception& cause) { explain(cause); }\n        catch (...) { std::cout << \"unknown exception\"; }\n    }\n}\nint main() {\n    try { service(); }\n    catch (const std::exception& error) { explain(error); }\n} // load profile -> storage unavailable"
+          "code": "#include <exception>\n#include <iostream>\n#include <stdexcept>\nvoid repository() {\n    throw std::runtime_error(\"storage unavailable\");\n}\nvoid service() {\n    try { repository(); }\n    catch (...) {\n        std::throw_with_nested(std::runtime_error(\"load profile\"));\n    }\n}\nvoid explain(const std::exception& error) {\n    std::cout << error.what();\n    auto nested = dynamic_cast<const std::nested_exception*>(&error);\n    if (nested && nested->nested_ptr()) {\n        std::cout << \" -> \";\n        try { nested->rethrow_nested(); }\n        catch (const std::exception& cause) { explain(cause); }\n        catch (...) { std::cout << \"unknown exception\"; }\n    }\n}\nint main() {\n    try { service(); }\n    catch (const std::exception& error) { explain(error); }\n} // load profile -> storage unavailable",
+          "verifiedOutput": "load profile -> storage unavailable",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2411,7 +2453,9 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа C++20: сохранить ошибку, выйти из catch, разобрать позднее",
-          "code": "#include <exception>\n#include <iostream>\n#include <stdexcept>\n\nint main() {\n    std::exception_ptr saved;\n    try {\n        throw std::runtime_error(\"read failed\");\n    } catch (...) {\n        saved = std::current_exception();\n    }\n    if (saved) {\n        try {\n            std::rethrow_exception(saved);\n        } catch (const std::exception& error) {\n            std::cout << error.what();\n        }\n    }\n}\n// Вывод: read failed"
+          "code": "#include <exception>\n#include <iostream>\n#include <stdexcept>\n\nint main() {\n    std::exception_ptr saved;\n    try {\n        throw std::runtime_error(\"read failed\");\n    } catch (...) {\n        saved = std::current_exception();\n    }\n    if (saved) {\n        try {\n            std::rethrow_exception(saved);\n        } catch (const std::exception& error) {\n            std::cout << error.what();\n        }\n    }\n}\n// Вывод: read failed",
+          "verifiedOutput": "read failed",
+          "verifiedOutputStandard": "20"
         },
         {
           "type": "text",
@@ -2549,17 +2593,15 @@ window.STATION_DATA = {
         {
           "type": "code",
           "caption": "Полная программа · C++20 · main.cpp",
-          "code": "#include <charconv>\n#include <iostream>\n#include <limits>\n#include <stdexcept>\n#include <string>\n#include <string_view>\n#include <system_error>\n#include <vector>\n\nstatic_assert(std::numeric_limits<int>::max() >= 65535);\n\nint parse_port(std::string_view text) {\n    if (text.empty()) throw std::invalid_argument(\"invalid port\");\n    for (char ch : text) {\n        if (ch < '0' || ch > '9')\n            throw std::invalid_argument(\"invalid port\");\n    }\n    int value = 0;\n    auto [end, ec] = std::from_chars(text.data(), text.data() + text.size(), value);\n    if (ec != std::errc{} || end != text.data() + text.size() ||\n        value < 1 || value > 65535)\n        throw std::invalid_argument(\"invalid port\");\n    return value;\n}\n\nclass Config {\n    std::vector<int> ports_{80, 443};\npublic:\n    void reload(const std::vector<std::string>& raw) {\n        std::vector<int> next;\n        next.reserve(raw.size());\n        for (const auto& text : raw) next.push_back(parse_port(text));\n        ports_.swap(next);\n    }\n    const std::vector<int>& ports() const { return ports_; }\n};\n\nvoid print(const Config& config) {\n    std::cout << \"ports:\";\n    for (int port : config.ports()) std::cout << ' ' << port;\n    std::cout << '\\n';\n}\n\nint main() {\n    Config config;\n    print(config);\n    try {\n        config.reload({\"8080\", \"oops\"});\n    } catch (const std::invalid_argument& error) {\n        std::cout << error.what() << '\\n';\n    }\n    print(config);\n    config.reload({\"8080\", \"9000\"});\n    print(config);\n}\n"
+          "code": "#include <charconv>\n#include <iostream>\n#include <limits>\n#include <stdexcept>\n#include <string>\n#include <string_view>\n#include <system_error>\n#include <vector>\n\nstatic_assert(std::numeric_limits<int>::max() >= 65535);\n\nint parse_port(std::string_view text) {\n    if (text.empty()) throw std::invalid_argument(\"invalid port\");\n    for (char ch : text) {\n        if (ch < '0' || ch > '9')\n            throw std::invalid_argument(\"invalid port\");\n    }\n    int value = 0;\n    auto [end, ec] = std::from_chars(text.data(), text.data() + text.size(), value);\n    if (ec != std::errc{} || end != text.data() + text.size() ||\n        value < 1 || value > 65535)\n        throw std::invalid_argument(\"invalid port\");\n    return value;\n}\n\nclass Config {\n    std::vector<int> ports_{80, 443};\npublic:\n    void reload(const std::vector<std::string>& raw) {\n        std::vector<int> next;\n        next.reserve(raw.size());\n        for (const auto& text : raw) next.push_back(parse_port(text));\n        ports_.swap(next);\n    }\n    const std::vector<int>& ports() const { return ports_; }\n};\n\nvoid print(const Config& config) {\n    std::cout << \"ports:\";\n    for (int port : config.ports()) std::cout << ' ' << port;\n    std::cout << '\\n';\n}\n\nint main() {\n    Config config;\n    print(config);\n    try {\n        config.reload({\"8080\", \"oops\"});\n    } catch (const std::invalid_argument& error) {\n        std::cout << error.what() << '\\n';\n    }\n    print(config);\n    config.reload({\"8080\", \"9000\"});\n    print(config);\n}\n",
+          "verifiedOutput": "ports: 80 443\ninvalid port\nports: 80 443\nports: 8080 9000\n",
+          "verifiedOutputStandard": "20",
+          "verifiedOutputCaption": "Ожидаемый вывод полной программы"
         },
         {
           "type": "code",
           "caption": "Необязательный запуск вне учебника: Linux/macOS с g++",
           "code": "g++ -std=c++20 -Wall -Wextra -pedantic  main.cpp -o example\n./example\n"
-        },
-        {
-          "type": "code",
-          "caption": "Ожидаемый вывод полной программы",
-          "code": "ports: 80 443\ninvalid port\nports: 80 443\nports: 8080 9000\n"
         },
         {
           "type": "text",

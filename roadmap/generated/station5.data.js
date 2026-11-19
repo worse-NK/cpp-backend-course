@@ -945,12 +945,10 @@ window.STATION_DATA = {
           "exampleId": "s5-global-one-tu-order",
           "standard": "20/23",
           "caption": "Полная отдельная программа: два обычных глобальных объекта в одной единице трансляции",
-          "code": "#include <cstdio>\n\nclass Mark {\npublic:\n    explicit Mark(const char* name) : name_(name) {\n        std::printf(\"create %s\\n\", name_);\n    }\n    ~Mark() { std::printf(\"destroy %s\\n\", name_); }\n    void use() const { std::printf(\"use %s\\n\", name_); }\nprivate:\n    const char* name_;\n};\n\nMark first{\"first\"};\nMark second{\"second\"};\n\nint main() {\n    first.use();\n    second.use();\n}"
-        },
-        {
-          "type": "code",
-          "caption": "Вывод показанной программы при штатном выполнении",
-          "code": "create first\ncreate second\nuse first\nuse second\ndestroy second\ndestroy first"
+          "code": "#include <cstdio>\n\nclass Mark {\npublic:\n    explicit Mark(const char* name) : name_(name) {\n        std::printf(\"create %s\\n\", name_);\n    }\n    ~Mark() { std::printf(\"destroy %s\\n\", name_); }\n    void use() const { std::printf(\"use %s\\n\", name_); }\nprivate:\n    const char* name_;\n};\n\nMark first{\"first\"};\nMark second{\"second\"};\n\nint main() {\n    first.use();\n    second.use();\n}",
+          "verifiedOutput": "create first\ncreate second\nuse first\nuse second\ndestroy second\ndestroy first\n",
+          "verifiedOutputStandard": "20/23",
+          "verifiedOutputCaption": "Вывод показанной программы при штатном выполнении"
         },
         {
           "type": "text",

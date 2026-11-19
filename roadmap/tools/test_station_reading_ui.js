@@ -180,8 +180,8 @@ function expectSection(view, expected, index, count) {
     assert(view.node && view.tree, 'Expected a theory page');
     const title = nodes(view.tree).find(n => n.props.className === 'section-title');
     assert(title && text(title) === expected.title, 'Wrong current section: ' + expected.id);
-    const counter = nodes(view.tree).find(n => n.props.className === 'kicker' && /^РАЗДЕЛ /.test(text(n)));
-    assert(counter && text(counter) === 'РАЗДЕЛ ' + (index + 1) + ' / ' + count,
+    const counter = nodes(view.tree).find(n => n.props.className === 'edition-position');
+    assert(count === 1 ? !counter : counter && text(counter) === 'Раздел ' + (index + 1) + ' из ' + count,
            'Counter must describe the current chapter, not a global route: ' + expected.id);
     assert(!nodes(view.tree).some(n => n.props.className === 'kicker' && /^ПЕРВОЕ ЧТЕНИЕ/.test(text(n))),
            'Obsolete global reading counter');

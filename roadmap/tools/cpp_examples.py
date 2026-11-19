@@ -137,7 +137,7 @@ def check_case(compiler: str, source: str, check: dict, macros: dict, probe_erro
         args = [compiler, f"-std=c++{check['standard']}", "-Wall", "-Wextra", "-pedantic-errors"]
         args += check.get("flags", []) + ["-x", "c++", "-"]
         args += ["-fsyntax-only"] if check["mode"] in {"compile", "compile-fail"} else ["-o", binary] + check.get("linkFlags", [])
-        result = invoke(args, input=source)
+        result = invoke(args, input=source, cwd=work)
         if result.returncode < 0:
             return "FAIL", f"compiler terminated by signal {-result.returncode}: {result.stderr}"
         if check["mode"] == "compile-fail":
@@ -146,7 +146,7 @@ def check_case(compiler: str, source: str, check: dict, macros: dict, probe_erro
             return "FAIL", result.stderr
         if check["mode"] == "compile":
             return "PASS", "compiled; not executed"
-        result = invoke([binary], input=check.get("stdin", ""))
+        result = invoke([binary], input=check.get("stdin", ""), cwd=work)
         if result.returncode:
             return "FAIL", f"exit {result.returncode}: {result.stderr}"
         if "stdout" in check and result.stdout != check["stdout"]:
@@ -176,6 +176,10 @@ def main() -> int:
     compiler = shutil.which(args.compiler)
     if not compiler:
         parser.error(f"compiler not found: {args.compiler}")
+    # Listing processes run in a disposable working directory. Keep a caller's
+    # explicitly relative toolchain path usable there (do not resolve symlinks
+    # such as clang++ into a differently named compiler driver).
+    compiler = os.path.abspath(compiler)
     identity = invoke([compiler, "--version"]).stdout.splitlines()[0]
     profiles, rows = {}, []
     for case in cases:
