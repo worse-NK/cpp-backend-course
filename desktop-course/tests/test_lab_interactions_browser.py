@@ -205,7 +205,7 @@ def experiments(page, roadmap, width, output):
         assert page.js("document.querySelector('#returnLink').hash==='#section=ownership-graph'")
 
 
-def main(callback=None, report=None):
+def main(callback=None, report=None, *, widths=(1280, 375)):
     """Use a supplied offline acceptance suite or run the default experiments."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--roadmap", type=Path, default=ROOT.parent / "roadmap")
@@ -238,7 +238,7 @@ def main(callback=None, report=None):
             else:
                 raise RuntimeError("No temporary browser target")
             page = CDP(target, port)
-            for width in (1280, 375):
+            for width in widths:
                 (callback or experiments)(page, args.roadmap.resolve(), width, args.screenshots)
             assert not any(e["method"] == "Runtime.exceptionThrown" for e in page.events), "JavaScript exception"
             print(report or "PASS: offline browser experiments, keyboard actions and page fit at 1280 and 375 px")

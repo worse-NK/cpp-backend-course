@@ -506,8 +506,36 @@ window.STATION_DATA = {
           "code": "FROM debian:bookworm-slim AS build\nRUN apt-get update && apt-get install -y --no-install-recommends \\\n    g++ cmake make && rm -rf /var/lib/apt/lists/*\nWORKDIR /src\nCOPY CMakeLists.txt main.cpp ./\nRUN cmake -S . -B /build -DCMAKE_BUILD_TYPE=Release \\\n && cmake --build /build --parallel 2 \\\n && ctest --test-dir /build --output-on-failure --no-tests=error\n\nFROM debian:bookworm-slim AS runtime\nRUN apt-get update && apt-get install -y --no-install-recommends \\\n    libstdc++6 && rm -rf /var/lib/apt/lists/*\nCOPY --from=build /build/gate_check /usr/local/bin/gate_check\nUSER 65532:65532\nENTRYPOINT [\"/usr/local/bin/gate_check\"]"
         },
         {
+          "type": "reading-figure",
+          "layout": "flow",
+          "title": "Как один файл попадает из сборки в готовый образ",
+          "rows": [
+            {
+              "label": "Два этапа в этом Dockerfile",
+              "cells": [
+                {
+                  "value": "build",
+                  "note": "g++, CMake и Make собирают gate_check; CTest запускает тест.",
+                  "state": "included"
+                },
+                {
+                  "value": "COPY --from=build",
+                  "note": "Из /build берём только gate_check.",
+                  "state": "boundary"
+                },
+                {
+                  "value": "runtime",
+                  "note": "В новой базе Debian устанавливаем libstdc++6. Программа лежит в /usr/local/bin.",
+                  "state": "included"
+                }
+              ]
+            }
+          ],
+          "caption": "Компилятор и каталог с исходниками в итоговый образ не копируются. Библиотеку для запуска программа получает не из сборочного этапа."
+        },
+        {
           "type": "text",
-          "html": "Первый этап получает исходники, настраивает и собирает проект, затем запускает CTest. Между этими командами стоит <code>&amp;&amp;</code>: при ненулевом коде завершения следующая команда цепочки не выполняется. Второй этап начинает другой образ и копирует в него <code>gate_check</code>, а не весь каталог сборки."
+          "html": "Обрати внимание на <code>&amp;&amp;</code> в команде сборки. Если конфигурация или компиляция завершится ошибкой, следующий шаг цепочки не запустится. Если упадёт сам тест, CTest вернёт ошибку и сборка этого образа не завершится успешно."
         },
         {
           "type": "text",

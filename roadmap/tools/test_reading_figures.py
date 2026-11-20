@@ -60,6 +60,44 @@ class ReadingFigures(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "aligned cells"):
             build_stations.validate(data, path)
 
+    def test_layouts_require_matching_axes_only_for_tables(self):
+        path, data, _, f = load("station13", "filesystem-lifetimes")
+        headers = ["Событие"] + [c["value"] for c in f["rows"][0]["cells"]]
+        for layout in ("compare", "flow"):
+            f["layout"] = layout
+            build_stations.validate(data, path)
+            f["columns"] = headers
+            with self.assertRaisesRegex(ValueError, "expected keys"):
+                build_stations.validate(data, path)
+            del f["columns"]
+        f["layout"] = "matrix"
+        with self.assertRaisesRegex(ValueError, "expected keys"):
+            build_stations.validate(data, path)
+        for invalid in ([], headers[:-1], headers + ["лишнее"]):
+            f["columns"] = invalid
+            with self.assertRaisesRegex(ValueError, "axis"):
+                build_stations.validate(data, path)
+        f["columns"] = headers
+        build_stations.validate(data, path)
+        f["layout"] = "typo"
+        with self.assertRaisesRegex(ValueError, "layout"):
+            build_stations.validate(data, path)
+
+    def test_time_chart_uses_real_nested_intervals_and_validates_its_axis(self):
+        path = build_stations.CONTENT / "station14.json"
+        data = build_stations.load_json(path)
+        section = next(s for s in data["theory"] if s["id"] == "trace-tree")
+        chart, = (b for b in section["blocks"] if b["type"] == "time-chart")
+        ranges = [(i["start"], i["end"]) for i in chart["intervals"]]
+        self.assertEqual([end-start for start, end in ranges], [250, 210, 180])
+        self.assertEqual(ranges[0], (0, chart["duration"]))
+        for (a, b), (c, d) in zip(ranges, ranges[1:]):
+            self.assertTrue(a <= c < d <= b)
+        for a, b in ((20, 20), (-1, 20), (1, 251), (True, 5), (0, 1.5)):
+            chart["intervals"][0].update(start=a, end=b)
+            with self.assertRaisesRegex(ValueError, "time axis"):
+                build_stations.validate(data, path)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -652,27 +652,28 @@
           "html": "При двух параллельных внешних вызовах важен <b>критический путь</b> — цепочка зависимостей, которая определяет завершение операции. Уменьшение короткой параллельной ветви может не ускорить итог, если ждать всё ещё приходится другую. Сначала проследи зависимости и фактические интервалы; число spans само по себе ничего не говорит об оптимальности архитектуры."
         },
         {
-          "type": "visual",
-          "variant": "flow",
-          "title": "Связи, которые создаст лаборатория",
-          "items": [
+          "type": "time-chart",
+          "title": "Один запрос, три вложенных интервала",
+          "unit": "мс",
+          "duration": 250,
+          "intervals": [
             {
-              "label": "01",
-              "title": "API: server span",
-              "html": "Принял /work и ждёт результат."
+              "label": "API: запрос /work",
+              "start": 0,
+              "end": 250
             },
             {
-              "label": "02",
-              "title": "API: client span",
-              "html": "Выполняет исходящий /step, родитель — server span API."
+              "label": "API: вызов /step",
+              "start": 20,
+              "end": 230
             },
             {
-              "label": "03",
-              "title": "Worker: server span",
-              "html": "Принял /step; родитель передан заголовком HTTP."
+              "label": "Worker: обработка /step",
+              "start": 35,
+              "end": 215
             }
           ],
-          "caption": "Это дерево происхождения операций. Для расчёта времени учитывают вложение и параллельность, а не сумму подписей."
+          "caption": "Отсчёт от начала /work. Начала и концы выбраны для нашего примера, а не измерены на разных машинах. Worker получает родительский контекст через HTTP: его 180 мс входят в 210 мс вызова API, а те — в 250 мс всего запроса."
         },
         {
           "type": "self-check",
@@ -911,7 +912,65 @@
       "blocks": [
         {
           "type": "text",
-          "html": "Пусть A обслужил 10000 запросов, из них 10 плохих. B обслужил 100, из них 10 плохих. Доли плохих равны 0,1% и 10%. Среднее этих процентов — 5,05%, но общий поток содержит 20 плохих из 10100: примерно 0,198%. Разница возникает не из-за округления, а из-за неверного веса групп."
+          "html": "На двух экземплярах сервиса за один и тот же час произошло по десять ошибок. Но через A прошло в сто раз больше запросов, чем через B. Какую долю запросов сервис не смог обслужить за этот час?"
+        },
+        {
+          "type": "reading-figure",
+          "layout": "matrix",
+          "title": "Почему получились 5,05% и 0,198%?",
+          "columns": [
+            "Где считаем",
+            "Ошибки / все запросы",
+            "Доля"
+          ],
+          "rows": [
+            {
+              "label": "Экземпляр A",
+              "cells": [
+                {
+                  "value": "10 из 10 000",
+                  "note": "Запросов с ошибкой.",
+                  "state": "included"
+                },
+                {
+                  "value": "0,1%",
+                  "note": "Доля ошибок у A.",
+                  "state": "included"
+                }
+              ]
+            },
+            {
+              "label": "Экземпляр B",
+              "cells": [
+                {
+                  "value": "10 из 100",
+                  "note": "Запросов с ошибкой.",
+                  "state": "included"
+                },
+                {
+                  "value": "10%",
+                  "note": "Доля ошибок у B.",
+                  "state": "included"
+                }
+              ]
+            },
+            {
+              "label": "Сервис целиком",
+              "cells": [
+                {
+                  "value": "20 из 10 100",
+                  "note": "Сложили отдельно ошибки и все запросы.",
+                  "state": "included"
+                },
+                {
+                  "value": "≈ 0,198%",
+                  "note": "Каждый запрос имеет одинаковый вес.",
+                  "state": "boundary"
+                }
+              ]
+            }
+          ],
+          "caption": "Если дать одинаковый вес не запросам, а двум экземплярам, получится (0,1% + 10%) / 2 = 5,05%. Это средняя доля по экземплярам, а не доля ошибок во всём потоке."
         },
         {
           "type": "text",
@@ -938,7 +997,7 @@
         {
           "type": "note",
           "kind": "tip",
-          "html": "Первоисточники и границы: <a href=\"https://prometheus.io/docs/prometheus/3.15/querying/functions/\" target=\"_blank\" rel=\"noopener noreferrer\">Prometheus 3.15: rate и histogram_quantile</a>; <a href=\"https://sre.google/workbook/implementing-slos/\" target=\"_blank\" rel=\"noopener noreferrer\">Google SRE Workbook: Implementing SLOs, инженерные рекомендации</a>. Условия численных примеров заданы в тексте, это не измерения вашего сервера."
+          "html": "Первоисточники и границы: <a href=\"https://prometheus.io/docs/practices/rules/#aggregation\" target=\"_blank\" rel=\"noopener noreferrer\">Prometheus: как объединять доли</a>; <a href=\"https://prometheus.io/docs/prometheus/3.15/querying/functions/\" target=\"_blank\" rel=\"noopener noreferrer\">Prometheus 3.15: rate и histogram_quantile</a>; <a href=\"https://sre.google/workbook/implementing-slos/\" target=\"_blank\" rel=\"noopener noreferrer\">Google SRE Workbook: Implementing SLOs, инженерные рекомендации</a>. Условия численных примеров заданы в тексте, это не измерения вашего сервера."
         }
       ]
     },

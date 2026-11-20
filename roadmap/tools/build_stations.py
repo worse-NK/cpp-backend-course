@@ -211,8 +211,37 @@ def validate(data: dict, path: Path) -> None:
                     require_text(item["html"], f"{item_where}.html")
                 if "caption" in raw_block:
                     require_text(raw_block["caption"], f"{block_where}.caption")
+            elif block_type == "time-chart":
+                block = require_keys(raw_block, {"type", "title", "unit", "duration", "intervals", "caption"}, block_where)
+                for name in ("title", "unit", "caption"):
+                    require_text(block[name], f"{block_where}.{name}")
+                duration = block["duration"]
+                if type(duration) is not int or duration <= 0:
+                    raise ValueError(f"{block_where}.duration: expected a positive integer")
+                intervals = block["intervals"]
+                if not isinstance(intervals, list) or not 2 <= len(intervals) <= 6:
+                    raise ValueError(f"{block_where}.intervals: expected 2–6 intervals")
+                for i, raw in enumerate(intervals):
+                    at = f"{block_where}.intervals[{i}]"
+                    item = require_keys(raw, {"label", "start", "end"}, at)
+                    require_text(item["label"], at + ".label")
+                    a, b = item["start"], item["end"]
+                    if type(a) is not int or type(b) is not int or not 0 <= a < b <= duration:
+                        raise ValueError(f"{at}: interval must lie within the shared time axis")
             elif block_type == "reading-figure":
-                block = require_keys(raw_block, {"type", "title", "rows", "caption"}, block_where)
+                keys = {"type", "title", "rows", "caption"}
+                layout = raw_block.get("layout")
+                if "layout" in raw_block:
+                    if layout not in ("flow", "compare", "matrix"):
+                        raise ValueError(f"{block_where}.layout: expected flow, compare or matrix")
+                    keys.add("layout")
+                if layout == "matrix":
+                    keys.add("columns")
+                    if "compact" in raw_block:
+                        keys.add("compact")
+                        if raw_block["compact"] is not True:
+                            raise ValueError(f"{block_where}.compact: omit or set to true for a short numeric grid")
+                block = require_keys(raw_block, keys, block_where)
                 require_text(block["title"], f"{block_where}.title")
                 require_text(block["caption"], f"{block_where}.caption")
                 rows = block["rows"]
@@ -234,6 +263,12 @@ def validate(data: dict, path: Path) -> None:
                         require_text(cell["note"], f"{where_cell}.note")
                         if cell["state"] not in ("included", "outside", "boundary"):
                             raise ValueError(f"{where_cell}.state: unknown figure state")
+                if layout == "matrix":
+                    heads = block["columns"]
+                    if not isinstance(heads, list) or len(heads) != columns + 1:
+                        raise ValueError(f"{block_where}.columns: name the row axis and every data column")
+                    for i, heading in enumerate(heads):
+                        require_text(heading, f"{block_where}.columns[{i}]")
             elif block_type == "visual":
                 allowed = (
                     {"type", "variant", "title", "items"},

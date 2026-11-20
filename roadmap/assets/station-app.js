@@ -408,20 +408,56 @@
       block.caption ? h("p", { className: "visual-caption" }, block.caption) : null);
   }
 
-  // Print-friendly snapshots. State is always written out; the rail is a second cue.
+  // One source order for wide screens, narrow screens, assistive technology and print.
   function ReadingFigure(props) {
-    var block = props.block;
-    return h("figure", { className: "reading-figure" },
-      h("figcaption", null, block.title),
-      h("dl", null, block.rows.map(function (row, i) {
+    var block = props.block, layout = block.layout || "positions";
+    var body;
+    if (layout === "matrix") {
+      // Explicit roles retain the table relationships when the narrow view stacks a row.
+      body = h("table", { className: "rf-table " + (block.compact ? "rf-grid" : "rf-responsive"), role: "table", "aria-label": block.title },
+        h("thead", { role: "rowgroup" }, h("tr", { role: "row" }, block.columns.map(function (heading, i) {
+          return h("th", { scope: "col", role: "columnheader", key: i }, heading);
+        }))),
+        h("tbody", { role: "rowgroup" }, block.rows.map(function (row, i) {
+          return h("tr", { role: "row", key: i },
+            h("th", { scope: "row", role: "rowheader" }, row.label),
+            row.cells.map(function (cell, j) {
+              return h("td", { role: "cell", key: j, className: "rf-cell rf-" + cell.state },
+                h("small", { className: "rf-mobile-key", "aria-hidden": "true" }, block.columns[j + 1]),
+                h("strong", null, cell.value), h("span", null, cell.note));
+            }));
+        })));
+    } else {
+      body = h("dl", null, block.rows.map(function (row, i) {
         return h("div", { className: "rf-row", key: i },
           h("dt", null, row.label),
-          h("dd", null, h("ol", { role: "list" }, row.cells.map(function (cell, j) {
+          h("dd", null, h(layout === "compare" ? "ul" : "ol", { role: "list" }, row.cells.map(function (cell, j) {
             return h("li", { key: j, className: "rf-cell rf-" + cell.state },
+              layout === "flow" ? h("small", { className: "rf-step", "aria-hidden": "true" }, String(j + 1)) : null,
               h("strong", null, cell.value), h("span", null, cell.note));
           }))));
-      })),
+      }));
+    }
+    return h("figure", { className: "reading-figure rf-" + layout },
+      h("figcaption", null, block.title), body,
       h("p", null, block.caption));
+  }
+
+  function TimeChart(props) {
+    var b = props.block;
+    return h("figure", { className: "reading-figure rf-time" },
+      h("figcaption", null, b.title),
+      h("div", { className: "rf-axis", "aria-hidden": "true" },
+        h("span", null, "0 " + b.unit), h("span", null, b.duration + " " + b.unit)),
+      h("dl", null, b.intervals.map(function (item, i) {
+        return h("div", { className: "rf-interval", key: i },
+          h("dt", null, item.label),
+          h("dd", null,
+            h("span", { className: "rf-time-range" }, item.start + "–" + item.end + " " + b.unit + " · " + (item.end - item.start) + " " + b.unit),
+            h("svg", { viewBox: "0 0 " + b.duration + " 10", preserveAspectRatio: "none", "aria-hidden": "true", focusable: "false" },
+              h("rect", { x: item.start, y: 1, width: item.end - item.start, height: 8 }))));
+      })),
+      h("p", null, b.caption));
   }
 
   function PacketBlock(props) {
@@ -905,6 +941,9 @@
           }
           if (block.type === "reading-figure") {
             return h(ReadingFigure, { block: block, key: index });
+          }
+          if (block.type === "time-chart") {
+            return h(TimeChart, { block: block, key: index });
           }
           if (block.type === "diagram") {
             return h("figure", { className: "diagram diagram-" + (block.mode || "flow"), key: index },

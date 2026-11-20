@@ -1255,12 +1255,43 @@
           "code": "SELECT u.id AS user_id, t.id AS task_id, p.id AS payment_id, p.amount\nFROM join_demo_users AS u\nLEFT JOIN join_demo_tasks AS t ON t.owner_id = u.id\nLEFT JOIN join_demo_payments AS p ON p.owner_id = u.id\nORDER BY u.id, t.id, p.id;"
         },
         {
-          "type": "text",
-          "html": "<div class=\"db-table-wrap\"><table><caption>Семь строк промежуточного результата</caption><thead><tr><th>user_id</th><th>task_id</th><th>payment_id</th><th>amount</th></tr></thead><tbody><tr><td>1</td><td>10</td><td>101</td><td>100</td></tr><tr><td>1</td><td>10</td><td>102</td><td>100</td></tr><tr><td>1</td><td>10</td><td>103</td><td>300</td></tr><tr><td>1</td><td>11</td><td>101</td><td>100</td></tr><tr><td>1</td><td>11</td><td>102</td><td>100</td></tr><tr><td>1</td><td>11</td><td>103</td><td>300</td></tr><tr><td>2</td><td>NULL</td><td>NULL</td><td>NULL</td></tr></tbody></table></div>"
+          "type": "reading-figure",
+          "layout": "matrix",
+          "title": "Почему три платежа Анны попали в расчёт дважды?",
+          "compact": true,
+          "columns": [
+            "Задача Анны",
+            "Платёж 101",
+            "Платёж 102",
+            "Платёж 103"
+          ],
+          "rows": [
+            {
+              "label": "Задача 10",
+              "cells": [
+                {"value": "100", "note": "пара 10 и 101", "state": "included"},
+                {"value": "100", "note": "пара 10 и 102", "state": "included"},
+                {"value": "300", "note": "пара 10 и 103", "state": "included"}
+              ]
+            },
+            {
+              "label": "Задача 11",
+              "cells": [
+                {"value": "100", "note": "пара 11 и 101", "state": "included"},
+                {"value": "100", "note": "пара 11 и 102", "state": "included"},
+                {"value": "300", "note": "пара 11 и 103", "state": "included"}
+              ]
+            }
+          ],
+          "caption": "Каждая ячейка — одна строка результата JOIN; число в ней — сумма платежа. Посмотри сверху вниз: платёж 103 один, но его 300 появятся в SUM дважды. У Бориса нет ни задач, ни платежей. LEFT JOIN всё равно оставляет ему одну строку: (2, NULL, NULL, NULL)."
         },
         {
           "type": "text",
-          "html": "<p>Последняя строка сохранена LEFT JOIN для Бориса. Шесть строк Анны — не шесть задач и не шесть платежей: каждая означает сочетание «пользователь — задача — платёж». Если забыть этот смысл и сразу считать, агрегаты честно обработают не тот набор.</p>"
+          "html": "<details><summary>Сверить с выводом SELECT: все семь строк</summary><div class=\"db-table-wrap\"><table><caption>Семь строк промежуточного результата</caption><thead><tr><th>user_id</th><th>task_id</th><th>payment_id</th><th>amount</th></tr></thead><tbody><tr><td>1</td><td>10</td><td>101</td><td>100</td></tr><tr><td>1</td><td>10</td><td>102</td><td>100</td></tr><tr><td>1</td><td>10</td><td>103</td><td>300</td></tr><tr><td>1</td><td>11</td><td>101</td><td>100</td></tr><tr><td>1</td><td>11</td><td>102</td><td>100</td></tr><tr><td>1</td><td>11</td><td>103</td><td>300</td></tr><tr><td>2</td><td>NULL</td><td>NULL</td><td>NULL</td></tr></tbody></table></div></details>"
+        },
+        {
+          "type": "text",
+          "html": "<p>Шесть строк Анны — не шесть задач и не шесть платежей: каждая означает сочетание «пользователь — задача — платёж». Что получится, если посчитать по этим строкам задачи и платежи и сложить все суммы?</p>"
         },
         {
           "type": "code",

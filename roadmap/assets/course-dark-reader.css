@@ -313,6 +313,10 @@ body.course-reader.course-dark .theory-text .table-scroll {
   border-color: var(--course-line);
   background: var(--course-surface);
 }
+body.course-reader.course-dark :is(.theory-text table, .note-text table) {
+  color: var(--course-ink);
+  background: var(--course-paper);
+}
 
 body.course-reader.course-dark :is(.theory-text th, .note-text th) {
   color: var(--course-ink);
@@ -933,6 +937,100 @@ body.course-reader.course-dark .reader-skip {
 .course-reader .rf-row .rf-outside { border-top: 1px dashed var(--course-muted, currentColor); background: none; }
 .course-reader .rf-row .rf-boundary { border-top-style: double; border-top-width: 4px; background: none; }
 .course-reader .reading-figure > p { max-width: 65ch; margin: .8rem 0 0; font-size: .95rem; line-height: 1.55; }
+
+/* Only use a rail for a sequence. Alternatives have no implied next step. */
+.course-reader .reading-figure { container: lesson-plate / inline-size; }
+.course-reader :is(.rf-flow, .rf-compare, .rf-matrix) .rf-cell strong {
+  font-family: var(--course-sans, sans-serif); line-height: 1.38;
+}
+.course-reader :is(.rf-flow, .rf-compare, .rf-matrix) .rf-cell span {
+  color: var(--course-muted); line-height: 1.45;
+}
+.course-reader :is(.rf-flow, .rf-compare) dt {
+  font-weight: 600; margin-block: .65rem .45rem;
+}
+.course-reader .rf-flow .rf-row ol { gap: 0; }
+.course-reader .rf-flow .rf-row .rf-cell {
+  position: relative; background: none; border: 0; padding: 0 .85rem .25rem 0;
+}
+.course-reader .rf-flow .rf-cell:not(:last-child)::before {
+  content: ""; position: absolute; inset: .72rem 0 auto 1.5rem; border-block-start: 1px solid var(--course-line);
+}
+.course-reader .rf-step {
+  display: grid; place-items: center; box-sizing: border-box; width: 1.5rem; height: 1.5rem;
+  margin-bottom: .4rem; border: 1px solid var(--course-accent); border-radius: 50%;
+  color: var(--course-accent); font: 600 .84rem/1 var(--course-mono, monospace);
+}
+.course-reader .rf-compare .rf-row ul {
+  display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: .5rem;
+  padding: 0; margin: 0; list-style: none;
+}
+.course-reader .rf-compare .rf-row .rf-cell {
+  border: 1px solid var(--course-line); border-inline-start: 3px solid var(--course-accent);
+  padding: .6rem .75rem; border-radius: .25rem; background: var(--course-surface);
+}
+.course-reader .rf-compare .rf-row .rf-outside { background: none; border-inline-start: 3px dashed var(--course-muted); }
+.course-reader .rf-compare .rf-row .rf-boundary { border-inline-start: 4px double var(--course-accent); }
+.course-reader .rf-table {
+  width: 100%; border-collapse: collapse; table-layout: fixed; text-align: start;
+  font-size: .96rem; line-height: 1.45; font-variant-numeric: tabular-nums;
+  color: var(--course-ink); background: var(--course-paper);
+}
+.course-reader .rf-table :is(th, td) {
+  text-align: start; vertical-align: top; padding: .58rem .65rem;
+  border: 0; border-bottom: 1px solid var(--course-line); overflow-wrap: anywhere;
+}
+.course-reader .rf-table thead th { font-weight: 600; color: var(--course-accent); background: var(--course-surface); }
+.course-reader .rf-table tbody th { font-weight: 600; background: transparent; }
+.course-reader .rf-table tbody tr:nth-child(even) { background: var(--course-surface); }
+.course-reader .rf-table .rf-mobile-key { display: none; }
+.course-reader .rf-time { --time-label: 29%; }
+.course-reader .rf-axis {
+  display: flex; justify-content: space-between; margin: .25rem 0 0 var(--time-label);
+  border-block-end: 1px solid var(--course-line); color: var(--course-muted);
+  font: .9rem/1.6 var(--course-mono, monospace);
+}
+.course-reader .rf-time .rf-interval {
+  display: grid; grid-template-columns: var(--time-label) minmax(0, 1fr); align-items: baseline;
+  padding-block: .6rem .3rem; font-variant-numeric: tabular-nums;
+}
+.course-reader .rf-interval dt { font-weight: 600; padding-inline-end: .6rem; }
+.course-reader .rf-time-range { color: var(--course-muted); font-size: .94rem; }
+.course-reader .rf-interval svg {
+  display: block; width: 100%; height: .8rem;
+  margin-top: .4rem; background: var(--course-surface); fill: var(--course-accent);
+}
+.course-reader .rf-interval:nth-child(2n) svg { fill: var(--course-success); }
+@media screen {
+  /* The article, not the viewport, determines whether the labels still fit. */
+  @container lesson-plate (max-width: 36rem) {
+    .course-reader .rf-time .rf-axis { margin-inline-start: 0; }
+    .course-reader .rf-time .rf-interval { display: block; }
+    .course-reader .rf-grid :is(th, td) { padding: .4rem .18rem; }
+    .course-reader .rf-grid thead th:first-child { width: 24%; }
+    .course-reader .rf-grid .rf-cell span { font-size: .88rem; }
+    .course-reader .rf-responsive, .course-reader .rf-responsive tbody { display: block; }
+    .course-reader .rf-responsive thead {
+      position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
+    }
+    .course-reader .rf-responsive tbody tr { display: block; margin-bottom: .8rem; }
+    .course-reader .rf-responsive tbody tr:nth-child(even) { background: none; }
+    .course-reader .rf-responsive tbody th {
+      display: block; background: var(--course-surface); color: var(--course-ink);
+    }
+    .course-reader .rf-responsive td { display: grid; grid-template-columns: minmax(5rem, .85fr) minmax(0, 1.75fr); column-gap: .65rem; }
+    .course-reader .rf-responsive .rf-cell :is(strong, span) { grid-column: 2; }
+    .course-reader .rf-responsive .rf-mobile-key { display: block; grid-row: 1 / span 2; color: var(--course-accent); font-size: .9rem; }
+    .course-reader .rf-compare .rf-row ul { grid-auto-flow: row; }
+    .course-reader .rf-flow .rf-row ol { display: block; }
+    .course-reader .rf-flow .rf-row .rf-cell { padding: 0 0 .8rem 2.1rem; }
+    .course-reader .rf-flow .rf-row .rf-cell:last-child { padding-block-end: .15rem; }
+    .course-reader .rf-flow .rf-step { position: absolute; inset: 0 auto auto 0; }
+    .course-reader .rf-flow .rf-cell:not(:last-child)::before {
+      inset: 1.5rem auto 0 .72rem; border: 0; border-inline-start: 1px solid var(--course-line);
+    }
+  }
+}
 @media print {
   .course-reader .rf-row .rf-cell { color: #111; background: transparent; border-color: currentColor; }
 }

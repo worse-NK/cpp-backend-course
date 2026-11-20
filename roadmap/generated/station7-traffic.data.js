@@ -1554,8 +1554,36 @@ window.STATION_DATA = {
           "html": "<b>Обратный прокси</b> принимает клиентское соединение и использует отдельное соединение к приложению. Это не просто другое имя NAT: здесь граница транспортных соединений, а не только преобразование адресов пакета."
         },
         {
+          "type": "reading-figure",
+          "layout": "flow",
+          "title": "Где закончился один TCP-разговор и начался другой?",
+          "rows": [
+            {
+              "label": "Путь одного HTTP-запроса через обратный прокси",
+              "cells": [
+                {
+                  "value": "Клиент",
+                  "note": "В захвате A виден обмен между клиентом и прокси.",
+                  "state": "included"
+                },
+                {
+                  "value": "Прокси",
+                  "note": "Принимает запрос и пересылает его по другому TCP-соединению.",
+                  "state": "boundary"
+                },
+                {
+                  "value": "Приложение",
+                  "note": "В захвате Б виден обмен между прокси и приложением.",
+                  "state": "included"
+                }
+              ]
+            }
+          ],
+          "caption": "Даже если Wireshark подписал оба разговора tcp.stream = 0, в файле A это клиентское соединение, а в файле Б — соединение с приложением. Номер потока не передаётся в пакете и не переходит через прокси."
+        },
+        {
           "type": "text",
-          "html": "У двух TCP-разговоров могут различаться исходные номера, порты, TLS и время начала. Поэтому <code>tcp.stream=0</code> у клиента и такой же индекс у backend не доказывают один запрос. Индекс локален для каждого файла; связь ищут по топологии и подходящим прикладным сведениям."
+          "html": "Начальные порядковые номера TCP, порты, параметры TLS и время начала у этих соединений могут различаться. Чтобы связать именно запросы, пригодится, например, идентификатор, который прокси записал в свой журнал и передал приложению. Одинаковый номер потока в двух файлах такой связи не устанавливает."
         },
         {
           "type": "text",
@@ -1571,7 +1599,7 @@ window.STATION_DATA = {
         },
         {
           "type": "text",
-          "html": "<b>Источники.</b> <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChStatConversations.html\" target=\"_blank\" rel=\"noopener noreferrer\">Wireshark: Conversations и отдельные разговоры</a> · <a href=\"https://www.rfc-editor.org/rfc/rfc3022.html\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 3022: преобразование адресов и портов</a> · <a href=\"https://www.rfc-editor.org/rfc/rfc9293.html#section-3.9.1\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 9293: интерфейс TCP и приложение</a>."
+          "html": "<b>Источники.</b> <a href=\"https://www.wireshark.org/docs/wsug_html_chunked/ChStatConversations.html\" target=\"_blank\" rel=\"noopener noreferrer\">Wireshark: Conversations и отдельные разговоры</a> · <a href=\"https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/#passing-a-request-to-a-proxied-server\" target=\"_blank\" rel=\"noopener noreferrer\">NGINX: как обратный прокси пересылает запрос</a> · <a href=\"https://www.rfc-editor.org/rfc/rfc3022.html\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 3022: преобразование адресов и портов</a> · <a href=\"https://www.rfc-editor.org/rfc/rfc9293.html#section-3.9.1\" target=\"_blank\" rel=\"noopener noreferrer\">RFC 9293: интерфейс TCP и приложение</a>."
         },
         {
           "type": "self-check",

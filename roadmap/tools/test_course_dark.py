@@ -39,7 +39,11 @@ class DarkCourse(unittest.TestCase):
                 self.assertNotIn("design-studio", body.get("class", ""))
                 self.assertNotIn("maximum-scale", source)
                 self.assertNotIn("user-scalable=no", source)
-                self.assertNotIn("fonts.googleapis.com", source)
+                # A host in a CSP allowlist isn't an asset request. Still check links,
+                # inline CSS imports and scripts in the rest of the generated shell.
+                without_csp = re.sub(r'<meta\b(?=[^>]*http-equiv="Content-Security-Policy")[^>]*>',
+                                     "", source, flags=re.I)
+                self.assertNotIn("fonts.googleapis.com", without_csp)
                 theme = [attrs for tag, attrs in doc.tags if tag == "meta" and attrs.get("name") == "theme-color"]
                 self.assertEqual(theme, [{"name": "theme-color", "content": "#18252f"}])
                 for asset in ["course-ui.css", "course-reader.css", "course-theme.css", "course-dark-reader.css", "course-code.css"]:
