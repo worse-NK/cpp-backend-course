@@ -74,19 +74,17 @@ class StationEightEditorial(unittest.TestCase):
                 for b in s['blocks'] if b['type'] == 'code']
         visual = [(s['id'], b) for s in original
                   for b in s['blocks'] if b['type'] in
-                  ('visual', 'diagram', 'lab', 'lanes', 'exchange')]
+                  ('visual', 'diagram', 'lab', 'lanes', 'exchange', 'reading-scene')]
         def digest(value):
             return hashlib.sha256(json.dumps(value, ensure_ascii=False).encode()).hexdigest()
         self.assertEqual(len(code), 34)
         self.assertEqual(digest(code),
                          'd7090e7770dd8a3fec06d76667050a465496010d537e1c1d04db17429f333152')
-        # 2026-11-05: all 66 blocks were compared structurally with the
-        # pre-stage course-gap baseline, with no differences.  This rebases
-        # the outdated visual hash; it does not reconstruct an unavailable
-        # earlier snapshot or excuse future visual payload changes.
+        # The conditional-update diagram now compares two clients in a scene.
+        # The remaining 65 visual blocks and the code snapshot are unchanged.
         self.assertEqual(len(visual), 66)
         self.assertEqual(digest(visual),
-                         'd507eff0500a0b4830adad0cf2425975045c25e4629c76e91f4b04fd1d2ed4d7')
+                         'a2d561a3f2e6d3e3cb31b706144a0bb78bc7dffec176e69445e2a089f78c1ffe')
 
     def test_cpp23_addition_has_a_separate_strict_payload_contract(self):
         section = self.sections['expected-input-http-cpp23']
@@ -100,7 +98,7 @@ class StationEightEditorial(unittest.TestCase):
         payload = [b['code'] for b in blocks]
         self.assertEqual(hashlib.sha256(json.dumps(payload, ensure_ascii=False).encode()).hexdigest(),
                          '814b3283f1f2a8c1404c53c07af686f2c69de77f2f09251edd541a425f3afb90')
-        self.assertFalse(any(b['type'] in ('visual', 'diagram', 'lab', 'lanes', 'exchange')
+        self.assertFalse(any(b['type'] in ('visual', 'diagram', 'lab', 'lanes', 'exchange', 'reading-scene')
                              for b in section['blocks']))
 
     def test_each_section_has_a_revealable_reasoning_check(self):

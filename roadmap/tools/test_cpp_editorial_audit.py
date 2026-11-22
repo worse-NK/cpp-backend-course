@@ -9,11 +9,21 @@ ROOT=Path(__file__).resolve().parents[1]
 ALLOWED=set('p b strong em i code pre a ul li ol div span table thead tbody tr th td figure figcaption h2 h3 h4 br details summary small sup sub'.split())
 
 class ProseParser(HTMLParser):
-    def __init__(self):
+    def __init__(self, point_lesson=False):
         super().__init__();self.unknown=[];self.text=[]
+        self.point_lesson=point_lesson
+        self.in_point_story=False
     def handle_starttag(self,tag,attrs):
+        if self.point_lesson and tag == 'point-call-story' and not self.in_point_story:
+            self.in_point_story=True
+            return
+        if self.in_point_story and tag in {'button', 'samp'}: return
         if tag not in ALLOWED:self.unknown.append(tag)
     def handle_endtag(self,tag):
+        if self.in_point_story and tag == 'point-call-story':
+            self.in_point_story=False
+            return
+        if self.in_point_story and tag in {'button', 'samp'}: return
         if tag not in ALLOWED:self.unknown.append(tag)
     def handle_data(self,data):self.text.append(data)
 
@@ -61,8 +71,17 @@ int main() { Box<std::unique_ptr<int>> box{std::make_unique<int>(7)};
             for section in data['theory']:
                 with self.subTest(station=n,section=section['id']):
                     for fragment in prose(section):
-                        parser=ProseParser();parser.feed(fragment)
+                        parser=ProseParser(point_lesson=(n == 0 and section['id'] == 'this'));parser.feed(fragment)
                         self.assertEqual(parser.unknown,[])
+                        self.assertFalse(parser.in_point_story)
+
+    def test_only_the_named_pilot_can_host_interactive_tags(self):
+        component='<point-call-story><button></button><samp></samp></point-call-story>'
+        approved=ProseParser(point_lesson=True)
+        approved.feed(component+'<samp></samp><T>')
+        self.assertEqual(approved.unknown,['samp','samp','t'])
+        elsewhere=ProseParser();elsewhere.feed(component)
+        self.assertEqual(elsewhere.unknown,['point-call-story','button','button','samp','samp','point-call-story'])
 
     def test_important_template_spellings_survive_rendering(self):
         for n,sid,spellings in [

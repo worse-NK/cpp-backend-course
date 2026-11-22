@@ -939,6 +939,12 @@
               h("span", { className: "note-label" }, isSource ? "ИСТОЧНИКИ И ГРАНИЦЫ ПРИМЕНЕНИЯ" : (noteLabels[block.kind] || noteLabels.key)),
               h("span", { className: "note-text", dangerouslySetInnerHTML: { __html: block.html } }));
           }
+          if (block.type === "reading-scene") {
+            if (window.CourseReadingScene) return h(window.CourseReadingScene, {block: block, key: section.id + ":" + block.id});
+            return h("ol", {key: index}, block.frames.map(function (f, i) {
+              return h("li", {key: i}, h("strong", null, f.label), " — ", f.note);
+            }));
+          }
           if (block.type === "reading-figure") {
             return h(ReadingFigure, { block: block, key: index });
           }

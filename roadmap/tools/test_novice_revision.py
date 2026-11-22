@@ -93,10 +93,22 @@ class NoviceRevision(unittest.TestCase):
                 os.close(write_fd)
 
     def test_self_contained_percentile_and_const_exercise(self):
-        q=self.data[8]['quizzes']['advanced'][-1]
-        self.assertIn('99 заняли по 10 мс',q['q'])
-        self.assertIn('1010 мс',q['q'])
-        self.assertNotIn('Для тех же',q['q'])
+        matches = [
+            q for q in self.data[8]['quizzes']['advanced']
+            if 'observations' in q['theoryRefs'] and 'p99' in q['q'] and '1010' in q['q']
+        ]
+        self.assertEqual(len(matches), 1, 'Expected exactly one p99 question for the 1010-ms outlier')
+        q = matches[0]
+        for detail in ('100 запросов', '99 заняли по 10 мс', 'один — 1010 мс', 'ceil(p×N)', 'с единицы'):
+            self.assertIn(detail, q['q'])
+        self.assertNotIn('для тех же', q['q'].lower())
+
+        # Discrete p99, not the mean (20 ms) or the maximum (1010 ms).
+        sample = [10] * 99 + [1010]
+        rank = (99 * len(sample) + 99) // 100  # ceil(0.99 * N), one-based
+        expected = f'{sorted(sample)[rank - 1]} мс'
+        self.assertEqual([i for i, option in enumerate(q['options']) if option == expected],
+                         [q['answer']], 'The calculated p99 must be the only keyed answer')
         t=next(t for t in self.data[1]['tasks'] if 'Counter' in t['brief'])
         self.assertIn('// cc.increment();',t['code'])
 

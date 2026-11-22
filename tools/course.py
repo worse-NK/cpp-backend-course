@@ -140,7 +140,9 @@ def run_checks():
     commands = [
         ([sys.executable, '-m', 'unittest', 'discover', '-s', 'tools', '-p', 'test_*.py'], ROOT),
         ([sys.executable, '-m', 'unittest', 'test_publication', 'test_repository_sync', 'test_web_security',
-          'test_sources_order', 'test_reading_figures', 'test_listing_outputs',
+          'test_sources_order', 'test_reading_figures', 'test_reading_scenes', 'test_listing_outputs',
+          'test_station9_editorial', 'test_terminology',
+          'test_novice_revision.NoviceRevision.test_self_contained_percentile_and_const_exercise',
           'test_course_figures_cpp', 'test_course_figures_network', 'test_course_figures_ops'], ROOT / 'roadmap/tools'),
         ([sys.executable, '-m', 'unittest', 'discover', '-s', 'desktop-course/tests', '-p', 'test_build.py'], ROOT),
         ([sys.executable, '-m', 'unittest', 'discover', '-s', 'desktop-course/tests', '-p', 'test_package.py'], ROOT),

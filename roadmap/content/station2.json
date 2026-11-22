@@ -1485,30 +1485,59 @@
           "code": "#include <iostream>\nstruct Base {\n    int id = 1;\n    virtual char kind() const { return 'B'; }\n    virtual ~Base() = default;\n};\nstruct Derived : Base {\n    int extra = 9;\n    char kind() const override { return 'D'; }\n};\nint main() {\n    Derived original;\n    Base copy = original;\n    Base& view = original;\n    copy.id = 7;\n    std::cout << copy.kind() << view.kind() << ' '\n              << original.id << ' ' << copy.id; // BD 1 7\n}"
         },
         {
-          "type": "text",
-          "html": "Сначала <code>original</code> содержит базовое поле <code>id == 1</code> и собственное <code>extra == 9</code>. Инициализация <code>copy</code> вызывает копирующий конструктор <code>Base</code>: из базовой части <code>original</code> копируется <code>id</code>, и появляется отдельный <code>Base</code> с <code>id == 1</code>. Поля <code>extra</code> у него нет. Это <strong>срезка</strong> (slicing) — копирование только базовой части в значение базы. Она сама по себе не означает порчу памяти или неопределённое поведение."
-        },
-        {
-          "type": "text",
-          "html": "<code>view</code>, напротив, обозначает базовую часть исходного <code>Derived</code> и ничего не копирует. После <code>copy.id = 7;</code> изменён только отдельный <code>copy</code>. Его динамический тип — <code>Base</code>, поэтому <code>copy.kind()</code> даёт <code>B</code>. Через <code>view</code> по-прежнему доступен исходный <code>Derived</code>, и виртуальный вызов даёт <code>D</code>. Оставшиеся числа — неизменённый <code>original.id == 1</code> и новый <code>copy.id == 7</code>. Полный вывод: <code>BD 1 7</code>. У исходного объекта по-прежнему есть <code>extra == 9</code>."
-        },
-        {
-          "type": "visual",
-          "variant": "compare",
-          "title": "Что происходит с объектами",
-          "items": [
+          "type": "reading-scene",
+          "id": "slicing",
+          "mode": "trace",
+          "title": "Одна копия, одна ссылка: сколько здесь объектов?",
+          "intro": "В main уже есть Derived original: id равен 1, extra равен 9. Проследим три строки, не меняя места исходного объекта.",
+          "columns": [
+            "original · Derived",
+            "copy · Base",
+            "Имя view"
+          ],
+          "frames": [
             {
-              "label": "Base copy = original",
-              "title": "Новый Base",
-              "html": "Копируется базовая часть, производная часть в копию не входит."
+              "label": "Появляется отдельный Base",
+              "code": "Base copy = original;",
+              "values": [
+                "id: 1 · extra: 9",
+                "id: 1",
+                "ещё не объявлено"
+              ],
+              "focus": [
+                1
+              ],
+              "note": "Конструктор копирования Base берёт базовую часть original. У нового объекта поля extra нет, у исходного оно осталось. Такую потерю производной части в копии называют срезкой."
             },
             {
-              "label": "Base& view = original",
-              "title": "Нового объекта нет",
-              "html": "Ссылка наблюдает существующий Derived через его базовый интерфейс."
+              "label": "Появляется имя для того же объекта",
+              "code": "Base& view = original;",
+              "values": [
+                "id: 1 · extra: 9",
+                "id: 1",
+                "ссылка на базовую часть original"
+              ],
+              "focus": [
+                0,
+                2
+              ],
+              "note": "Ссылка не создаёт третьего объекта. Поэтому виртуальный вызов view.kind() по-прежнему выберет реализацию Derived."
+            },
+            {
+              "label": "Изменяется только копия",
+              "code": "copy.id = 7;",
+              "values": [
+                "id: 1 · extra: 9",
+                "id: 7",
+                "по-прежнему original"
+              ],
+              "focus": [
+                1
+              ],
+              "note": "У объекта copy своя жизнь и своё поле id. Вызовы copy.kind() и view.kind() дают B и D, а значения original.id и copy.id — 1 и 7."
             }
           ],
-          "caption": "Ссылку нельзя считать независимой копией: её срок безопасного использования связан с original."
+          "after": "Полный вывод: BD 1 7. Срезка здесь — обычное создание значения Base, а не порча памяти или неопределённое поведение."
         },
         {
           "type": "text",

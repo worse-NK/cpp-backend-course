@@ -35,7 +35,8 @@ class NetlabEditorialTests(unittest.TestCase):
         payloads = [(s['id'], b) for s in original for b in s['blocks']
                     if b['type'] not in ('text', 'note', 'self-check')]
         digest = hashlib.sha256(json.dumps(payloads, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
-        self.assertEqual(digest, 'dbac2153747ae27cf8dd7b7c6b46ee2ee55c6a608ce7ab0b46a8dbb4c82ecc27')
+        # One addition to the older payloads: the bridge-learning trace.
+        self.assertEqual(digest, '70f51899c76d5d77e09af2d9ab6e5161d32af06dcaf3cfb14d7109993fdf10a2')
 
     def test_every_section_has_explained_self_check(self):
         for section in self.sections.values():

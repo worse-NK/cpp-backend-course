@@ -78,8 +78,9 @@ class StationSevenEditorial(unittest.TestCase):
                   for s in original]
         self.assertEqual(digest(codes),
                          'af7301ec538541eb073abbdbb384e63b1425ae75af1c05e916a8a6a5fce70f18')
+        # Only the level/edge-triggered readiness visual changed to a trace.
         self.assertEqual(digest(visual),
-                         'b5c9760815c0186bf1eb1401301ebc816c3b400bd5459c6c94e357afa8e7c904')
+                         'dce6e9db05d9e4836ecff7a71cfd0ba2bf7fb084962260dc629b3b73eb045f38')
 
     def test_each_section_has_explained_retrieval_check_and_valid_html(self):
         count = 0

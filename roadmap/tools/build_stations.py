@@ -50,6 +50,58 @@ def require_keys(value: object, keys: set[str], where: str) -> dict:
     return value
 
 
+def validate_scene(block: dict, section: str, where: str) -> None:
+    def demand(ok, why):
+        if not ok:
+            raise ValueError(f"{where}: {why}")
+
+    required = {"type", "id", "mode", "title", "intro", "columns", "frames"}
+    demand(required <= set(block) <= required | {"after", "axis"}, "unexpected scene keys")
+    demand(block["id"] == section, "scene id must match section")
+    demand(block["mode"] in ("compare", "trace", "table", "timeline", "scroll"), "unknown scene mode")
+    for key in ("title", "intro", "after"):
+        if key in block:
+            require_text(block[key], where + "." + key)
+    columns, frames = block["columns"], block["frames"]
+    demand(isinstance(columns, list) and 1 <= len(columns) <= 8, "expected 1–8 columns")
+    for column in columns:
+        require_text(column, where + ".columns")
+    demand(len(set(columns)) == len(columns), "duplicate scene column")
+    demand(isinstance(frames, list) and 2 <= len(frames) <= 12, "expected 2–12 frames")
+    axis = block.get("axis")
+    if "axis" in block:
+        require_keys(axis, {"min", "max", "unit"}, where + ".axis")
+        demand(block["mode"] == "timeline" and
+               all(type(axis[k]) in (int, float) for k in ("min", "max")) and axis["min"] < axis["max"], "invalid axis")
+        require_text(axis["unit"], where + ".axis.unit")
+    def column_id(n):
+        return type(n) is int and 0 <= n < len(columns)
+    for i, frame in enumerate(frames):
+        loc = f"{where}.frames[{i}]"
+        keys = {"label", "values", "note"}
+        demand(isinstance(frame, dict) and keys <= set(frame) <= keys | {"code", "focus", "edges", "span", "output"}, "invalid frame keys")
+        demand("output" not in frame or isinstance(frame["output"], str), "output must contain console text")
+        for key in ("label", "note", "code"):
+            if key in frame:
+                require_text(frame[key], loc + "." + key)
+        values = frame["values"]
+        demand(isinstance(values, list) and len(values) == len(columns), "values must align with columns")
+        for value in values:
+            require_text(value, loc + ".values")
+        focus = frame.get("focus", [])
+        demand(isinstance(focus, list) and all(column_id(k) for k in focus) and len(set(focus)) == len(focus), "invalid focus")
+        edges = frame.get("edges", [])
+        demand(isinstance(edges, list), "invalid edges")
+        for edge in edges:
+            demand(isinstance(edge, list) and len(edge) in (2, 3) and all(column_id(k) for k in edge[:2])
+                   and edge[0] != edge[1] and (len(edge) == 2 or edge[2] == "weak"), "invalid edge")
+        demand(("span" in frame) == (axis is not None), "timeline spans require an axis and vice versa")
+        if axis:
+            span = frame["span"]
+            demand(isinstance(span, list) and len(span) == 2 and all(type(k) in (int, float) for k in span)
+                   and axis["min"] <= span[0] < span[1] <= axis["max"], "invalid frame span")
+
+
 def validate(data: dict, path: Path) -> None:
     required = {"meta", "theory", "quizzes", "tasks"}
     if not isinstance(data, dict):
@@ -228,6 +280,10 @@ def validate(data: dict, path: Path) -> None:
                     a, b = item["start"], item["end"]
                     if type(a) is not int or type(b) is not int or not 0 <= a < b <= duration:
                         raise ValueError(f"{at}: interval must lie within the shared time axis")
+            elif block_type == "reading-scene":
+                validate_scene(raw_block, section_id, block_where)
+                if sum(b.get("type") == "reading-scene" for b in blocks if isinstance(b, dict)) != 1:
+                    raise ValueError(f"{block_where}: duplicate scene")
             elif block_type == "reading-figure":
                 keys = {"type", "title", "rows", "caption"}
                 layout = raw_block.get("layout")
@@ -530,6 +586,21 @@ def html_for(data: dict) -> str:
         for name in ("vendor/highlightjs/highlight.min.js", "vendor/highlightjs/http.min.js", "vendor/highlightjs/cmake.min.js",
                      "vendor/highlightjs/dockerfile.min.js", "vendor/highlightjs/nginx.min.js", "assets/course-code.js")
     )
+    # The small scroll scene is an enhancement to the authored, readable steps.
+    # Do not add its runtime, styles or a different resource hash to other stations.
+    point_story = meta["id"] == "station0" and any(
+        "<point-call-story " in block.get("html", "")
+        for section in data["theory"] if section["id"] == "this" for block in section["blocks"]
+    )
+    if point_story:
+        script = "assets/point-call-story.js"
+        fingerprint = hashlib.sha256((ROADMAP / script).read_bytes()).hexdigest()[:12]
+        code_scripts += f'\n  <script src="{script}?v={fingerprint}" defer></script>'
+    scenes = any(block["type"] == "reading-scene" for section in data["theory"] for block in section["blocks"])
+    if scenes:
+        script = "assets/reading-scenes.js"
+        fingerprint = hashlib.sha256((ROADMAP / script).read_bytes()).hexdigest()[:12]
+        code_scripts += f'\n  <script src="{script}?v={fingerprint}"></script>'
     html = f"""<!doctype html>
 <html lang="ru" class="course-dark map-trail-root">
 <head>
@@ -563,6 +634,10 @@ def html_for(data: dict) -> str:
     # The approved smooth route is shared by every station. Keep it last so its
     # SVG bridges replace the original border-based connectors at all sizes.
     final_css = ["course-code.css", "course-dark-reader.css", "station-map.css", "station-map-joints.css", "edition-reader.css"]
+    if point_story:
+        final_css.append("point-call-story.css")
+    if scenes:
+        final_css.append("reading-scenes.css")
     last_styles = "\n".join(
         f'<link rel="stylesheet" href="assets/{name}?v={hashlib.sha256((ROADMAP / "assets" / name).read_bytes()).hexdigest()[:12]}">'
         for name in final_css

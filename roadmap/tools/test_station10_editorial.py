@@ -78,7 +78,9 @@ class Station10Editorial(unittest.TestCase):
             # Includes the earlier, intentional C++20/23 CMake selector in
             # gate-final-workbook. Its behaviour is tested below, not just hashed.
             'code': (16, 'ab8c8574c0701aabfcb162c17d609145f75d3b2d58c0dd4d679959351887f921'),
-            'diagram': (16, 'e4b96e2ea3a69c30cccca42d7d236020eea9d3e7288471a1ca5d61580d984ae9'),
+            # The request budget uses the same six intervals on a common time axis.
+            'diagram': (15, 'e93cbdf5e3d70edc6b5a2de2719058121f30ce71b10c5885cdf19be164017338'),
+            'reading-scene': (1, '135c284bfa7aefb97b59b49bdff9e8f3f89c22e8700cf4564c24bb40b24e5b94'),
             'lab': (1, '39369db963fe72c4daf492d39154442589ba740ee8bbc6ba82f2e25388d714cc'),
         }
         for kind, (count, digest) in expected.items():

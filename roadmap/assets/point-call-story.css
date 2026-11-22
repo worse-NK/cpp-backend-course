@@ -1,0 +1,310 @@
+/* A scroll figure for Station 0. The ordered list is the lesson; the diagram
+   is its visual accompaniment. Without enhancement the list reads normally. */
+point-call-story {
+  display: block;
+  container: point-call / inline-size;
+  margin: 2.3rem 0;
+  padding-block: 1.3rem;
+  border-block: 1px solid var(--course-line, #43565e);
+  --pcs-mint: #a6e3cd;
+  --pcs-warm: #f4c596;
+  --pcs-ink: #e6edeb;
+  --pcs-muted: #bccbd0;
+  --pcs-line: #4a6168;
+  --pcs-mono: var(--course-mono, ui-monospace, monospace);
+}
+/* The prose measure (65ch) is right for paragraphs, but this block also
+   holds a figure. Use the width of its own reading column, never the TOC. */
+body.course-reader.edition-reader .reader-content .theory-text:has(> point-call-story) {
+  max-width: none;
+}
+.course-reader point-call-story .pcs-title {
+  margin: 0 0 .45rem;
+  font: normal 1.65em/1.16 var(--ed-book, Georgia, serif);
+  color: var(--ed-title, inherit);
+  letter-spacing: -.02em;
+  text-wrap: balance;
+}
+.course-reader point-call-story .pcs-intro {
+  max-width: 63ch;
+  margin: 0 0 1.25em;
+}
+point-call-story .pcs-skip { display: none; }
+.course-reader point-call-story.pcs-enhanced .pcs-skip {
+  display: inline-block;
+  min-height: 2rem;
+  width: fit-content;
+  margin-inline-end: .4em;
+  padding: .1em .1em .1em 0;
+  border: 0;
+  background: none;
+  color: var(--course-accent, #9ccddc);
+  font: inherit;
+  font-size: .9em;
+  text-align: start;
+  text-decoration: underline;
+  text-underline-offset: .2em;
+  cursor: pointer;
+}
+point-call-story :is(.pcs-skip, .pcs-after):focus-visible {
+  outline: 2px solid var(--course-focus, #c2eafa);
+  outline-offset: 3px;
+}
+point-call-story .pcs-after {
+  display: block;
+  scroll-margin-block: 1rem;
+}
+.course-reader point-call-story .pcs-beats {
+  margin: 0;
+  padding-inline-start: 1.5em;
+}
+.course-reader point-call-story .pcs-beats > li { margin: 1em 0 0; }
+.course-reader point-call-story .pcs-beats h4 {
+  margin: 0 0 .35em;
+  color: var(--ed-title, inherit);
+  font: 600 1.06em/1.36 var(--course-sans, sans-serif);
+  text-wrap: balance;
+}
+.course-reader point-call-story .pcs-beats p { margin: 0; line-height: 1.55; }
+.course-reader point-call-story .pcs-beats p + p { margin-block-start: .6em; }
+
+@media screen {
+  point-call-story .pcs-track { position: relative; }
+  point-call-story .pcs-stage {
+    position: sticky;
+    top: max(.35rem, env(safe-area-inset-top));
+    z-index: 2;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: .8em;
+    border: 1px solid var(--pcs-line);
+    border-radius: .5rem;
+    background: #18282f;
+    color: var(--pcs-ink);
+    font-family: var(--course-sans, sans-serif);
+    line-height: 1.35;
+  }
+  point-call-story .pcs-stage-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .15em .6em;
+    color: var(--pcs-muted);
+    font-size: .82em;
+  }
+  point-call-story .pcs-index {
+    white-space: nowrap;
+    color: #b4d5dd;
+    font-family: var(--pcs-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .course-reader.course-dark point-call-story .pcs-stage code.pcs-line,
+  .course-reader.course-dark point-call-story .pcs-stage code.pcs-assignment {
+    padding: 0;
+    background: none;
+    font-family: var(--pcs-mono);
+    color: var(--pcs-ink);
+  }
+  .course-reader.course-dark point-call-story .pcs-stage code.pcs-line {
+    display: block;
+    /* The final cout statement wraps. Reserve two lines for every snapshot
+       so swapping a short call for it does not move the reading position. */
+    min-block-size: 2.8em;
+    margin: .32em 0 .62em;
+    font-size: 1em;
+    line-height: 1.4;
+  }
+  point-call-story .pcs-method {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .15em .45em;
+    padding: .4em .55em;
+    border-block: 1px solid #425961;
+    background: #20333b;
+    font: .85em/1.4 var(--pcs-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .course-reader.course-dark point-call-story .pcs-stage code.pcs-assignment {
+    font-size: 1em;
+  }
+  point-call-story .pcs-arg { color: var(--pcs-warm); }
+  point-call-story[data-target="none"] .pcs-method :is(.pcs-arg, code.pcs-assignment) {
+    color: var(--pcs-muted);
+  }
+  point-call-story .pcs-link {
+    position: relative;
+    height: 2.8em;
+    text-align: center;
+    color: var(--pcs-mint);
+  }
+  point-call-story .pcs-this-label {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    vertical-align: top;
+    margin-top: .14em;
+    padding-inline: .35em;
+    background: #18282f;
+    font: .78em/1.35 var(--pcs-mono);
+  }
+  point-call-story[data-target="none"] .pcs-this-label { color: var(--pcs-muted); }
+  point-call-story .pcs-arrows {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  point-call-story .pcs-arrows :is(.pcs-to-a, .pcs-to-b) {
+    display: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  point-call-story[data-target="a"] .pcs-to-a,
+  point-call-story[data-target="b"] .pcs-to-b { display: inline; }
+  point-call-story .pcs-objects {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  point-call-story .pcs-object {
+    --pcs-border: #758a92;
+    min-width: 0;
+    padding: .45em .65em;
+    border: 1px solid var(--pcs-border);
+    border-radius: .3rem;
+    background: #20313a;
+  }
+  point-call-story .pcs-object:first-child { margin-inline: .18em .45em; }
+  point-call-story .pcs-object:last-child { margin-inline: .45em .18em; }
+  point-call-story .pcs-name {
+    display: block;
+    margin-block-end: .32em;
+    color: var(--pcs-ink);
+    font: 600 .92em/1.3 var(--pcs-mono);
+  }
+  point-call-story .pcs-field {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .35em;
+    padding-block-start: .2em;
+    border-block-start: 1px solid var(--pcs-border);
+    color: var(--pcs-muted);
+    font: .9em/1.2 var(--pcs-mono);
+  }
+  .course-reader.edition-reader point-call-story .pcs-field .pcs-value {
+    color: var(--pcs-ink);
+    font-size: 1.35em;
+    font-variant-numeric: tabular-nums;
+  }
+  point-call-story[data-target="a"] [data-object="a"],
+  point-call-story[data-target="b"] [data-object="b"] {
+    --pcs-border: #7aa997;
+    background: #223b36;
+    box-shadow: inset 0 2px var(--pcs-mint);
+  }
+  point-call-story[data-target="a"] [data-object="a"] .pcs-name,
+  point-call-story[data-target="b"] [data-object="b"] .pcs-name { color: var(--pcs-mint); }
+  .course-reader point-call-story[data-phase="write"][data-target="a"] [data-object="a"] .pcs-value,
+  .course-reader point-call-story[data-phase="write"][data-target="b"] [data-object="b"] .pcs-value {
+    color: var(--pcs-warm);
+    text-decoration: underline;
+    text-underline-offset: .12em;
+  }
+  point-call-story .pcs-stage-foot {
+    /* Entry captions take two lines on a phone, assignment captions one.
+       Let longer copy grow naturally (also under user text scaling). */
+    min-block-size: 2.8em;
+    margin: .65em 0 0;
+    color: var(--pcs-muted);
+    font-size: .85em;
+    line-height: 1.4;
+  }
+
+  .course-reader point-call-story.pcs-enhanced .pcs-beats {
+    list-style: none;
+    counter-reset: pcs-beat;
+    padding: 0;
+  }
+  .course-reader point-call-story.pcs-enhanced .pcs-beats > li {
+    counter-increment: pcs-beat;
+    position: relative;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 1em 0 clamp(1.6rem, 14vh, 7rem) 1.2em;
+    border-inline-start: 1px solid var(--pcs-line);
+  }
+  .course-reader point-call-story.pcs-enhanced .pcs-beats > li:last-child { padding-block-end: 1.15em; }
+  .course-reader point-call-story.pcs-enhanced .pcs-beats > li::before {
+    content: counter(pcs-beat, decimal-leading-zero);
+    content: counter(pcs-beat, decimal-leading-zero) / "";
+    display: block;
+    width: fit-content;
+    padding-bottom: .35em;
+    color: var(--pcs-muted);
+    font: .78em/1.35 var(--pcs-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  point-call-story .pcs-beats > li[aria-current="step"]::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 1em;
+    inset-inline-start: -2px;
+    width: 3px;
+    height: 2.65em;
+    border-radius: 2px;
+    background: var(--pcs-mint);
+  }
+  .course-reader point-call-story.pcs-enhanced .pcs-beats > li[aria-current="step"]::before { color: var(--pcs-mint); }
+  /* A single block on mobile makes the pinned figure and the prose share
+     the entire track; no inner scrolling and no sticky grid-row trap. */
+  @container point-call (min-width: 40rem) {
+    point-call-story.pcs-enhanced .pcs-track {
+      display: grid;
+      grid-template-columns: minmax(0, 1.04fr) minmax(0, 1fr);
+      gap: clamp(1rem, 3cqi, 1.6rem);
+      align-items: start;
+    }
+    point-call-story .pcs-stage {
+      top: clamp(1.25rem, 15vh, 7.5rem);
+      padding: 1em;
+    }
+    point-call-story .pcs-link { height: 3.3em; }
+    point-call-story .pcs-object { padding: .65em .8em; }
+    .course-reader point-call-story.pcs-enhanced .pcs-beats > li { padding-block: .5em clamp(2.5rem, 23vh, 11rem); }
+    point-call-story .pcs-beats > li[aria-current="step"]::after { inset-block-start: .5em; }
+  }
+  @container point-call (max-width: 25rem) {
+    point-call-story .pcs-stage { padding: .58em .7em; }
+    point-call-story .pcs-link { height: 2.3em; }
+    point-call-story .pcs-object { padding: .35em .52em; }
+    point-call-story .pcs-stage-foot { margin-block-start: .42em; }
+  }
+  @container point-call (max-width: 19rem) {
+    .course-reader.course-dark point-call-story .pcs-stage code.pcs-line,
+    point-call-story .pcs-stage-foot { min-block-size: 4.2em; }
+  }
+}
+/* In a shallow landscape window (or at high zoom), don't pin the
+   illustration over the very text it is supposed to explain. */
+@media screen and (max-height: 440px) {
+  point-call-story .pcs-stage { position: static; }
+  .course-reader point-call-story.pcs-enhanced .pcs-beats > li { padding-block-end: 1.1em; }
+}
+@media print {
+  point-call-story { margin-block: 1em; padding-block: .7em; border-color: #777; container-type: normal; }
+  point-call-story .pcs-stage,
+  .course-reader point-call-story.pcs-enhanced .pcs-skip { display: none; }
+  .course-reader point-call-story .pcs-beats > li { break-inside: avoid; }
+}

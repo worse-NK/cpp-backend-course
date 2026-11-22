@@ -32,7 +32,8 @@ class TrafficEditorialTests(unittest.TestCase):
         payloads = [(s['id'], b) for s in original for b in s['blocks']
                     if b['type'] not in ('text', 'note', 'self-check')]
         digest = hashlib.sha256(json.dumps(payloads, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
-        self.assertEqual(digest, 'a0762211ad4dc3802d130dd9bed963f077520d5093085674020ee770e5ad3df4')
+        # Three Wireshark panes now share a packet selection; other diagrams are unchanged.
+        self.assertEqual(digest, '989bf873ea3f62d881b6591803b048884f984e3e23d3e14e7db6394b5dd45d0b')
 
     def test_self_checks_and_html(self):
         for section in self.sections.values():

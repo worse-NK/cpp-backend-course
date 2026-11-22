@@ -27,10 +27,10 @@ class StationZeroExamples(unittest.TestCase):
             candidates = [code for code in candidates if all(part in code for part in required)]
         return candidates[index]
 
-    def compile(self, source, expected='', *, valid=True):
+    def compile(self, source, expected='', *, valid=True, standard='c++20'):
         with tempfile.TemporaryDirectory(prefix='station0-editorial-test-') as directory:
             binary = str(Path(directory) / 'example')
-            args = ['g++', '-std=c++20', '-Wall', '-Wextra', '-pedantic-errors',
+            args = ['g++', '-std=' + standard, '-Wall', '-Wextra', '-pedantic-errors',
                     '-x', 'c++', '-', '-o', binary]
             if not valid:
                 args = args[:-2] + ['-fsyntax-only']
@@ -93,6 +93,12 @@ int main() {
     assert(!account.deposit(1) && account.getBalance() == maximum);
 }
 ''')
+
+    def test_two_receivers_example_matches_story(self):
+        source = self.code('this', containing=('#include', 'a.setX(3);', 'b.setX(7);'))
+        for standard in ('c++20', 'c++23'):
+            with self.subTest(standard=standard):
+                self.compile(source, '3 7', standard=standard)
 
     def test_returned_reference_aliases_but_value_declaration_copies(self):
         self.compile(self.definition('this', containing=('#include', 'return *this;')) + r'''

@@ -11,11 +11,24 @@ from test_linux_systems import Fragment, fields
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'content/station9.json'
-IDS = ('learning-route', 'storage', 'transactions', 'concurrent-update', 'isolation',
-       'indexes', 'index-decisions', 'storage-maintenance', 'cpp-storage', 'pool',
-       'evolution', 'durability-limits', 'write-lifecycle', 'design',
-       'parking-final-workbook', 'replication-path', 'replication-failover',
-       'cache-race', 'cache-pressure', 'outbox-transaction', 'outbox-delivery')
+ROUTE = (
+    ('storage', ('learning-route', 'storage')),
+    ('transactions', ('transactions',)),
+    ('concurrent-update', ('concurrent-update',)),
+    ('isolation', ('isolation',)),
+    ('indexes', ('indexes', 'index-decisions', 'storage-maintenance',
+                 'physical-join-workbook', 'query-memory-spill-lab')),
+    ('cpp-storage', ('cpp-storage',)),
+    ('pool', ('pool',)),
+    ('evolution', ('evolution', 'durability-limits', 'write-lifecycle')),
+    ('design', ('design', 'schema-history-boundaries', 'parking-final-workbook')),
+    ('replication', ('replication-path', 'replication-failover', 'postgres-recovery-real-lab')),
+    ('cache', ('cache-race', 'cache-pressure')),
+    ('delivery', ('outbox-transaction', 'outbox-delivery')),
+)
+# Older snapshots cover the original sections; additions retain their own hash.
+ADDED_IDS = {'physical-join-workbook', 'query-memory-spill-lab',
+             'schema-history-boundaries', 'postgres-recovery-real-lab'}
 
 
 class DatabaseEditorialTests(unittest.TestCase):
@@ -27,15 +40,25 @@ class DatabaseEditorialTests(unittest.TestCase):
 
     def test_schema_ids_and_progress(self):
         validate(self.data, SOURCE)
-        self.assertEqual(tuple(self.sections), IDS)
+        self.assertEqual([m['id'] for m in self.data['substations']], [m for m, _ in ROUTE])
+        self.assertEqual([(s['substation'], s['id']) for s in self.data['theory']],
+                         [(module, lesson) for module, lessons in ROUTE for lesson in lessons])
         self.assertEqual(self.data['meta']['storeKey'], 'cpp_station9_progress_v1')
-        self.assertEqual(len(self.data['substations']), 12)
 
     def test_nonprose_payloads_and_order_preserved(self):
-        original = [(s['id'], b) for s in self.data['theory'] for b in s['blocks']
-                    if b['type'] not in ('text', 'note', 'self-check')]
-        digest = hashlib.sha256(json.dumps(original, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
-        self.assertEqual(digest, 'eac8563695ef98b07b12346bbd5c4ae0590c223637930c6840238961f2a3bd01')
+        items = [(s['id'], b) for s in self.data['theory'] for b in s['blocks']
+                 if b['type'] not in ('text', 'note', 'self-check')]
+        original, additions = [], []
+        for sid, block in items:
+            group = additions if sid in ADDED_IDS or block['type'] in ('reading-figure', 'reading-scene') else original
+            group.append((sid, block))
+        for payload, size, expected in (
+            (original, 22, 'eac8563695ef98b07b12346bbd5c4ae0590c223637930c6840238961f2a3bd01'),
+            (additions, 12, 'fa108962f497e5477fd54273eb89c6043dc67b3beda969761e1d06a5de19aa19'),
+        ):
+            self.assertEqual(len(payload), size)
+            digest = hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
+            self.assertEqual(digest, expected)
 
     def test_real_cpp_listing_matches_download_without_stubs(self):
         for sid, filename in [('cpp-storage', 'main.cpp'), ('parking-final-workbook', 'parking.cpp')]:
@@ -88,10 +111,22 @@ class DatabaseEditorialTests(unittest.TestCase):
         isolation = ' '.join(fields(self.sections['isolation'], 'html'))
         self.assertIn('write skew', isolation)
         self.assertIn('перекос записи', isolation)
-        maintenance = ' '.join(fields(self.sections['storage-maintenance'], 'html'))
-        self.assertIn('all-visible', maintenance)
-        self.assertIn('INCLUDE', maintenance)
-        self.assertEqual(self.data['quizzes']['advanced'][8]['theoryRefs'], ['index-decisions'])
+        blocks = self.sections['storage-maintenance']['blocks']
+        examples = [i for i, b in enumerate(blocks) if b['type'] == 'reading-figure' and
+                    any(c['value'] == 'all-visible = 1' for row in b['rows'] for c in row['cells'])]
+        self.assertEqual(len(examples), 1)
+        intro = ' '.join(b['html'] for b in blocks[:examples[0]] if b['type'] == 'text')
+        for term in ('INCLUDE', r'карт\w* видимости', 'all-visible', r'страниц\w*'):
+            self.assertRegex(intro, term)  # Teach terms before the diagram or its solution.
+        for bank, subject, ref, correct in (
+            ('advanced', 'Две транзакции RR снимают', 'isolation', 'Обе фиксации'),
+            ('advanced', 'UNIQUE(digest)', 'index-decisions', 'разные строки'),
+            ('interview', 'Гарантированы ли нулевые', 'storage-maintenance', 'видимость'),
+        ):
+            with self.subTest(subject=subject):
+                question, = (q for q in self.data['quizzes'][bank] if subject in q['q'])
+                self.assertEqual(question['theoryRefs'], [ref])
+                self.assertIn(correct, question['options'][question['answer']])
 
     def test_stated_arithmetic_not_claimed_pg_execution(self):
         # These calculations validate the numbers in the teaching scenarios only.

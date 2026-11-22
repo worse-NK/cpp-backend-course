@@ -37,6 +37,8 @@ DESKTOP_SOURCES = (
     "tests/test_desktop_identity.py", "tests/test_downloads.py",
     "tests/test_multiwindow.py", "tests/test_package.py", "tests/test_progress.py",
     "tests/test_lab_interactions_browser.py",
+    "tests/test_point_call_story_browser.py",
+    "tests/test_reading_scenes_browser.py",
     "tests/test_lab_observations_browser.py",
     "tests/test_reading_edition_browser.py",
     "tests/test_progress_ui.py", "tests/test_real_package.py",

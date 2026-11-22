@@ -58,7 +58,7 @@ class Terminology(unittest.TestCase):
             (3, r"\bRSS\b", "оперативной памяти"),
             (5, r"\bCMake\b", "правила его сборки"),
             (5, r"\bJSON\b", "представления структурированных данных"),
-            (5, r"\bCI\b", "непрерывная интеграция"),
+            (5, r"\bCI\b", "непрерывная интеграция", "собирать программу", "запускать тесты"),
             (6, r"\bhappens-before\b", "связь порядка"),
             (6, r"\bmutex\b", "мьютекс"),
             (6, r"\bABA\b", "сменилось на B"),
@@ -71,8 +71,13 @@ class Terminology(unittest.TestCase):
             (8, r"\bRPC\b", "удалённом вызове"),
             ("9-sql", r"\bСУБД\b", "система управления базами данных"),
             (10, r"\bTDD\b", "разработке через тестирование"),
-            (1, r"\baliasing\b", "не обязательно указывает"),
-            (2, r"\bvtable\b", "таблицу адресов"),
+            # Typed access and the shared_ptr aliasing constructor are distinct.
+            # Also catch an unexplained standalone "aliasing" before the constructor.
+            (1, r"\bstrict[- ]aliasing\b", "типового доступа", "неопределённое поведение"),
+            (1, r"(?<!strict )(?<!strict-)\baliasing\b", "разделит владение", "не обязательно указывает"),
+            # A virtual table is an implementation device; it need not be a plain
+            # array of function addresses. Keep both the qualifier and dispatch example.
+            (2, r"\bvtable\b", "Типичная реализация", "виртуальных вызовов", "адрес реализации"),
             (3, r"инвалидац\w*", "пригодности"),
             (3, r"\bsentinels?\b", "объектом-границей"),
             (4, r"предуслови\w*", "требования"),
@@ -87,12 +92,13 @@ class Terminology(unittest.TestCase):
             (9, r"\bB-tree\b", "сбалансированное дерево"),
             (10, r"\bdigest\b", "идентификатор его конкретного содержимого"),
         ]
-        for number, term, explanation in cases:
+        for number, term, *markers in cases:
             with self.subTest(station=number, term=term):
                 station = json.loads((ROOT / f"content/station{number}.json").read_text())
                 first = next((p for p in teaching_blocks(station) if re.search(term, p, re.I)), None)
                 self.assertIsNotNone(first, term)
-                self.assertIn(explanation, first)
+                for marker in markers:
+                    self.assertIn(marker, first)
 
     def test_invariant_is_explained_in_the_reported_sentence(self):
         station = json.loads((ROOT / "content/station0.json").read_text())

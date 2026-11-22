@@ -677,9 +677,9 @@
 </article><article class="glossary-entry" id="term-vtable" tabindex="-1" data-group="C++" data-aliases="vtable / vptr vtable vptr">
 <p class="entry-group">C++</p>
 <h2><a href="#term-vtable" title="Ссылка на этот термин">vtable / vptr<span aria-hidden="true">#</span></a></h2>
-<p class="entry-short">Типичный механизм виртуальных вызовов: таблица адресов функций и служебный указатель на неё.</p>
-<div class="entry-detail"><p>При распространённой реализации компилятор организует таблицу виртуальных функций. Вызов через базовый интерфейс использует служебные данные объекта, чтобы выбрать подходящую реализацию производного класса.</p><p>Это удобная модель устройства конкретного ABI (соглашений о двоичном взаимодействии), но не требование стандарта о расположении байтов. Нельзя по ней без проверки обещать ровно один vptr, фиксированный размер объекта или одинаковые таблицы на всех платформах.</p></div>
-<a class="entry-lesson" href="cpp_station2_inheritance_polymorphism.html#section=virtual">Разобрать в учебнике: Виртуальные функции — главное →</a>
+<p class="entry-short">В распространённой реализации vtable — таблица, по которой находят нужную виртуальную функцию, а vptr — служебный указатель объекта на эту таблицу.</p>
+<div class="entry-detail"><p>Например, при вызове через Animal* у объекта Dog нужная запись ведёт к Dog::sound, если Dog переопределяет sound. Таблица не обязательно состоит только из адресов функций: в Itanium C++ ABI она содержит, в частности, смещение и указатель на сведения о типе.</p><p>Это удобная модель устройства конкретного ABI (соглашений о двоичном взаимодействии), но не требование стандарта о расположении байтов. Нельзя по ней без проверки обещать ровно один vptr, фиксированный размер объекта или одинаковые таблицы на всех платформах.</p></div>
+<a class="entry-lesson" href="cpp_station2_inheritance_polymorphism.html#section=vtable">Разобрать в учебнике: Как обычно реализован virtual →</a>
 <details class="entry-sources"><summary>Первоисточники</summary><p><a href="https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable" target="_blank" rel="noopener noreferrer">Itanium C++ ABI: виртуальные таблицы ↗</a></p></details>
 </article><article class="glossary-entry" id="term-weak-ptr" tabindex="-1" data-group="C++" data-aliases="weak_ptr std::weak_ptr">
 <p class="entry-group">C++</p>

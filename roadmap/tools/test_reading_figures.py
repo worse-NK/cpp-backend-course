@@ -1,28 +1,36 @@
 """Check the boundaries illustrated on the reading page, not pixel colors."""
 import copy
+import re
 import sqlite3
 import unittest
 
 import build_stations
 
 
-def load(station, section):
+def load(station, section, kind="reading-figure"):
     path = build_stations.CONTENT / (station + ".json")
     data = build_stations.load_json(path)
     blocks = next(s["blocks"] for s in data["theory"] if s["id"] == section)
-    figure, = (b for b in blocks if b["type"] == "reading-figure")
+    figure, = (b for b in blocks if b["type"] == kind)
     return path, data, blocks, figure
 
 
 class ReadingFigures(unittest.TestCase):
     def test_iterator_excludes_exactly_the_past_end_position(self):
-        _, _, _, f = load("station3", "iterators")
-        cells = f["rows"][0]["cells"]
-        self.assertEqual([c["value"] for c in cells if c["state"] == "included"], ["10", "20", "30"])
-        self.assertEqual([c["value"] for c in cells if c["state"] == "boundary"], ["end()"])
+        _, _, blocks, f = load("station3", "iterators", "reading-scene")
+        self.assertEqual(f["columns"], ["10", "20", "30", "end()"])
+        self.assertTrue(any("{10, 20, 30}" in b.get("code", "") for b in blocks))
+        self.assertEqual([r["focus"] for r in f["frames"]], [[0], [1], [2], [3]])
+        for pos, row in enumerate(f["frames"]):
+            self.assertEqual([i for i, value in enumerate(row["values"]) if value == "it здесь"], [pos])
+            if pos < 3:
+                self.assertEqual(row["values"][-1], "граница")
+        boundary = f["frames"][-1]
+        self.assertEqual(boundary["code"], "it != v.end()")
+        self.assertIn("не читает *it", boundary["note"])
 
     def test_window_memberships_match_the_printed_query(self):
-        _, _, blocks, f = load("station9-sql", "sql-window-frame")
+        _, _, blocks, f = load("station9-sql", "sql-window-frame", "reading-scene")
         sql, = (b["code"] for b in blocks if b["type"] == "code")
         # This standard ROWS example is also executable on the course's SQLite engine.
         db = sqlite3.connect(":memory:")
@@ -33,11 +41,16 @@ class ReadingFigures(unittest.TestCase):
             results = list(db.execute(sql))
         finally:
             db.close()
-        self.assertEqual(len(results), len(f["rows"]))
-        for row, (task, owner, _, count) in zip(f["rows"], results):
-            members = [int(c["value"]) for c in row["cells"] if c["state"] == "included"]
-            self.assertEqual(members, [t for t, o in data if o == owner and t <= task])
-            self.assertEqual(len(members), count)
+        self.assertEqual(f["columns"], [f"Задача {task} · владелец {owner}" for task, owner in data])
+        self.assertEqual(len(results), len(f["frames"]))
+        for row, (task, owner, total, count) in zip(f["frames"], results):
+            self.assertEqual(row["label"], f"Текущая задача {task}")
+            positions = [i for i, (t, o) in enumerate(data) if o == owner and t <= task]
+            self.assertEqual(row["focus"], positions)
+            self.assertEqual([i for i, c in enumerate(row["values"]) if c == "В рамке"], positions)
+            self.assertEqual(len(positions), count)
+            for alias, value in (("all_tasks", total), ("tasks_so_far", count)):
+                self.assertEqual(re.findall(rf"\b{alias} = (\d+)", row["note"]), [str(value)])
 
     def test_restart_points_are_positions_not_last_completed_records(self):
         _, _, _, f = load("station11", "kafka-consumer-positions")

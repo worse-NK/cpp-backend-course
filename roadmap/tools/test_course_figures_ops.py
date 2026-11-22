@@ -13,6 +13,51 @@ def percentage(label):
 
 
 class OperationsFigures(unittest.TestCase):
+    def test_each_request_phase_consumes_the_original_budget(self):
+        _, _, _, scene = load("station10", "request-budget-architecture", "reading-scene")
+        axis = scene["axis"]
+        self.assertEqual(axis, {"min": 0, "max": 300, "unit": "мс"})
+        previous = axis["min"]
+        for row in scene["frames"]:
+            start, end = row["span"]
+            self.assertEqual(start, previous)
+            self.assertGreater(end, start)
+            self.assertEqual(row["values"], [f"{end - start} мс", f"{axis['max'] - end} мс"])
+            previous = end
+        self.assertEqual(scene["frames"][3]["span"], [200, 220])  # SQL itself
+        self.assertEqual(previous, 260)
+
+    def test_kafka_commit_position_advances_only_over_a_finished_prefix(self):
+        _, _, _, scene = load("station11", "kafka-parallel-frontier", "reading-scene")
+        offsets = [int(col.split()[-1]) for col in scene["columns"][:-1]]
+        self.assertEqual(offsets, [100, 101, 102])
+        finished = set()
+        snapshots = [set(), {102}, {100, 102}, {100, 101, 102}]
+        self.assertEqual(len(scene["frames"]), len(snapshots))
+        for row, expected in zip(scene["frames"], snapshots):
+            states, displayed_next = row["values"][:-1], int(row["values"][-1])
+            self.assertLessEqual(set(states), {"В работе", "Готова"})
+            now = {offset for offset, state in zip(offsets, states) if state == "Готова"}
+            self.assertEqual(now, expected)
+            self.assertLessEqual(finished, now)
+            self.assertEqual(displayed_next, next((n for n in offsets if n not in now), offsets[-1] + 1))
+            finished = now
+
+    def test_classic_histogram_counts_inclusive_cumulative_buckets(self):
+        _, _, _, scene = load("station14", "histogram-buckets", "reading-scene")
+        self.assertEqual(scene["columns"], ["≤ 0,1 с", "≤ 0,3 с", "≤ 1 с", "+Inf"])
+        # Integer milliseconds, including two values right on a boundary.
+        observations, prior = [], [0] * 4
+        groups = [[50, 100], [120], [300, 800]]
+        self.assertEqual(len(scene["frames"]), len(groups))
+        for row, more in zip(scene["frames"], groups):
+            observations.extend(more)
+            counts = [sum(x <= bound for x in observations) for bound in [100, 300, 1000, float("inf")]]
+            self.assertEqual(list(map(int, row["values"])), counts)
+            if prior[-1]:
+                self.assertEqual(row["focus"], [i for i in range(4) if counts[i] != prior[i]])
+            prior = counts
+
     def test_only_named_artifact_crosses_stage_boundary(self):
         _, _, blocks, figure = load("station10", "docker-build")
         dockerfile, = (b["code"] for b in blocks if b["type"] == "code")

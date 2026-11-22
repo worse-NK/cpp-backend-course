@@ -1,0 +1,164 @@
+/* Marginal illustrations for the reading edition. Ink is for facts, mint
+   for the active relation, ochre for its changed value. Static by design. */
+.course-reader figure.reading-scene {
+  --rs-paper:#172830; --rs-inset:#20343d; --rs-line:#49616a; --rs-ink:#ebf2f1;
+  --rs-muted:#b5c8ce; --rs-mint:#a1dfcd; --rs-gold:#ffcf91;
+  container:reading-scene / inline-size; box-sizing:border-box; display:block;
+  min-width:0; width:100%; max-width:none; margin:1.6rem 0 2rem; padding:1.16rem 0 .45rem;
+  border:0; border-block:1px solid var(--rs-line); border-radius:0; background:transparent;
+  color:var(--rs-ink); font:400 1rem/1.48 var(--course-sans,sans-serif);
+  overflow:visible; overflow-wrap:anywhere; scroll-margin-block:1.4rem;
+}
+.reading-scene *, .reading-scene *::before {box-sizing:border-box}
+.course-reader figure.reading-scene figcaption {
+  display:block; margin:0; padding:0; background:none; color:var(--ed-title,#f3e9d9);
+  font:500 clamp(1.35rem,3.7cqi,1.7rem)/1.18 var(--ed-book,Georgia,serif);
+  text-align:left; letter-spacing:-.02em; text-wrap:balance;
+}
+.course-reader .reading-scene :is(.rs-intro,.rs-after,.rs-note,.rs-beats p) {
+  margin:.5rem 0 .85rem; max-width:67ch; color:var(--rs-muted);
+  font:inherit; text-wrap:pretty;
+}
+.course-reader .reading-scene .rs-after {margin:.9rem 0 .45rem;scroll-margin-top:1rem}
+.reading-scene :is(button,.rs-after):focus-visible {outline:2px solid var(--rs-mint);outline-offset:3px}
+.reading-scene .rs-snapshot {min-width:0;padding:.85rem .95rem;background:var(--rs-paper);border:1px solid var(--rs-line);border-radius:.42rem}
+.reading-scene .rs-snap-head {display:flex;gap:.5rem;align-items:baseline;justify-content:space-between;line-height:1.3}
+.reading-scene .rs-snap-head b,.reading-scene .rs-time-content>b {color:var(--rs-ink);font-weight:650}
+.reading-scene .rs-snap-head small,.reading-scene .rs-controls>span {color:var(--rs-muted);font:500 .79rem/1.4 var(--course-mono,monospace);white-space:nowrap}
+.course-reader.course-dark .reading-scene code.rs-code {
+  display:block; width:fit-content; max-width:100%; padding:.12rem 0; margin:.35rem 0 .5rem;
+  color:var(--rs-gold); font:500 .94em/1.42 var(--course-mono,monospace); white-space:pre-wrap;
+  overflow-wrap:anywhere; border:0; background:transparent; box-shadow:none;
+}
+.reading-scene .rs-cells {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(6.9rem,100%),1fr));margin:.6rem 0 .12rem;padding:0;gap:.38rem}
+.reading-scene .rs-cell {min-width:0;display:block;margin:0;padding:.4rem .5rem;border:1px solid var(--rs-line);border-radius:.22rem;background:var(--rs-inset)}
+.reading-scene :is(dt,dd) {display:block;margin:0;padding:0}
+.reading-scene .rs-cell dt,.reading-scene .rs-inline-data dt {
+  color:var(--rs-muted);font-size:.81em;line-height:1.35;font-weight:500;
+}
+.reading-scene .rs-cell dd {margin-top:.15rem;color:var(--rs-ink);font-weight:600;line-height:1.33;font-variant-numeric:tabular-nums}
+.reading-scene .rs-focus.rs-cell {border-color:#7cb2a3;border-inline-start:3px solid var(--rs-mint);padding-inline-start:calc(.5rem - 2px);background:#213b36}
+.reading-scene .rs-focus dd,.reading-scene td.rs-focus {color:var(--rs-gold)}
+.reading-scene .rs-arcs {display:block;width:100%;height:2.25rem;margin-top:.5rem;color:var(--rs-mint);overflow:visible}
+.reading-scene .rs-arcs path {fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.reading-scene .rs-weak {color:#d6c6a9}
+.reading-scene .rs-weak path:not(.rs-tip) {stroke-dasharray:4 3}
+.reading-scene .rs-graph .rs-cells {margin-top:0}
+.reading-scene .rs-graph .rs-n2 {grid-template-columns:repeat(2,minmax(0,1fr))}
+.reading-scene .rs-graph .rs-n3 {grid-template-columns:repeat(3,minmax(0,1fr))}
+.reading-scene .rs-graph .rs-n4 {grid-template-columns:repeat(4,minmax(0,1fr))}
+.reading-scene .rs-connections {display:block;margin-top:.4rem;color:var(--rs-muted);font-size:.78em}
+.reading-scene .rs-layered .rs-cells {margin-top:.55rem}
+.reading-scene .rs-layered .rs-arcs {margin:0;height:2.05rem}
+.reading-scene .rs-resource {width:65%;margin:0 auto}
+.reading-scene .rs-resource .rs-cell {display:flex;flex-wrap:wrap;gap:.2rem .65rem;justify-content:center;align-items:baseline;border-radius:1.1rem}
+.reading-scene .rs-resource dd {margin:0}
+.reading-scene .rs-console {display:flex; flex-wrap:wrap;align-items:baseline;gap:.25rem .75rem;
+  margin-top:.65rem;padding-top:.45rem;border-top:1px solid var(--rs-line);color:var(--rs-muted);font-size:.85rem}
+.reading-scene .rs-console samp {color:var(--rs-gold);font-size:1.03em}
+.reading-scene[data-scene=iterators] .rs-cells {
+  grid-template-columns:repeat(4,minmax(0,1fr));gap:.2rem;
+}
+.reading-scene[data-scene=iterators] .rs-cell:last-child {border-style:dashed}
+.reading-scene[data-scene=spsc-ring-model] .rs-cell dt {color:var(--rs-mint)}
+.reading-scene[data-scene=spsc-ring-model] .rs-cells {grid-template-columns:repeat(2,minmax(0,1fr))}
+.reading-scene[data-scene=spsc-ring-model] .rs-cell:nth-child(3) {grid-area:2/2}
+.reading-scene[data-scene=spsc-ring-model] .rs-cell:nth-child(4) {grid-area:2/1}
+.reading-scene[data-scene=spsc-ring-model] dt::after {float:right;padding-inline-start:.3em;color:var(--rs-muted)}
+.reading-scene[data-scene=spsc-ring-model] .rs-cell:nth-child(1) dt::after {content:"→" / ""}
+.reading-scene[data-scene=spsc-ring-model] .rs-cell:nth-child(2) dt::after {content:"↓" / ""}
+.reading-scene[data-scene=spsc-ring-model] .rs-cell:nth-child(3) dt::after {content:"←" / ""}
+.reading-scene[data-scene=spsc-ring-model] .rs-cell:nth-child(4) dt::after {content:"↑" / ""}
+.reading-scene .rs-compare-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(15rem,100%),1fr));gap:.8rem}
+.reading-scene .rs-case .rs-cells {display:block}
+.reading-scene .rs-case .rs-cell {display:flex;align-items:baseline;justify-content:space-between;gap:.7rem;margin-top:.25rem;
+  padding:.27rem .52rem;border:0;border-inline-start:2px solid var(--rs-line);border-radius:0}
+.reading-scene .rs-case .rs-cell dd {text-align:end;margin:0}
+.reading-scene .rs-case .rs-focus {border-inline-start-color:var(--rs-mint)}
+.course-reader .reading-scene .rs-case .rs-note {margin:.5rem .2rem .85rem}
+.reading-scene .rs-stack {display:grid;min-width:0}
+.reading-scene .rs-layer {grid-area:1/1;min-width:0}
+.reading-scene .rs-layer .rs-snapshot {height:100%}
+.reading-scene .rs-layer[data-shown=no] {visibility:hidden;pointer-events:none}
+/* Share the heights of the title, source line and object rows across frames.
+   Reserving only the outside box would still let the object "jump" whenever
+   a different line of C++ wraps, even though that object hasn't moved. */
+@supports (grid-template-rows:subgrid) {
+  .reading-scene .rs-stack {grid-template-rows:repeat(6,auto)}
+  .reading-scene .rs-layer {grid-area:1/1/7/2;display:grid;grid-template-rows:subgrid}
+  .reading-scene .rs-layer .rs-snapshot {grid-area:1/1/7/2;display:grid;grid-template-rows:subgrid}
+  .rs-layer .rs-snap-head {grid-row:1}
+  .rs-layer .rs-snapshot>.rs-code {grid-row:2}
+  .rs-layer .rs-model {grid-row:3/6;min-width:0}
+  .rs-layer .rs-layered {display:grid;grid-template-rows:subgrid}
+  .rs-layer .rs-layered .rs-cells {grid-row:1}
+  .rs-layer .rs-layered .rs-arcs {grid-row:2}
+  .rs-layer .rs-resource {grid-row:3;align-self:start}
+  .rs-layer .rs-console {grid-row:6}
+}
+.reading-scene .rs-controls,.reading-scene .rs-guide {display:flex;align-items:center;flex-wrap:wrap;gap:.45rem .85rem;margin:.5rem 0 1rem}
+.course-reader .reading-scene button {
+  display:inline-block;min-height:2.35rem;width:fit-content;max-width:100%;padding:.28rem .72rem;
+  font:600 .92rem/1.3 var(--course-sans,sans-serif);color:var(--rs-ink);background:transparent;border:1px solid #6c8992;border-radius:.35rem;cursor:pointer;
+}
+.course-reader .reading-scene button:hover:not(:disabled) {border-color:var(--rs-mint);background:var(--rs-inset)}
+.course-reader .reading-scene button:disabled {color:#a2b2ba;border-color:#465c65;cursor:default}
+.reading-scene .rs-guide {justify-content:space-between;font-size:.88rem;color:var(--rs-muted)}
+.course-reader .reading-scene .rs-guide button {border:0;color:var(--course-accent,#9bd3e1);text-decoration:underline;text-underline-offset:.17em}
+.reading-scene .rs-track {position:relative;min-width:0;overflow-anchor:none}
+.reading-scene .rs-stage {position:sticky;top:max(.35rem,env(safe-area-inset-top));z-index:2;align-self:start;min-width:0;background:var(--rs-paper)}
+.course-reader .reading-scene .rs-beats,.course-reader .reading-scene .rs-timelist {list-style:none;margin:0;padding:0}
+.course-reader .reading-scene .rs-beats li {
+  position:relative;margin:0;padding:1rem 0 clamp(1.6rem,12vh,6.5rem) .95rem;border-inline-start:1px solid var(--rs-line);
+}
+.course-reader .reading-scene .rs-beats li:last-child {padding-bottom:.7rem}
+.reading-scene .rs-beats li[aria-current=step]::before {position:absolute;content:"";width:3px;height:2.2rem;inset:1rem auto auto -2px;background:var(--rs-mint)}
+.reading-scene .rs-beat-num {font:.82rem/1.2 var(--course-mono,monospace);color:var(--rs-muted)}
+.course-reader .reading-scene .rs-beats h4 {margin:.2rem 0;color:var(--rs-ink);font:650 1.07rem/1.32 var(--course-sans,sans-serif)}
+.course-reader .reading-scene .rs-beats p {margin:.38rem 0 .4rem;color:var(--rs-ink)}
+.reading-scene .rs-beat-detail,.reading-scene .rs-print-detail {
+  position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden;
+}
+.reading-scene .rs-print-all {display:none}
+.reading-scene .rs-unpinned .rs-stage {position:static}
+.reading-scene .rs-unpinned .rs-beat-detail {position:static;clip-path:none;width:auto;height:auto;overflow:visible;color:var(--rs-muted);font-size:.92em}
+.reading-scene .rs-unpinned .rs-beat-detail span {display:block}
+.reading-scene .rs-unpinned .rs-beats li {padding-bottom:.9rem}
+@container reading-scene (min-width:40rem) {
+  .reading-scene .rs-track {display:grid;grid-template-columns:minmax(0,1.07fr) minmax(0,1fr);gap:1.15rem;align-items:start}
+  .reading-scene .rs-stage {top:clamp(1rem,12vh,6rem)}
+  .course-reader .reading-scene .rs-beats li:not(:last-child) {padding-bottom:clamp(2rem,20vh,9rem)}
+}
+.course-reader .reading-scene .rs-matrix {width:100%;margin:.7rem 0 1rem;border-collapse:collapse;table-layout:fixed;color:var(--rs-ink);font:inherit}
+.course-reader .reading-scene .rs-matrix :is(th,td) {padding:.45rem .5rem;border:0;border-bottom:1px solid var(--rs-line);text-align:left;vertical-align:top}
+.reading-scene .rs-matrix thead th {color:var(--rs-muted);font-size:.86em}
+.course-reader .reading-scene .rs-matrix td.rs-focus {background:#263d38;color:var(--rs-gold);font-weight:650}
+.reading-scene .rs-mobile-key {display:none}
+.reading-scene .rs-matrix .rs-explain-row td {color:var(--rs-muted);font-size:.9em}
+.course-reader .reading-scene .rs-timelist li {margin:0;padding:.65rem 0;border-block-start:1px solid var(--rs-line)}
+.reading-scene .rs-axis {display:flex;align-items:center;gap:.7rem;color:var(--rs-mint);margin-bottom:.3rem}
+.reading-scene .rs-axis small {flex:none;min-width:8ch}
+.reading-scene .rs-axis svg {width:min(60%,22rem);height:.48rem;fill:currentColor}
+.reading-scene .rs-axis .rs-base {fill:var(--rs-inset)}
+.reading-scene .rs-inline-data {display:flex;flex-wrap:wrap;gap:.25rem 1rem;margin:.25rem 0}
+.reading-scene .rs-inline-data div {display:flex;flex-wrap:wrap;align-items:baseline;gap:.35rem}
+.reading-scene .rs-inline-data dd {color:var(--rs-ink);font-weight:600}
+@container reading-scene (max-width:30rem) {
+  .reading-scene .rs-snapshot {padding:.55rem .6rem}
+  .reading-scene .rs-cells {gap:.26rem}
+  .reading-scene .rs-cell {padding:.25rem .32rem}
+  .reading-scene .rs-focus.rs-cell {padding-inline-start:calc(.32rem - 2px)}
+  .reading-scene .rs-cell dd {font-size:.92rem}
+  .reading-scene .rs-matrix,.reading-scene .rs-matrix tbody,.reading-scene .rs-matrix tr,.reading-scene .rs-matrix :is(td,th) {display:block;width:auto}
+  .reading-scene .rs-matrix thead {position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+  .reading-scene .rs-mobile-key {display:inline;color:var(--rs-muted);padding-right:.65rem}
+}
+@media print {
+  .course-reader figure.reading-scene {border-color:#555;color:#111;container-type:normal;break-inside:auto}
+  .reading-scene .rs-stage,.reading-scene .rs-guide,.reading-scene .rs-explorer {display:none}
+  .reading-scene .rs-track,.reading-scene .rs-print-all {display:block}
+  .reading-scene :is(.rs-beat-detail,.rs-print-detail) {position:static;clip-path:none;width:auto;height:auto;overflow:visible}
+  .reading-scene :is(.rs-beat-detail,.rs-print-detail) span {display:block}
+  .course-reader .reading-scene .rs-beats li {padding:.25em 0;break-inside:avoid;border:0}
+  .reading-scene * {color:#111!important;background:transparent!important}
+}

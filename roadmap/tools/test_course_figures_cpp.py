@@ -19,7 +19,8 @@ class CourseFiguresCpp(unittest.TestCase):
             self.assertEqual(sum(int(row[i]["value"]) for i in positions), expected_sum)
 
     def test_distinct_descriptors_share_only_the_duplicated_offset(self):
-        _, _, _, figure = load("station5-linux", "linux-fd-open-description")
+        _, _, _, figure = load("station5-linux", "linux-fd-open-description", "reading-scene")
+        self.assertEqual(figure["columns"], ["Прочитано", "first и same", "independent"])
         with TemporaryDirectory() as directory:
             path = Path(directory) / "letters"
             path.write_bytes(b"ABC")
@@ -30,7 +31,10 @@ class CourseFiguresCpp(unittest.TestCase):
                         byte = stream.read(1).decode("ascii")
                         self.assertEqual(first.tell(), same.tell())
                         observed.append([byte, str(first.tell()), str(independent.tell())])
-        self.assertEqual([[c["value"] for c in r["cells"]] for r in figure["rows"]], observed)
+        self.assertEqual(len(figure["frames"]), len(observed) + 1)
+        for frame, (byte, a, b) in zip(figure["frames"], [["—", "0", "0"], *observed]):
+            self.assertEqual(frame["values"],
+                             [byte, f"{a} · перед {'ABC'[int(a)]}", f"{b} · перед {'ABC'[int(b)]}"])
 
     def test_deadlock_snapshot_has_a_wait_cycle_without_running_it(self):
         _, _, _, figure = load("station6", "deadlock")
